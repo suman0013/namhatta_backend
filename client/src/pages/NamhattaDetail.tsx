@@ -458,6 +458,15 @@ export default function NamhattaDetail() {
           }}
         />
       )}
+
+      {/* Update Form Modal */}
+      {namhatta && (
+        <NamhattaUpdateForm
+          namhattaId={namhatta.id}
+          isOpen={showUpdateForm}
+          onClose={() => setShowUpdateForm(false)}
+        />
+      )}
     </div>
   );
 }
