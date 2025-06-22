@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import NamhattaForm from "@/components/forms/NamhattaForm";
+import NamhattaUpdateForm from "@/components/forms/NamhattaUpdateForm";
+import NamhattaUpdateCard from "@/components/NamhattaUpdateCard";
 import { 
   Home, 
   Users, 
@@ -26,7 +28,8 @@ import {
   Image as ImageIcon,
   Facebook,
   Youtube,
-  Crown
+  Crown,
+  Plus
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
