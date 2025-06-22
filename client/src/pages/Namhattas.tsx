@@ -178,6 +178,21 @@ export default function Namhattas() {
           totalItems={namhattas.total}
         />
       )}
+
+      {/* Form Modal */}
+      {(showForm || editingNamhatta) && (
+        <NamhattaForm
+          namhatta={editingNamhatta}
+          onClose={() => {
+            setShowForm(false);
+            setEditingNamhatta(undefined);
+          }}
+          onSuccess={() => {
+            setShowForm(false);
+            setEditingNamhatta(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }
