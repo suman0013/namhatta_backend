@@ -18,6 +18,7 @@ import NamhattaApprovals from "@/pages/NamhattaApprovals";
 import Updates from "@/pages/Updates";
 import Health from "@/pages/Health";
 import About from "@/pages/About";
+import Map from "@/pages/Map";
 
 function Router() {
   return (
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/statuses" component={Statuses} />
         <Route path="/shraddhakutirs" component={Shraddhakutirs} />
         <Route path="/updates" component={Updates} />
+        <Route path="/map" component={Map} />
         <Route path="/health" component={Health} />
         <Route path="/about" component={About} />
         <Route component={NotFound} />

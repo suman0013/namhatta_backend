@@ -76,6 +76,12 @@ export interface IStorage {
   getDistricts(state: string): Promise<string[]>;
   getSubDistricts(district: string): Promise<string[]>;
   getVillages(subDistrict: string): Promise<string[]>;
+
+  // Map data
+  getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>>;
+  getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>>;
+  getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>>;
+  getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
 }
 
 export class MemStorage implements IStorage {
@@ -135,22 +141,76 @@ export class MemStorage implements IStorage {
     // Initialize namhattas
     const namhattasData = [
       {
+        code: "NAM001",
         name: "Mayapur Namhatta",
         address: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur" },
-        status: "active",
-        leaderRole: "MalaSenapoti"
+        status: "APPROVED",
+        malaSenapoti: "Prabhu Jaya Gopala Das",
+        meetingDay: "Sunday",
+        meetingTime: "16:00"
       },
       {
-        name: "Kolkata Namhatta",
+        code: "NAM002", 
+        name: "Kolkata Central Namhatta",
         address: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street" },
-        status: "pending",
-        leaderRole: "ChakraSenapoti"
+        status: "APPROVED",
+        chakraSenapoti: "Prabhu Radha Kanta Das",
+        meetingDay: "Saturday",
+        meetingTime: "17:00"
       },
       {
-        name: "Dhaka Namhatta",
+        code: "NAM003",
+        name: "Kolkata North Namhatta",
+        address: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "North", village: "Shyama Bazar" },
+        status: "APPROVED", 
+        chakraSenapoti: "Prabhu Krishna Chaitanya Das",
+        meetingDay: "Friday",
+        meetingTime: "18:00"
+      },
+      {
+        code: "NAM004",
+        name: "Dhaka Central Namhatta",
         address: { country: "Bangladesh", state: "Dhaka", district: "Dhaka", subDistrict: "Dhanmondi", village: "Dhanmondi" },
-        status: "active",
-        leaderRole: "MahaChakraSenapoti"
+        status: "APPROVED",
+        mahaChakraSenapoti: "Prabhu Nityananda Das",
+        meetingDay: "Saturday",
+        meetingTime: "16:30"
+      },
+      {
+        code: "NAM005",
+        name: "Chittagong Namhatta",
+        address: { country: "Bangladesh", state: "Chittagong", district: "Chittagong", subDistrict: "Port Area", village: "Chittagong" },
+        status: "APPROVED",
+        chakraSenapoti: "Prabhu Gauranga Das",
+        meetingDay: "Sunday",
+        meetingTime: "15:00"
+      },
+      {
+        code: "NAM006",
+        name: "Nadia Krishnanagar Namhatta", 
+        address: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Krishnanagar", village: "Krishnanagar" },
+        status: "PENDING_APPROVAL",
+        upaChakraSenapoti: "Prabhu Harinama Das",
+        meetingDay: "Sunday",
+        meetingTime: "17:30"
+      },
+      {
+        code: "NAM007",
+        name: "Colombo Namhatta",
+        address: { country: "Sri Lanka", state: "Western", district: "Colombo", subDistrict: "Colombo Central", village: "Colombo" },
+        status: "APPROVED",
+        chakraSenapoti: "Prabhu Vrindavan Das",
+        meetingDay: "Saturday",
+        meetingTime: "16:00"
+      },
+      {
+        code: "NAM008",
+        name: "Kathmandu Namhatta",
+        address: { country: "Nepal", state: "Bagmati", district: "Kathmandu", subDistrict: "Central", village: "Kathmandu" },
+        status: "APPROVED", 
+        chakraSenapoti: "Prabhu Govinda Das",
+        meetingDay: "Sunday",
+        meetingTime: "15:30"
       }
     ];
 
@@ -819,6 +879,103 @@ export class MemStorage implements IStorage {
       "Dhanmondi": ["Dhanmondi", "Lalmatia", "Mohammadpur"],
     };
     return villagesBySubDistrict[subDistrict] || [];
+  }
+
+  async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
+    const countryCounts = new Map<string, number>();
+    
+    for (const namhatta of this.namhattas.values()) {
+      const country = namhatta.address?.country;
+      if (country) {
+        countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+      }
+    }
+    
+    return Array.from(countryCounts.entries()).map(([country, count]) => ({ country, count }));
+  }
+
+  async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
+    const stateCounts = new Map<string, { country: string; count: number }>();
+    
+    for (const namhatta of this.namhattas.values()) {
+      const namhattaCountry = namhatta.address?.country;
+      const state = namhatta.address?.state;
+      if (state && namhattaCountry && (!country || namhattaCountry === country)) {
+        const key = `${namhattaCountry}-${state}`;
+        const existing = stateCounts.get(key);
+        stateCounts.set(key, {
+          country: namhattaCountry,
+          count: (existing?.count || 0) + 1
+        });
+      }
+    }
+    
+    return Array.from(stateCounts.entries()).map(([key, data]) => ({
+      state: key.split('-')[1],
+      country: data.country,
+      count: data.count
+    }));
+  }
+
+  async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
+    const districtCounts = new Map<string, { state: string; country: string; count: number }>();
+    
+    for (const namhatta of this.namhattas.values()) {
+      const namhattaState = namhatta.address?.state;
+      const district = namhatta.address?.district;
+      const country = namhatta.address?.country;
+      if (district && namhattaState && country && (!state || namhattaState === state)) {
+        const key = `${country}-${namhattaState}-${district}`;
+        const existing = districtCounts.get(key);
+        districtCounts.set(key, {
+          state: namhattaState,
+          country,
+          count: (existing?.count || 0) + 1
+        });
+      }
+    }
+    
+    return Array.from(districtCounts.entries()).map(([key, data]) => {
+      const parts = key.split('-');
+      return {
+        district: parts[2],
+        state: data.state,
+        country: data.country,
+        count: data.count
+      };
+    });
+  }
+
+  async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
+    const subDistrictCounts = new Map<string, { district: string; state: string; country: string; count: number }>();
+    
+    for (const namhatta of this.namhattas.values()) {
+      const namhattaDistrict = namhatta.address?.district;
+      const subDistrict = namhatta.address?.subDistrict;
+      const state = namhatta.address?.state;
+      const country = namhatta.address?.country;
+      if (subDistrict && namhattaDistrict && state && country && (!district || namhattaDistrict === district)) {
+        const key = `${country}-${state}-${namhattaDistrict}-${subDistrict}`;
+        const existing = subDistrictCounts.get(key);
+        subDistrictCounts.set(key, {
+          district: namhattaDistrict,
+          state,
+          country,
+          count: (existing?.count || 0) + 1
+        });
+      }
+    }
+    
+    return Array.from(subDistrictCounts.entries()).map(([key, data]) => {
+      const parts = key.split('-');
+      return {
+        subDistrict: parts[3],
+        district: data.district,
+        state: data.state,
+        country: data.country,
+        count: data.count
+      };
+    });
   }
 }
 

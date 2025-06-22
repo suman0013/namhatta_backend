@@ -98,20 +98,22 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 22, 2025: Added interactive map visualization showing Namhatta distribution by geographic regions
+- June 22, 2025: Implemented zoom-based geographic aggregation (country → state → district → sub-district)
+- June 22, 2025: Created map API endpoints for geographic data aggregation
+- June 22, 2025: Successfully completed migration from Replit Agent to standard Replit environment
 - January 2, 2025: Replaced URL input with image upload functionality for better user experience
 - January 2, 2025: Added image preview and removal capabilities in update forms
 - January 2, 2025: Implemented comprehensive Namhatta Updates system with rich forms and visual cards
 - January 2, 2025: Added activity tracking (kirtan, prasadam, book distribution, chanting, arati, bhagwat path)
 - January 2, 2025: Created dedicated Updates page with filtering, search, and statistics
 - January 2, 2025: Enhanced Namhatta detail pages with update management capabilities
-- January 2, 2025: Successfully migrated from Replit Agent to standard Replit environment
 - January 2, 2025: Enhanced UI with modern glass morphism design and responsive mobile interface
 - January 2, 2025: Fixed API endpoints to match OpenAPI 3.0.3 specification
 - January 2, 2025: Implemented proper geography hierarchy with sub-districts support
 - January 2, 2025: Applied security best practices with client/server separation
 - December 30, 2024: Modified Namhatta form to use individual text inputs for leadership roles instead of dropdown
 - December 30, 2024: Updated database schema to include separate fields for MalaSenapoti, MahaChakraSenapoti, ChakraSenapoti, and UpaChakraSenapoti
-- June 22, 2025: Initial setup
 
 ## User Preferences
 

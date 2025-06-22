@@ -60,6 +60,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(villages);
   });
 
+  // Map data endpoints
+  app.get("/api/map/countries", async (req, res) => {
+    const data = await storage.getNamhattaCountsByCountry();
+    res.json(data);
+  });
+
+  app.get("/api/map/states", async (req, res) => {
+    const { country } = req.query;
+    const data = await storage.getNamhattaCountsByState(country as string);
+    res.json(data);
+  });
+
+  app.get("/api/map/districts", async (req, res) => {
+    const { state } = req.query;
+    const data = await storage.getNamhattaCountsByDistrict(state as string);
+    res.json(data);
+  });
+
+  app.get("/api/map/sub-districts", async (req, res) => {
+    const { district } = req.query;
+    const data = await storage.getNamhattaCountsBySubDistrict(district as string);
+    res.json(data);
+  });
+
   // Dashboard
   app.get("/api/dashboard", async (req, res) => {
     const summary = await storage.getDashboardSummary();

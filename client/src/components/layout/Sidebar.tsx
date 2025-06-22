@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { X, Home, Users, Layers, Building, Bell, Settings } from "lucide-react";
+import { X, Home, Users, Layers, Building, Bell, Settings, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ const navigationItems = [
   { href: "/namhattas", label: "Namhattas", icon: Home, badge: "24" },
   { href: "/devotees", label: "Devotees", icon: Users, badge: "1,247" },
   { href: "/updates", label: "Updates", icon: Bell, badge: "12" },
+  { href: "/map", label: "Map View", icon: MapPin },
   { href: "/statuses", label: "Statuses", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
   { href: "/health", label: "Health", icon: Settings },
