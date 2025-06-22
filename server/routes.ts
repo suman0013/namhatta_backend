@@ -52,11 +52,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/villages", async (req, res) => {
-    const { district } = req.query;
-    if (!district) {
-      return res.status(400).json({ message: "District parameter is required" });
+    const { subDistrict } = req.query;
+    if (!subDistrict) {
+      return res.status(400).json({ message: "Sub-district parameter is required" });
     }
-    const villages = await storage.getVillages(district as string);
+    const villages = await storage.getVillages(subDistrict as string);
     res.json(villages);
   });
 
@@ -105,6 +105,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const devoteeData = insertDevoteeSchema.parse(req.body);
       const devotee = await storage.createDevotee(devoteeData);
+      res.status(201).json(devotee);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid devotee data", error });
+    }
+  });
+
+  // Add devotee to specific Namhatta
+  app.post("/api/devotees/:namhattaId", async (req, res) => {
+    const namhattaId = parseInt(req.params.namhattaId);
+    try {
+      const devoteeData = insertDevoteeSchema.parse(req.body);
+      const devotee = await storage.createDevoteeForNamhatta(devoteeData, namhattaId);
       res.status(201).json(devotee);
     } catch (error) {
       res.status(400).json({ message: "Invalid devotee data", error });

@@ -19,6 +19,7 @@ export interface IStorage {
   getDevotees(page?: number, size?: number): Promise<{ data: Devotee[], total: number }>;
   getDevotee(id: number): Promise<Devotee | undefined>;
   createDevotee(devotee: InsertDevotee): Promise<Devotee>;
+  createDevoteeForNamhatta(devotee: InsertDevotee, namhattaId: number): Promise<Devotee>;
   updateDevotee(id: number, devotee: Partial<InsertDevotee>): Promise<Devotee>;
   getDevoteesByNamhatta(namhattaId: number, page?: number, size?: number, statusId?: number): Promise<{ data: Devotee[], total: number }>;
   upgradeDevoteeStatus(id: number, newStatusId: number): Promise<void>;
@@ -243,6 +244,13 @@ export class MemStorage implements IStorage {
   }
 
   async createDevotee(devotee: InsertDevotee): Promise<Devotee> {
+    const id = this.currentId++;
+    const newDevotee: Devotee = { ...devotee, id, createdAt: new Date() };
+    this.devotees.set(id, newDevotee);
+    return newDevotee;
+  }
+
+  async createDevoteeForNamhatta(devotee: InsertDevotee, namhattaId: number): Promise<Devotee> {
     const id = this.currentId++;
     const newDevotee: Devotee = { ...devotee, id, createdAt: new Date() };
     this.devotees.set(id, newDevotee);

@@ -23,6 +23,7 @@ export default function Namhattas() {
     country: "",
     state: "",
     district: "",
+    subDistrict: "",
     village: "",
   });
 
@@ -30,6 +31,16 @@ export default function Namhattas() {
     queryKey: ["/api/namhattas", page, searchTerm, filters],
     queryFn: () => api.getNamhattas(page, 12, { ...filters, search: searchTerm }),
   });
+
+  const handleCreateNamhatta = () => {
+    setEditingNamhatta(undefined);
+    setShowForm(true);
+  };
+
+  const handleEditNamhatta = (namhatta: Namhatta) => {
+    setEditingNamhatta(namhatta);
+    setShowForm(true);
+  };
 
   const { data: countries } = useQuery({
     queryKey: ["/api/countries"],
@@ -48,10 +59,16 @@ export default function Namhattas() {
     enabled: !!filters.state,
   });
 
-  const { data: villages } = useQuery({
-    queryKey: ["/api/villages", filters.district],
-    queryFn: () => api.getVillages(filters.district),
+  const { data: subDistricts } = useQuery({
+    queryKey: ["/api/sub-districts", filters.district],
+    queryFn: () => api.getSubDistricts(filters.district),
     enabled: !!filters.district,
+  });
+
+  const { data: villages } = useQuery({
+    queryKey: ["/api/villages", filters.subDistrict],
+    queryFn: () => api.getVillages(filters.subDistrict),
+    enabled: !!filters.subDistrict,
   });
 
   const handleFilterChange = (key: string, value: string) => {
@@ -59,9 +76,10 @@ export default function Namhattas() {
       ...prev,
       [key]: value === "all" ? "" : value,
       // Reset dependent filters
-      ...(key === "country" && { state: "", district: "", village: "" }),
-      ...(key === "state" && { district: "", village: "" }),
-      ...(key === "district" && { village: "" }),
+      ...(key === "country" && { state: "", district: "", subDistrict: "", village: "" }),
+      ...(key === "state" && { district: "", subDistrict: "", village: "" }),
+      ...(key === "district" && { subDistrict: "", village: "" }),
+      ...(key === "subDistrict" && { village: "" }),
     }));
     setPage(1);
   };
@@ -104,7 +122,7 @@ export default function Namhattas() {
 
           {/* Filters */}
           <h3 className="font-semibold text-gray-900 dark:text-white">Filters</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <SearchableSelect
               value={filters.country}
               onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "all" : value)}
@@ -132,10 +150,20 @@ export default function Namhattas() {
             />
 
             <SearchableSelect
+              value={filters.subDistrict || "All Sub-Districts"}
+              onValueChange={(value) => handleFilterChange("subDistrict", value === "All Sub-Districts" ? "all" : value)}
+              options={["All Sub-Districts", ...(subDistricts || [])]}
+              placeholder="All Sub-Districts"
+              disabled={!filters.district}
+              className="glass border-0"
+            />
+
+            <SearchableSelect
               value={filters.village || "All Villages"}
               onValueChange={(value) => handleFilterChange("village", value === "All Villages" ? "all" : value)}
               options={["All Villages", ...(villages || [])]}
               placeholder="All Villages"
+              disabled={!filters.subDistrict}
               className="glass border-0"
             />
 
