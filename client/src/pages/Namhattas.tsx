@@ -78,7 +78,7 @@ export default function Namhattas() {
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value === "all" ? "" : value,
+      [key]: value,
       // Reset dependent filters
       ...(key === "country" && { state: "", district: "", subDistrict: "", village: "" }),
       ...(key === "state" && { district: "", subDistrict: "", village: "" }),
@@ -123,8 +123,8 @@ export default function Namhattas() {
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <SearchableSelect
-              value={filters.country}
-              onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "all" : value)}
+              value={filters.country || "All Countries"}
+              onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
               options={["All Countries", ...(countries || [])]}
               placeholder="All Countries"
               className="glass border-0"
@@ -132,7 +132,7 @@ export default function Namhattas() {
 
             <SearchableSelect
               value={filters.state || "All States"}
-              onValueChange={(value) => handleFilterChange("state", value === "All States" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("state", value === "All States" ? "" : value)}
               options={["All States", ...(states || [])]}
               placeholder="All States"
               disabled={!filters.country}
@@ -141,7 +141,7 @@ export default function Namhattas() {
 
             <SearchableSelect
               value={filters.district || "All Districts"}
-              onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "" : value)}
               options={["All Districts", ...(districts || [])]}
               placeholder="All Districts"
               disabled={!filters.state}
@@ -150,7 +150,7 @@ export default function Namhattas() {
 
             <SearchableSelect
               value={filters.subDistrict || "All Sub-Districts"}
-              onValueChange={(value) => handleFilterChange("subDistrict", value === "All Sub-Districts" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("subDistrict", value === "All Sub-Districts" ? "" : value)}
               options={["All Sub-Districts", ...(subDistricts || [])]}
               placeholder="All Sub-Districts"
               disabled={!filters.district}
@@ -159,19 +159,19 @@ export default function Namhattas() {
 
             <SearchableSelect
               value={filters.village || "All Villages"}
-              onValueChange={(value) => handleFilterChange("village", value === "All Villages" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("village", value === "All Villages" ? "" : value)}
               options={["All Villages", ...(villages || [])]}
               placeholder="All Villages"
               disabled={!filters.subDistrict}
               className="glass border-0"
             />
 
-            <Select value={filters.status || "status"} onValueChange={(value) => handleFilterChange("status", value === "status" ? "all" : value)}>
+            <Select value={filters.status || "All Statuses"} onValueChange={(value) => handleFilterChange("status", value === "All Statuses" ? "" : value)}>
               <SelectTrigger className="glass border-0">
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="status">All Statuses</SelectItem>
+                <SelectItem value="All Statuses">All Statuses</SelectItem>
                 <SelectItem value="APPROVED">Approved</SelectItem>
                 <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
               </SelectContent>
@@ -182,7 +182,7 @@ export default function Namhattas() {
           <ActiveFilters
             filters={filters}
             searchTerm={searchTerm}
-            onRemoveFilter={(key) => handleFilterChange(key, "all")}
+            onRemoveFilter={(key) => handleFilterChange(key, "")}
             onClearAll={() => {
               setFilters({ country: "", state: "", district: "", subDistrict: "", village: "", status: "" });
               setSearchTerm("");

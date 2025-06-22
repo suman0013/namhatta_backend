@@ -85,7 +85,7 @@ export default function Devotees() {
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value === "all" ? "" : value,
+      [key]: value,
       // Reset dependent filters
       ...(key === "country" && { state: "", district: "" }),
       ...(key === "state" && { district: "" }),
@@ -131,7 +131,7 @@ export default function Devotees() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <SearchableSelect
               value={filters.country || "All Countries"}
-              onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
               options={["All Countries", ...(countries || [])]}
               placeholder="All Countries"
               className="glass border-0"
@@ -139,7 +139,7 @@ export default function Devotees() {
 
             <SearchableSelect
               value={filters.state || "All States"}
-              onValueChange={(value) => handleFilterChange("state", value === "All States" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("state", value === "All States" ? "" : value)}
               options={["All States", ...(states || [])]}
               placeholder="All States"
               disabled={!filters.country}
@@ -148,7 +148,7 @@ export default function Devotees() {
 
             <SearchableSelect
               value={filters.district || "All Districts"}
-              onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "" : value)}
               options={["All Districts", ...(districts || [])]}
               placeholder="All Districts"
               disabled={!filters.state}
@@ -156,8 +156,19 @@ export default function Devotees() {
             />
 
             <SearchableSelect
-              value={filters.statusId || "All Statuses"}
-              onValueChange={(value) => handleFilterChange("statusId", value === "All Statuses" ? "all" : statuses?.find(s => s.name === value)?.id.toString() || "")}
+              value={(() => {
+                if (!filters.statusId) return "All Statuses";
+                const status = statuses?.find(s => s.id.toString() === filters.statusId);
+                return status ? status.name : "All Statuses";
+              })()}
+              onValueChange={(value) => {
+                if (value === "All Statuses") {
+                  handleFilterChange("statusId", "");
+                } else {
+                  const status = statuses?.find(s => s.name === value);
+                  handleFilterChange("statusId", status ? status.id.toString() : "");
+                }
+              }}
               options={["All Statuses", ...(statuses?.map(status => status.name) || [])]}
               placeholder="All Statuses"
               className="glass border-0"
@@ -168,7 +179,7 @@ export default function Devotees() {
           <ActiveFilters
             filters={filters}
             searchTerm={searchTerm}
-            onRemoveFilter={(key) => handleFilterChange(key, "all")}
+            onRemoveFilter={(key) => handleFilterChange(key, "")}
             onClearAll={() => {
               setFilters({ country: "", state: "", district: "", statusId: "" });
               setSearchTerm("");
