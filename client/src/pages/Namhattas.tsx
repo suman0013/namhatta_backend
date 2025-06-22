@@ -269,39 +269,51 @@ function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
 function NamhattasSkeleton() {
   return (
     <div className="p-6 space-y-8">
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
+      {/* Page Header Skeleton */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-10 w-40" />
       </div>
+
+      {/* Search and Filters Skeleton */}
       <Card className="glass-card">
-        <CardContent className="p-6">
-          <Skeleton className="h-20 w-full" />
+        <CardContent className="p-6 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
         </CardContent>
       </Card>
+
+      {/* Namhattas Grid Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 9 }).map((_, i) => (
           <Card key={i} className="glass-card">
             <CardContent className="p-6">
-              <Skeleton className="h-48 w-full" />
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="w-12 h-12 rounded-xl" />
+                  <div className="flex-1">
+                    <Skeleton className="h-6 w-32 mb-1" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex space-x-2">
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      {/* Form Modal */}
-      {(showForm || editingNamhatta) && (
-        <NamhattaForm
-          namhatta={editingNamhatta}
-          onClose={() => {
-            setShowForm(false);
-            setEditingNamhatta(undefined);
-          }}
-          onSuccess={() => {
-            setShowForm(false);
-            setEditingNamhatta(undefined);
-          }}
-        />
-      )}
     </div>
   );
 }
