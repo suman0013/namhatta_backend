@@ -1,0 +1,746 @@
+openapi: 3.0.3
+info:
+  title: Namhatta Management System API
+  description: OpenAPI spec for Namhatta web and mobile-compatible system
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+paths:
+  /countries:
+    get:
+      summary: Get list of countries
+      responses:
+        '200':
+          description: List of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /states:
+    get:
+      summary: Get list of states by country
+      parameters:
+        - in: query
+          name: country
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of states
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /districts:
+    get:
+      summary: Get list of districts by state
+      parameters:
+        - in: query
+          name: state
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of districts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /sub-districts:
+    get:
+      summary: Get list of sub-districts by district
+      parameters:
+        - in: query
+          name: district
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of sub-districts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /villages:
+    get:
+      summary: Get list of villages by sub-district
+      parameters:
+        - in: query
+          name: subDistrict
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of villages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: OK
+
+  /about:
+    get:
+      summary: Get application metadata
+      responses:
+        '200':
+          description: Basic app info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  version:
+                    type: string
+                  description:
+                    type: string
+  /namhattas/{id}/status-history:
+    get:
+      summary: Get devotional status change history for all devotees in a Namhatta
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+$1          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of status history entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusHistory'
+  /dashboard:
+    get:
+      summary: Get admin dashboard data (totals, recent updates)
+      responses:
+        '200':
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+  /hierarchy:
+    get:
+      summary: Get names of top-level leadership (GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR)
+      responses:
+        '200':
+          description: Top-level leaders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gbc:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Leader'
+                  regionalDirectors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Leader'
+                  coRegionalDirectors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Leader'
+  /hierarchy/{level}:
+    get:
+      summary: Get list of leaders for a given subordinate level (DISTRICT_SUPERVISOR and below only)
+      parameters:
+        - in: path
+          name: level
+          required: true
+          schema:
+            type: string
+            enum: [DISTRICT_SUPERVISOR, MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI]
+      responses:
+        '200':
+          description: List of leaders at the given level
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Leader'
+
+  /devotees/{namhattaId}:
+    post:
+      summary: Add a new devotee to a specific Namhatta
+      parameters:
+        - in: path
+          name: namhattaId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Devotee'
+      responses:
+        '201':
+          description: Devotee added
+      summary: Add a new devotee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Devotee'
+      responses:
+        '201':
+          description: Devotee added
+
+  /devotees/{id}:
+    get:
+      summary: Get devotee by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Devotee details
+    put:
+      summary: Update devotee details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Devotee'
+      responses:
+        '200':
+          description: Devotee updated
+        '200':
+          description: Devotee details
+    put:
+      summary: Update devotee details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Devotee'
+      responses:
+        '200':
+          description: Updated
+
+  /devotees/{id}/upgrade-status:
+    post:
+      summary: Upgrade Devotee's Devotional Status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newStatusId:
+                  type: integer
+      responses:
+        '200':
+          description: Status updated
+
+  /devotees/{id}/status-history:
+    get:
+      summary: Get status change history of devotee
+      responses:
+        '200':
+          description: List of status updates
+
+  /namhattas:
+    get:
+      summary: List Namhattas with filters
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+$1      responses:
+        '200':
+          description: List of Namhattas
+    post:
+      summary: Create Namhatta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Namhatta'
+      responses:
+        '201':
+          description: Namhatta created
+
+  /namhattas/{id}:
+    get:
+      summary: Get Namhatta Details
+      responses:
+        '200':
+          description: Details of Namhatta
+    put:
+      summary: Update Namhatta details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Namhatta'
+      responses:
+        '200':
+          description: Namhatta updated
+        '200':
+          description: Details of Namhatta
+
+  /namhattas/{id}/devotees:
+    get:
+      summary: Get list of devotees for a Namhatta
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: size
+          schema:
+            type: integer
+$1          schema:
+            type: integer
+        - in: query
+          name: statusId
+          schema:
+            type: integer
+          description: Optional filter by devotional status ID
+      responses:
+        '200':
+          description: List of devotees for the given Namhatta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Devotee'
+        '200':
+          description: Details of Namhatta
+  
+  /namhattas/{id}/approve:
+    post:
+      summary: Approve a pending Namhatta
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Namhatta approved
+
+  /namhattas/{id}/updates:
+    get:
+      summary: Get updates of Namhatta
+      responses:
+        '200':
+          description: List of updates
+
+  /namhattas/{id}/devotee-status-count:
+    get:
+      summary: Get count of devotees per devotional status for a Namhatta
+      responses:
+        '200':
+          description: Counts by status
+
+  /shraddhakutirs:
+    get:
+      summary: List all Shraddhakutirs
+      responses:
+        '200':
+          description: List
+    post:
+      summary: Add a Shraddhakutir
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Shraddhakutir'
+      responses:
+        '201':
+          description: Shraddhakutir created
+
+  /statuses:
+    get:
+      summary: Get list of Devotional Statuses with count
+      responses:
+        '200':
+          description: List with counts
+    post:
+      summary: Add a new devotional status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Added
+
+  /statuses/{id}/rename:
+    post:
+      summary: Rename an existing devotional status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newName:
+                  type: string
+      responses:
+        '200':
+          description: Renamed
+
+  /updates:
+    post:
+      summary: Post an update for Namhatta
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NamhattaUpdate'
+      responses:
+        '201':
+          description: Update posted
+
+components:
+  schemas:
+    DashboardSummary:
+      type: object
+      properties:
+        totalDevotees:
+          type: integer
+        totalNamhattas:
+          type: integer
+        recentUpdates:
+          type: array
+          items:
+            $ref: '#/components/schemas/NamhattaUpdateCard'
+
+    NamhattaUpdateCard:
+      type: object
+      properties:
+        namhattaId:
+          type: integer
+        namhattaName:
+          type: string
+        programType:
+          type: string
+        date:
+          type: string
+          format: date
+        attendance:
+          type: integer
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Education:
+      type: object
+      properties:
+        id:
+          type: integer
+        degree:
+          type: string
+        institution:
+          type: string
+        year:
+          type: string
+
+    Occupation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        employer:
+          type: string
+
+    StatusHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+        devoteeId:
+          type: integer
+        previousStatus:
+          type: string
+        newStatus:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        comment:
+          type: string
+    LeadershipHierarchy:
+      type: object
+      properties:
+        srilaPrabhupada:
+          type: object
+          properties:
+            name:
+              type: string
+        gbc:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderNode'
+
+    LeaderNode:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        subordinates:
+          type: array
+          items:
+            $ref: '#/components/schemas/LeaderNode'
+
+    Leader:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        level:
+          type: string
+          enum: [GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR, MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI]
+
+    Devotee:
+      type: object
+      properties:
+        legalName:
+          type: string
+        dob:
+          type: string
+          format: date
+        email:
+          type: string
+        phone:
+          type: string
+        fatherName:
+          type: string
+        motherName:
+          type: string
+        husbandName:
+          type: string
+        bloodGroup:
+          type: string
+        maritalStatus:
+          type: string
+          enum: [MARRIED, UNMARRIED, WIDOWED]
+        presentAddress:
+          $ref: '#/components/schemas/Address'
+        permanentAddress:
+          $ref: '#/components/schemas/Address'
+        devotionalStatusId:
+          type: integer
+        gurudevHarinam:
+          type: integer
+        gurudevPancharatrik:
+          type: integer
+        initiatedName:
+          type: string
+        harinamDate:
+          type: string
+          format: date
+        pancharatrikDate:
+          type: string
+          format: date
+        education:
+          type: string
+        occupation:
+          type: string
+        devotionalCourses:
+          type: array
+          items:
+            $ref: '#/components/schemas/DevotionalCourse'
+        shraddhakutirId:
+          type: integer
+
+    DevotionalCourse:
+      type: object
+      properties:
+        name:
+          type: string
+        date:
+          type: string
+          format: date
+        institute:
+          type: string
+
+    Address:
+      type: object
+      properties:
+        country:
+          type: string
+        state:
+          type: string
+        district:
+          type: string
+        subDistrict:
+          type: string
+        village:
+          type: string
+        postalCode:
+          type: string
+        landmark:
+          type: string
+
+    Namhatta:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        meetingDay:
+          type: string
+        meetingTime:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        malaSenapoti:
+          type: string
+        mahaChakraSenapoti:
+          type: string
+        chakraSenapoti:
+          type: string
+        upaChakraSenapoti:
+          type: string
+        secretary:
+          type: string
+        status:
+          type: string
+          enum: [PENDING_APPROVAL, APPROVED]
+
+    Shraddhakutir:
+      type: object
+      properties:
+        name:
+          type: string
+        districtCode:
+          type: string
+
+    NamhattaUpdate:
+      type: object
+      properties:
+        namhattaId:
+          type: integer
+        programType:
+          type: string
+        date:
+          type: string
+          format: date
+        attendance:
+          type: integer
+        prasadDistribution:
+          type: integer
+        nagarKirtan:
+          type: boolean
+        bookDistribution:
+          type: boolean
+        chanting:
+          type: boolean
+        arati:
+          type: boolean
+        bhagwatPath:
+          type: boolean
+        specialAttraction:
+          type: string
+        facebookLink:
+          type: string
+        youtubeLink:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+            format: uri
