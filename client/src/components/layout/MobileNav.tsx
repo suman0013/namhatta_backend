@@ -22,9 +22,9 @@ export default function MobileNav() {
           
           return (
             <Link key={item.href} href={item.href}>
-              <a
+              <div
                 className={cn(
-                  "flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors duration-200",
+                  "flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors duration-200 cursor-pointer",
                   isActive
                     ? "text-indigo-600 dark:text-indigo-400"
                     : "text-gray-600 dark:text-gray-400"
@@ -32,7 +32,7 @@ export default function MobileNav() {
               >
                 <Icon className="h-5 w-5 mb-1" />
                 {item.label}
-              </a>
+              </div>
             </Link>
           );
         })}

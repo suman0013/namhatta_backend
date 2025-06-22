@@ -45,7 +45,7 @@ export default function Namhattas() {
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value,
+      [key]: value === "all" ? "" : value,
       // Reset dependent filters
       ...(key === "country" && { state: "", district: "" }),
       ...(key === "state" && { district: "" }),
@@ -81,7 +81,7 @@ export default function Namhattas() {
                 <SelectValue placeholder="All Countries" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Countries</SelectItem>
+                <SelectItem value="all">All Countries</SelectItem>
                 {countries?.map((country) => (
                   <SelectItem key={country} value={country}>{country}</SelectItem>
                 ))}
@@ -93,7 +93,7 @@ export default function Namhattas() {
                 <SelectValue placeholder="All States" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 {states?.map((state) => (
                   <SelectItem key={state} value={state}>{state}</SelectItem>
                 ))}
@@ -105,7 +105,7 @@ export default function Namhattas() {
                 <SelectValue placeholder="All Districts" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Districts</SelectItem>
+                <SelectItem value="all">All Districts</SelectItem>
                 {districts?.map((district) => (
                   <SelectItem key={district} value={district}>{district}</SelectItem>
                 ))}
@@ -117,7 +117,7 @@ export default function Namhattas() {
                 <SelectValue placeholder="All Roles" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="MalaSenapoti">MalaSenapoti</SelectItem>
                 <SelectItem value="ChakraSenapoti">ChakraSenapoti</SelectItem>
                 <SelectItem value="MahaChakraSenapoti">MahaChakraSenapoti</SelectItem>

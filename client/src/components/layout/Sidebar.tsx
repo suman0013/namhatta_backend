@@ -55,9 +55,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
           
           return (
             <Link key={item.href} href={item.href}>
-              <a
+              <div
                 className={cn(
-                  "nav-item",
+                  "nav-item group cursor-pointer",
                   isActive ? "nav-item-active" : "nav-item-inactive"
                 )}
                 onClick={onClose}
@@ -75,7 +75,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                 {item.notification && (
                   <div className="ml-auto w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                 )}
-              </a>
+              </div>
             </Link>
           );
         })}
