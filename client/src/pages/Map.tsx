@@ -338,43 +338,15 @@ export default function Map() {
     console.log(`Added ${currentData.length} markers to map`);
   }, [currentData, colorScale, currentLevel]);
 
-  const handleZoomIn = () => {
-    if (mapRef.current) {
-      mapRef.current.zoomIn();
-    }
-  };
 
-  const handleZoomOut = () => {
-    if (mapRef.current) {
-      mapRef.current.zoomOut();
-    }
-  };
 
   const handleReset = () => {
-    setCurrentLevel('COUNTRY');
-    setSelectedCountry('');
-    setSelectedState('');
-    setSelectedDistrict('');
-    setSelectedSubDistrict('');
     if (mapRef.current) {
       mapRef.current.setView([20, 77], 4);
     }
   };
 
-  const handleLevelChange = (level: MapLevel) => {
-    setCurrentLevel(level);
-    if (mapRef.current) {
-      const zoomLevels = {
-        COUNTRY: { center: [20, 77] as [number, number], zoom: 4 },
-        STATE: { center: [22.5, 88] as [number, number], zoom: 6 },
-        DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 8 },
-        SUB_DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 10 },
-        VILLAGE: { center: [22.6, 88.4] as [number, number], zoom: 12 }
-      };
-      const config = zoomLevels[level];
-      mapRef.current.setView(config.center, config.zoom);
-    }
-  };
+
 
   const handleMarkerClick = (data: MapData) => {
     console.log('Marker clicked:', data.name, 'Level:', data.level);
@@ -428,49 +400,24 @@ export default function Map() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Zoom Level</label>
-              <Select value={currentLevel} onValueChange={(value: MapLevel) => handleLevelChange(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="COUNTRY">Country View</SelectItem>
-                  <SelectItem value="STATE">State View</SelectItem>
-                  <SelectItem value="DISTRICT">District View</SelectItem>
-                  <SelectItem value="SUB_DISTRICT">Sub-District View</SelectItem>
-                  <SelectItem value="VILLAGE">Village View</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="space-y-2">
+              <Button onClick={handleReset} variant="outline" className="w-full">
+                Reset to World View
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Zoom in/out to see different levels of detail automatically
+              </p>
             </div>
 
-            {selectedCountry && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Selected Country</label>
-                <Badge variant="secondary">{selectedCountry}</Badge>
-              </div>
-            )}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Current Zoom Level</label>
+              <Badge variant="secondary">Zoom {zoomLevel}</Badge>
+            </div>
 
-            {selectedState && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Selected State</label>
-                <Badge variant="secondary">{selectedState}</Badge>
-              </div>
-            )}
-
-            {selectedDistrict && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Selected District</label>
-                <Badge variant="secondary">{selectedDistrict}</Badge>
-              </div>
-            )}
-
-            {selectedSubDistrict && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">Selected Sub-District</label>
-                <Badge variant="secondary">{selectedSubDistrict}</Badge>
-              </div>
-            )}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Current View</label>
+              <Badge variant="outline">{currentLevel.replace('_', ' ')}</Badge>
+            </div>
 
             <div className="pt-4 border-t">
               <h4 className="font-medium mb-2">Legend</h4>
