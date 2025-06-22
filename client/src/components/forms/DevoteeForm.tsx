@@ -22,13 +22,24 @@ interface DevoteeFormProps {
 }
 
 interface FormData {
+  legalName: string;
   name: string;
+  dob: string;
+  email: string;
+  phone: string;
+  fatherName: string;
+  motherName: string;
+  husbandName: string;
+  bloodGroup: string;
+  maritalStatus: string;
   presentAddress: Address;
   permanentAddress: Address;
-  gurudev: string;
-  maritalStatus: string;
-  statusId: number | undefined;
-  shraddhakutirId: number | undefined;
+  devotionalStatusId: number | undefined;
+  gurudevHarinam: number | undefined;
+  gurudevPancharatrik: number | undefined;
+  initiatedName: string;
+  harinamDate: string;
+  pancharatrikDate: string;
   education: string;
   occupation: string;
   devotionalCourses: Array<{
@@ -36,6 +47,7 @@ interface FormData {
     date: string;
     institute: string;
   }>;
+  shraddhakutirId: number | undefined;
 }
 
 export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeFormProps) {
@@ -45,12 +57,24 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
+      legalName: devotee?.legalName || "",
       name: devotee?.name || "",
+      dob: devotee?.dob || "",
+      email: devotee?.email || "",
+      phone: devotee?.phone || "",
+      fatherName: devotee?.fatherName || "",
+      motherName: devotee?.motherName || "",
+      husbandName: devotee?.husbandName || "",
+      bloodGroup: devotee?.bloodGroup || "",
+      maritalStatus: devotee?.maritalStatus || "",
       presentAddress: devotee?.presentAddress || {},
       permanentAddress: devotee?.permanentAddress || {},
-      gurudev: devotee?.gurudev || "",
-      maritalStatus: devotee?.maritalStatus || "",
-      statusId: devotee?.statusId,
+      devotionalStatusId: devotee?.devotionalStatusId,
+      gurudevHarinam: devotee?.gurudevHarinam,
+      gurudevPancharatrik: devotee?.gurudevPancharatrik,
+      initiatedName: devotee?.initiatedName || "",
+      harinamDate: devotee?.harinamDate || "",
+      pancharatrikDate: devotee?.pancharatrikDate || "",
       shraddhakutirId: devotee?.shraddhakutirId,
       education: devotee?.education || "",
       occupation: devotee?.occupation || "",

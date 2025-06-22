@@ -478,13 +478,13 @@ function DevoteeCard({ devotee }: { devotee: Devotee }) {
         <div className="flex items-center space-x-3 mb-3">
           <Avatar>
             <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
-              {devotee.name.substring(0, 2).toUpperCase()}
+              {(devotee.name || devotee.legalName).substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <Link href={`/devotees/${devotee.id}`}>
               <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
-                {devotee.name}
+                {devotee.name || devotee.legalName}
               </h4>
             </Link>
             <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
@@ -500,10 +500,10 @@ function DevoteeCard({ devotee }: { devotee: Devotee }) {
         )}
         <div className="flex justify-between items-center">
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {devotee.gurudev}
+            {devotee.initiatedName || "Aspiring Devotee"}
           </span>
           <Badge variant="secondary" className="text-xs">
-            Status ID: {devotee.statusId}
+            Status ID: {devotee.devotionalStatusId}
           </Badge>
         </div>
       </CardContent>

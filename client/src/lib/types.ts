@@ -42,41 +42,56 @@ export interface Address {
   district?: string;
   subDistrict?: string;
   village?: string;
-  zipcode?: string;
-  details?: string;
+  postalCode?: string;
+  landmark?: string;
+}
+
+export interface DevotionalCourse {
+  name: string;
+  date: string;
+  institute: string;
 }
 
 export interface Devotee {
   id: number;
-  name: string;
+  legalName: string;
+  name?: string; // Initiated/spiritual name
+  dob?: string;
+  email?: string;
+  phone?: string;
+  fatherName?: string;
+  motherName?: string;
+  husbandName?: string;
+  bloodGroup?: string;
+  maritalStatus?: 'MARRIED' | 'UNMARRIED' | 'WIDOWED';
   presentAddress?: Address;
   permanentAddress?: Address;
-  gurudev?: string;
-  maritalStatus?: string;
-  statusId?: number;
-  shraddhakutirId?: number;
+  devotionalStatusId?: number;
+  gurudevHarinam?: number;
+  gurudevPancharatrik?: number;
+  initiatedName?: string;
+  harinamDate?: string;
+  pancharatrikDate?: string;
   education?: string;
   occupation?: string;
-  devotionalCourses?: Array<{
-    name: string;
-    date: string;
-    institute: string;
-  }>;
+  devotionalCourses?: DevotionalCourse[];
+  shraddhakutirId?: number;
   createdAt: Date;
 }
 
 export interface Namhatta {
   id: number;
-  name: string;
   code: string;
+  name: string;
+  meetingDay?: string;
+  meetingTime?: string;
   address?: Address;
-  status: string;
-  weeklyMeetingDay?: string;
-  weeklyMeetingTime?: string;
   malaSenapoti?: string;
   mahaChakraSenapoti?: string;
   chakraSenapoti?: string;
   upaChakraSenapoti?: string;
+  secretary?: string;
+  status: 'PENDING_APPROVAL' | 'APPROVED';
   createdAt: Date;
 }
 

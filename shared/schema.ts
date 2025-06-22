@@ -5,15 +5,24 @@ import { z } from "zod";
 // Devotees table
 export const devotees = pgTable("devotees", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  legalName: text("legal_name").notNull(),
+  name: text("name"), // Initiated/spiritual name
+  dob: timestamp("dob"),
+  email: text("email"),
+  phone: text("phone"),
+  fatherName: text("father_name"),
+  motherName: text("mother_name"),
+  husbandName: text("husband_name"),
+  bloodGroup: text("blood_group"),
+  maritalStatus: text("marital_status"), // MARRIED, UNMARRIED, WIDOWED
   presentAddress: json("present_address").$type<{
     country?: string;
     state?: string;
     district?: string;
     subDistrict?: string;
     village?: string;
-    zipcode?: string;
-    details?: string;
+    postalCode?: string;
+    landmark?: string;
   }>(),
   permanentAddress: json("permanent_address").$type<{
     country?: string;
@@ -21,13 +30,15 @@ export const devotees = pgTable("devotees", {
     district?: string;
     subDistrict?: string;
     village?: string;
-    zipcode?: string;
-    details?: string;
+    postalCode?: string;
+    landmark?: string;
   }>(),
-  gurudev: text("gurudev"),
-  maritalStatus: text("marital_status"),
-  statusId: integer("status_id"),
-  shraddhakutirId: integer("shraddhakutir_id"),
+  devotionalStatusId: integer("devotional_status_id"),
+  gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
+  gurudevPancharatrik: integer("gurudev_pancharatrik"), // Reference to leader ID
+  initiatedName: text("initiated_name"),
+  harinamDate: timestamp("harinam_date"),
+  pancharatrikDate: timestamp("pancharatrik_date"),
   education: text("education"),
   occupation: text("occupation"),
   devotionalCourses: json("devotional_courses").$type<Array<{
@@ -35,30 +46,32 @@ export const devotees = pgTable("devotees", {
     date: string;
     institute: string;
   }>>(),
+  shraddhakutirId: integer("shraddhakutir_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Namhattas table
 export const namhattas = pgTable("namhattas", {
   id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
   name: text("name").notNull(),
-  code: text("code").notNull(),
+  meetingDay: text("meeting_day"),
+  meetingTime: text("meeting_time"),
   address: json("address").$type<{
     country?: string;
     state?: string;
     district?: string;
     subDistrict?: string;
     village?: string;
-    zipcode?: string;
-    details?: string;
+    postalCode?: string;
+    landmark?: string;
   }>(),
-  status: text("status").notNull().default("pending"), // pending, active, inactive
-  weeklyMeetingDay: text("weekly_meeting_day"),
-  weeklyMeetingTime: text("weekly_meeting_time"),
   malaSenapoti: text("mala_senapoti"),
   mahaChakraSenapoti: text("maha_chakra_senapoti"),
   chakraSenapoti: text("chakra_senapoti"),
   upaChakraSenapoti: text("upa_chakra_senapoti"),
+  secretary: text("secretary"),
+  status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED
   createdAt: timestamp("created_at").defaultNow(),
 });
 

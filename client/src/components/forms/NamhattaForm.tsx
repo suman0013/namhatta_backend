@@ -21,15 +21,16 @@ interface NamhattaFormProps {
 }
 
 interface FormData {
-  name: string;
   code: string;
+  name: string;
+  meetingDay: string;
+  meetingTime: string;
   address: Address;
-  weeklyMeetingDay: string;
-  weeklyMeetingTime: string;
   malaSenapoti: string;
   mahaChakraSenapoti: string;
   chakraSenapoti: string;
   upaChakraSenapoti: string;
+  secretary: string;
 }
 
 export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaFormProps) {
@@ -39,15 +40,16 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
+      code: namhatta?.code || "",
       name: namhatta?.name || "",
-      code: "",
+      meetingDay: namhatta?.meetingDay || "",
+      meetingTime: namhatta?.meetingTime || "",
       address: namhatta?.address || {},
-      weeklyMeetingDay: "",
-      weeklyMeetingTime: "",
       malaSenapoti: namhatta?.malaSenapoti || "",
       mahaChakraSenapoti: namhatta?.mahaChakraSenapoti || "",
       chakraSenapoti: namhatta?.chakraSenapoti || "",
       upaChakraSenapoti: namhatta?.upaChakraSenapoti || "",
+      secretary: namhatta?.secretary || "",
     }
   });
 

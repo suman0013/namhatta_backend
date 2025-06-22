@@ -215,12 +215,10 @@ export default function Namhattas() {
 function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "active":
-        return <Badge className="status-badge-active">Active</Badge>;
-      case "pending":
-        return <Badge className="status-badge-pending">Pending</Badge>;
-      case "inactive":
-        return <Badge className="status-badge-inactive">Inactive</Badge>;
+      case "APPROVED":
+        return <Badge className="status-badge-active">Approved</Badge>;
+      case "PENDING_APPROVAL":
+        return <Badge className="status-badge-pending">Pending Approval</Badge>;
       default:
         return <Badge className="status-badge-inactive">{status}</Badge>;
     }

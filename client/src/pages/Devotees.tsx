@@ -316,29 +316,29 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12">
               <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
-                {devotee.name.substring(0, 2).toUpperCase()}
+                {(devotee.name || devotee.legalName).substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
               <Link href={`/devotees/${devotee.id}`}>
                 <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                  {devotee.name}
+                  {devotee.name || devotee.legalName}
                 </h3>
               </Link>
               <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
             </div>
           </div>
-          <Badge className={getStatusColor(devotee.statusId)}>
-            {getStatusName(devotee.statusId)}
+          <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+            {getStatusName(devotee.devotionalStatusId)}
           </Badge>
         </div>
 
         {/* Details */}
         <div className="space-y-2 mb-4">
-          {devotee.gurudev && (
+          {(devotee.gurudevHarinam || devotee.gurudevPancharatrik) && (
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <Heart className="mr-2 h-3 w-3" />
-              <span>Disciple of {devotee.gurudev}</span>
+              <span>Initiated Devotee</span>
             </div>
           )}
           
