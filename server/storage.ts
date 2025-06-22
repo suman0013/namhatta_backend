@@ -155,38 +155,253 @@ export class MemStorage implements IStorage {
 
     namhattasData.forEach((namhatta, index) => {
       const id = this.currentId++;
-      this.namhattas.set(id, { ...namhatta, id, createdAt: new Date() });
+      this.namhattas.set(id, { 
+        ...namhatta, 
+        id, 
+        createdAt: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000) // Random date within last 6 months
+      });
     });
 
     // Initialize devotees
     const devoteesData = [
       {
+        legalName: "Ananda Kumar Das",
         name: "Ananda Das",
-        presentAddress: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur" },
-        permanentAddress: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur" },
-        gurudev: "Jayapataka Swami",
-        maritalStatus: "Single",
-        statusId: 3,
+        dob: "1985-05-15",
+        email: "ananda.das@iskcon.org",
+        phone: "+91-9876543210",
+        fatherName: "Raman Das",
+        motherName: "Radha Devi",
+        bloodGroup: "O+",
+        maritalStatus: "UNMARRIED",
+        presentAddress: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur", postalCode: "741313" },
+        permanentAddress: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur", postalCode: "741313" },
+        devotionalStatusId: 3,
+        initiatedName: "Ananda Das",
+        harinamDate: "2010-08-15",
+        pancharatrikDate: "2015-03-20",
         shraddhakutirId: 1,
-        education: "Graduate",
-        occupation: "Temple Service"
+        education: "B.Tech Computer Science",
+        occupation: "Temple Service - IT Department"
       },
       {
+        legalName: "Bhakti Kumari Devi",
         name: "Bhakti Devi",
-        presentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street" },
-        permanentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street" },
-        gurudev: "Jayapataka Swami",
-        maritalStatus: "Married",
-        statusId: 2,
+        dob: "1988-12-03",
+        email: "bhakti.devi@iskcon.org",
+        phone: "+91-9876543211",
+        fatherName: "Krishna Das",
+        motherName: "Ganga Devi",
+        husbandName: "Govinda Das",
+        bloodGroup: "A+",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street", postalCode: "700016" },
+        permanentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street", postalCode: "700016" },
+        devotionalStatusId: 2,
+        initiatedName: "Bhakti Devi",
+        harinamDate: "2012-06-10",
         shraddhakutirId: 2,
-        education: "Post Graduate",
-        occupation: "Teacher"
+        education: "M.A. Sanskrit",
+        occupation: "Teacher - Gurukula"
+      },
+      {
+        legalName: "Govinda Kumar Singh",
+        name: "Govinda Das",
+        dob: "1982-03-22",
+        email: "govinda.das@iskcon.org",
+        phone: "+91-9876543212",
+        fatherName: "Hari Singh",
+        motherName: "Sita Devi",
+        bloodGroup: "B+",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "South", village: "Ballygunge", postalCode: "700019" },
+        permanentAddress: { country: "India", state: "Bihar", district: "Patna", subDistrict: "Patna Sadar", village: "Boring Road", postalCode: "800001" },
+        devotionalStatusId: 4,
+        initiatedName: "Govinda Das",
+        harinamDate: "2008-11-25",
+        pancharatrikDate: "2018-09-15",
+        shraddhakutirId: 2,
+        education: "MBA Finance",
+        occupation: "Temple Administration"
+      },
+      {
+        legalName: "Radha Kumari Sharma",
+        name: "Radha Devi",
+        dob: "1990-07-18",
+        email: "radha.devi@iskcon.org",
+        phone: "+91-9876543213",
+        fatherName: "Gopal Sharma",
+        motherName: "Lakshmi Devi",
+        bloodGroup: "AB+",
+        maritalStatus: "UNMARRIED",
+        presentAddress: { country: "India", state: "Maharashtra", district: "Mumbai", subDistrict: "Andheri", village: "Juhu", postalCode: "400049" },
+        permanentAddress: { country: "India", state: "Rajasthan", district: "Jaipur", subDistrict: "Jaipur", village: "Pink City", postalCode: "302001" },
+        devotionalStatusId: 2,
+        initiatedName: "Radha Devi",
+        harinamDate: "2015-04-12",
+        shraddhakutirId: 1,
+        education: "B.A. Arts",
+        occupation: "Deity Service"
+      },
+      {
+        legalName: "Krishna Kumar Patel",
+        dob: "1975-09-08",
+        email: "krishna.patel@iskcon.org",
+        phone: "+91-9876543214",
+        fatherName: "Mohan Patel",
+        motherName: "Gita Devi",
+        bloodGroup: "O-",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "Gujarat", district: "Ahmedabad", subDistrict: "Satellite", village: "Prahlad Nagar", postalCode: "380015" },
+        permanentAddress: { country: "India", state: "Gujarat", district: "Ahmedabad", subDistrict: "Satellite", village: "Prahlad Nagar", postalCode: "380015" },
+        devotionalStatusId: 1,
+        shraddhakutirId: 1,
+        education: "B.Com",
+        occupation: "Business - Grocery Store"
+      },
+      {
+        legalName: "Ganga Kumari Roy",
+        name: "Ganga Devi",
+        dob: "1993-11-30",
+        email: "ganga.devi@iskcon.org",
+        phone: "+91-9876543215",
+        fatherName: "Shyam Roy",
+        motherName: "Tulsi Devi",
+        bloodGroup: "A-",
+        maritalStatus: "UNMARRIED",
+        presentAddress: { country: "Bangladesh", state: "Dhaka", district: "Dhaka", subDistrict: "Dhanmondi", village: "Dhanmondi 15", postalCode: "1209" },
+        permanentAddress: { country: "Bangladesh", state: "Dhaka", district: "Dhaka", subDistrict: "Dhanmondi", village: "Dhanmondi 15", postalCode: "1209" },
+        devotionalStatusId: 2,
+        initiatedName: "Ganga Devi",
+        harinamDate: "2018-02-14",
+        shraddhakutirId: 2,
+        education: "B.Sc. Biology",
+        occupation: "Research Assistant"
+      },
+      {
+        legalName: "Hari Kumar Gupta",
+        name: "Hari Das",
+        dob: "1987-01-25",
+        email: "hari.das@iskcon.org",
+        phone: "+91-9876543216",
+        fatherName: "Ram Gupta",
+        motherName: "Sita Gupta",
+        bloodGroup: "B-",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "Uttar Pradesh", district: "Vrindavan", subDistrict: "Mathura", village: "Raman Reti", postalCode: "281121" },
+        permanentAddress: { country: "India", state: "Uttar Pradesh", district: "Vrindavan", subDistrict: "Mathura", village: "Raman Reti", postalCode: "281121" },
+        devotionalStatusId: 3,
+        initiatedName: "Hari Das",
+        harinamDate: "2013-12-08",
+        pancharatrikDate: "2020-01-15",
+        shraddhakutirId: 1,
+        education: "M.Tech Mechanical",
+        occupation: "Temple Maintenance"
+      },
+      {
+        legalName: "Tulsi Kumari Joshi",
+        name: "Tulsi Devi",
+        dob: "1991-06-12",
+        email: "tulsi.devi@iskcon.org",
+        phone: "+91-9876543217",
+        fatherName: "Narayan Joshi",
+        motherName: "Kamala Devi",
+        bloodGroup: "AB-",
+        maritalStatus: "WIDOWED",
+        presentAddress: { country: "Nepal", state: "Bagmati", district: "Kathmandu", subDistrict: "Kathmandu", village: "Thamel", postalCode: "44600" },
+        permanentAddress: { country: "Nepal", state: "Bagmati", district: "Kathmandu", subDistrict: "Kathmandu", village: "Thamel", postalCode: "44600" },
+        devotionalStatusId: 2,
+        initiatedName: "Tulsi Devi",
+        harinamDate: "2016-10-22",
+        shraddhakutirId: 2,
+        education: "M.A. Philosophy",
+        occupation: "Book Distribution"
+      },
+      {
+        legalName: "Shyam Kumar Mehta",
+        dob: "1980-04-07",
+        email: "shyam.mehta@iskcon.org",
+        phone: "+91-9876543218",
+        fatherName: "Gopal Mehta",
+        motherName: "Rukmini Devi",
+        bloodGroup: "O+",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "Karnataka", district: "Bangalore", subDistrict: "Rajajinagar", village: "Rajajinagar", postalCode: "560010" },
+        permanentAddress: { country: "India", state: "Karnataka", district: "Bangalore", subDistrict: "Rajajinagar", village: "Rajajinagar", postalCode: "560010" },
+        devotionalStatusId: 1,
+        shraddhakutirId: 1,
+        education: "B.E. Electronics",
+        occupation: "Software Engineer"
+      },
+      {
+        legalName: "Rukmini Kumari Nair",
+        name: "Rukmini Devi",
+        dob: "1989-08-19",
+        email: "rukmini.devi@iskcon.org",
+        phone: "+91-9876543219",
+        fatherName: "Vishnu Nair",
+        motherName: "Saraswati Devi",
+        bloodGroup: "A+",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "Kerala", district: "Kochi", subDistrict: "Ernakulam", village: "Marine Drive", postalCode: "682031" },
+        permanentAddress: { country: "India", state: "Kerala", district: "Kochi", subDistrict: "Ernakulam", village: "Marine Drive", postalCode: "682031" },
+        devotionalStatusId: 3,
+        initiatedName: "Rukmini Devi",
+        harinamDate: "2014-07-05",
+        pancharatrikDate: "2019-11-12",
+        shraddhakutirId: 2,
+        education: "B.Sc. Nursing",
+        occupation: "Healthcare - Nurse"
+      },
+      {
+        legalName: "Saraswati Kumari Iyer",
+        name: "Saraswati Devi",
+        dob: "1992-02-28",
+        email: "saraswati.devi@iskcon.org",
+        phone: "+91-9876543220",
+        fatherName: "Lakshman Iyer",
+        motherName: "Parvati Devi",
+        bloodGroup: "B+",
+        maritalStatus: "UNMARRIED",
+        presentAddress: { country: "India", state: "Tamil Nadu", district: "Chennai", subDistrict: "T.Nagar", village: "T.Nagar", postalCode: "600017" },
+        permanentAddress: { country: "India", state: "Tamil Nadu", district: "Chennai", subDistrict: "T.Nagar", village: "T.Nagar", postalCode: "600017" },
+        devotionalStatusId: 2,
+        initiatedName: "Saraswati Devi",
+        harinamDate: "2017-09-03",
+        shraddhakutirId: 1,
+        education: "M.Sc. Mathematics",
+        occupation: "Teacher - Mathematics"
+      },
+      {
+        legalName: "Parvati Kumari Reddy",
+        name: "Parvati Devi",
+        dob: "1986-10-14",
+        email: "parvati.devi@iskcon.org",
+        phone: "+91-9876543221",
+        fatherName: "Venkat Reddy",
+        motherName: "Lakshmi Reddy",
+        bloodGroup: "AB+",
+        maritalStatus: "MARRIED",
+        presentAddress: { country: "India", state: "Andhra Pradesh", district: "Hyderabad", subDistrict: "Banjara Hills", village: "Banjara Hills", postalCode: "500034" },
+        permanentAddress: { country: "India", state: "Andhra Pradesh", district: "Hyderabad", subDistrict: "Banjara Hills", village: "Banjara Hills", postalCode: "500034" },
+        devotionalStatusId: 4,
+        initiatedName: "Parvati Devi",
+        harinamDate: "2011-05-28",
+        pancharatrikDate: "2017-12-10",
+        shraddhakutirId: 2,
+        education: "M.B.A. Marketing",
+        occupation: "Temple Outreach Coordinator"
       }
     ];
 
     devoteesData.forEach((devotee, index) => {
       const id = this.currentId++;
-      this.devotees.set(id, { ...devotee, id, devotionalCourses: [], createdAt: new Date() });
+      this.devotees.set(id, { 
+        ...devotee, 
+        id, 
+        devotionalCourses: [], 
+        createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000) // Random date within last year
+      });
     });
 
     // Initialize shraddhakutirs
@@ -200,35 +415,60 @@ export class MemStorage implements IStorage {
       this.shraddhakutirs.set(id, { ...shraddhakutir, id, createdAt: new Date() });
     });
 
-    // Initialize namhatta updates
-    const updatesData = [
-      {
-        namhattaId: 1,
-        programType: "Weekly Satsang Program",
-        date: new Date("2024-12-28"),
-        attendance: 45,
-        hasKirtan: true,
-        hasPrasadam: true,
-        hasClass: true,
-        imageUrls: [],
-        specialAttraction: "Special Kirtan by visiting devotee"
-      },
-      {
-        namhattaId: 2,
-        programType: "Bhagavad Gita Study Circle",
-        date: new Date("2024-12-27"),
-        attendance: 28,
-        hasKirtan: false,
-        hasPrasadam: true,
-        hasClass: true,
-        imageUrls: [],
-        specialAttraction: "Chapter 7 discussion"
-      }
+    // Initialize namhatta updates with comprehensive data
+    const programTypes = [
+      "Weekly Satsang Program", "Bhagavad Gita Study Circle", "Kirtan Evening", 
+      "Festival Celebration", "Book Distribution Drive", "Youth Program",
+      "Ladies Program", "Children's Program", "Prasadam Distribution",
+      "Community Service", "Spiritual Workshop", "Deity Darshan Program"
     ];
+    
+    const specialAttractions = [
+      "Special Kirtan by visiting devotee", "Guest speaker from temple",
+      "Cultural performance by children", "Bhajan competition",
+      "Spiritual question & answer session", "Community feast",
+      "Book reading session", "Meditation workshop",
+      "Festival decorations", "Special prasadam varieties",
+      "Drama presentation", "Interactive spiritual games"
+    ];
+
+    const updatesData = [];
+    
+    // Generate updates for each namhatta
+    for (let namhattaId = 1; namhattaId <= 12; namhattaId++) {
+      // Generate 5-8 random updates per namhatta
+      const updateCount = 5 + Math.floor(Math.random() * 4);
+      
+      for (let i = 0; i < updateCount; i++) {
+        const daysAgo = Math.floor(Math.random() * 90); // Within last 3 months
+        const date = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+        
+        updatesData.push({
+          namhattaId,
+          programType: programTypes[Math.floor(Math.random() * programTypes.length)],
+          date,
+          attendance: 15 + Math.floor(Math.random() * 60), // 15-75 attendees
+          prasadDistribution: 10 + Math.floor(Math.random() * 50),
+          nagarKirtan: Math.random() > 0.7,
+          bookDistribution: Math.random() > 0.6,
+          chanting: Math.random() > 0.3,
+          arati: Math.random() > 0.5,
+          bhagwatPath: Math.random() > 0.4,
+          specialAttraction: Math.random() > 0.5 ? specialAttractions[Math.floor(Math.random() * specialAttractions.length)] : undefined,
+          facebookLink: Math.random() > 0.8 ? "https://facebook.com/iskcon" : undefined,
+          youtubeLink: Math.random() > 0.9 ? "https://youtube.com/iskcon" : undefined,
+          imageUrls: []
+        });
+      }
+    }
 
     updatesData.forEach((update, index) => {
       const id = this.currentId++;
-      this.namhattaUpdates.set(id, { ...update, id, createdAt: new Date() });
+      this.namhattaUpdates.set(id, { 
+        ...update, 
+        id, 
+        createdAt: update.date
+      });
     });
   }
 
