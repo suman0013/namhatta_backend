@@ -386,7 +386,11 @@ export class MemStorage implements IStorage {
 
   async createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate> {
     const id = this.currentId++;
-    const newUpdate: NamhattaUpdate = { ...update, id, createdAt: new Date() };
+    const newUpdate: NamhattaUpdate = { 
+      ...update, 
+      id, 
+      createdAt: new Date()
+    };
     this.namhattaUpdates.set(id, newUpdate);
     return newUpdate;
   }

@@ -285,7 +285,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Updates
   app.post("/api/updates", async (req, res) => {
     try {
-      const updateData = insertNamhattaUpdateSchema.parse(req.body);
+      // Convert date string to Date object for validation
+      const requestData = {
+        ...req.body,
+        date: new Date(req.body.date)
+      };
+      const updateData = insertNamhattaUpdateSchema.parse(requestData);
       const update = await storage.createNamhattaUpdate(updateData);
       res.status(201).json(update);
     } catch (error) {

@@ -33,6 +33,7 @@ export default function DevoteeDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
+  const [showHistory, setShowHistory] = useState(false);
 
   const { data: devotee, isLoading } = useQuery({
     queryKey: ["/api/devotees", id],
