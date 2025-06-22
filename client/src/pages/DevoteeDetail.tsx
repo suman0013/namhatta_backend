@@ -478,19 +478,10 @@ export default function DevoteeDetail() {
       </Tabs>
 
       {/* Status History Modal */}
-      {showHistory && (
+      {showHistory && devotee && (
         <StatusHistoryView
-          devoteeId={devoteeId}
+          devoteeId={devotee.id}
           onClose={() => setShowHistory(false)}
-        />
-      )}
-
-      {/* Edit Form Modal */}
-      {showEditForm && (
-        <DevoteeForm
-          devotee={devotee}
-          onClose={() => setShowEditForm(false)}
-          onSuccess={() => setShowEditForm(false)}
         />
       )}
     </div>
