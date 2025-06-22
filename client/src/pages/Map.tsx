@@ -34,12 +34,10 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Determine level based on zoom
+  // Determine level based on zoom - simplified thresholds
   const getLevelFromZoom = (zoom: number): MapLevel => {
-    if (zoom >= 12) return 'VILLAGE';
-    if (zoom >= 9) return 'SUB_DISTRICT';
-    if (zoom >= 7) return 'DISTRICT';
-    if (zoom >= 5) return 'STATE';
+    if (zoom >= 10) return 'DISTRICT';
+    if (zoom >= 6) return 'STATE';
     return 'COUNTRY';
   };
 
@@ -52,43 +50,26 @@ export default function Map() {
     }
   }, [zoomLevel, currentLevel]);
 
-  // Fetch data based on current level - load data as needed
+  // Always load all data - no conditional loading to avoid blank screens
   const { data: countryData, isLoading: countryLoading } = useQuery({
     queryKey: ["/api/map/countries"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'COUNTRY',
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: stateData, isLoading: stateLoading } = useQuery({
     queryKey: ["/api/map/states"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'STATE',
     staleTime: 5 * 60 * 1000,
   });
 
   const { data: districtData, isLoading: districtLoading } = useQuery({
     queryKey: ["/api/map/districts"], 
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'DISTRICT',
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: subDistrictData, isLoading: subDistrictLoading } = useQuery({
-    queryKey: ["/api/map/sub-districts"],
-    queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'SUB_DISTRICT',
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: villageData, isLoading: villageLoading } = useQuery({
-    queryKey: ["/api/map/villages"],
-    queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'VILLAGE',
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading || villageLoading;
+  const isLoading = countryLoading || stateLoading || districtLoading;
 
   // Get current data based on level
   const getCurrentData = (): MapData[] => {
@@ -153,26 +134,6 @@ export default function Map() {
         })).filter((item: any) => item.coordinates);
         console.log(`Showing ${districts.length} districts at zoom ${zoomLevel}`);
         return districts;
-      case 'SUB_DISTRICT':
-        if (!subDistrictData) return [];
-        const subDistricts = subDistrictData.map((item: any) => ({
-          name: item.subDistrict,
-          count: item.count,
-          coordinates: coordinatesMap[item.subDistrict],
-          level: 'SUB_DISTRICT' as MapLevel
-        })).filter((item: any) => item.coordinates);
-        console.log(`Showing ${subDistricts.length} sub-districts at zoom ${zoomLevel}`);
-        return subDistricts;
-      case 'VILLAGE':
-        if (!villageData) return [];
-        const villages = villageData.map((item: any) => ({
-          name: item.village,
-          count: item.count,
-          coordinates: coordinatesMap[item.village],
-          level: 'VILLAGE' as MapLevel
-        })).filter((item: any) => item.coordinates);
-        console.log(`Showing ${villages.length} villages at zoom ${zoomLevel}`);
-        return villages;
       default:
         return [];
     }
@@ -212,7 +173,12 @@ export default function Map() {
         map.on('zoomend', () => {
           const zoom = map.getZoom();
           console.log('Zoom changed to:', zoom);
-          setZoomLevel(Math.round(zoom)); // Round to avoid precision issues
+          setZoomLevel(Math.round(zoom));
+        });
+        
+        // Listen for view changes to ensure markers are always visible
+        map.on('moveend', () => {
+          console.log('Map moved, current bounds:', map.getBounds());
         });
         
         // Set initial zoom level
@@ -366,12 +332,11 @@ export default function Map() {
       const [lng, lat] = data.coordinates;
       
       // Determine appropriate zoom level for the next detail level
-      let targetZoom = mapRef.current.getZoom() + 2;
-      if (data.level === 'COUNTRY') targetZoom = 6;
-      else if (data.level === 'STATE') targetZoom = 8;
-      else if (data.level === 'DISTRICT') targetZoom = 10;
-      else if (data.level === 'SUB_DISTRICT') targetZoom = 12;
+      let targetZoom = mapRef.current.getZoom() + 3;
+      if (data.level === 'COUNTRY') targetZoom = 7;
+      else if (data.level === 'STATE') targetZoom = 11;
       
+      console.log(`Zooming to [${lat}, ${lng}] at zoom ${targetZoom}`);
       mapRef.current.setView([lat, lng], targetZoom);
     }
   };
