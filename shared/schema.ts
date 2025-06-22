@@ -52,7 +52,10 @@ export const namhattas = pgTable("namhattas", {
   status: text("status").notNull().default("pending"), // pending, active, inactive
   weeklyMeetingDay: text("weekly_meeting_day"),
   weeklyMeetingTime: text("weekly_meeting_time"),
-  hierarchy: text("hierarchy"), // MalaSenapoti, MahaChakraSenapoti, ChakraSenapoti, UpaChakraSenapoti, Secretary
+  malaSenapoti: text("mala_senapoti"),
+  mahaChakraSenapoti: text("maha_chakra_senapoti"),
+  chakraSenapoti: text("chakra_senapoti"),
+  upaChakraSenapoti: text("upa_chakra_senapoti"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -71,7 +71,10 @@ export interface Namhatta {
   status: string;
   weeklyMeetingDay?: string;
   weeklyMeetingTime?: string;
-  hierarchy?: string;
+  malaSenapoti?: string;
+  mahaChakraSenapoti?: string;
+  chakraSenapoti?: string;
+  upaChakraSenapoti?: string;
   createdAt: Date;
 }
 

@@ -98,7 +98,10 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
-- June 22, 2025. Initial setup
+- December 30, 2024: Project migrated from Replit Agent to standard Replit environment
+- December 30, 2024: Modified Namhatta form to use individual text inputs for leadership roles instead of dropdown
+- December 30, 2024: Updated database schema to include separate fields for MalaSenapoti, MahaChakraSenapoti, ChakraSenapoti, and UpaChakraSenapoti
+- June 22, 2025: Initial setup
 
 ## User Preferences
 

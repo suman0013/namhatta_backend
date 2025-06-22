@@ -25,7 +25,10 @@ interface FormData {
   address: Address;
   weeklyMeetingDay: string;
   weeklyMeetingTime: string;
-  hierarchy: string;
+  malaSenapoti: string;
+  mahaChakraSenapoti: string;
+  chakraSenapoti: string;
+  upaChakraSenapoti: string;
 }
 
 export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaFormProps) {
@@ -40,7 +43,10 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
       address: namhatta?.address || {},
       weeklyMeetingDay: "",
       weeklyMeetingTime: "",
-      hierarchy: "",
+      malaSenapoti: namhatta?.malaSenapoti || "",
+      mahaChakraSenapoti: namhatta?.mahaChakraSenapoti || "",
+      chakraSenapoti: namhatta?.chakraSenapoti || "",
+      upaChakraSenapoti: namhatta?.upaChakraSenapoti || "",
     }
   });
 
@@ -221,23 +227,37 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                     placeholder="Select meeting time"
                   />
                 </div>
+              </div>
+              
+              {/* Leadership Roles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="hierarchy">Hierarchy Level</Label>
-                  <Select
-                    value={watch("hierarchy")}
-                    onValueChange={(value) => setValue("hierarchy", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select hierarchy level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MalaSenapoti">Mala Senapoti</SelectItem>
-                      <SelectItem value="MahaChakraSenapoti">Maha Chakra Senapoti</SelectItem>
-                      <SelectItem value="ChakraSenapoti">Chakra Senapoti</SelectItem>
-                      <SelectItem value="UpaChakraSenapoti">Upa Chakra Senapoti</SelectItem>
-                      <SelectItem value="Secretary">Secretary</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="malaSenapoti">Mala Senapoti</Label>
+                  <Input
+                    {...register("malaSenapoti")}
+                    placeholder="Enter Mala Senapoti name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mahaChakraSenapoti">Maha Chakra Senapoti</Label>
+                  <Input
+                    {...register("mahaChakraSenapoti")}
+                    placeholder="Enter Maha Chakra Senapoti name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="chakraSenapoti">Chakra Senapoti</Label>
+                  <Input
+                    {...register("chakraSenapoti")}
+                    placeholder="Enter Chakra Senapoti name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="upaChakraSenapoti">Upa Chakra Senapoti</Label>
+                  <Input
+                    {...register("upaChakraSenapoti")}
+                    placeholder="Enter Upa Chakra Senapoti name"
+                  />
                 </div>
               </div>
             </div>
