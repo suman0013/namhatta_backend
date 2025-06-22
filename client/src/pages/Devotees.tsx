@@ -114,7 +114,7 @@ export default function Devotees() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="glass-card relative z-10">
+      <Card className="glass-card relative z-50">
         <CardContent className="p-6 space-y-4">
           {/* Search Bar */}
           <SearchInput
@@ -194,7 +194,7 @@ export default function Devotees() {
       </Card>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-0">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
         <Card className="glass-card">
           <CardContent className="p-6">
             <div className="flex items-center space-x-3">
@@ -261,7 +261,7 @@ export default function Devotees() {
       </div>
 
       {/* Devotees Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
         {devotees?.data?.map((devotee) => (
           <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses || []} />
         ))}

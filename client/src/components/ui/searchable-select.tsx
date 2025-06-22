@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Check } from "lucide-react";
@@ -22,12 +23,24 @@ export function SearchableSelect({
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter(option =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const updateDropdownPosition = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,9 +50,22 @@ export function SearchableSelect({
       }
     };
 
+    const handleScroll = () => {
+      if (isOpen) {
+        updateDropdownPosition();
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", handleScroll);
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -56,6 +82,7 @@ export function SearchableSelect({
   };
 
   const handleInputFocus = () => {
+    updateDropdownPosition();
     setIsOpen(true);
     setSearchTerm("");
   };
@@ -80,6 +107,9 @@ export function SearchableSelect({
           size="sm"
           className="absolute right-0 top-0 h-full px-2"
           onClick={() => {
+            if (!isOpen) {
+              updateDropdownPosition();
+            }
             setIsOpen(!isOpen);
             if (!isOpen) {
               inputRef.current?.focus();
@@ -91,8 +121,16 @@ export function SearchableSelect({
         </Button>
       </div>
       
-      {isOpen && !disabled && (
-        <div className="absolute z-[100] top-full mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+      {isOpen && !disabled && createPortal(
+        <div 
+          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto"
+          style={{
+            top: dropdownPosition.top + 4,
+            left: dropdownPosition.left,
+            width: dropdownPosition.width,
+            zIndex: 9999
+          }}
+        >
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <div
@@ -111,7 +149,8 @@ export function SearchableSelect({
               {searchTerm ? `No results found for "${searchTerm}"` : "No options available"}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
