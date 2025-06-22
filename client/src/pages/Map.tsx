@@ -218,11 +218,20 @@ export default function Map() {
         // Set initial zoom level
         setZoomLevel(4);
         
-        // Add OpenStreetMap tiles (like Google Maps)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // Add OpenStreetMap tiles with better error handling
+        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors',
           maxZoom: 19,
-        }).addTo(map);
+          minZoom: 2,
+          detectRetina: true,
+          crossOrigin: true
+        });
+        
+        tileLayer.on('tileerror', function(error, tile) {
+          console.log('Tile error:', error);
+        });
+        
+        tileLayer.addTo(map);
         
         // Initialize marker layer
         markersRef.current = L.layerGroup().addTo(map);
@@ -254,101 +263,87 @@ export default function Map() {
       return;
     }
     
-    console.log('Updating markers with data:', currentData);
+    console.log(`Updating markers for ${currentLevel} with ${currentData.length} items:`, currentData);
     
     // Clear existing markers
     markersRef.current.clearLayers();
     
     if (currentData.length === 0) {
       console.log('No data to display on map for level:', currentLevel);
-      return;
+      // Don't return early - let the map stay visible even without markers
     }
     
-    // Add new markers
-    currentData.forEach((data, index) => {
-      if (!data.coordinates || !markersRef.current) {
-        console.log('Missing coordinates for:', data.name);
-        return;
-      }
-      
-      const [lng, lat] = data.coordinates;
-      const radius = Math.max(15, Math.sqrt(data.count) * 10);
-      
-      console.log(`Adding marker for ${data.name} at [${lat}, ${lng}] with ${data.count} namhattas`);
-      
-      // Create a highly visible circle marker with color based on count
-      const circle = L.circleMarker([lat, lng], {
-        radius: Math.max(15, Math.sqrt(data.count) * 8),
-        fillColor: colorScale(data.count),
-        color: '#ffffff',
-        weight: 3,
-        opacity: 1,
-        fillOpacity: 0.8
-      });
-      
-      // Add popup to the circle
-      circle.bindPopup(`
-        <div style="padding: 12px; min-width: 200px;">
-          <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0; color: #1f2937;">${data.name}</h3>
-          <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
-            <strong style="color: #374151;">Namhattas:</strong> 
-            <span style="font-weight: 600; color: #059669;">${data.count}</span>
-          </p>
-          <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 12px;">
-            Level: ${currentLevel.replace('_', ' ')}
-          </p>
-          <p style="margin: 8px 0 0 0; color: #6366f1; font-size: 12px; cursor: pointer;">
-            Click to zoom in →
-          </p>
-        </div>
-      `);
-      
-      // Add click handler for drilling down
-      circle.on('click', () => {
-        console.log('Marker clicked:', data.name);
-        handleMarkerClick(data);
-      });
-      
-
-      
-      // Create a combined marker with visible count
-      const markerSize = Math.max(30, Math.sqrt(data.count) * 12);
-      const combinedIcon = L.divIcon({
-        html: `
-          <div style="
-            background: ${colorScale(data.count)};
-            color: white;
-            border: 3px solid white;
-            border-radius: 50%;
-            width: ${markerSize}px;
-            height: ${markerSize}px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            font-size: ${Math.max(12, markerSize * 0.3)}px;
-            line-height: 1;
-          ">
-            <div style="font-size: ${Math.max(16, markerSize * 0.4)}px; margin-bottom: 2px;">${data.count}</div>
-            <div style="font-size: ${Math.max(8, markerSize * 0.2)}px; opacity: 0.9;">${data.name.length > 8 ? data.name.substring(0, 8) + '...' : data.name}</div>
+    // Add new markers - only if we have data
+    if (currentData.length > 0) {
+      currentData.forEach((data, index) => {
+        if (!data.coordinates || !markersRef.current) {
+          console.log('Missing coordinates for:', data.name);
+          return;
+        }
+        
+        const [lng, lat] = data.coordinates;
+        
+        console.log(`Adding marker for ${data.name} at [${lat}, ${lng}] with ${data.count} namhattas`);
+        
+        // Create a combined marker with visible count
+        const markerSize = Math.max(40, Math.sqrt(data.count) * 15);
+        const combinedIcon = L.divIcon({
+          html: `
+            <div style="
+              background: ${colorScale(data.count)};
+              color: white;
+              border: 3px solid white;
+              border-radius: 50%;
+              width: ${markerSize}px;
+              height: ${markerSize}px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              font-weight: bold;
+              text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              cursor: pointer;
+              font-size: ${Math.max(12, markerSize * 0.3)}px;
+              line-height: 1;
+              z-index: 1000;
+            ">
+              <div style="font-size: ${Math.max(18, markerSize * 0.4)}px; margin-bottom: 2px;">${data.count}</div>
+              <div style="font-size: ${Math.max(10, markerSize * 0.25)}px; opacity: 0.9;">${data.name.length > 8 ? data.name.substring(0, 8) + '...' : data.name}</div>
+            </div>
+          `,
+          className: 'namhatta-marker',
+          iconSize: [markerSize, markerSize],
+          iconAnchor: [markerSize / 2, markerSize / 2]
+        });
+        
+        const marker = L.marker([lat, lng], { icon: combinedIcon });
+        
+        // Add popup
+        marker.bindPopup(`
+          <div style="padding: 12px; min-width: 200px;">
+            <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0; color: #1f2937;">${data.name}</h3>
+            <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
+              <strong style="color: #374151;">Namhattas:</strong> 
+              <span style="font-weight: 600; color: #059669;">${data.count}</span>
+            </p>
+            <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 12px;">
+              Level: ${currentLevel.replace('_', ' ')}
+            </p>
+            <p style="margin: 8px 0 0 0; color: #6366f1; font-size: 12px; cursor: pointer;">
+              Click to zoom in →
+            </p>
           </div>
-        `,
-        className: 'namhatta-marker',
-        iconSize: [markerSize, markerSize],
-        iconAnchor: [markerSize / 2, markerSize / 2]
+        `);
+        
+        marker.on('click', () => {
+          console.log('Marker clicked:', data.name);
+          handleMarkerClick(data);
+        });
+        
+        markersRef.current.addLayer(marker);
       });
-      
-      const marker = L.marker([lat, lng], { icon: combinedIcon });
-      marker.on('click', () => {
-        console.log('Marker clicked:', data.name);
-        handleMarkerClick(data);
-      });
-      markersRef.current.addLayer(marker);
-    });
+    }
     
     console.log(`Added ${currentData.length} markers to map`);
   }, [currentData, colorScale, currentLevel]);
