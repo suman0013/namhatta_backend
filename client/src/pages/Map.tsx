@@ -276,47 +276,18 @@ export default function Map() {
       
       console.log(`Adding marker for ${data.name} at [${lat}, ${lng}] with ${data.count} namhattas`);
       
-      // Create circle marker with color based on count
+      // Create a highly visible circle marker
       const circle = L.circleMarker([lat, lng], {
-        radius: radius,
-        fillColor: colorScale(data.count),
+        radius: Math.max(25, Math.sqrt(data.count) * 15),
+        fillColor: '#3b82f6', // Always use blue for high visibility
         color: '#ffffff',
-        weight: 3,
+        weight: 4,
         opacity: 1,
         fillOpacity: 0.8
       });
       
-      // Add a text marker overlay for the count
-      const divIcon = L.divIcon({
-        html: `<div style="
-          background: ${colorScale(data.count)};
-          color: white;
-          border: 3px solid white;
-          border-radius: 50%;
-          width: ${radius * 2}px;
-          height: ${radius * 2}px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          font-size: ${Math.max(12, radius * 0.7)}px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-          cursor: pointer;
-        ">
-          <div style="text-align: center;">
-            <div style="font-size: ${Math.max(14, radius * 0.8)}px; line-height: 1;">${data.count}</div>
-            <div style="font-size: ${Math.max(8, radius * 0.4)}px; line-height: 1; opacity: 0.9;">${data.name}</div>
-          </div>
-        </div>`,
-        className: 'namhatta-marker',
-        iconSize: [radius * 2, radius * 2],
-        iconAnchor: [radius, radius]
-      });
-      
-      const marker = L.marker([lat, lng], { icon: divIcon });
-      
-      // Add popup
-      marker.bindPopup(`
+      // Add popup to the circle
+      circle.bindPopup(`
         <div style="padding: 12px; min-width: 200px;">
           <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0; color: #1f2937;">${data.name}</h3>
           <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
@@ -333,12 +304,44 @@ export default function Map() {
       `);
       
       // Add click handler for drilling down
-      marker.on('click', () => {
+      circle.on('click', () => {
         console.log('Marker clicked:', data.name);
         handleMarkerClick(data);
       });
       
-      markersRef.current.addLayer(marker);
+      // Add the marker to the layer group
+      markersRef.current.addLayer(circle);
+      
+      // Add a text label on top of the circle
+      const textIcon = L.divIcon({
+        html: `
+          <div style="
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            ${data.count}
+          </div>
+        `,
+        className: 'marker-label',
+        iconSize: [50, 50],
+        iconAnchor: [25, 25]
+      });
+      
+      const textMarker = L.marker([lat, lng], { icon: textIcon });
+      textMarker.on('click', () => {
+        console.log('Text marker clicked:', data.name);
+        handleMarkerClick(data);
+      });
+      markersRef.current.addLayer(textMarker);
     });
     
     console.log(`Added ${currentData.length} markers to map`);
