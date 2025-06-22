@@ -79,20 +79,84 @@ export default function Map() {
       'Bangladesh': [90, 24],
       'Sri Lanka': [81, 7],
       'Nepal': [84, 28],
-      // States in India
+      
+      // States
       'West Bengal': [88, 22.5],
       'Odisha': [85, 20],
       'Bihar': [85, 25.5],
-      // States in Bangladesh  
+      'Jharkhand': [85.5, 23.5],
+      'Assam': [94, 26.5],
       'Dhaka': [90.4, 23.8],
       'Chittagong': [91.8, 22.3],
       'Western': [79.8, 6.9],
       'Bagmati': [85.3, 27.7],
-      // Districts
-      'Kolkata': [88.4, 22.6],
+      
+      // Districts - West Bengal
       'Nadia': [88.4, 23.4],
+      'Kolkata': [88.4, 22.6],
+      'Howrah': [88.3, 22.6],
+      'Paschim Bardhaman': [87.3, 23.2],
+      'Darjeeling': [88.3, 27.0],
+      'Malda': [88.0, 25.0],
+      'Cooch Behar': [89.4, 26.3],
+      'Jalpaiguri': [88.7, 26.5],
+      'Murshidabad': [88.2, 24.2],
+      'Bankura': [87.1, 23.2],
+      'Purulia': [86.4, 23.3],
+      'Paschim Medinipur': [87.3, 22.4],
+      
+      // Districts - Odisha
+      'Khordha': [85.8, 20.2],
+      'Puri': [85.8, 19.8],
+      'Cuttack': [85.9, 20.5],
+      'Ganjam': [84.8, 19.4],
+      'Sundargarh': [84.0, 22.1],
+      'Sambalpur': [83.9, 21.5],
+      'Balasore': [86.9, 21.5],
+      'Mayurbhanj': [86.7, 22.1],
+      'Jharsuguda': [84.0, 21.9],
+      'Angul': [85.1, 20.8],
+      'Kendrapara': [86.4, 20.5],
+      'Koraput': [82.7, 18.8],
+      
+      // Districts - Bihar
+      'Patna': [85.1, 25.6],
+      'Gaya': [85.0, 24.8],
+      'Muzaffarpur': [85.4, 26.1],
+      'Bhagalpur': [87.0, 25.2],
+      'Darbhanga': [85.9, 26.2],
+      'Purnia': [87.5, 25.8],
+      'Bhojpur': [84.4, 25.5],
+      'Begusarai': [86.1, 25.4],
+      'Katihar': [87.6, 25.5],
+      'Rohtas': [84.0, 24.9],
+      
+      // Districts - Jharkhand
+      'Ranchi': [85.3, 23.4],
+      'East Singhbhum': [86.2, 22.8],
+      'Dhanbad': [86.4, 23.8],
+      'Bokaro': [86.0, 23.8],
+      'Deoghar': [86.7, 24.5],
+      'Hazaribagh': [85.4, 24.0],
+      'Giridih': [86.3, 24.2],
+      'West Singhbhum': [85.8, 22.6],
+      
+      // Districts - Assam
+      'Kamrup Metropolitan': [91.7, 26.2],
+      'Dibrugarh': [95.0, 27.5],
+      'Cachar': [92.8, 24.8],
+      'Jorhat': [94.2, 26.8],
+      'Sonitpur': [92.8, 26.6],
+      'Nagaon': [92.7, 26.3],
+      'Tinsukia': [95.4, 27.5],
+      'Bongaigaon': [90.5, 26.5],
+      
+      // Other countries
+      'Dhaka': [90.4, 23.8],
+      'Chittagong': [91.8, 22.3],
       'Colombo': [79.8, 6.9],
       'Kathmandu': [85.3, 27.7],
+      
       // Sub-districts
       'Mayapur': [88.4, 23.4],
       'Central': [88.35, 22.57],
