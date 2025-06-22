@@ -14,6 +14,7 @@ import DevoteeDetail from "@/pages/DevoteeDetail";
 
 import Statuses from "@/pages/Statuses";
 import Shraddhakutirs from "@/pages/Shraddhakutirs";
+import Updates from "@/pages/Updates";
 import Health from "@/pages/Health";
 import About from "@/pages/About";
 
@@ -30,6 +31,7 @@ function Router() {
 
         <Route path="/statuses" component={Statuses} />
         <Route path="/shraddhakutirs" component={Shraddhakutirs} />
+        <Route path="/updates" component={Updates} />
         <Route path="/health" component={Health} />
         <Route path="/about" component={About} />
         <Route component={NotFound} />

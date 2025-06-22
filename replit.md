@@ -98,6 +98,10 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- January 2, 2025: Implemented comprehensive Namhatta Updates system with rich forms and visual cards
+- January 2, 2025: Added activity tracking (kirtan, prasadam, book distribution, chanting, arati, bhagwat path)
+- January 2, 2025: Created dedicated Updates page with filtering, search, and statistics
+- January 2, 2025: Enhanced Namhatta detail pages with update management capabilities
 - January 2, 2025: Successfully migrated from Replit Agent to standard Replit environment
 - January 2, 2025: Enhanced UI with modern glass morphism design and responsive mobile interface
 - January 2, 2025: Fixed API endpoints to match OpenAPI 3.0.3 specification

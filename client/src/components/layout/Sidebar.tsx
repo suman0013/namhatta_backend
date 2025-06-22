@@ -13,10 +13,11 @@ const navigationItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home, active: true },
   { href: "/namhattas", label: "Namhattas", icon: Home, badge: "24" },
   { href: "/devotees", label: "Devotees", icon: Users, badge: "1,247" },
+  { href: "/updates", label: "Updates", icon: Bell, badge: "12" },
   { href: "/statuses", label: "Statuses", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
-  { href: "/health", label: "Health", icon: Bell },
-  { href: "/about", label: "About", icon: Bell },
+  { href: "/health", label: "Health", icon: Settings },
+  { href: "/about", label: "About", icon: Settings },
 ];
 
 export default function Sidebar({ onClose }: SidebarProps) {

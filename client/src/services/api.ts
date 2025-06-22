@@ -132,6 +132,11 @@ export const api = {
     return res.json();
   },
 
+  createNamhattaUpdate: async (update: any) => {
+    const res = await apiRequest("POST", "/api/updates", update);
+    return res.json();
+  },
+
   // Statuses
   getStatuses: async (): Promise<DevotionalStatus[]> => {
     const res = await apiRequest("GET", "/api/statuses");

@@ -1,0 +1,285 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/services/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar, Search, Filter, TrendingUp, Users, Home } from "lucide-react";
+import NamhattaUpdateCard from "@/components/NamhattaUpdateCard";
+
+export default function Updates() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProgramType, setSelectedProgramType] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  const { data: namhattas } = useQuery({
+    queryKey: ["/api/namhattas"],
+    queryFn: () => api.getNamhattas(1, 100),
+  });
+
+  // Get all updates from all namhattas
+  const { data: allUpdates, isLoading } = useQuery({
+    queryKey: ["/api/updates/all"],
+    queryFn: async () => {
+      if (!namhattas?.data) return [];
+      
+      // Fetch updates from all namhattas
+      const updatePromises = namhattas.data.map(async (namhatta: any) => {
+        const updates = await api.getNamhattaUpdates(namhatta.id);
+        return updates.map((update: any) => ({
+          ...update,
+          namhattaName: namhatta.name
+        }));
+      });
+      
+      const allUpdatesArrays = await Promise.all(updatePromises);
+      return allUpdatesArrays.flat();
+    },
+    enabled: !!namhattas?.data,
+  });
+
+  const programTypes = [
+    "Weekly Satsang Program",
+    "Bhagavad Gita Study Circle", 
+    "Harinama Sankirtana",
+    "Festival Celebration",
+    "Bhagavatam Class",
+    "Kirtan Session",
+    "Prasadam Distribution",
+    "Community Service",
+    "Youth Program",
+    "Ladies Program"
+  ];
+
+  // Filter and sort updates
+  const filteredUpdates = allUpdates?.filter((update: any) => {
+    const matchesSearch = update.programType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         update.namhattaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (update.specialAttraction && update.specialAttraction.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesType = selectedProgramType === "all" || update.programType === selectedProgramType;
+    
+    return matchesSearch && matchesType;
+  }).sort((a: any, b: any) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      case "oldest":
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      case "attendance":
+        return b.attendance - a.attendance;
+      default:
+        return 0;
+    }
+  });
+
+  if (isLoading) {
+    return <UpdatesSkeleton />;
+  }
+
+  return (
+    <div className="p-6 space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Updates</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Latest activities and programs from all Namhattas
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge variant="outline" className="flex items-center space-x-1">
+            <Calendar className="h-3 w-3" />
+            <span>{filteredUpdates?.length || 0} Updates</span>
+          </Badge>
+        </div>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Updates</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {allUpdates?.length || 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Attendance</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {allUpdates?.reduce((sum: number, update: any) => sum + update.attendance, 0) || 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Namhattas</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {namhattas?.data?.length || 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
+                <Home className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <Card className="glass-card">
+        <CardContent className="p-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search updates by program type, namhatta, or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 glass border-0"
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Program Type</label>
+              <Select value={selectedProgramType} onValueChange={setSelectedProgramType}>
+                <SelectTrigger className="glass border-0">
+                  <SelectValue placeholder="All Program Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Program Types</SelectItem>
+                  {programTypes.map((type) => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort By</label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="glass border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="attendance">Highest Attendance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedProgramType("all");
+                  setSortBy("newest");
+                }}
+                className="glass w-full"
+              >
+                <Filter className="mr-2 h-4 w-4" />
+                Clear Filters
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Updates Grid */}
+      {filteredUpdates && filteredUpdates.length > 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredUpdates.map((update: any) => (
+            <NamhattaUpdateCard
+              key={`${update.namhattaId}-${update.id}`}
+              update={update}
+              showNamhattaName={true}
+              namhattaName={update.namhattaName}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="glass-card">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Calendar className="h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">No updates found</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center">
+              {searchTerm || selectedProgramType !== "all"
+                ? "Try adjusting your search criteria"
+                : "No updates have been posted yet"}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function UpdatesSkeleton() {
+  return (
+    <div className="p-6 space-y-8">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="glass-card">
+            <CardContent className="p-6">
+              <Skeleton className="h-16 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="glass-card">
+        <CardContent className="p-6 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Card key={i} className="glass-card">
+            <CardContent className="p-6">
+              <Skeleton className="h-48 w-full" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
