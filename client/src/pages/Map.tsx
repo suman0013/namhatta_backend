@@ -300,39 +300,45 @@ export default function Map() {
         handleMarkerClick(data);
       });
       
-      // Add the marker to the layer group
-      markersRef.current.addLayer(circle);
+
       
-      // Add a text label on top of the circle
-      const textIcon = L.divIcon({
+      // Create a combined marker with visible count
+      const markerSize = Math.max(30, Math.sqrt(data.count) * 12);
+      const combinedIcon = L.divIcon({
         html: `
           <div style="
+            background: ${colorScale(data.count)};
             color: white;
-            font-weight: bold;
-            font-size: 18px;
-            text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            pointer-events: none;
-            width: 50px;
-            height: 50px;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: ${markerSize}px;
+            height: ${markerSize}px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: ${Math.max(12, markerSize * 0.3)}px;
+            line-height: 1;
           ">
-            ${data.count}
+            <div style="font-size: ${Math.max(16, markerSize * 0.4)}px; margin-bottom: 2px;">${data.count}</div>
+            <div style="font-size: ${Math.max(8, markerSize * 0.2)}px; opacity: 0.9;">${data.name.length > 8 ? data.name.substring(0, 8) + '...' : data.name}</div>
           </div>
         `,
-        className: 'marker-label',
-        iconSize: [50, 50],
-        iconAnchor: [25, 25]
+        className: 'namhatta-marker',
+        iconSize: [markerSize, markerSize],
+        iconAnchor: [markerSize / 2, markerSize / 2]
       });
       
-      const textMarker = L.marker([lat, lng], { icon: textIcon });
-      textMarker.on('click', () => {
-        console.log('Text marker clicked:', data.name);
+      const marker = L.marker([lat, lng], { icon: combinedIcon });
+      marker.on('click', () => {
+        console.log('Marker clicked:', data.name);
         handleMarkerClick(data);
       });
-      markersRef.current.addLayer(textMarker);
+      markersRef.current.addLayer(marker);
     });
     
     console.log(`Added ${currentData.length} markers to map`);
@@ -381,75 +387,22 @@ export default function Map() {
           <Button variant="outline" size="sm" onClick={handleReset}>
             Reset View
           </Button>
+          <p className="text-sm text-muted-foreground">
+            Zoom in/out to see different levels automatically
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Controls */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              View Controls
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Button onClick={handleReset} variant="outline" className="w-full">
-                Reset to World View
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                Zoom in/out to see different levels of detail automatically
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Current Zoom Level</label>
-              <Badge variant="secondary">Zoom {zoomLevel}</Badge>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Current View</label>
-              <Badge variant="outline">{currentLevel.replace('_', ' ')}</Badge>
-            </div>
-
-            <div className="pt-4 border-t">
-              <h4 className="font-medium mb-2">Legend</h4>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-blue-200"></div>
-                  <span className="text-sm">Low (1-2)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-                  <span className="text-sm">Medium (3-5)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full bg-blue-800"></div>
-                  <span className="text-sm">High (6+)</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Map */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              {currentLevel.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())} Distribution
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div 
-              id="leaflet-map" 
-              className="w-full h-[600px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
-              style={{ minHeight: '600px' }}
-            />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Full Width Map */}
+      <Card>
+        <CardContent className="p-0">
+          <div 
+            id="leaflet-map" 
+            className="w-full h-[80vh] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
+            style={{ minHeight: '80vh' }}
+          />
+        </CardContent>
+      </Card>
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
