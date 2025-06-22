@@ -44,7 +44,12 @@ export function SearchableSelect({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const dropdownElement = document.querySelector('.searchable-dropdown-portal');
+      
+      if (containerRef.current && 
+          !containerRef.current.contains(target) && 
+          (!dropdownElement || !dropdownElement.contains(target))) {
         setIsOpen(false);
         setSearchTerm("");
       }
@@ -70,8 +75,10 @@ export function SearchableSelect({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchTerm(newValue);
-    onValueChange(newValue);
-    if (!isOpen) setIsOpen(true);
+    if (!isOpen) {
+      updateDropdownPosition();
+      setIsOpen(true);
+    }
   };
 
   const handleOptionSelect = (option: string) => {
@@ -123,7 +130,7 @@ export function SearchableSelect({
       
       {isOpen && !disabled && createPortal(
         <div 
-          className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto"
+          className="searchable-dropdown-portal fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto"
           style={{
             top: dropdownPosition.top + 4,
             left: dropdownPosition.left,
@@ -136,7 +143,15 @@ export function SearchableSelect({
               <div
                 key={index}
                 className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                onClick={() => handleOptionSelect(option)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleOptionSelect(option);
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOptionSelect(option);
+                }}
               >
                 <span className="text-sm">{option}</span>
                 {value === option && (
