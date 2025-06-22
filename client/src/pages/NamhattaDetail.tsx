@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import NamhattaForm from "@/components/forms/NamhattaForm";
 import { 
   Home, 
   Users, 
@@ -24,7 +25,8 @@ import {
   Clock,
   Image as ImageIcon,
   Facebook,
-  Youtube
+  Youtube,
+  Crown
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
@@ -32,6 +34,7 @@ export default function NamhattaDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showEditForm, setShowEditForm] = useState(false);
 
   const { data: namhatta, isLoading } = useQuery({
     queryKey: ["/api/namhattas", id],
@@ -152,7 +155,7 @@ export default function NamhattaDetail() {
               Approve
             </Button>
           )}
-          <Button variant="outline" className="glass">
+          <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Details
           </Button>
@@ -226,15 +229,58 @@ export default function NamhattaDetail() {
                     <Home className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Leader Role</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Meeting Schedule</p>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {namhatta.leaderRole || "Not assigned"}
+                      {namhatta.weeklyMeetingDay ? `${namhatta.weeklyMeetingDay} ${namhatta.weeklyMeetingTime || ''}` : "Not scheduled"}
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Leadership Roles */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Crown className="mr-2 h-5 w-5" />
+                Leadership Roles
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {namhatta.malaSenapoti && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Mala Senapoti</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{namhatta.malaSenapoti}</p>
+                  </div>
+                )}
+                {namhatta.mahaChakraSenapoti && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Maha Chakra Senapoti</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{namhatta.mahaChakraSenapoti}</p>
+                  </div>
+                )}
+                {namhatta.chakraSenapoti && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Chakra Senapoti</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{namhatta.chakraSenapoti}</p>
+                  </div>
+                )}
+                {namhatta.upaChakraSenapoti && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Upa Chakra Senapoti</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{namhatta.upaChakraSenapoti}</p>
+                  </div>
+                )}
+                {!namhatta.malaSenapoti && !namhatta.mahaChakraSenapoti && !namhatta.chakraSenapoti && !namhatta.upaChakraSenapoti && (
+                  <div className="col-span-2 text-center text-gray-500 dark:text-gray-400 py-8">
+                    No leadership roles assigned yet
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Address Details */}
           {namhatta.address && (
@@ -380,6 +426,18 @@ export default function NamhattaDetail() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Edit Form Modal */}
+      {showEditForm && (
+        <NamhattaForm
+          namhatta={namhatta}
+          onClose={() => setShowEditForm(false)}
+          onSuccess={() => {
+            setShowEditForm(false);
+            queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id] });
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, User, Zap, X } from "lucide-react";
+import { ArrowRight, Calendar, User, Activity, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface StatusHistoryViewProps {
@@ -64,7 +64,7 @@ export default function StatusHistoryView({ devoteeId, onClose }: StatusHistoryV
       <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
-            <Zap className="h-5 w-5 text-indigo-500" />
+            <Activity className="h-5 w-5 text-indigo-500" />
             <span>Status History</span>
           </CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>
