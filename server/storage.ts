@@ -215,7 +215,81 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    namhattasData.forEach((namhatta, index) => {
+    // Clear existing namhattas and add the comprehensive data
+    this.namhattas.clear();
+    
+    // West Bengal Namhattas (15 total)
+    const comprehensiveNamhattas = [
+      { code: "NAM001", name: "Mayapur Namhatta", address: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur" }, status: "APPROVED", malaSenapoti: "Prabhu Jaya Gopala Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM002", name: "Kolkata Central Namhatta", address: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street" }, status: "APPROVED", chakraSenapoti: "Prabhu Radha Kanta Das", meetingDay: "Saturday", meetingTime: "17:00" },
+      { code: "NAM003", name: "Kolkata North Namhatta", address: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "North", village: "Shyama Bazar" }, status: "APPROVED", chakraSenapoti: "Prabhu Krishna Chaitanya Das", meetingDay: "Friday", meetingTime: "18:00" },
+      { code: "NAM006", name: "Nadia Krishnanagar Namhatta", address: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Krishnanagar", village: "Krishnanagar" }, status: "APPROVED", upaChakraSenapoti: "Prabhu Harinama Das", meetingDay: "Sunday", meetingTime: "17:30" },
+      { code: "NAM009", name: "Howrah Namhatta", address: { country: "India", state: "West Bengal", district: "Howrah", subDistrict: "Howrah", village: "Howrah" }, status: "APPROVED", chakraSenapoti: "Prabhu Jagannath Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM010", name: "Durgapur Namhatta", address: { country: "India", state: "West Bengal", district: "Paschim Bardhaman", subDistrict: "Durgapur", village: "Durgapur" }, status: "APPROVED", chakraSenapoti: "Prabhu Steel Das", meetingDay: "Saturday", meetingTime: "18:00" },
+      { code: "NAM011", name: "Siliguri Namhatta", address: { country: "India", state: "West Bengal", district: "Darjeeling", subDistrict: "Siliguri", village: "Siliguri" }, status: "APPROVED", chakraSenapoti: "Prabhu Mountain Das", meetingDay: "Sunday", meetingTime: "17:00" },
+      { code: "NAM012", name: "Malda Namhatta", address: { country: "India", state: "West Bengal", district: "Malda", subDistrict: "English Bazar", village: "Malda" }, status: "APPROVED", chakraSenapoti: "Prabhu Mango Das", meetingDay: "Friday", meetingTime: "18:00" },
+      { code: "NAM013", name: "Asansol Namhatta", address: { country: "India", state: "West Bengal", district: "Paschim Bardhaman", subDistrict: "Asansol", village: "Asansol" }, status: "APPROVED", chakraSenapoti: "Prabhu Coal Das", meetingDay: "Sunday", meetingTime: "16:30" },
+      { code: "NAM014", name: "Cooch Behar Namhatta", address: { country: "India", state: "West Bengal", district: "Cooch Behar", subDistrict: "Cooch Behar", village: "Cooch Behar" }, status: "APPROVED", chakraSenapoti: "Prabhu Royal Das", meetingDay: "Saturday", meetingTime: "17:30" },
+      { code: "NAM015", name: "Jalpaiguri Namhatta", address: { country: "India", state: "West Bengal", district: "Jalpaiguri", subDistrict: "Jalpaiguri", village: "Jalpaiguri" }, status: "APPROVED", chakraSenapoti: "Prabhu Tea Das", meetingDay: "Sunday", meetingTime: "18:00" },
+      { code: "NAM016", name: "Murshidabad Namhatta", address: { country: "India", state: "West Bengal", district: "Murshidabad", subDistrict: "Berhampore", village: "Berhampore" }, status: "APPROVED", chakraSenapoti: "Prabhu Nawab Das", meetingDay: "Thursday", meetingTime: "18:00" },
+      { code: "NAM017", name: "Bankura Namhatta", address: { country: "India", state: "West Bengal", district: "Bankura", subDistrict: "Bankura", village: "Bankura" }, status: "APPROVED", chakraSenapoti: "Prabhu Bishnupur Das", meetingDay: "Sunday", meetingTime: "17:00" },
+      { code: "NAM018", name: "Purulia Namhatta", address: { country: "India", state: "West Bengal", district: "Purulia", subDistrict: "Purulia", village: "Purulia" }, status: "APPROVED", chakraSenapoti: "Prabhu Tribal Das", meetingDay: "Saturday", meetingTime: "17:00" },
+      { code: "NAM019", name: "Medinipur Namhatta", address: { country: "India", state: "West Bengal", district: "Paschim Medinipur", subDistrict: "Medinipur", village: "Medinipur" }, status: "APPROVED", chakraSenapoti: "Prabhu Coastal Das", meetingDay: "Sunday", meetingTime: "16:00" },
+
+      // Odisha Namhattas (12 total)
+      { code: "NAM020", name: "Bhubaneswar Namhatta", address: { country: "India", state: "Odisha", district: "Khordha", subDistrict: "Bhubaneswar", village: "Bhubaneswar" }, status: "APPROVED", malaSenapoti: "Prabhu Capital Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM021", name: "Puri Namhatta", address: { country: "India", state: "Odisha", district: "Puri", subDistrict: "Puri", village: "Puri" }, status: "APPROVED", malaSenapoti: "Prabhu Jagannath Das", meetingDay: "Daily", meetingTime: "18:00" },
+      { code: "NAM022", name: "Cuttack Namhatta", address: { country: "India", state: "Odisha", district: "Cuttack", subDistrict: "Cuttack", village: "Cuttack" }, status: "APPROVED", chakraSenapoti: "Prabhu Silver Das", meetingDay: "Saturday", meetingTime: "17:00" },
+      { code: "NAM023", name: "Berhampur Namhatta", address: { country: "India", state: "Odisha", district: "Ganjam", subDistrict: "Berhampur", village: "Berhampur" }, status: "APPROVED", chakraSenapoti: "Prabhu Silk Das", meetingDay: "Sunday", meetingTime: "17:30" },
+      { code: "NAM024", name: "Rourkela Namhatta", address: { country: "India", state: "Odisha", district: "Sundargarh", subDistrict: "Rourkela", village: "Rourkela" }, status: "APPROVED", chakraSenapoti: "Prabhu Steel Das", meetingDay: "Sunday", meetingTime: "16:30" },
+      { code: "NAM025", name: "Sambalpur Namhatta", address: { country: "India", state: "Odisha", district: "Sambalpur", subDistrict: "Sambalpur", village: "Sambalpur" }, status: "APPROVED", chakraSenapoti: "Prabhu Mahanadi Das", meetingDay: "Saturday", meetingTime: "18:00" },
+      { code: "NAM026", name: "Balasore Namhatta", address: { country: "India", state: "Odisha", district: "Balasore", subDistrict: "Balasore", village: "Balasore" }, status: "APPROVED", chakraSenapoti: "Prabhu Coastal Das", meetingDay: "Sunday", meetingTime: "17:00" },
+      { code: "NAM027", name: "Baripada Namhatta", address: { country: "India", state: "Odisha", district: "Mayurbhanj", subDistrict: "Baripada", village: "Baripada" }, status: "APPROVED", chakraSenapoti: "Prabhu Tribal Das", meetingDay: "Friday", meetingTime: "18:00" },
+      { code: "NAM028", name: "Jharsuguda Namhatta", address: { country: "India", state: "Odisha", district: "Jharsuguda", subDistrict: "Jharsuguda", village: "Jharsuguda" }, status: "APPROVED", chakraSenapoti: "Prabhu Coal Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM029", name: "Angul Namhatta", address: { country: "India", state: "Odisha", district: "Angul", subDistrict: "Angul", village: "Angul" }, status: "APPROVED", chakraSenapoti: "Prabhu Power Das", meetingDay: "Saturday", meetingTime: "17:30" },
+      { code: "NAM030", name: "Kendrapara Namhatta", address: { country: "India", state: "Odisha", district: "Kendrapara", subDistrict: "Kendrapara", village: "Kendrapara" }, status: "APPROVED", chakraSenapoti: "Prabhu River Das", meetingDay: "Sunday", meetingTime: "18:00" },
+      { code: "NAM031", name: "Koraput Namhatta", address: { country: "India", state: "Odisha", district: "Koraput", subDistrict: "Koraput", village: "Koraput" }, status: "APPROVED", chakraSenapoti: "Prabhu Hills Das", meetingDay: "Sunday", meetingTime: "17:00" },
+
+      // Bihar Namhattas (10 total)
+      { code: "NAM032", name: "Patna Namhatta", address: { country: "India", state: "Bihar", district: "Patna", subDistrict: "Patna", village: "Patna" }, status: "APPROVED", malaSenapoti: "Prabhu Ganga Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM033", name: "Gaya Namhatta", address: { country: "India", state: "Bihar", district: "Gaya", subDistrict: "Gaya", village: "Gaya" }, status: "APPROVED", malaSenapoti: "Prabhu Buddha Das", meetingDay: "Sunday", meetingTime: "17:00" },
+      { code: "NAM034", name: "Muzaffarpur Namhatta", address: { country: "India", state: "Bihar", district: "Muzaffarpur", subDistrict: "Muzaffarpur", village: "Muzaffarpur" }, status: "APPROVED", chakraSenapoti: "Prabhu Litchi Das", meetingDay: "Saturday", meetingTime: "18:00" },
+      { code: "NAM035", name: "Bhagalpur Namhatta", address: { country: "India", state: "Bihar", district: "Bhagalpur", subDistrict: "Bhagalpur", village: "Bhagalpur" }, status: "APPROVED", chakraSenapoti: "Prabhu Silk Das", meetingDay: "Sunday", meetingTime: "16:30" },
+      { code: "NAM036", name: "Darbhanga Namhatta", address: { country: "India", state: "Bihar", district: "Darbhanga", subDistrict: "Darbhanga", village: "Darbhanga" }, status: "APPROVED", chakraSenapoti: "Prabhu Mithila Das", meetingDay: "Sunday", meetingTime: "17:30" },
+      { code: "NAM037", name: "Purnia Namhatta", address: { country: "India", state: "Bihar", district: "Purnia", subDistrict: "Purnia", village: "Purnia" }, status: "APPROVED", chakraSenapoti: "Prabhu Border Das", meetingDay: "Friday", meetingTime: "18:00" },
+      { code: "NAM038", name: "Arrah Namhatta", address: { country: "India", state: "Bihar", district: "Bhojpur", subDistrict: "Arrah", village: "Arrah" }, status: "APPROVED", chakraSenapoti: "Prabhu Sone Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM039", name: "Begusarai Namhatta", address: { country: "India", state: "Bihar", district: "Begusarai", subDistrict: "Begusarai", village: "Begusarai" }, status: "APPROVED", chakraSenapoti: "Prabhu Industrial Das", meetingDay: "Saturday", meetingTime: "17:00" },
+      { code: "NAM040", name: "Katihar Namhatta", address: { country: "India", state: "Bihar", district: "Katihar", subDistrict: "Katihar", village: "Katihar" }, status: "APPROVED", chakraSenapoti: "Prabhu Junction Das", meetingDay: "Sunday", meetingTime: "18:00" },
+      { code: "NAM041", name: "Sasaram Namhatta", address: { country: "India", state: "Bihar", district: "Rohtas", subDistrict: "Sasaram", village: "Sasaram" }, status: "APPROVED", chakraSenapoti: "Prabhu Sher Das", meetingDay: "Sunday", meetingTime: "17:00" },
+
+      // Jharkhand Namhattas (8 total)
+      { code: "NAM042", name: "Ranchi Namhatta", address: { country: "India", state: "Jharkhand", district: "Ranchi", subDistrict: "Ranchi", village: "Ranchi" }, status: "APPROVED", malaSenapoti: "Prabhu Capital Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM043", name: "Jamshedpur Namhatta", address: { country: "India", state: "Jharkhand", district: "East Singhbhum", subDistrict: "Jamshedpur", village: "Jamshedpur" }, status: "APPROVED", chakraSenapoti: "Prabhu Steel Das", meetingDay: "Sunday", meetingTime: "17:00" },
+      { code: "NAM044", name: "Dhanbad Namhatta", address: { country: "India", state: "Jharkhand", district: "Dhanbad", subDistrict: "Dhanbad", village: "Dhanbad" }, status: "APPROVED", chakraSenapoti: "Prabhu Coal Das", meetingDay: "Saturday", meetingTime: "18:00" },
+      { code: "NAM045", name: "Bokaro Namhatta", address: { country: "India", state: "Jharkhand", district: "Bokaro", subDistrict: "Bokaro", village: "Bokaro" }, status: "APPROVED", chakraSenapoti: "Prabhu Steel Das", meetingDay: "Sunday", meetingTime: "16:30" },
+      { code: "NAM046", name: "Deoghar Namhatta", address: { country: "India", state: "Jharkhand", district: "Deoghar", subDistrict: "Deoghar", village: "Deoghar" }, status: "APPROVED", chakraSenapoti: "Prabhu Baba Das", meetingDay: "Sunday", meetingTime: "17:30" },
+      { code: "NAM047", name: "Hazaribagh Namhatta", address: { country: "India", state: "Jharkhand", district: "Hazaribagh", subDistrict: "Hazaribagh", village: "Hazaribagh" }, status: "APPROVED", chakraSenapoti: "Prabhu Hills Das", meetingDay: "Sunday", meetingTime: "18:00" },
+      { code: "NAM048", name: "Giridih Namhatta", address: { country: "India", state: "Jharkhand", district: "Giridih", subDistrict: "Giridih", village: "Giridih" }, status: "APPROVED", chakraSenapoti: "Prabhu Coal Das", meetingDay: "Saturday", meetingTime: "17:00" },
+      { code: "NAM049", name: "Chaibasa Namhatta", address: { country: "India", state: "Jharkhand", district: "West Singhbhum", subDistrict: "Chaibasa", village: "Chaibasa" }, status: "APPROVED", chakraSenapoti: "Prabhu Tribal Das", meetingDay: "Sunday", meetingTime: "16:00" },
+
+      // Assam Namhattas (8 total)
+      { code: "NAM050", name: "Guwahati Namhatta", address: { country: "India", state: "Assam", district: "Kamrup Metropolitan", subDistrict: "Guwahati", village: "Guwahati" }, status: "APPROVED", malaSenapoti: "Prabhu Brahmaputra Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM051", name: "Dibrugarh Namhatta", address: { country: "India", state: "Assam", district: "Dibrugarh", subDistrict: "Dibrugarh", village: "Dibrugarh" }, status: "APPROVED", chakraSenapoti: "Prabhu Tea Das", meetingDay: "Sunday", meetingTime: "17:00" },
+      { code: "NAM052", name: "Silchar Namhatta", address: { country: "India", state: "Assam", district: "Cachar", subDistrict: "Silchar", village: "Silchar" }, status: "APPROVED", chakraSenapoti: "Prabhu Barak Das", meetingDay: "Saturday", meetingTime: "18:00" },
+      { code: "NAM053", name: "Jorhat Namhatta", address: { country: "India", state: "Assam", district: "Jorhat", subDistrict: "Jorhat", village: "Jorhat" }, status: "APPROVED", chakraSenapoti: "Prabhu Tea Das", meetingDay: "Sunday", meetingTime: "16:30" },
+      { code: "NAM054", name: "Tezpur Namhatta", address: { country: "India", state: "Assam", district: "Sonitpur", subDistrict: "Tezpur", village: "Tezpur" }, status: "APPROVED", chakraSenapoti: "Prabhu Cultural Das", meetingDay: "Sunday", meetingTime: "17:30" },
+      { code: "NAM055", name: "Nagaon Namhatta", address: { country: "India", state: "Assam", district: "Nagaon", subDistrict: "Nagaon", village: "Nagaon" }, status: "APPROVED", chakraSenapoti: "Prabhu Central Das", meetingDay: "Friday", meetingTime: "18:00" },
+      { code: "NAM056", name: "Tinsukia Namhatta", address: { country: "India", state: "Assam", district: "Tinsukia", subDistrict: "Tinsukia", village: "Tinsukia" }, status: "APPROVED", chakraSenapoti: "Prabhu Oil Das", meetingDay: "Sunday", meetingTime: "16:00" },
+      { code: "NAM057", name: "Bongaigaon Namhatta", address: { country: "India", state: "Assam", district: "Bongaigaon", subDistrict: "Bongaigaon", village: "Bongaigaon" }, status: "APPROVED", chakraSenapoti: "Prabhu Refinery Das", meetingDay: "Saturday", meetingTime: "17:00" },
+
+      // Bangladesh, Sri Lanka, Nepal
+      { code: "NAM058", name: "Dhaka Central Namhatta", address: { country: "Bangladesh", state: "Dhaka", district: "Dhaka", subDistrict: "Dhanmondi", village: "Dhanmondi" }, status: "APPROVED", mahaChakraSenapoti: "Prabhu Nityananda Das", meetingDay: "Saturday", meetingTime: "16:30" },
+      { code: "NAM059", name: "Chittagong Namhatta", address: { country: "Bangladesh", state: "Chittagong", district: "Chittagong", subDistrict: "Port Area", village: "Chittagong" }, status: "APPROVED", chakraSenapoti: "Prabhu Gauranga Das", meetingDay: "Sunday", meetingTime: "15:00" },
+      { code: "NAM060", name: "Colombo Namhatta", address: { country: "Sri Lanka", state: "Western", district: "Colombo", subDistrict: "Colombo Central", village: "Colombo" }, status: "APPROVED", chakraSenapoti: "Prabhu Lanka Das", meetingDay: "Wednesday", meetingTime: "18:00" },
+      { code: "NAM061", name: "Kathmandu Namhatta", address: { country: "Nepal", state: "Bagmati", district: "Kathmandu", subDistrict: "Kathmandu", village: "Kathmandu" }, status: "APPROVED", chakraSenapoti: "Prabhu Nepal Das", meetingDay: "Monday", meetingTime: "17:00" }
+    ];
+
+    comprehensiveNamhattas.forEach((namhatta, index) => {
       const id = this.currentId++;
       this.namhattas.set(id, { 
         ...namhatta, 
