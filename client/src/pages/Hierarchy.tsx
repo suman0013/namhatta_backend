@@ -94,36 +94,48 @@ export default function Hierarchy() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* GBC Level */}
-              {hierarchy?.gbc?.map((leader) => (
+              {/* Founder Acharya Level */}
+              {hierarchy?.founder?.map((founder) => (
                 <HierarchyNode
-                  key={leader.id}
-                  leader={leader}
+                  key={founder.id}
+                  leader={founder}
                   level={0}
-                  isExpanded={expandedNodes.has(leader.id)}
-                  onToggle={() => toggleNode(leader.id)}
+                  isExpanded={expandedNodes.has(founder.id)}
+                  onToggle={() => toggleNode(founder.id)}
                   hasChildren={true}
                 >
-                  {/* Regional Directors */}
-                  {expandedNodes.has(leader.id) && hierarchy?.regionalDirectors?.map((director) => (
+                  {/* GBC Level */}
+                  {expandedNodes.has(founder.id) && hierarchy?.gbc?.map((leader) => (
                     <HierarchyNode
-                      key={director.id}
-                      leader={director}
+                      key={leader.id}
+                      leader={leader}
                       level={1}
-                      isExpanded={expandedNodes.has(director.id)}
-                      onToggle={() => toggleNode(director.id)}
+                      isExpanded={expandedNodes.has(leader.id)}
+                      onToggle={() => toggleNode(leader.id)}
                       hasChildren={true}
                     >
-                      {/* Co-Regional Directors */}
-                      {expandedNodes.has(director.id) && hierarchy?.coRegionalDirectors?.map((coDirector) => (
+                      {/* Regional Directors */}
+                      {expandedNodes.has(leader.id) && hierarchy?.regionalDirectors?.map((director) => (
                         <HierarchyNode
-                          key={coDirector.id}
-                          leader={coDirector}
+                          key={director.id}
+                          leader={director}
                           level={2}
-                          isExpanded={false}
-                          onToggle={() => {}}
-                          hasChildren={false}
-                        />
+                          isExpanded={expandedNodes.has(director.id)}
+                          onToggle={() => toggleNode(director.id)}
+                          hasChildren={true}
+                        >
+                          {/* Co-Regional Directors */}
+                          {expandedNodes.has(director.id) && hierarchy?.coRegionalDirectors?.map((coDirector) => (
+                            <HierarchyNode
+                              key={coDirector.id}
+                              leader={coDirector}
+                              level={3}
+                              isExpanded={false}
+                              onToggle={() => {}}
+                              hasChildren={false}
+                            />
+                          ))}
+                        </HierarchyNode>
                       ))}
                     </HierarchyNode>
                   ))}
@@ -144,6 +156,12 @@ export default function Hierarchy() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 dark:text-gray-400">Founder Acharya</span>
+                <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+                  {hierarchy?.founder?.length || 0}
+                </Badge>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 dark:text-gray-400">GBC Members</span>
                 <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
@@ -222,10 +240,12 @@ function HierarchyNode({
   const getNodeStyle = (level: number) => {
     switch (level) {
       case 0:
-        return "bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200/50 dark:border-purple-700/50";
+        return "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200/50 dark:border-amber-700/50";
       case 1:
-        return "bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200/50 dark:border-blue-700/50";
+        return "bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200/50 dark:border-purple-700/50";
       case 2:
+        return "bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200/50 dark:border-blue-700/50";
+      case 3:
         return "glass border-gray-200/50 dark:border-slate-600/50";
       default:
         return "glass border-gray-200/50 dark:border-slate-600/50";
@@ -235,10 +255,12 @@ function HierarchyNode({
   const getIconStyle = (level: number) => {
     switch (level) {
       case 0:
-        return "bg-gradient-to-br from-purple-500 to-indigo-600";
+        return "bg-gradient-to-br from-amber-500 to-orange-600";
       case 1:
-        return "bg-gradient-to-br from-blue-500 to-cyan-600";
+        return "bg-gradient-to-br from-purple-500 to-indigo-600";
       case 2:
+        return "bg-gradient-to-br from-blue-500 to-cyan-600";
+      case 3:
         return "bg-gradient-to-br from-teal-400 to-green-500";
       default:
         return "bg-gradient-to-br from-gray-400 to-gray-600";
@@ -250,7 +272,9 @@ function HierarchyNode({
       case 0:
         return Crown;
       case 1:
+        return Crown;
       case 2:
+      case 3:
         return UserCheck;
       default:
         return Users;

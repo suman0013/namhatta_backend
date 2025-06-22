@@ -48,6 +48,7 @@ export interface IStorage {
 
   // Hierarchy
   getTopLevelHierarchy(): Promise<{
+    founder: Leader[];
     gbc: Leader[];
     regionalDirectors: Leader[];
     coRegionalDirectors: Leader[];
@@ -115,11 +116,12 @@ export class MemStorage implements IStorage {
 
     // Initialize leaders
     const leadersData = [
-      { name: "His Holiness Jayapataka Swami", role: "GBC", reportingTo: null, location: { country: "India" } },
-      { name: "Regional Director - East", role: "REGIONAL_DIRECTOR", reportingTo: 1, location: { country: "India", state: "West Bengal" } },
-      { name: "Co-Regional Director - West Bengal", role: "CO_REGIONAL_DIRECTOR", reportingTo: 2, location: { country: "India", state: "West Bengal" } },
-      { name: "District Supervisor - Nadia", role: "DISTRICT_SUPERVISOR", reportingTo: 3, location: { country: "India", state: "West Bengal", district: "Nadia" } },
-      { name: "Mala Senapoti - Mayapur", role: "MALA_SENAPOTI", reportingTo: 4, location: { country: "India", state: "West Bengal", district: "Nadia" } }
+      { name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", role: "FOUNDER_ACHARYA", reportingTo: null, location: { country: "India" } },
+      { name: "His Holiness Jayapataka Swami", role: "GBC", reportingTo: 1, location: { country: "India" } },
+      { name: "Regional Director - East", role: "REGIONAL_DIRECTOR", reportingTo: 2, location: { country: "India", state: "West Bengal" } },
+      { name: "Co-Regional Director - West Bengal", role: "CO_REGIONAL_DIRECTOR", reportingTo: 3, location: { country: "India", state: "West Bengal" } },
+      { name: "District Supervisor - Nadia", role: "DISTRICT_SUPERVISOR", reportingTo: 4, location: { country: "India", state: "West Bengal", district: "Nadia" } },
+      { name: "Mala Senapoti - Mayapur", role: "MALA_SENAPOTI", reportingTo: 5, location: { country: "India", state: "West Bengal", district: "Nadia" } }
     ];
 
     leadersData.forEach((leader, index) => {
@@ -380,12 +382,14 @@ export class MemStorage implements IStorage {
   }
 
   async getTopLevelHierarchy(): Promise<{
+    founder: Leader[];
     gbc: Leader[];
     regionalDirectors: Leader[];
     coRegionalDirectors: Leader[];
   }> {
     const allLeaders = Array.from(this.leaders.values());
     return {
+      founder: allLeaders.filter(l => l.role === "FOUNDER_ACHARYA"),
       gbc: allLeaders.filter(l => l.role === "GBC"),
       regionalDirectors: allLeaders.filter(l => l.role === "REGIONAL_DIRECTOR"),
       coRegionalDirectors: allLeaders.filter(l => l.role === "CO_REGIONAL_DIRECTOR")

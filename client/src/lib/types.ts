@@ -13,6 +13,7 @@ export interface NamhattaUpdateCard {
 }
 
 export interface HierarchyResponse {
+  founder: Leader[];
   gbc: Leader[];
   regionalDirectors: Leader[];
   coRegionalDirectors: Leader[];

@@ -113,6 +113,19 @@ export default function Dashboard() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Founder Acharya Level */}
+          {hierarchy?.founder?.map((founder) => (
+            <div key={founder.id} className="flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                <Crown className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{founder.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">ISKCON Founder Acharya</p>
+              </div>
+            </div>
+          ))}
+          
           {/* GBC Level */}
           {hierarchy?.gbc?.map((leader) => (
             <div key={leader.id} className="flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200/50 dark:border-purple-700/50">
@@ -121,7 +134,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 dark:text-white">{leader.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">GBC - Governing Body Commissioner</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">GBC - Governing Body Commissioner & Congregational Minister</p>
               </div>
             </div>
           ))}
