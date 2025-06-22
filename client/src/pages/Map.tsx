@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues } from "d3-scale-chromatic";
@@ -36,11 +36,19 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
+  // Force country level on component mount
+  React.useEffect(() => {
+    setCurrentLevel('COUNTRY');
+    setSelectedCountry('');
+    setSelectedState('');
+    setSelectedDistrict('');
+  }, []);
+
   // Fetch data based on current level
   const { data: countryData, isLoading: countryLoading } = useQuery({
     queryKey: ["/api/map/countries"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'COUNTRY'
+    enabled: true // Always load country data as it's the default view
   });
 
   const { data: stateData, isLoading: stateLoading } = useQuery({
@@ -97,33 +105,49 @@ export default function Map() {
 
     switch (currentLevel) {
       case 'COUNTRY':
-        return countryData?.map((item: any) => ({
+        if (!countryData) {
+          console.log('No country data available yet');
+          return [];
+        }
+        const countries = countryData.map((item: any) => ({
           name: item.country,
           count: item.count,
           coordinates: coordinatesMap[item.country],
           level: 'COUNTRY' as MapLevel
-        })) || [];
+        })).filter((item: any) => item.coordinates);
+        console.log('Country data processed:', countries);
+        return countries;
       case 'STATE':
-        return stateData?.map((item: any) => ({
+        if (!stateData || !selectedCountry) {
+          console.log('No state data available or no country selected');
+          return [];
+        }
+        const states = stateData.map((item: any) => ({
           name: item.state,
           count: item.count,
           coordinates: coordinatesMap[item.state],
           level: 'STATE' as MapLevel
-        })) || [];
+        })).filter((item: any) => item.coordinates);
+        console.log('State data processed:', states);
+        return states;
       case 'DISTRICT':
-        return districtData?.map((item: any) => ({
+        const districts = districtData?.map((item: any) => ({
           name: item.district,
           count: item.count,
           coordinates: coordinatesMap[item.district],
           level: 'DISTRICT' as MapLevel
-        })) || [];
+        })).filter((item: any) => item.coordinates) || [];
+        console.log('District data processed:', districts);
+        return districts;
       case 'SUB_DISTRICT':
-        return subDistrictData?.map((item: any) => ({
+        const subDistricts = subDistrictData?.map((item: any) => ({
           name: item.subDistrict,
           count: item.count,
           coordinates: coordinatesMap[item.subDistrict],
           level: 'SUB_DISTRICT' as MapLevel
-        })) || [];
+        })).filter((item: any) => item.coordinates) || [];
+        console.log('Sub-district data processed:', subDistricts);
+        return subDistricts;
       default:
         return [];
     }
@@ -132,6 +156,12 @@ export default function Map() {
   const currentData = getCurrentData();
   const maxCount = Math.max(...currentData.map(d => d.count), 1);
   const colorScale = scaleSequential(interpolateBlues).domain([0, maxCount]);
+  
+  console.log('Current level:', currentLevel);
+  console.log('Current data:', currentData);
+  console.log('Country data from API:', countryData);
+  console.log('State data from API:', stateData);
+  console.log('Max count:', maxCount);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -190,44 +220,99 @@ export default function Map() {
 
   // Update markers when data changes
   useEffect(() => {
-    if (!mapRef.current || !markersRef.current) return;
+    if (!mapRef.current || !markersRef.current) {
+      console.log('Map or markers not ready yet');
+      return;
+    }
+    
+    console.log('Updating markers with data:', currentData);
     
     // Clear existing markers
     markersRef.current.clearLayers();
     
+    if (currentData.length === 0) {
+      console.log('No data to display on map');
+      return;
+    }
+    
     // Add new markers
-    currentData.forEach((data) => {
-      if (!data.coordinates || !markersRef.current) return;
+    currentData.forEach((data, index) => {
+      if (!data.coordinates || !markersRef.current) {
+        console.log('Missing coordinates for:', data.name);
+        return;
+      }
       
       const [lng, lat] = data.coordinates;
-      const radius = Math.max(10, Math.sqrt(data.count) * 8);
+      const radius = Math.max(15, Math.sqrt(data.count) * 10);
+      
+      console.log(`Adding marker for ${data.name} at [${lat}, ${lng}] with ${data.count} namhattas`);
       
       // Create circle marker with color based on count
       const circle = L.circleMarker([lat, lng], {
         radius: radius,
         fillColor: colorScale(data.count),
-        color: 'white',
+        color: '#ffffff',
         weight: 3,
-        opacity: 0.9,
+        opacity: 1,
         fillOpacity: 0.8
       });
       
+      // Add a text marker overlay for the count
+      const divIcon = L.divIcon({
+        html: `<div style="
+          background: ${colorScale(data.count)};
+          color: white;
+          border: 3px solid white;
+          border-radius: 50%;
+          width: ${radius * 2}px;
+          height: ${radius * 2}px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: ${Math.max(12, radius * 0.7)}px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          cursor: pointer;
+        ">
+          <div style="text-align: center;">
+            <div style="font-size: ${Math.max(14, radius * 0.8)}px; line-height: 1;">${data.count}</div>
+            <div style="font-size: ${Math.max(8, radius * 0.4)}px; line-height: 1; opacity: 0.9;">${data.name}</div>
+          </div>
+        </div>`,
+        className: 'namhatta-marker',
+        iconSize: [radius * 2, radius * 2],
+        iconAnchor: [radius, radius]
+      });
+      
+      const marker = L.marker([lat, lng], { icon: divIcon });
+      
       // Add popup
-      circle.bindPopup(`
-        <div class="p-2">
-          <h3 class="font-semibold text-lg">${data.name}</h3>
-          <p class="text-sm text-gray-600">Namhattas: <span class="font-medium">${data.count}</span></p>
-          <p class="text-xs text-gray-500">${currentLevel.replace('_', ' ')}</p>
+      marker.bindPopup(`
+        <div style="padding: 12px; min-width: 200px;">
+          <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 8px 0; color: #1f2937;">${data.name}</h3>
+          <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
+            <strong style="color: #374151;">Namhattas:</strong> 
+            <span style="font-weight: 600; color: #059669;">${data.count}</span>
+          </p>
+          <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 12px;">
+            Level: ${currentLevel.replace('_', ' ')}
+          </p>
+          <p style="margin: 8px 0 0 0; color: #6366f1; font-size: 12px; cursor: pointer;">
+            Click to drill down →
+          </p>
         </div>
       `);
       
       // Add click handler for drilling down
-      circle.on('click', () => {
+      marker.on('click', () => {
+        console.log('Marker clicked:', data.name);
         handleMarkerClick(data);
       });
       
-      markersRef.current.addLayer(circle);
+      markersRef.current.addLayer(marker);
     });
+    
+    console.log(`Added ${currentData.length} markers to map`);
   }, [currentData, colorScale, currentLevel]);
 
   const handleZoomIn = () => {
