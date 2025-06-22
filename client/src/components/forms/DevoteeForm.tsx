@@ -310,41 +310,97 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               <h3 className="text-lg font-semibold">Basic Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Name *</Label>
+                  <Label htmlFor="legalName">Legal Name *</Label>
                   <Input
-                    {...register("name", { required: "Name is required" })}
-                    placeholder="Enter devotee name"
+                    {...register("legalName", { required: "Legal name is required" })}
+                    placeholder="Enter legal name"
                   />
-                  {errors.name && (
-                    <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
+                  {errors.legalName && (
+                    <p className="text-sm text-red-500 mt-1">{errors.legalName.message}</p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="gurudev">Gurudev</Label>
-                  <Input {...register("gurudev")} placeholder="Enter Gurudev name" />
+                  <Label htmlFor="name">Initiated Name</Label>
+                  <Input {...register("name")} placeholder="Enter initiated/spiritual name" />
+                </div>
+                <div>
+                  <Label htmlFor="dob">Date of Birth</Label>
+                  <Input type="date" {...register("dob")} />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input type="email" {...register("email")} placeholder="Enter email address" />
+                </div>
+                <div>
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input {...register("phone")} placeholder="Enter phone number" />
+                </div>
+                <div>
+                  <Label htmlFor="bloodGroup">Blood Group</Label>
+                  <Select value={watch("bloodGroup")} onValueChange={(value) => setValue("bloodGroup", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select blood group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A+">A+</SelectItem>
+                      <SelectItem value="A-">A-</SelectItem>
+                      <SelectItem value="B+">B+</SelectItem>
+                      <SelectItem value="B-">B-</SelectItem>
+                      <SelectItem value="AB+">AB+</SelectItem>
+                      <SelectItem value="AB-">AB-</SelectItem>
+                      <SelectItem value="O+">O+</SelectItem>
+                      <SelectItem value="O-">O-</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Family Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Family Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="fatherName">Father's Name</Label>
+                  <Input {...register("fatherName")} placeholder="Enter father's name" />
+                </div>
+                <div>
+                  <Label htmlFor="motherName">Mother's Name</Label>
+                  <Input {...register("motherName")} placeholder="Enter mother's name" />
                 </div>
                 <div>
                   <Label htmlFor="maritalStatus">Marital Status</Label>
-                  <Select
-                    value={watch("maritalStatus")}
-                    onValueChange={(value) => setValue("maritalStatus", value)}
-                  >
+                  <Select value={watch("maritalStatus")} onValueChange={(value) => setValue("maritalStatus", value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select marital status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="married">Married</SelectItem>
-                      <SelectItem value="divorced">Divorced</SelectItem>
-                      <SelectItem value="widowed">Widowed</SelectItem>
+                      <SelectItem value="UNMARRIED">Unmarried</SelectItem>
+                      <SelectItem value="MARRIED">Married</SelectItem>
+                      <SelectItem value="WIDOWED">Widowed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="statusId">Devotional Status</Label>
+                  <Label htmlFor="husbandName">Husband's Name</Label>
+                  <Input {...register("husbandName")} placeholder="Enter husband's name (if applicable)" />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Spiritual Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Spiritual Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="devotionalStatusId">Devotional Status</Label>
                   <Select
-                    value={watch("statusId")?.toString() || ""}
-                    onValueChange={(value) => setValue("statusId", value ? parseInt(value) : undefined)}
+                    value={watch("devotionalStatusId")?.toString() || ""}
+                    onValueChange={(value) => setValue("devotionalStatusId", value ? parseInt(value) : undefined)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select devotional status" />
@@ -357,6 +413,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label htmlFor="initiatedName">Initiated Name</Label>
+                  <Input {...register("initiatedName")} placeholder="Enter initiated name" />
+                </div>
+                <div>
+                  <Label htmlFor="harinamDate">Harinama Initiation Date</Label>
+                  <Input type="date" {...register("harinamDate")} />
+                </div>
+                <div>
+                  <Label htmlFor="pancharatrikDate">Pancharatrik Initiation Date</Label>
+                  <Input type="date" {...register("pancharatrikDate")} />
                 </div>
                 <div>
                   <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
@@ -376,6 +444,15 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Personal Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Personal Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="education">Education</Label>
                   <Input {...register("education")} placeholder="Enter education details" />
@@ -443,19 +520,19 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   />
                 </div>
                 <div>
-                  <Label htmlFor="presentZipcode">ZIP Code</Label>
+                  <Label htmlFor="presentPostalCode">Postal Code</Label>
                   <Input
-                    value={presentAddress.zipcode || ""}
-                    onChange={(e) => handlePresentAddressChange("zipcode", e.target.value)}
-                    placeholder="Enter ZIP code"
+                    value={presentAddress.postalCode || ""}
+                    onChange={(e) => handlePresentAddressChange("postalCode", e.target.value)}
+                    placeholder="Enter postal code"
                   />
                 </div>
                 <div className="md:col-span-2 lg:col-span-3">
-                  <Label htmlFor="presentDetails">Additional Details</Label>
+                  <Label htmlFor="presentLandmark">Landmark</Label>
                   <Textarea
-                    value={presentAddress.details || ""}
-                    onChange={(e) => handlePresentAddressChange("details", e.target.value)}
-                    placeholder="Enter additional address details"
+                    value={presentAddress.landmark || ""}
+                    onChange={(e) => handlePresentAddressChange("landmark", e.target.value)}
+                    placeholder="Enter landmark or additional details"
                   />
                 </div>
               </div>
@@ -532,19 +609,19 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     />
                   </div>
                   <div>
-                    <Label htmlFor="permanentZipcode">ZIP Code</Label>
+                    <Label htmlFor="permanentPostalCode">Postal Code</Label>
                     <Input
-                      value={permanentAddress.zipcode || ""}
-                      onChange={(e) => handlePermanentAddressChange("zipcode", e.target.value)}
-                      placeholder="Enter ZIP code"
+                      value={permanentAddress.postalCode || ""}
+                      onChange={(e) => handlePermanentAddressChange("postalCode", e.target.value)}
+                      placeholder="Enter postal code"
                     />
                   </div>
                   <div className="md:col-span-2 lg:col-span-3">
-                    <Label htmlFor="permanentDetails">Additional Details</Label>
+                    <Label htmlFor="permanentLandmark">Landmark</Label>
                     <Textarea
-                      value={permanentAddress.details || ""}
-                      onChange={(e) => handlePermanentAddressChange("details", e.target.value)}
-                      placeholder="Enter additional address details"
+                      value={permanentAddress.landmark || ""}
+                      onChange={(e) => handlePermanentAddressChange("landmark", e.target.value)}
+                      placeholder="Enter landmark or additional details"
                     />
                   </div>
                 </div>
