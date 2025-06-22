@@ -98,78 +98,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Leadership Hierarchy Section */}
-      <Card className="glass-card">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center">
-              <Crown className="mr-3 h-5 w-5 text-indigo-500" />
-              Leadership Hierarchy
-            </CardTitle>
-            <Button variant="link" className="text-indigo-600 dark:text-indigo-400">
-              View Full Hierarchy
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Founder Acharya Level */}
-          {hierarchy?.founder?.map((founder) => (
-            <div key={founder.id} className="flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50">
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-                <Crown className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">{founder.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">ISKCON Founder Acharya</p>
-              </div>
-            </div>
-          ))}
-          
-          {/* GBC Level */}
-          {hierarchy?.gbc?.map((leader) => (
-            <div key={leader.id} className="flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200/50 dark:border-purple-700/50">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                <Crown className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">{leader.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">GBC - Governing Body Commissioner & Congregational Minister</p>
-              </div>
-            </div>
-          ))}
 
-          {/* Regional Directors */}
-          <div className="ml-6 space-y-3">
-            {hierarchy?.regionalDirectors?.map((director) => (
-              <div key={director.id} className="flex items-center space-x-4 p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/50 dark:border-blue-700/50">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
-                  <UserCheck className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">{director.name}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Managing 12 districts</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Co-Regional Directors */}
-            <div className="ml-6 space-y-2">
-              {hierarchy?.coRegionalDirectors?.map((coDirector) => (
-                <div key={coDirector.id} className="flex items-center space-x-3 p-3 rounded-lg glass border border-gray-200/50 dark:border-slate-600/50">
-                  <div className="w-8 h-8 bg-gradient-to-br from-teal-400 to-green-500 rounded-lg flex items-center justify-center">
-                    <UserCheck className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-gray-900 dark:text-white text-sm">{coDirector.name}</h5>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">6 districts, 156 devotees</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Recent Activity & Updates */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
