@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues } from "d3-scale-chromatic";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getQueryFn } from "@/lib/queryClient";
 import { Map as MapIcon, ZoomIn, ZoomOut, RotateCcw, Globe, MapPin } from "lucide-react";
+import L from "leaflet";
 
 // Geographic boundaries for different zoom levels
 const ZOOM_LEVELS = {
@@ -32,7 +33,8 @@ export default function Map() {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const [position, setPosition] = useState({ coordinates: ZOOM_LEVELS.COUNTRY.center, zoom: 1 });
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
 
   // Fetch data based on current level
   const { data: countryData, isLoading: countryLoading } = useQuery({
@@ -76,14 +78,21 @@ export default function Map() {
       // States in Bangladesh  
       'Dhaka': [90.4, 23.8],
       'Chittagong': [91.8, 22.3],
+      'Western': [79.8, 6.9],
+      'Bagmati': [85.3, 27.7],
       // Districts
       'Kolkata': [88.4, 22.6],
       'Nadia': [88.4, 23.4],
-      'Dhaka': [90.4, 23.8],
+      'Colombo': [79.8, 6.9],
+      'Kathmandu': [85.3, 27.7],
       // Sub-districts
       'Mayapur': [88.4, 23.4],
       'Central': [88.35, 22.57],
-      'Dhanmondi': [90.37, 23.75]
+      'Krishnanagar': [88.5, 23.4],
+      'North': [88.37, 22.62],
+      'Dhanmondi': [90.37, 23.75],
+      'Port Area': [91.8, 22.3],
+      'Colombo Central': [79.8, 6.9]
     };
 
     switch (currentLevel) {
@@ -124,12 +133,113 @@ export default function Map() {
   const maxCount = Math.max(...currentData.map(d => d.count), 1);
   const colorScale = scaleSequential(interpolateBlues).domain([0, maxCount]);
 
+  // Initialize Leaflet map
+  useEffect(() => {
+    const initMap = () => {
+      const mapContainer = document.getElementById('leaflet-map');
+      if (!mapContainer) {
+        console.log('Map container not found, retrying...');
+        setTimeout(initMap, 100);
+        return;
+      }
+      
+      if (mapRef.current) {
+        return; // Map already initialized
+      }
+
+      try {
+        // Initialize the map with full interaction capabilities
+        const map = L.map('leaflet-map', {
+          zoomControl: false, // We'll add custom controls
+          doubleClickZoom: true, // Enable double click zoom
+          scrollWheelZoom: true, // Enable mouse wheel zoom
+          touchZoom: true, // Enable touch zoom on mobile
+          dragging: true, // Enable dragging
+          tap: true, // Enable tap on mobile
+          boxZoom: true, // Enable box zoom with shift+drag
+        }).setView([20, 77], 4); // Centered on South Asia
+        
+        // Add OpenStreetMap tiles (like Google Maps)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19,
+        }).addTo(map);
+        
+        // Initialize marker layer
+        markersRef.current = L.layerGroup().addTo(map);
+        mapRef.current = map;
+        
+        console.log('Leaflet map initialized successfully');
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        setTimeout(initMap, 500);
+      }
+    };
+
+    // Start initialization
+    initMap();
+    
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+        markersRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update markers when data changes
+  useEffect(() => {
+    if (!mapRef.current || !markersRef.current) return;
+    
+    // Clear existing markers
+    markersRef.current.clearLayers();
+    
+    // Add new markers
+    currentData.forEach((data) => {
+      if (!data.coordinates || !markersRef.current) return;
+      
+      const [lng, lat] = data.coordinates;
+      const radius = Math.max(10, Math.sqrt(data.count) * 8);
+      
+      // Create circle marker with color based on count
+      const circle = L.circleMarker([lat, lng], {
+        radius: radius,
+        fillColor: colorScale(data.count),
+        color: 'white',
+        weight: 3,
+        opacity: 0.9,
+        fillOpacity: 0.8
+      });
+      
+      // Add popup
+      circle.bindPopup(`
+        <div class="p-2">
+          <h3 class="font-semibold text-lg">${data.name}</h3>
+          <p class="text-sm text-gray-600">Namhattas: <span class="font-medium">${data.count}</span></p>
+          <p class="text-xs text-gray-500">${currentLevel.replace('_', ' ')}</p>
+        </div>
+      `);
+      
+      // Add click handler for drilling down
+      circle.on('click', () => {
+        handleMarkerClick(data);
+      });
+      
+      markersRef.current.addLayer(circle);
+    });
+  }, [currentData, colorScale, currentLevel]);
+
   const handleZoomIn = () => {
-    setPosition(pos => ({ ...pos, zoom: Math.min(pos.zoom * 1.5, 8) }));
+    if (mapRef.current) {
+      mapRef.current.zoomIn();
+    }
   };
 
   const handleZoomOut = () => {
-    setPosition(pos => ({ ...pos, zoom: Math.max(pos.zoom / 1.5, 1) }));
+    if (mapRef.current) {
+      mapRef.current.zoomOut();
+    }
   };
 
   const handleReset = () => {
@@ -137,25 +247,50 @@ export default function Map() {
     setSelectedCountry('');
     setSelectedState('');
     setSelectedDistrict('');
-    setPosition({ coordinates: ZOOM_LEVELS.COUNTRY.center, zoom: 1 });
+    if (mapRef.current) {
+      mapRef.current.setView([20, 77], 4);
+    }
   };
 
   const handleLevelChange = (level: MapLevel) => {
     setCurrentLevel(level);
-    const zoomConfig = ZOOM_LEVELS[level];
-    setPosition({ coordinates: zoomConfig.center, zoom: 1 });
+    if (mapRef.current) {
+      const zoomLevels = {
+        COUNTRY: { center: [20, 77] as [number, number], zoom: 4 },
+        STATE: { center: [22.5, 88] as [number, number], zoom: 6 },
+        DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 8 },
+        SUB_DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 10 }
+      };
+      const config = zoomLevels[level];
+      mapRef.current.setView(config.center, config.zoom);
+    }
   };
 
   const handleMarkerClick = (data: MapData) => {
     if (data.level === 'COUNTRY' && currentLevel === 'COUNTRY') {
       setSelectedCountry(data.name);
       setCurrentLevel('STATE');
+      // Zoom to the country
+      if (mapRef.current && data.coordinates) {
+        const [lng, lat] = data.coordinates;
+        mapRef.current.setView([lat, lng], 6);
+      }
     } else if (data.level === 'STATE' && currentLevel === 'STATE') {
       setSelectedState(data.name);
       setCurrentLevel('DISTRICT');
+      // Zoom to the state
+      if (mapRef.current && data.coordinates) {
+        const [lng, lat] = data.coordinates;
+        mapRef.current.setView([lat, lng], 8);
+      }
     } else if (data.level === 'DISTRICT' && currentLevel === 'DISTRICT') {
       setSelectedDistrict(data.name);
       setCurrentLevel('SUB_DISTRICT');
+      // Zoom to the district
+      if (mapRef.current && data.coordinates) {
+        const [lng, lat] = data.coordinates;
+        mapRef.current.setView([lat, lng], 10);
+      }
     }
   };
 
@@ -258,84 +393,11 @@ export default function Map() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="w-full h-[600px] bg-gradient-to-br from-blue-50 to-green-50 dark:from-slate-800 dark:to-slate-900 rounded-lg overflow-hidden">
-              <svg viewBox="0 0 800 600" className="w-full h-full">
-                {/* Simple world map outline */}
-                <path
-                  d="M50 200 Q200 150 350 180 Q500 210 750 200 Q750 300 700 400 Q500 450 350 420 Q200 390 50 400 Z"
-                  fill="#E5E7EB"
-                  stroke="#9CA3AF"
-                  strokeWidth="2"
-                  className="dark:fill-slate-700 dark:stroke-slate-600"
-                />
-                
-                {/* Country boundaries */}
-                <path
-                  d="M300 250 Q400 240 500 260 Q500 340 400 350 Q300 340 300 250 Z"
-                  fill="#F3F4F6"
-                  stroke="#9CA3AF"
-                  strokeWidth="1"
-                  className="dark:fill-slate-600 dark:stroke-slate-500"
-                />
-                
-                <path
-                  d="M520 270 Q580 265 620 280 Q620 330 580 340 Q520 335 520 270 Z"
-                  fill="#F3F4F6"
-                  stroke="#9CA3AF"
-                  strokeWidth="1"
-                  className="dark:fill-slate-600 dark:stroke-slate-500"
-                />
-                
-                {/* Data markers */}
-                {currentData.map((data, index) => {
-                  if (!data.coordinates) return null;
-                  
-                  const [x, y] = data.coordinates;
-                  // Scale coordinates to SVG viewBox
-                  const scaledX = (x - 68) * 10 + 200; // Approximate scaling
-                  const scaledY = (28 - y) * 15 + 150; // Approximate scaling
-                  const radius = Math.max(6, Math.sqrt(data.count) * 4);
-                  
-                  return (
-                    <g key={`${data.name}-${index}`}>
-                      <circle
-                        cx={scaledX}
-                        cy={scaledY}
-                        r={radius}
-                        fill={colorScale(data.count)}
-                        stroke="white"
-                        strokeWidth="2"
-                        opacity="0.9"
-                        className="cursor-pointer hover:opacity-100 transition-opacity"
-                        onClick={() => handleMarkerClick(data)}
-                      />
-                      <text
-                        x={scaledX}
-                        y={scaledY - radius - 8}
-                        textAnchor="middle"
-                        fontSize="12"
-                        fill="#374151"
-                        fontWeight="500"
-                        className="pointer-events-none dark:fill-white"
-                      >
-                        {data.name}
-                      </text>
-                      <text
-                        x={scaledX}
-                        y={scaledY + 3}
-                        textAnchor="middle"
-                        fontSize="10"
-                        fill="white"
-                        fontWeight="600"
-                        className="pointer-events-none"
-                      >
-                        {data.count}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
+            <div 
+              id="leaflet-map" 
+              className="w-full h-[600px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
+              style={{ minHeight: '600px' }}
+            />
           </CardContent>
         </Card>
       </div>
