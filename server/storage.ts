@@ -232,8 +232,54 @@ export class MemStorage implements IStorage {
     });
   }
 
-  async getDevotees(page = 1, size = 10): Promise<{ data: Devotee[], total: number }> {
-    const allDevotees = Array.from(this.devotees.values());
+  async getDevotees(page = 1, size = 10, filters?: any): Promise<{ data: Devotee[], total: number }> {
+    let allDevotees = Array.from(this.devotees.values());
+    
+    // Apply search filter
+    if (filters?.search) {
+      const searchTerm = filters.search.toLowerCase();
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.legalName?.toLowerCase().includes(searchTerm) ||
+        devotee.name?.toLowerCase().includes(searchTerm) ||
+        devotee.email?.toLowerCase().includes(searchTerm) ||
+        devotee.phone?.toLowerCase().includes(searchTerm) ||
+        devotee.education?.toLowerCase().includes(searchTerm) ||
+        devotee.occupation?.toLowerCase().includes(searchTerm) ||
+        devotee.presentAddress?.country?.toLowerCase().includes(searchTerm) ||
+        devotee.presentAddress?.state?.toLowerCase().includes(searchTerm) ||
+        devotee.presentAddress?.district?.toLowerCase().includes(searchTerm) ||
+        devotee.presentAddress?.village?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Apply country filter
+    if (filters?.country) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.presentAddress?.country === filters.country
+      );
+    }
+    
+    // Apply state filter
+    if (filters?.state) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.presentAddress?.state === filters.state
+      );
+    }
+    
+    // Apply district filter
+    if (filters?.district) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.presentAddress?.district === filters.district
+      );
+    }
+    
+    // Apply status filter
+    if (filters?.statusId) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.devotionalStatusId === parseInt(filters.statusId)
+      );
+    }
+    
     const start = (page - 1) * size;
     const data = allDevotees.slice(start, start + size);
     return { data, total: allDevotees.length };
@@ -298,7 +344,54 @@ export class MemStorage implements IStorage {
   }
 
   async getNamhattas(page = 1, size = 10, filters?: any): Promise<{ data: Namhatta[], total: number }> {
-    const allNamhattas = Array.from(this.namhattas.values());
+    let allNamhattas = Array.from(this.namhattas.values());
+    
+    // Apply search filter
+    if (filters?.search) {
+      const searchTerm = filters.search.toLowerCase();
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.name?.toLowerCase().includes(searchTerm) ||
+        namhatta.code?.toLowerCase().includes(searchTerm) ||
+        namhatta.malaSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.mahaChakraSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.chakraSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.upaChakraSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.secretary?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.country?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.state?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.district?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.village?.toLowerCase().includes(searchTerm)
+      );
+    }
+    
+    // Apply country filter
+    if (filters?.country) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.country === filters.country
+      );
+    }
+    
+    // Apply state filter
+    if (filters?.state) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.state === filters.state
+      );
+    }
+    
+    // Apply district filter
+    if (filters?.district) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.district === filters.district
+      );
+    }
+    
+    // Apply status filter
+    if (filters?.status) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.status === filters.status
+      );
+    }
+    
     const start = (page - 1) * size;
     const data = allNamhattas.slice(start, start + size);
     return { data, total: allNamhattas.length };

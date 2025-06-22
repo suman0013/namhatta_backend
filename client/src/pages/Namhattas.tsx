@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { SearchInput } from "@/components/ui/search-input";
+import { ActiveFilters } from "@/components/ui/filter-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pagination } from "@/components/ui/pagination";
+import { AdvancedPagination } from "@/components/ui/advanced-pagination";
 import { Home, Users, Calendar, Search, Plus, Edit, MapPin } from "lucide-react";
 import { Link } from "wouter";
 import NamhattaForm from "@/components/forms/NamhattaForm";
@@ -16,6 +18,7 @@ import type { Namhatta } from "@/lib/types";
 
 export default function Namhattas() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingNamhatta, setEditingNamhatta] = useState<Namhatta | undefined>();
@@ -25,11 +28,12 @@ export default function Namhattas() {
     district: "",
     subDistrict: "",
     village: "",
+    status: "",
   });
 
   const { data: namhattas, isLoading } = useQuery({
-    queryKey: ["/api/namhattas", page, searchTerm, filters],
-    queryFn: () => api.getNamhattas(page, 12, { ...filters, search: searchTerm }),
+    queryKey: ["/api/namhattas", page, pageSize, searchTerm, filters],
+    queryFn: () => api.getNamhattas(page, pageSize, { ...filters, search: searchTerm }),
   });
 
   const handleCreateNamhatta = () => {
@@ -106,23 +110,18 @@ export default function Namhattas() {
       <Card className="glass-card">
         <CardContent className="p-6 space-y-4">
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search namhattas by name or location..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1); // Reset to first page on search
-              }}
-              className="pl-10 glass border-0"
-            />
-          </div>
+          <SearchInput
+            value={searchTerm}
+            onChange={(value) => {
+              setSearchTerm(value);
+              setPage(1);
+            }}
+            placeholder="Search namhattas by name, code, location, or leaders..."
+            debounceMs={500}
+          />
 
           {/* Filters */}
-          <h3 className="font-semibold text-gray-900 dark:text-white">Filters</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <SearchableSelect
               value={filters.country}
               onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "all" : value)}
@@ -167,11 +166,33 @@ export default function Namhattas() {
               className="glass border-0"
             />
 
-            <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-              <Search className="mr-2 h-4 w-4" />
-              Search
-            </Button>
+            <Select value={filters.status || "status"} onValueChange={(value) => handleFilterChange("status", value === "status" ? "all" : value)}>
+              <SelectTrigger className="glass border-0">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="status">All Statuses</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          
+          {/* Active Filters */}
+          <ActiveFilters
+            filters={filters}
+            searchTerm={searchTerm}
+            onRemoveFilter={(key) => handleFilterChange(key, "all")}
+            onClearAll={() => {
+              setFilters({ country: "", state: "", district: "", subDistrict: "", village: "", status: "" });
+              setSearchTerm("");
+              setPage(1);
+            }}
+            onClearSearch={() => {
+              setSearchTerm("");
+              setPage(1);
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -183,14 +204,19 @@ export default function Namhattas() {
       </div>
 
       {/* Pagination */}
-      {namhattas && namhattas.total > 12 && (
-        <Pagination
+      {namhattas && namhattas.total > 0 && (
+        <AdvancedPagination
           currentPage={page}
-          totalPages={Math.ceil(namhattas.total / 12)}
-          onPageChange={setPage}
-          showingFrom={((page - 1) * 12) + 1}
-          showingTo={Math.min(page * 12, namhattas.total)}
+          totalPages={Math.ceil(namhattas.total / pageSize)}
+          pageSize={pageSize}
           totalItems={namhattas.total}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+          showingFrom={Math.min(((page - 1) * pageSize) + 1, namhattas.total)}
+          showingTo={Math.min(page * pageSize, namhattas.total)}
         />
       )}
 

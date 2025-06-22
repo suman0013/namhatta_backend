@@ -88,7 +88,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/devotees", async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const size = parseInt(req.query.size as string) || 10;
-    const result = await storage.getDevotees(page, size);
+    const filters = {
+      search: req.query.search as string,
+      country: req.query.country as string,
+      state: req.query.state as string,
+      district: req.query.district as string,
+      statusId: req.query.statusId as string,
+    };
+    const result = await storage.getDevotees(page, size, filters);
     res.json(result);
   });
 

@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { SearchInput } from "@/components/ui/search-input";
+import { ActiveFilters } from "@/components/ui/filter-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Pagination } from "@/components/ui/pagination";
+import { AdvancedPagination } from "@/components/ui/advanced-pagination";
 import { 
   Users, 
   Search, 
@@ -28,6 +30,7 @@ import type { Devotee } from "@/lib/types";
 
 export default function Devotees() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingDevotee, setEditingDevotee] = useState<Devotee | undefined>();
@@ -39,11 +42,11 @@ export default function Devotees() {
   });
 
   const { data: devotees, isLoading } = useQuery({
-    queryKey: ["/api/devotees", page, searchTerm, filters],
+    queryKey: ["/api/devotees", page, pageSize, searchTerm, filters],
     queryFn: () => {
       const params = new URLSearchParams({
         page: page.toString(),
-        size: "12"
+        size: pageSize.toString()
       });
       
       // Add search and filters
@@ -114,19 +117,15 @@ export default function Devotees() {
       <Card className="glass-card">
         <CardContent className="p-6 space-y-4">
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search devotees by name, gurudev, or location..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1); // Reset to first page on search
-              }}
-              className="pl-10 glass border-0"
-            />
-          </div>
+          <SearchInput
+            value={searchTerm}
+            onChange={(value) => {
+              setSearchTerm(value);
+              setPage(1);
+            }}
+            placeholder="Search devotees by name, email, phone, location, education, occupation..."
+            debounceMs={500}
+          />
 
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -158,12 +157,28 @@ export default function Devotees() {
 
             <SearchableSelect
               value={filters.statusId || "All Statuses"}
-              onValueChange={(value) => handleFilterChange("statusId", value === "All Statuses" ? "all" : value)}
+              onValueChange={(value) => handleFilterChange("statusId", value === "All Statuses" ? "all" : statuses?.find(s => s.name === value)?.id.toString() || "")}
               options={["All Statuses", ...(statuses?.map(status => status.name) || [])]}
               placeholder="All Statuses"
               className="glass border-0"
             />
           </div>
+          
+          {/* Active Filters */}
+          <ActiveFilters
+            filters={filters}
+            searchTerm={searchTerm}
+            onRemoveFilter={(key) => handleFilterChange(key, "all")}
+            onClearAll={() => {
+              setFilters({ country: "", state: "", district: "", statusId: "" });
+              setSearchTerm("");
+              setPage(1);
+            }}
+            onClearSearch={() => {
+              setSearchTerm("");
+              setPage(1);
+            }}
+          />
         </CardContent>
       </Card>
 
@@ -262,14 +277,19 @@ export default function Devotees() {
       )}
 
       {/* Pagination */}
-      {devotees && devotees.total > 12 && (
-        <Pagination
+      {devotees && devotees.total > 0 && (
+        <AdvancedPagination
           currentPage={page}
-          totalPages={Math.ceil(devotees.total / 12)}
-          onPageChange={setPage}
-          showingFrom={((page - 1) * 12) + 1}
-          showingTo={Math.min(page * 12, devotees.total)}
+          totalPages={Math.ceil(devotees.total / pageSize)}
+          pageSize={pageSize}
           totalItems={devotees.total}
+          onPageChange={setPage}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+          showingFrom={Math.min(((page - 1) * pageSize) + 1, devotees.total)}
+          showingTo={Math.min(page * pageSize, devotees.total)}
         />
       )}
 
