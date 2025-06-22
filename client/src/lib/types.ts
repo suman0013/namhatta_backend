@@ -66,9 +66,12 @@ export interface Devotee {
 export interface Namhatta {
   id: number;
   name: string;
+  code: string;
   address?: Address;
   status: string;
-  leaderRole?: string;
+  weeklyMeetingDay?: string;
+  weeklyMeetingTime?: string;
+  hierarchy?: string;
   createdAt: Date;
 }
 

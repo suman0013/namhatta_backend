@@ -40,6 +40,7 @@ export const devotees = pgTable("devotees", {
 export const namhattas = pgTable("namhattas", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  code: text("code").notNull(),
   address: json("address").$type<{
     country?: string;
     state?: string;
@@ -49,7 +50,9 @@ export const namhattas = pgTable("namhattas", {
     details?: string;
   }>(),
   status: text("status").notNull().default("pending"), // pending, active, inactive
-  leaderRole: text("leader_role"), // MalaSenapoti, MahaChakraSenapoti, ChakraSenapoti, UpaChakraSenapoti
+  weeklyMeetingDay: text("weekly_meeting_day"),
+  weeklyMeetingTime: text("weekly_meeting_time"),
+  hierarchy: text("hierarchy"), // MalaSenapoti, MahaChakraSenapoti, ChakraSenapoti, UpaChakraSenapoti, Secretary
   createdAt: timestamp("created_at").defaultNow(),
 });
 

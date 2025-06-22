@@ -21,9 +21,11 @@ interface NamhattaFormProps {
 
 interface FormData {
   name: string;
+  code: string;
   address: Address;
-  status: string;
-  leaderRole: string;
+  weeklyMeetingDay: string;
+  weeklyMeetingTime: string;
+  hierarchy: string;
 }
 
 export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaFormProps) {
@@ -34,9 +36,11 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       name: namhatta?.name || "",
+      code: "",
       address: namhatta?.address || {},
-      status: namhatta?.status || "pending",
-      leaderRole: namhatta?.leaderRole || "",
+      weeklyMeetingDay: "",
+      weeklyMeetingTime: "",
+      hierarchy: "",
     }
   });
 
@@ -180,35 +184,58 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="code">Namhatta Code *</Label>
+                  <Input
+                    {...register("code", { required: "Code is required" })}
+                    placeholder="Enter namhatta code"
+                  />
+                  {errors.code && (
+                    <p className="text-sm text-red-500 mt-1">{errors.code.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="weeklyMeetingDay">Weekly Meeting Day</Label>
                   <Select
-                    value={watch("status")}
-                    onValueChange={(value) => setValue("status", value)}
+                    value={watch("weeklyMeetingDay")}
+                    onValueChange={(value) => setValue("weeklyMeetingDay", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select meeting day" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="Monday">Monday</SelectItem>
+                      <SelectItem value="Tuesday">Tuesday</SelectItem>
+                      <SelectItem value="Wednesday">Wednesday</SelectItem>
+                      <SelectItem value="Thursday">Thursday</SelectItem>
+                      <SelectItem value="Friday">Friday</SelectItem>
+                      <SelectItem value="Saturday">Saturday</SelectItem>
+                      <SelectItem value="Sunday">Sunday</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="leaderRole">Leader Role</Label>
+                <div>
+                  <Label htmlFor="weeklyMeetingTime">Weekly Meeting Time</Label>
+                  <Input
+                    {...register("weeklyMeetingTime")}
+                    type="time"
+                    placeholder="Select meeting time"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="hierarchy">Hierarchy Level</Label>
                   <Select
-                    value={watch("leaderRole")}
-                    onValueChange={(value) => setValue("leaderRole", value)}
+                    value={watch("hierarchy")}
+                    onValueChange={(value) => setValue("hierarchy", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select leader role" />
+                      <SelectValue placeholder="Select hierarchy level" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="MalaSenapoti">Mala Senapoti</SelectItem>
                       <SelectItem value="MahaChakraSenapoti">Maha Chakra Senapoti</SelectItem>
                       <SelectItem value="ChakraSenapoti">Chakra Senapoti</SelectItem>
                       <SelectItem value="UpaChakraSenapoti">Upa Chakra Senapoti</SelectItem>
+                      <SelectItem value="Secretary">Secretary</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
