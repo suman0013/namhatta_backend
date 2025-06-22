@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { X, Home, Users, Map, Layers, Building, Bell, Settings } from "lucide-react";
+import { X, Home, Users, Layers, Building, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,6 @@ const navigationItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home, active: true },
   { href: "/namhattas", label: "Namhattas", icon: Home, badge: "24" },
   { href: "/devotees", label: "Devotees", icon: Users, badge: "1,247" },
-  { href: "/hierarchy", label: "Hierarchy", icon: Map },
   { href: "/statuses", label: "Statuses", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
   { href: "/updates", label: "Updates", icon: Bell, notification: true },
