@@ -48,11 +48,11 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" className="glass">
+          <Button variant="outline" className="glass" onClick={() => window.print()}>
             <Download className="mr-2 h-4 w-4" />
             Export Report
           </Button>
-          <Button className="gradient-button">
+          <Button className="gradient-button" onClick={() => window.location.href = '/devotees'}>
             <Plus className="mr-2 h-4 w-4" />
             Add Devotee
           </Button>
@@ -259,6 +259,7 @@ export default function Dashboard() {
               icon={UserPlus}
               gradient="from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
               iconGradient="from-indigo-500 to-purple-600"
+              onClick={() => window.location.href = '/devotees'}
             />
             <QuickActionCard
               title="Create Namhatta"
@@ -266,20 +267,23 @@ export default function Dashboard() {
               icon={Home}
               gradient="from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
               iconGradient="from-emerald-500 to-teal-600"
+              onClick={() => window.location.href = '/namhattas'}
             />
             <QuickActionCard
-              title="Schedule Program"
-              description="Plan activities"
+              title="Manage Statuses"
+              description="Update spiritual levels"
               icon={CalendarPlus}
               gradient="from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20"
               iconGradient="from-orange-500 to-red-600"
+              onClick={() => window.location.href = '/statuses'}
             />
             <QuickActionCard
-              title="Generate Report"
-              description="Analytics & insights"
+              title="Health Check"
+              description="System status & monitoring"
               icon={BarChart3}
               gradient="from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20"
               iconGradient="from-blue-500 to-cyan-600"
+              onClick={() => window.location.href = '/health'}
             />
           </div>
         </CardContent>
@@ -356,17 +360,19 @@ function StatusProgressBar({ label, count, percentage, color }: {
   );
 }
 
-function QuickActionCard({ title, description, icon: Icon, gradient, iconGradient }: {
+function QuickActionCard({ title, description, icon: Icon, gradient, iconGradient, onClick }: {
   title: string;
   description: string;
   icon: any;
   gradient: string;
   iconGradient: string;
+  onClick?: () => void;
 }) {
   return (
     <Button
       variant="ghost"
       className={`group p-4 bg-gradient-to-br ${gradient} rounded-xl border border-gray-200/50 dark:border-gray-700/50 h-auto flex-col space-y-3 hover-lift hover:shadow-lg`}
+      onClick={onClick}
     >
       <div className={`w-12 h-12 bg-gradient-to-br ${iconGradient} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
         <Icon className="h-6 w-6 text-white" />

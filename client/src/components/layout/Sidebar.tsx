@@ -15,7 +15,8 @@ const navigationItems = [
   { href: "/devotees", label: "Devotees", icon: Users, badge: "1,247" },
   { href: "/statuses", label: "Statuses", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
-  { href: "/updates", label: "Updates", icon: Bell, notification: true },
+  { href: "/health", label: "Health", icon: Bell },
+  { href: "/about", label: "About", icon: Bell },
 ];
 
 export default function Sidebar({ onClose }: SidebarProps) {
