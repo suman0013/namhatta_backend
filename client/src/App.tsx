@@ -29,7 +29,7 @@ function Router() {
         <Route path="/namhattas/:id" component={NamhattaDetail} />
         <Route path="/devotees" component={Devotees} />
         <Route path="/devotees/:id" component={DevoteeDetail} />
-
+        <Route path="/approvals" component={NamhattaApprovals} />
         <Route path="/statuses" component={Statuses} />
         <Route path="/shraddhakutirs" component={Shraddhakutirs} />
         <Route path="/updates" component={Updates} />
