@@ -107,7 +107,7 @@ export default function Namhattas() {
       </div>
 
       {/* Search and Filters Section */}
-      <Card className="glass-card">
+      <Card className="glass-card relative z-10">
         <CardContent className="p-6 space-y-4">
           {/* Search Bar */}
           <SearchInput
@@ -197,7 +197,7 @@ export default function Namhattas() {
       </Card>
 
       {/* Namhattas Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-0">
         {namhattas?.data?.map((namhatta) => (
           <NamhattaCard key={namhatta.id} namhatta={namhatta} />
         ))}
