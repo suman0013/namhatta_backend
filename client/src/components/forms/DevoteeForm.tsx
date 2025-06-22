@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -370,97 +371,60 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.country || ""}
                     onValueChange={(value) => handlePresentAddressChange("country", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries?.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={countries || []}
+                    placeholder="Select or type country"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="presentState">State</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.state || ""}
                     onValueChange={(value) => handlePresentAddressChange("state", value)}
+                    options={presentStates || []}
+                    placeholder="Select or type state"
                     disabled={!presentAddress.country}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentStates?.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <Label htmlFor="presentDistrict">District</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.district || ""}
                     onValueChange={(value) => handlePresentAddressChange("district", value)}
+                    options={presentDistricts || []}
+                    placeholder="Select or type district"
                     disabled={!presentAddress.state}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentDistricts?.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <Label htmlFor="presentSubDistrict">Sub-District</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.subDistrict || ""}
                     onValueChange={(value) => handlePresentAddressChange("subDistrict", value)}
+                    options={presentSubDistricts || []}
+                    placeholder="Select or type sub-district"
                     disabled={!presentAddress.district}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select sub-district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentSubDistricts?.map((subDistrict) => (
-                        <SelectItem key={subDistrict} value={subDistrict}>
-                          {subDistrict}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <Label htmlFor="presentVillage">Village</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.village || ""}
                     onValueChange={(value) => handlePresentAddressChange("village", value)}
+                    options={presentVillages || []}
+                    placeholder="Select or type village"
                     disabled={!presentAddress.district}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select village" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentVillages?.map((village) => (
-                        <SelectItem key={village} value={village}>
-                          {village}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="presentZipcode">ZIP Code</Label>
+                  <Input
+                    value={presentAddress.zipcode || ""}
+                    onChange={(e) => handlePresentAddressChange("zipcode", e.target.value)}
+                    placeholder="Enter ZIP code"
+                  />
                 </div>
                 <div className="md:col-span-2 lg:col-span-3">
                   <Label htmlFor="presentDetails">Additional Details</Label>
@@ -496,97 +460,60 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="permanentCountry">Country</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.country || ""}
                       onValueChange={(value) => handlePermanentAddressChange("country", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries?.map((country) => (
-                          <SelectItem key={country} value={country}>
-                            {country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      options={countries || []}
+                      placeholder="Select or type country"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="permanentState">State</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.state || ""}
                       onValueChange={(value) => handlePermanentAddressChange("state", value)}
+                      options={permanentStates || []}
+                      placeholder="Select or type state"
                       disabled={!permanentAddress.country}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentStates?.map((state) => (
-                          <SelectItem key={state} value={state}>
-                            {state}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
                   <div>
                     <Label htmlFor="permanentDistrict">District</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.district || ""}
                       onValueChange={(value) => handlePermanentAddressChange("district", value)}
+                      options={permanentDistricts || []}
+                      placeholder="Select or type district"
                       disabled={!permanentAddress.state}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select district" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentDistricts?.map((district) => (
-                          <SelectItem key={district} value={district}>
-                            {district}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
                   <div>
                     <Label htmlFor="permanentSubDistrict">Sub-District</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.subDistrict || ""}
                       onValueChange={(value) => handlePermanentAddressChange("subDistrict", value)}
+                      options={permanentSubDistricts || []}
+                      placeholder="Select or type sub-district"
                       disabled={!permanentAddress.district}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select sub-district" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentSubDistricts?.map((subDistrict) => (
-                          <SelectItem key={subDistrict} value={subDistrict}>
-                            {subDistrict}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
                   <div>
                     <Label htmlFor="permanentVillage">Village</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.village || ""}
                       onValueChange={(value) => handlePermanentAddressChange("village", value)}
+                      options={permanentVillages || []}
+                      placeholder="Select or type village"
                       disabled={!permanentAddress.district}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select village" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentVillages?.map((village) => (
-                          <SelectItem key={village} value={village}>
-                            {village}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="permanentZipcode">ZIP Code</Label>
+                    <Input
+                      value={permanentAddress.zipcode || ""}
+                      onChange={(e) => handlePermanentAddressChange("zipcode", e.target.value)}
+                      placeholder="Enter ZIP code"
+                    />
                   </div>
                   <div className="md:col-span-2 lg:col-span-3">
                     <Label htmlFor="permanentDetails">Additional Details</Label>

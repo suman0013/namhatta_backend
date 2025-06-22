@@ -12,6 +12,7 @@ export const devotees = pgTable("devotees", {
     district?: string;
     subDistrict?: string;
     village?: string;
+    zipcode?: string;
     details?: string;
   }>(),
   permanentAddress: json("permanent_address").$type<{
@@ -20,6 +21,7 @@ export const devotees = pgTable("devotees", {
     district?: string;
     subDistrict?: string;
     village?: string;
+    zipcode?: string;
     details?: string;
   }>(),
   gurudev: text("gurudev"),
@@ -47,6 +49,7 @@ export const namhattas = pgTable("namhattas", {
     district?: string;
     subDistrict?: string;
     village?: string;
+    zipcode?: string;
     details?: string;
   }>(),
   status: text("status").notNull().default("pending"), // pending, active, inactive

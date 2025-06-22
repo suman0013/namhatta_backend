@@ -251,6 +251,12 @@ export default function DevoteeDetail() {
                           <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.village}</span>
                         </div>
                       )}
+                      {devotee.presentAddress.zipcode && (
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">ZIP Code:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.zipcode}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -281,6 +287,12 @@ export default function DevoteeDetail() {
                         <div>
                           <span className="text-gray-500 dark:text-gray-400">Village:</span>
                           <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.village}</span>
+                        </div>
+                      )}
+                      {devotee.permanentAddress.zipcode && (
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">ZIP Code:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.zipcode}</span>
                         </div>
                       )}
                     </div>

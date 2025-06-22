@@ -323,6 +323,12 @@ export default function NamhattaDetail() {
                       <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.village}</p>
                     </div>
                   )}
+                  {namhatta.address.zipcode && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">ZIP Code</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.zipcode}</p>
+                    </div>
+                  )}
                   {namhatta.address.details && (
                     <div className="md:col-span-2 lg:col-span-3">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Additional Details</p>

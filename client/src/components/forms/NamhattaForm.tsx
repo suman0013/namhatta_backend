@@ -5,7 +5,7 @@ import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -270,97 +270,60 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="country">Country</Label>
-                  <Select
+                  <SearchableSelect
                     value={address.country || ""}
                     onValueChange={(value) => handleAddressChange("country", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries?.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={countries || []}
+                    placeholder="Select or type country"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="state">State</Label>
-                  <Select
+                  <SearchableSelect
                     value={address.state || ""}
                     onValueChange={(value) => handleAddressChange("state", value)}
+                    options={states || []}
+                    placeholder="Select or type state"
                     disabled={!address.country}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {states?.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <Label htmlFor="district">District</Label>
-                  <Select
+                  <SearchableSelect
                     value={address.district || ""}
                     onValueChange={(value) => handleAddressChange("district", value)}
+                    options={districts || []}
+                    placeholder="Select or type district"
                     disabled={!address.state}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {districts?.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <Label htmlFor="subDistrict">Sub-District</Label>
-                  <Select
+                  <SearchableSelect
                     value={address.subDistrict || ""}
                     onValueChange={(value) => handleAddressChange("subDistrict", value)}
+                    options={subDistricts || []}
+                    placeholder="Select or type sub-district"
                     disabled={!address.district}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select sub-district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subDistricts?.map((subDistrict) => (
-                        <SelectItem key={subDistrict} value={subDistrict}>
-                          {subDistrict}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                 </div>
                 <div>
                   <Label htmlFor="village">Village</Label>
-                  <Select
+                  <SearchableSelect
                     value={address.village || ""}
                     onValueChange={(value) => handleAddressChange("village", value)}
+                    options={villages || []}
+                    placeholder="Select or type village"
                     disabled={!address.district}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select village" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {villages?.map((village) => (
-                        <SelectItem key={village} value={village}>
-                          {village}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zipcode">ZIP Code</Label>
+                  <Input
+                    value={address.zipcode || ""}
+                    onChange={(e) => handleAddressChange("zipcode", e.target.value)}
+                    placeholder="Enter ZIP code"
+                  />
                 </div>
                 <div className="md:col-span-2 lg:col-span-3">
                   <Label htmlFor="details">Additional Details</Label>
