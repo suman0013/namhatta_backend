@@ -48,38 +48,44 @@ export default function Map() {
     const newLevel = getLevelFromZoom(zoomLevel);
     if (newLevel !== currentLevel) {
       setCurrentLevel(newLevel);
+      console.log(`Zoom level ${zoomLevel} -> switching to ${newLevel} view`);
     }
   }, [zoomLevel, currentLevel]);
 
-  // Fetch data based on current level - always load all data for zoom-based switching
+  // Fetch data based on current level - load data as needed
   const { data: countryData, isLoading: countryLoading } = useQuery({
     queryKey: ["/api/map/countries"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'COUNTRY'
+    enabled: currentLevel === 'COUNTRY',
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: stateData, isLoading: stateLoading } = useQuery({
     queryKey: ["/api/map/states"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'STATE'
+    enabled: currentLevel === 'STATE',
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: districtData, isLoading: districtLoading } = useQuery({
     queryKey: ["/api/map/districts"], 
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'DISTRICT'
+    enabled: currentLevel === 'DISTRICT',
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: subDistrictData, isLoading: subDistrictLoading } = useQuery({
     queryKey: ["/api/map/sub-districts"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'SUB_DISTRICT'
+    enabled: currentLevel === 'SUB_DISTRICT',
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: villageData, isLoading: villageLoading } = useQuery({
     queryKey: ["/api/map/villages"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'VILLAGE'
+    enabled: currentLevel === 'VILLAGE',
+    staleTime: 5 * 60 * 1000,
   });
 
   const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading || villageLoading;
@@ -206,8 +212,11 @@ export default function Map() {
         map.on('zoomend', () => {
           const zoom = map.getZoom();
           console.log('Zoom changed to:', zoom);
-          setZoomLevel(zoom);
+          setZoomLevel(Math.round(zoom)); // Round to avoid precision issues
         });
+        
+        // Set initial zoom level
+        setZoomLevel(4);
         
         // Add OpenStreetMap tiles (like Google Maps)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -251,7 +260,7 @@ export default function Map() {
     markersRef.current.clearLayers();
     
     if (currentData.length === 0) {
-      console.log('No data to display on map');
+      console.log('No data to display on map for level:', currentLevel);
       return;
     }
     
