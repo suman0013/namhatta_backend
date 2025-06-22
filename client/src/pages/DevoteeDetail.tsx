@@ -24,7 +24,8 @@ import {
   Book,
   Award,
   Phone,
-  Mail
+  Mail,
+  Zap
 } from "lucide-react";
 import type { Devotee } from "@/lib/types";
 
