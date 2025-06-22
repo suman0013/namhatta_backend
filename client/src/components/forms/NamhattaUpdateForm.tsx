@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { api } from "@/services/api";
 import { queryClient } from "@/lib/queryClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Users, Image, Link, Music, Utensils, BookOpen, Sparkles } from "lucide-react";
+import { Calendar, Users, Image, Link, Music, Utensils, BookOpen, Sparkles, Upload, X } from "lucide-react";
 
 interface NamhattaUpdateFormProps {
   namhattaId: number;
@@ -50,7 +50,8 @@ const programTypes = [
 
 export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: NamhattaUpdateFormProps) {
   const { toast } = useToast();
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<UpdateFormData>({
     defaultValues: {
@@ -65,17 +66,28 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
       bhagwatPath: false,
       specialAttraction: "",
       facebookLink: "",
-      youtubeLink: "",
-      imageUrls: []
+      youtubeLink: ""
     }
   });
 
   const createUpdateMutation = useMutation({
-    mutationFn: (data: UpdateFormData) => api.createNamhattaUpdate({
-      namhattaId,
-      ...data,
-      imageUrls
-    }),
+    mutationFn: async (data: UpdateFormData) => {
+      // Convert uploaded images to base64 or upload to a service
+      const imageUrls: string[] = [];
+      
+      for (const file of uploadedImages) {
+        // For demo purposes, we'll create object URLs
+        // In production, you'd upload to a cloud service like AWS S3, Cloudinary, etc.
+        const objectUrl = URL.createObjectURL(file);
+        imageUrls.push(objectUrl);
+      }
+      
+      return api.createNamhattaUpdate({
+        namhattaId,
+        ...data,
+        imageUrls
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/namhattas/${namhattaId}/updates`] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
@@ -84,7 +96,8 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
         description: "Update posted successfully",
       });
       reset();
-      setImageUrls([]);
+      setUploadedImages([]);
+      setImagePreviews([]);
       onClose();
     },
     onError: (error: any) => {
@@ -97,24 +110,39 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
   });
 
   const onSubmit = (data: UpdateFormData) => {
-    createUpdateMutation.mutate({
-      ...data,
-      imageUrls
-    });
+    createUpdateMutation.mutate(data);
   };
 
-  const addImageUrl = () => {
-    setImageUrls([...imageUrls, ""]);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    
+    // Validate file types
+    const validFiles = files.filter(file => 
+      file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024 // 5MB limit
+    );
+    
+    if (validFiles.length !== files.length) {
+      toast({
+        title: "Invalid files",
+        description: "Some files were skipped. Only images under 5MB are allowed.",
+        variant: "destructive",
+      });
+    }
+    
+    // Update uploaded images
+    setUploadedImages(prev => [...prev, ...validFiles]);
+    
+    // Create preview URLs
+    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
   };
 
-  const updateImageUrl = (index: number, url: string) => {
-    const newUrls = [...imageUrls];
-    newUrls[index] = url;
-    setImageUrls(newUrls);
-  };
-
-  const removeImageUrl = (index: number) => {
-    setImageUrls(imageUrls.filter((_, i) => i !== index));
+  const removeImage = (index: number) => {
+    // Revoke the object URL to free memory
+    URL.revokeObjectURL(imagePreviews[index]);
+    
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -125,6 +153,9 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
             <Calendar className="mr-2 h-5 w-5 text-indigo-500" />
             Post Namhatta Update
           </DialogTitle>
+          <DialogDescription>
+            Share details about your program including attendance, activities, and photos.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -292,35 +323,57 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
             </div>
           </div>
 
-          {/* Image URLs */}
+          {/* Image Upload */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label>Images (optional)</Label>
-              <Button type="button" variant="outline" size="sm" onClick={addImageUrl}>
-                <Image className="mr-2 h-4 w-4" />
-                Add Image URL
-              </Button>
-            </div>
-            
-            {imageUrls.map((url, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <Input
-                  type="url"
-                  value={url}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                  className="glass"
-                  placeholder="https://example.com/image.jpg"
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  id="image-upload"
                 />
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => removeImageUrl(index)}
-                >
-                  Remove
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <label htmlFor="image-upload" className="cursor-pointer flex items-center">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Images
+                  </label>
                 </Button>
               </div>
-            ))}
+            </div>
+            
+            {/* Image Previews */}
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={preview}
+                      alt={`Upload ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {uploadedImages.length > 0 && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {uploadedImages.length} image{uploadedImages.length !== 1 ? 's' : ''} selected
+              </p>
+            )}
           </div>
 
           {/* Submit Buttons */}

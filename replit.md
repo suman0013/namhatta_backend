@@ -98,6 +98,8 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- January 2, 2025: Replaced URL input with image upload functionality for better user experience
+- January 2, 2025: Added image preview and removal capabilities in update forms
 - January 2, 2025: Implemented comprehensive Namhatta Updates system with rich forms and visual cards
 - January 2, 2025: Added activity tracking (kirtan, prasadam, book distribution, chanting, arati, bhagwat path)
 - January 2, 2025: Created dedicated Updates page with filtering, search, and statistics
