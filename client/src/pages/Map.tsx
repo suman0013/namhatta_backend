@@ -30,51 +30,56 @@ interface MapData {
 
 export default function Map() {
   const [currentLevel, setCurrentLevel] = useState<MapLevel>('COUNTRY');
-  const [selectedCountry, setSelectedCountry] = useState<string>('');
-  const [selectedState, setSelectedState] = useState<string>('');
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const [selectedSubDistrict, setSelectedSubDistrict] = useState<string>('');
+  const [zoomLevel, setZoomLevel] = useState<number>(4);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Force country level on component mount
-  useEffect(() => {
-    setCurrentLevel('COUNTRY');
-    setSelectedCountry('');
-    setSelectedState('');
-    setSelectedDistrict('');
-    setSelectedSubDistrict('');
-  }, []);
+  // Determine level based on zoom
+  const getLevelFromZoom = (zoom: number): MapLevel => {
+    if (zoom >= 12) return 'VILLAGE';
+    if (zoom >= 9) return 'SUB_DISTRICT';
+    if (zoom >= 7) return 'DISTRICT';
+    if (zoom >= 5) return 'STATE';
+    return 'COUNTRY';
+  };
 
-  // Fetch data based on current level
+  // Update level when zoom changes
+  useEffect(() => {
+    const newLevel = getLevelFromZoom(zoomLevel);
+    if (newLevel !== currentLevel) {
+      setCurrentLevel(newLevel);
+    }
+  }, [zoomLevel, currentLevel]);
+
+  // Fetch data based on current level - always load all data for zoom-based switching
   const { data: countryData, isLoading: countryLoading } = useQuery({
     queryKey: ["/api/map/countries"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: true // Always load country data as it's the default view
+    enabled: currentLevel === 'COUNTRY'
   });
 
   const { data: stateData, isLoading: stateLoading } = useQuery({
-    queryKey: ["/api/map/states", selectedCountry],
+    queryKey: ["/api/map/states"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: (currentLevel === 'STATE' || currentLevel === 'DISTRICT' || currentLevel === 'SUB_DISTRICT') && !!selectedCountry
+    enabled: currentLevel === 'STATE'
   });
 
   const { data: districtData, isLoading: districtLoading } = useQuery({
-    queryKey: ["/api/map/districts", selectedState], 
+    queryKey: ["/api/map/districts"], 
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: (currentLevel === 'DISTRICT' || currentLevel === 'SUB_DISTRICT') && !!selectedState
+    enabled: currentLevel === 'DISTRICT'
   });
 
   const { data: subDistrictData, isLoading: subDistrictLoading } = useQuery({
-    queryKey: ["/api/map/sub-districts", selectedDistrict],
+    queryKey: ["/api/map/sub-districts"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: (currentLevel === 'SUB_DISTRICT' || currentLevel === 'VILLAGE') && !!selectedDistrict
+    enabled: currentLevel === 'SUB_DISTRICT'
   });
 
   const { data: villageData, isLoading: villageLoading } = useQuery({
-    queryKey: ["/api/map/villages", selectedSubDistrict],
+    queryKey: ["/api/map/villages"],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'VILLAGE' && !!selectedSubDistrict
+    enabled: currentLevel === 'VILLAGE'
   });
 
   const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading || villageLoading;
@@ -113,69 +118,54 @@ export default function Map() {
 
     switch (currentLevel) {
       case 'COUNTRY':
-        if (!countryData) {
-          console.log('No country data available yet');
-          return [];
-        }
+        if (!countryData) return [];
         const countries = countryData.map((item: any) => ({
           name: item.country,
           count: item.count,
           coordinates: coordinatesMap[item.country],
           level: 'COUNTRY' as MapLevel
         })).filter((item: any) => item.coordinates);
-        console.log('Country data processed:', countries);
+        console.log(`Showing ${countries.length} countries at zoom ${zoomLevel}`);
         return countries;
       case 'STATE':
-        if (!stateData || !selectedCountry) {
-          console.log('No state data available or no country selected');
-          return [];
-        }
+        if (!stateData) return [];
         const states = stateData.map((item: any) => ({
           name: item.state,
           count: item.count,
           coordinates: coordinatesMap[item.state],
           level: 'STATE' as MapLevel
         })).filter((item: any) => item.coordinates);
-        console.log('State data processed:', states);
+        console.log(`Showing ${states.length} states at zoom ${zoomLevel}`);
         return states;
       case 'DISTRICT':
-        if (!districtData || !selectedState) {
-          console.log('No district data available or no state selected');
-          return [];
-        }
+        if (!districtData) return [];
         const districts = districtData.map((item: any) => ({
           name: item.district,
           count: item.count,
           coordinates: coordinatesMap[item.district],
           level: 'DISTRICT' as MapLevel
         })).filter((item: any) => item.coordinates);
-        console.log('District data processed:', districts);
+        console.log(`Showing ${districts.length} districts at zoom ${zoomLevel}`);
         return districts;
       case 'SUB_DISTRICT':
-        if (!subDistrictData || !selectedDistrict) {
-          console.log('No sub-district data available or no district selected');
-          return [];
-        }
+        if (!subDistrictData) return [];
         const subDistricts = subDistrictData.map((item: any) => ({
           name: item.subDistrict,
           count: item.count,
           coordinates: coordinatesMap[item.subDistrict],
           level: 'SUB_DISTRICT' as MapLevel
         })).filter((item: any) => item.coordinates);
-        console.log('Sub-district data processed:', subDistricts);
+        console.log(`Showing ${subDistricts.length} sub-districts at zoom ${zoomLevel}`);
         return subDistricts;
       case 'VILLAGE':
-        if (!villageData || !selectedSubDistrict) {
-          console.log('No village data available or no sub-district selected');
-          return [];
-        }
+        if (!villageData) return [];
         const villages = villageData.map((item: any) => ({
           name: item.village,
           count: item.count,
           coordinates: coordinatesMap[item.village],
           level: 'VILLAGE' as MapLevel
         })).filter((item: any) => item.coordinates);
-        console.log('Village data processed:', villages);
+        console.log(`Showing ${villages.length} villages at zoom ${zoomLevel}`);
         return villages;
       default:
         return [];
@@ -185,12 +175,6 @@ export default function Map() {
   const currentData = getCurrentData();
   const maxCount = Math.max(...currentData.map(d => d.count), 1);
   const colorScale = scaleSequential(interpolateBlues).domain([0, maxCount]);
-  
-  console.log('Current level:', currentLevel);
-  console.log('Current data:', currentData);
-  console.log('Country data from API:', countryData);
-  console.log('State data from API:', stateData);
-  console.log('Max count:', maxCount);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -209,7 +193,7 @@ export default function Map() {
       try {
         // Initialize the map with full interaction capabilities
         const map = L.map('leaflet-map', {
-          zoomControl: false, // We'll add custom controls
+          zoomControl: true, // Enable zoom controls
           doubleClickZoom: true, // Enable double click zoom
           scrollWheelZoom: true, // Enable mouse wheel zoom
           touchZoom: true, // Enable touch zoom on mobile
@@ -217,6 +201,13 @@ export default function Map() {
           tap: true, // Enable tap on mobile
           boxZoom: true, // Enable box zoom with shift+drag
         }).setView([20, 77], 4); // Centered on South Asia
+        
+        // Listen for zoom changes to update level automatically
+        map.on('zoomend', () => {
+          const zoom = map.getZoom();
+          console.log('Zoom changed to:', zoom);
+          setZoomLevel(zoom);
+        });
         
         // Add OpenStreetMap tiles (like Google Maps)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -276,12 +267,12 @@ export default function Map() {
       
       console.log(`Adding marker for ${data.name} at [${lat}, ${lng}] with ${data.count} namhattas`);
       
-      // Create a highly visible circle marker
+      // Create a highly visible circle marker with color based on count
       const circle = L.circleMarker([lat, lng], {
-        radius: Math.max(25, Math.sqrt(data.count) * 15),
-        fillColor: '#3b82f6', // Always use blue for high visibility
+        radius: Math.max(15, Math.sqrt(data.count) * 8),
+        fillColor: colorScale(data.count),
         color: '#ffffff',
-        weight: 4,
+        weight: 3,
         opacity: 1,
         fillOpacity: 0.8
       });
@@ -298,7 +289,7 @@ export default function Map() {
             Level: ${currentLevel.replace('_', ' ')}
           </p>
           <p style="margin: 8px 0 0 0; color: #6366f1; font-size: 12px; cursor: pointer;">
-            Click to drill down →
+            Click to zoom in →
           </p>
         </div>
       `);
@@ -386,44 +377,20 @@ export default function Map() {
   };
 
   const handleMarkerClick = (data: MapData) => {
-    console.log('Marker clicked:', data.name, 'Level:', data.level, 'Current Level:', currentLevel);
+    console.log('Marker clicked:', data.name, 'Level:', data.level);
     
-    if (data.level === 'COUNTRY' && currentLevel === 'COUNTRY') {
-      console.log('Drilling down from country to state for:', data.name);
-      setSelectedCountry(data.name);
-      setCurrentLevel('STATE');
-      // Zoom to the country
-      if (mapRef.current && data.coordinates) {
-        const [lng, lat] = data.coordinates;
-        mapRef.current.setView([lat, lng], 6);
-      }
-    } else if (data.level === 'STATE' && currentLevel === 'STATE') {
-      console.log('Drilling down from state to district for:', data.name);
-      setSelectedState(data.name);
-      setCurrentLevel('DISTRICT');
-      // Zoom to the state
-      if (mapRef.current && data.coordinates) {
-        const [lng, lat] = data.coordinates;
-        mapRef.current.setView([lat, lng], 8);
-      }
-    } else if (data.level === 'DISTRICT' && currentLevel === 'DISTRICT') {
-      console.log('Drilling down from district to sub-district for:', data.name);
-      setSelectedDistrict(data.name);
-      setCurrentLevel('SUB_DISTRICT');
-      // Zoom to the district
-      if (mapRef.current && data.coordinates) {
-        const [lng, lat] = data.coordinates;
-        mapRef.current.setView([lat, lng], 10);
-      }
-    } else if (data.level === 'SUB_DISTRICT' && currentLevel === 'SUB_DISTRICT') {
-      console.log('Drilling down from sub-district to village for:', data.name);
-      setSelectedSubDistrict(data.name);
-      setCurrentLevel('VILLAGE');
-      // Zoom to the sub-district
-      if (mapRef.current && data.coordinates) {
-        const [lng, lat] = data.coordinates;
-        mapRef.current.setView([lat, lng], 12);
-      }
+    // Simply zoom to the location and let the zoom level determine what data to show
+    if (mapRef.current && data.coordinates) {
+      const [lng, lat] = data.coordinates;
+      
+      // Determine appropriate zoom level for the next detail level
+      let targetZoom = mapRef.current.getZoom() + 2;
+      if (data.level === 'COUNTRY') targetZoom = 6;
+      else if (data.level === 'STATE') targetZoom = 8;
+      else if (data.level === 'DISTRICT') targetZoom = 10;
+      else if (data.level === 'SUB_DISTRICT') targetZoom = 12;
+      
+      mapRef.current.setView([lat, lng], targetZoom);
     }
   };
 
