@@ -11,7 +11,7 @@ import Namhattas from "@/pages/Namhattas";
 import NamhattaDetail from "@/pages/NamhattaDetail";
 import Devotees from "@/pages/Devotees";
 import DevoteeDetail from "@/pages/DevoteeDetail";
-import Hierarchy from "@/pages/Hierarchy";
+
 import Statuses from "@/pages/Statuses";
 import Shraddhakutirs from "@/pages/Shraddhakutirs";
 import Health from "@/pages/Health";
@@ -27,8 +27,7 @@ function Router() {
         <Route path="/namhattas/:id" component={NamhattaDetail} />
         <Route path="/devotees" component={Devotees} />
         <Route path="/devotees/:id" component={DevoteeDetail} />
-        <Route path="/hierarchy" component={Hierarchy} />
-        <Route path="/hierarchy/:level" component={Hierarchy} />
+
         <Route path="/statuses" component={Statuses} />
         <Route path="/shraddhakutirs" component={Shraddhakutirs} />
         <Route path="/health" component={Health} />

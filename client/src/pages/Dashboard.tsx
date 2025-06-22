@@ -67,10 +67,7 @@ export default function Dashboard() {
               <Crown className="mr-3 h-5 w-5 text-indigo-500" />
               Leadership Hierarchy
             </CardTitle>
-            <Button variant="link" className="text-indigo-600 dark:text-indigo-400">
-              View Full Hierarchy
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
