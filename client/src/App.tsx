@@ -14,6 +14,7 @@ import DevoteeDetail from "@/pages/DevoteeDetail";
 
 import Statuses from "@/pages/Statuses";
 import Shraddhakutirs from "@/pages/Shraddhakutirs";
+import NamhattaApprovals from "@/pages/NamhattaApprovals";
 import Updates from "@/pages/Updates";
 import Health from "@/pages/Health";
 import About from "@/pages/About";

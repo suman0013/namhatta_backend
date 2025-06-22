@@ -31,6 +31,7 @@ export interface IStorage {
   createNamhatta(namhatta: InsertNamhatta): Promise<Namhatta>;
   updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta>;
   approveNamhatta(id: number): Promise<void>;
+  rejectNamhatta(id: number, reason?: string): Promise<void>;
   getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]>;
   getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>>;
   getNamhattaStatusHistory(id: number, page?: number, size?: number): Promise<{ data: StatusHistory[], total: number }>;
