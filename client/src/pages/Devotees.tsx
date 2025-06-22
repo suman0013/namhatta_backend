@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -129,53 +130,39 @@ export default function Devotees() {
 
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Select value={filters.country} onValueChange={(value) => handleFilterChange("country", value)}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Countries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {countries?.map((country) => (
-                  <SelectItem key={country} value={country}>{country}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.country || "All Countries"}
+              onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "all" : value)}
+              options={["All Countries", ...(countries || [])]}
+              placeholder="All Countries"
+              className="glass border-0"
+            />
 
-            <Select value={filters.state} onValueChange={(value) => handleFilterChange("state", value)} disabled={!filters.country}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All States" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All States</SelectItem>
-                {states?.map((state) => (
-                  <SelectItem key={state} value={state}>{state}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.state || "All States"}
+              onValueChange={(value) => handleFilterChange("state", value === "All States" ? "all" : value)}
+              options={["All States", ...(states || [])]}
+              placeholder="All States"
+              disabled={!filters.country}
+              className="glass border-0"
+            />
 
-            <Select value={filters.district} onValueChange={(value) => handleFilterChange("district", value)} disabled={!filters.state}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Districts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Districts</SelectItem>
-                {districts?.map((district) => (
-                  <SelectItem key={district} value={district}>{district}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.district || "All Districts"}
+              onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "all" : value)}
+              options={["All Districts", ...(districts || [])]}
+              placeholder="All Districts"
+              disabled={!filters.state}
+              className="glass border-0"
+            />
 
-            <Select value={filters.statusId} onValueChange={(value) => handleFilterChange("statusId", value)}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {statuses?.map((status) => (
-                  <SelectItem key={status.id} value={status.id.toString()}>{status.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.statusId || "All Statuses"}
+              onValueChange={(value) => handleFilterChange("statusId", value === "All Statuses" ? "all" : value)}
+              options={["All Statuses", ...(statuses?.map(status => status.name) || [])]}
+              placeholder="All Statuses"
+              className="glass border-0"
+            />
           </div>
         </CardContent>
       </Card>
