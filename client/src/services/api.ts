@@ -158,6 +158,12 @@ export const api = {
     return res.json();
   },
 
+  // Updates
+  createNamhattaUpdate: async (update: any) => {
+    const res = await apiRequest("POST", "/api/updates", update);
+    return res.json();
+  },
+
   // Health & About
   getHealth: async () => {
     const res = await apiRequest("GET", "/api/health");

@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import ShraddhakutirForm from "@/components/forms/ShraddhakutirForm";
 import { 
   Building, 
   Plus, 
@@ -33,7 +34,7 @@ const createShraddhakutirSchema = z.object({
 
 export default function Shraddhakutirs() {
   const { toast } = useToast();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: shraddhakutirs, isLoading } = useQuery({
@@ -108,17 +109,11 @@ export default function Shraddhakutirs() {
             Manage spiritual centers and their organizational codes
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gradient-button">
-              <Plus className="mr-2 h-4 w-4" />
-              Create New Shraddhakutir
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="glass-card border-0">
-            <DialogHeader>
-              <DialogTitle>Create New Shraddhakutir</DialogTitle>
-            </DialogHeader>
+        <Button className="gradient-button" onClick={() => setShowForm(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create New Shraddhakutir
+        </Button>
+      </div>
             <Form {...createForm}>
               <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
                 <FormField
@@ -284,7 +279,7 @@ export default function Shraddhakutirs() {
                 Create your first shraddhakutir to start managing spiritual centers.
               </p>
               <Button
-                onClick={() => setIsCreateDialogOpen(true)}
+                onClick={() => setShowForm(true)}
                 className="gradient-button"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -294,6 +289,14 @@ export default function Shraddhakutirs() {
           )}
         </CardContent>
       </Card>
+
+      {/* Form Modal */}
+      {showForm && (
+        <ShraddhakutirForm
+          onClose={() => setShowForm(false)}
+          onSuccess={() => setShowForm(false)}
+        />
+      )}
     </div>
   );
 }

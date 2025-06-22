@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import StatusForm from "@/components/forms/StatusForm";
 import { 
   Layers, 
   Plus, 
@@ -36,8 +37,8 @@ const renameStatusSchema = z.object({
 
 export default function Statuses() {
   const { toast } = useToast();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingStatus, setEditingStatus] = useState<DevotionalStatus | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingStatus, setEditingStatus] = useState<DevotionalStatus | undefined>();
 
   const { data: statuses, isLoading } = useQuery({
     queryKey: ["/api/statuses"],
@@ -147,17 +148,11 @@ export default function Statuses() {
             Manage spiritual progression levels and track devotee advancement
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gradient-button">
-              <Plus className="mr-2 h-4 w-4" />
-              Add New Status
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="glass-card border-0">
-            <DialogHeader>
-              <DialogTitle>Create New Status</DialogTitle>
-            </DialogHeader>
+        <Button className="gradient-button" onClick={() => setShowForm(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add New Status
+        </Button>
+      </div>
             <Form {...createForm}>
               <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
                 <FormField
@@ -298,7 +293,7 @@ export default function Statuses() {
                 Create your first devotional status to start tracking spiritual progress.
               </p>
               <Button
-                onClick={() => setIsCreateDialogOpen(true)}
+                onClick={() => setShowForm(true)}
                 className="gradient-button"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -308,6 +303,21 @@ export default function Statuses() {
           )}
         </CardContent>
       </Card>
+
+      {/* Form Modal */}
+      {(showForm || editingStatus) && (
+        <StatusForm
+          status={editingStatus}
+          onClose={() => {
+            setShowForm(false);
+            setEditingStatus(undefined);
+          }}
+          onSuccess={() => {
+            setShowForm(false);
+            setEditingStatus(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }

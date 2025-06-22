@@ -7,12 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Pagination } from "@/components/ui/pagination";
 import { Home, Users, Calendar, Search, Plus, Edit, MapPin } from "lucide-react";
 import { Link } from "wouter";
+import NamhattaForm from "@/components/forms/NamhattaForm";
 import type { Namhatta } from "@/lib/types";
 
 export default function Namhattas() {
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingNamhatta, setEditingNamhatta] = useState<Namhatta | undefined>();
   const [filters, setFilters] = useState({
     country: "",
     state: "",
@@ -21,8 +26,8 @@ export default function Namhattas() {
   });
 
   const { data: namhattas, isLoading } = useQuery({
-    queryKey: ["/api/namhattas", page, filters],
-    queryFn: () => api.getNamhattas(page, 12, filters),
+    queryKey: ["/api/namhattas", page, searchTerm, filters],
+    queryFn: () => api.getNamhattas(page, 12, { ...filters, search: searchTerm }),
   });
 
   const { data: countries } = useQuery({
@@ -72,17 +77,33 @@ export default function Namhattas() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Namhattas Management</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and monitor all Namhatta centers</p>
         </div>
-        <Button className="gradient-button">
+        <Button className="gradient-button" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Create New Namhatta
         </Button>
       </div>
 
-      {/* Filters Section */}
+      {/* Search and Filters Section */}
       <Card className="glass-card">
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Filters</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <CardContent className="p-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Search namhattas by name or location..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1); // Reset to first page on search
+              }}
+              className="pl-10 glass border-0"
+            />
+          </div>
+
+          {/* Filters */}
+          <h3 className="font-semibold text-gray-900 dark:text-white">Filters</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <Select value={filters.country} onValueChange={(value) => handleFilterChange("country", value)}>
               <SelectTrigger className="glass border-0">
                 <SelectValue placeholder="All Countries" />
@@ -148,43 +169,14 @@ export default function Namhattas() {
 
       {/* Pagination */}
       {namhattas && namhattas.total > 12 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Showing <span className="font-medium">{((page - 1) * 12) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * 12, namhattas.total)}</span> of{" "}
-            <span className="font-medium">{namhattas.total}</span> results
-          </p>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              className="glass"
-            >
-              Previous
-            </Button>
-            {Array.from({ length: Math.ceil(namhattas.total / 12) }, (_, i) => i + 1)
-              .filter(p => Math.abs(p - page) <= 2)
-              .map((p) => (
-                <Button
-                  key={p}
-                  variant={p === page ? "default" : "outline"}
-                  onClick={() => setPage(p)}
-                  className={p === page ? "bg-indigo-500" : "glass"}
-                >
-                  {p}
-                </Button>
-              ))}
-            <Button
-              variant="outline"
-              onClick={() => setPage(page + 1)}
-              disabled={page >= Math.ceil(namhattas.total / 12)}
-              className="glass"
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(namhattas.total / 12)}
+          onPageChange={setPage}
+          showingFrom={((page - 1) * 12) + 1}
+          showingTo={Math.min(page * 12, namhattas.total)}
+          totalItems={namhattas.total}
+        />
       )}
     </div>
   );
@@ -260,7 +252,12 @@ function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
               View Details
             </Button>
           </Link>
-          <Button variant="outline" size="icon" className="glass">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="glass"
+            onClick={() => setEditingNamhatta(namhatta)}
+          >
             <Edit className="h-4 w-4" />
           </Button>
         </div>
@@ -290,6 +287,21 @@ function NamhattasSkeleton() {
           </Card>
         ))}
       </div>
+
+      {/* Form Modal */}
+      {(showForm || editingNamhatta) && (
+        <NamhattaForm
+          namhatta={editingNamhatta}
+          onClose={() => {
+            setShowForm(false);
+            setEditingNamhatta(undefined);
+          }}
+          onSuccess={() => {
+            setShowForm(false);
+            setEditingNamhatta(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }

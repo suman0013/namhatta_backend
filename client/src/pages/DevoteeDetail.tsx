@@ -142,9 +142,13 @@ export default function DevoteeDetail() {
           </div>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" className="glass">
+          <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Profile
+          </Button>
+          <Button variant="outline" className="glass" onClick={() => setShowHistory(true)}>
+            <Zap className="mr-2 h-4 w-4" />
+            Status History
           </Button>
         </div>
       </div>
@@ -458,6 +462,23 @@ export default function DevoteeDetail() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Status History Modal */}
+      {showHistory && (
+        <StatusHistoryView
+          devoteeId={devoteeId}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
+
+      {/* Edit Form Modal */}
+      {showEditForm && (
+        <DevoteeForm
+          devotee={devotee}
+          onClose={() => setShowEditForm(false)}
+          onSuccess={() => setShowEditForm(false)}
+        />
+      )}
     </div>
   );
 }

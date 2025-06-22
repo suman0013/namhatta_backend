@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Pagination } from "@/components/ui/pagination";
 import { 
   Users, 
   Search, 
@@ -21,11 +22,14 @@ import {
   Heart
 } from "lucide-react";
 import { Link } from "wouter";
+import DevoteeForm from "@/components/forms/DevoteeForm";
 import type { Devotee } from "@/lib/types";
 
 export default function Devotees() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingDevotee, setEditingDevotee] = useState<Devotee | undefined>();
   const [filters, setFilters] = useState({
     country: "",
     state: "",
@@ -35,7 +39,21 @@ export default function Devotees() {
 
   const { data: devotees, isLoading } = useQuery({
     queryKey: ["/api/devotees", page, searchTerm, filters],
-    queryFn: () => api.getDevotees(page, 12),
+    queryFn: () => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: "12"
+      });
+      
+      // Add search and filters
+      if (searchTerm) params.append('search', searchTerm);
+      if (filters.country) params.append('country', filters.country);
+      if (filters.state) params.append('state', filters.state);
+      if (filters.district) params.append('district', filters.district);
+      if (filters.statusId) params.append('statusId', filters.statusId);
+      
+      return fetch(`/api/devotees?${params}`).then(res => res.json());
+    },
   });
 
   const { data: statuses } = useQuery({
@@ -85,7 +103,7 @@ export default function Devotees() {
             Manage devotee profiles and spiritual progress
           </p>
         </div>
-        <Button className="gradient-button">
+        <Button className="gradient-button" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Devotee
         </Button>
@@ -101,7 +119,10 @@ export default function Devotees() {
               type="text"
               placeholder="Search devotees by name, gurudev, or location..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1); // Reset to first page on search
+              }}
               className="pl-10 glass border-0"
             />
           </div>
@@ -245,7 +266,7 @@ export default function Devotees() {
                 : "Start by adding your first devotee to the system."
               }
             </p>
-            <Button className="gradient-button">
+            <Button className="gradient-button" onClick={() => setShowForm(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add First Devotee
             </Button>
@@ -255,43 +276,29 @@ export default function Devotees() {
 
       {/* Pagination */}
       {devotees && devotees.total > 12 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Showing <span className="font-medium">{((page - 1) * 12) + 1}</span> to{" "}
-            <span className="font-medium">{Math.min(page * 12, devotees.total)}</span> of{" "}
-            <span className="font-medium">{devotees.total}</span> results
-          </p>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              className="glass"
-            >
-              Previous
-            </Button>
-            {Array.from({ length: Math.ceil(devotees.total / 12) }, (_, i) => i + 1)
-              .filter(p => Math.abs(p - page) <= 2)
-              .map((p) => (
-                <Button
-                  key={p}
-                  variant={p === page ? "default" : "outline"}
-                  onClick={() => setPage(p)}
-                  className={p === page ? "bg-indigo-500" : "glass"}
-                >
-                  {p}
-                </Button>
-              ))}
-            <Button
-              variant="outline"
-              onClick={() => setPage(page + 1)}
-              disabled={page >= Math.ceil(devotees.total / 12)}
-              className="glass"
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(devotees.total / 12)}
+          onPageChange={setPage}
+          showingFrom={((page - 1) * 12) + 1}
+          showingTo={Math.min(page * 12, devotees.total)}
+          totalItems={devotees.total}
+        />
+      )}
+
+      {/* Form Modal */}
+      {(showForm || editingDevotee) && (
+        <DevoteeForm
+          devotee={editingDevotee}
+          onClose={() => {
+            setShowForm(false);
+            setEditingDevotee(undefined);
+          }}
+          onSuccess={() => {
+            setShowForm(false);
+            setEditingDevotee(undefined);
+          }}
+        />
       )}
     </div>
   );
