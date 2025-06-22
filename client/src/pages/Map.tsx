@@ -19,7 +19,7 @@ const ZOOM_LEVELS = {
   SUB_DISTRICT: { scale: 6400, center: [88.4, 22.9] as [number, number] }
 };
 
-type MapLevel = 'COUNTRY' | 'STATE' | 'DISTRICT' | 'SUB_DISTRICT';
+type MapLevel = 'COUNTRY' | 'STATE' | 'DISTRICT' | 'SUB_DISTRICT' | 'VILLAGE';
 
 interface MapData {
   name: string;
@@ -33,15 +33,17 @@ export default function Map() {
   const [selectedCountry, setSelectedCountry] = useState<string>('');
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedSubDistrict, setSelectedSubDistrict] = useState<string>('');
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
   // Force country level on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentLevel('COUNTRY');
     setSelectedCountry('');
     setSelectedState('');
     setSelectedDistrict('');
+    setSelectedSubDistrict('');
   }, []);
 
   // Fetch data based on current level
@@ -54,22 +56,28 @@ export default function Map() {
   const { data: stateData, isLoading: stateLoading } = useQuery({
     queryKey: ["/api/map/states", selectedCountry],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'STATE' && !!selectedCountry
+    enabled: (currentLevel === 'STATE' || currentLevel === 'DISTRICT' || currentLevel === 'SUB_DISTRICT') && !!selectedCountry
   });
 
   const { data: districtData, isLoading: districtLoading } = useQuery({
     queryKey: ["/api/map/districts", selectedState], 
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'DISTRICT' && !!selectedState
+    enabled: (currentLevel === 'DISTRICT' || currentLevel === 'SUB_DISTRICT') && !!selectedState
   });
 
   const { data: subDistrictData, isLoading: subDistrictLoading } = useQuery({
     queryKey: ["/api/map/sub-districts", selectedDistrict],
     queryFn: getQueryFn({ on401: "throw" }),
-    enabled: currentLevel === 'SUB_DISTRICT' && !!selectedDistrict
+    enabled: (currentLevel === 'SUB_DISTRICT' || currentLevel === 'VILLAGE') && !!selectedDistrict
   });
 
-  const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading;
+  const { data: villageData, isLoading: villageLoading } = useQuery({
+    queryKey: ["/api/map/villages", selectedSubDistrict],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: currentLevel === 'VILLAGE' && !!selectedSubDistrict
+  });
+
+  const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading || villageLoading;
 
   // Get current data based on level
   const getCurrentData = (): MapData[] => {
@@ -131,23 +139,44 @@ export default function Map() {
         console.log('State data processed:', states);
         return states;
       case 'DISTRICT':
-        const districts = districtData?.map((item: any) => ({
+        if (!districtData || !selectedState) {
+          console.log('No district data available or no state selected');
+          return [];
+        }
+        const districts = districtData.map((item: any) => ({
           name: item.district,
           count: item.count,
           coordinates: coordinatesMap[item.district],
           level: 'DISTRICT' as MapLevel
-        })).filter((item: any) => item.coordinates) || [];
+        })).filter((item: any) => item.coordinates);
         console.log('District data processed:', districts);
         return districts;
       case 'SUB_DISTRICT':
-        const subDistricts = subDistrictData?.map((item: any) => ({
+        if (!subDistrictData || !selectedDistrict) {
+          console.log('No sub-district data available or no district selected');
+          return [];
+        }
+        const subDistricts = subDistrictData.map((item: any) => ({
           name: item.subDistrict,
           count: item.count,
           coordinates: coordinatesMap[item.subDistrict],
           level: 'SUB_DISTRICT' as MapLevel
-        })).filter((item: any) => item.coordinates) || [];
+        })).filter((item: any) => item.coordinates);
         console.log('Sub-district data processed:', subDistricts);
         return subDistricts;
+      case 'VILLAGE':
+        if (!villageData || !selectedSubDistrict) {
+          console.log('No village data available or no sub-district selected');
+          return [];
+        }
+        const villages = villageData.map((item: any) => ({
+          name: item.village,
+          count: item.count,
+          coordinates: coordinatesMap[item.village],
+          level: 'VILLAGE' as MapLevel
+        })).filter((item: any) => item.coordinates);
+        console.log('Village data processed:', villages);
+        return villages;
       default:
         return [];
     }
@@ -332,6 +361,7 @@ export default function Map() {
     setSelectedCountry('');
     setSelectedState('');
     setSelectedDistrict('');
+    setSelectedSubDistrict('');
     if (mapRef.current) {
       mapRef.current.setView([20, 77], 4);
     }
@@ -344,7 +374,8 @@ export default function Map() {
         COUNTRY: { center: [20, 77] as [number, number], zoom: 4 },
         STATE: { center: [22.5, 88] as [number, number], zoom: 6 },
         DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 8 },
-        SUB_DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 10 }
+        SUB_DISTRICT: { center: [22.6, 88.4] as [number, number], zoom: 10 },
+        VILLAGE: { center: [22.6, 88.4] as [number, number], zoom: 12 }
       };
       const config = zoomLevels[level];
       mapRef.current.setView(config.center, config.zoom);
@@ -352,7 +383,10 @@ export default function Map() {
   };
 
   const handleMarkerClick = (data: MapData) => {
+    console.log('Marker clicked:', data.name, 'Level:', data.level, 'Current Level:', currentLevel);
+    
     if (data.level === 'COUNTRY' && currentLevel === 'COUNTRY') {
+      console.log('Drilling down from country to state for:', data.name);
       setSelectedCountry(data.name);
       setCurrentLevel('STATE');
       // Zoom to the country
@@ -361,6 +395,7 @@ export default function Map() {
         mapRef.current.setView([lat, lng], 6);
       }
     } else if (data.level === 'STATE' && currentLevel === 'STATE') {
+      console.log('Drilling down from state to district for:', data.name);
       setSelectedState(data.name);
       setCurrentLevel('DISTRICT');
       // Zoom to the state
@@ -369,12 +404,22 @@ export default function Map() {
         mapRef.current.setView([lat, lng], 8);
       }
     } else if (data.level === 'DISTRICT' && currentLevel === 'DISTRICT') {
+      console.log('Drilling down from district to sub-district for:', data.name);
       setSelectedDistrict(data.name);
       setCurrentLevel('SUB_DISTRICT');
       // Zoom to the district
       if (mapRef.current && data.coordinates) {
         const [lng, lat] = data.coordinates;
         mapRef.current.setView([lat, lng], 10);
+      }
+    } else if (data.level === 'SUB_DISTRICT' && currentLevel === 'SUB_DISTRICT') {
+      console.log('Drilling down from sub-district to village for:', data.name);
+      setSelectedSubDistrict(data.name);
+      setCurrentLevel('VILLAGE');
+      // Zoom to the sub-district
+      if (mapRef.current && data.coordinates) {
+        const [lng, lat] = data.coordinates;
+        mapRef.current.setView([lat, lng], 12);
       }
     }
   };
@@ -424,6 +469,7 @@ export default function Map() {
                   <SelectItem value="STATE">State View</SelectItem>
                   <SelectItem value="DISTRICT">District View</SelectItem>
                   <SelectItem value="SUB_DISTRICT">Sub-District View</SelectItem>
+                  <SelectItem value="VILLAGE">Village View</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -446,6 +492,13 @@ export default function Map() {
               <div>
                 <label className="text-sm font-medium mb-2 block">Selected District</label>
                 <Badge variant="secondary">{selectedDistrict}</Badge>
+              </div>
+            )}
+
+            {selectedSubDistrict && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">Selected Sub-District</label>
+                <Badge variant="secondary">{selectedSubDistrict}</Badge>
               </div>
             )}
 

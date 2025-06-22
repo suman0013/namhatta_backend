@@ -82,6 +82,7 @@ export interface IStorage {
   getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>>;
   getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>>;
   getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
+  getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
 }
 
 export class MemStorage implements IStorage {
@@ -970,6 +971,41 @@ export class MemStorage implements IStorage {
       const parts = key.split('-');
       return {
         subDistrict: parts[3],
+        district: data.district,
+        state: data.state,
+        country: data.country,
+        count: data.count
+      };
+    });
+  }
+
+  async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
+    const villageCounts = new Map<string, { subDistrict: string; district: string; state: string; country: string; count: number }>();
+    
+    for (const namhatta of this.namhattas.values()) {
+      const village = namhatta.address?.village;
+      const namhattaSubDistrict = namhatta.address?.subDistrict;
+      const district = namhatta.address?.district;
+      const state = namhatta.address?.state;
+      const country = namhatta.address?.country;
+      if (village && namhattaSubDistrict && district && state && country && (!subDistrict || namhattaSubDistrict === subDistrict)) {
+        const key = `${country}-${state}-${district}-${namhattaSubDistrict}-${village}`;
+        const existing = villageCounts.get(key);
+        villageCounts.set(key, {
+          subDistrict: namhattaSubDistrict,
+          district,
+          state,
+          country,
+          count: (existing?.count || 0) + 1
+        });
+      }
+    }
+    
+    return Array.from(villageCounts.entries()).map(([key, data]) => {
+      const parts = key.split('-');
+      return {
+        village: parts[4],
+        subDistrict: data.subDistrict,
         district: data.district,
         state: data.state,
         country: data.country,

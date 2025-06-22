@@ -84,6 +84,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(data);
   });
 
+  app.get("/api/map/villages", async (req, res) => {
+    const { subDistrict } = req.query;
+    const data = await storage.getNamhattaCountsByVillage(subDistrict as string);
+    res.json(data);
+  });
+
   // Dashboard
   app.get("/api/dashboard", async (req, res) => {
     const summary = await storage.getDashboardSummary();
