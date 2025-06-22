@@ -52,11 +52,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/villages", async (req, res) => {
-    const { subDistrict } = req.query;
-    if (!subDistrict) {
-      return res.status(400).json({ message: "SubDistrict parameter is required" });
+    const { district } = req.query;
+    if (!district) {
+      return res.status(400).json({ message: "District parameter is required" });
     }
-    const villages = await storage.getVillages(subDistrict as string);
+    const villages = await storage.getVillages(district as string);
     res.json(villages);
   });
 

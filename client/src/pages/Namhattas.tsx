@@ -17,7 +17,7 @@ export default function Namhattas() {
     country: "",
     state: "",
     district: "",
-    role: "",
+    village: "",
   });
 
   const { data: namhattas, isLoading } = useQuery({
@@ -42,13 +42,20 @@ export default function Namhattas() {
     enabled: !!filters.state,
   });
 
+  const { data: villages } = useQuery({
+    queryKey: ["/api/villages", filters.district],
+    queryFn: () => api.getVillages(filters.district),
+    enabled: !!filters.district,
+  });
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
       [key]: value === "all" ? "" : value,
       // Reset dependent filters
-      ...(key === "country" && { state: "", district: "" }),
-      ...(key === "state" && { district: "" }),
+      ...(key === "country" && { state: "", district: "", village: "" }),
+      ...(key === "state" && { district: "", village: "" }),
+      ...(key === "district" && { village: "" }),
     }));
     setPage(1);
   };
@@ -112,16 +119,15 @@ export default function Namhattas() {
               </SelectContent>
             </Select>
 
-            <Select value={filters.role} onValueChange={(value) => handleFilterChange("role", value)}>
+            <Select value={filters.village} onValueChange={(value) => handleFilterChange("village", value)}>
               <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Roles" />
+                <SelectValue placeholder="All Villages" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="MalaSenapoti">MalaSenapoti</SelectItem>
-                <SelectItem value="ChakraSenapoti">ChakraSenapoti</SelectItem>
-                <SelectItem value="MahaChakraSenapoti">MahaChakraSenapoti</SelectItem>
-                <SelectItem value="UpaChakraSenapoti">UpaChakraSenapoti</SelectItem>
+                <SelectItem value="all">All Villages</SelectItem>
+                {villages?.map((village) => (
+                  <SelectItem key={village} value={village}>{village}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 

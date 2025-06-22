@@ -49,8 +49,8 @@ export const api = {
     return res.json();
   },
 
-  getVillages: async (subDistrict: string): Promise<string[]> => {
-    const res = await apiRequest("GET", `/api/villages?subDistrict=${encodeURIComponent(subDistrict)}`);
+  getVillages: async (district: string): Promise<string[]> => {
+    const res = await apiRequest("GET", `/api/villages?district=${encodeURIComponent(district)}`);
     return res.json();
   },
 
