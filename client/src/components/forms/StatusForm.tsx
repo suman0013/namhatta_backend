@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
 import { api } from "@/services/api";
+import { queryClient } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, X } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { X, Award } from "lucide-react";
 import type { DevotionalStatus } from "@/lib/types";
 
 interface StatusFormProps {
@@ -16,29 +18,31 @@ interface StatusFormProps {
   onSuccess?: () => void;
 }
 
-interface FormData {
-  name: string;
-}
+const formSchema = z.object({
+  name: z.string().min(1, "Status name is required").max(100, "Name too long"),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function StatusForm({ status, onClose, onSuccess }: StatusFormProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const isEditing = !!status;
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: status?.name || "",
-    }
+    },
   });
 
   const createMutation = useMutation({
-    mutationFn: (name: string) => api.createStatus(name),
+    mutationFn: (data: FormData) => api.createStatus(data.name),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/statuses"] });
       toast({
         title: "Success",
         description: "Status created successfully",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/statuses"] });
       onSuccess?.();
       onClose();
     },
@@ -52,13 +56,13 @@ export default function StatusForm({ status, onClose, onSuccess }: StatusFormPro
   });
 
   const renameMutation = useMutation({
-    mutationFn: (newName: string) => api.renameStatus(status!.id, newName),
+    mutationFn: (data: FormData) => api.renameStatus(status!.id, data.name),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/statuses"] });
       toast({
         title: "Success",
         description: "Status renamed successfully",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/statuses"] });
       onSuccess?.();
       onClose();
     },
@@ -73,47 +77,66 @@ export default function StatusForm({ status, onClose, onSuccess }: StatusFormPro
 
   const onSubmit = (data: FormData) => {
     if (isEditing) {
-      renameMutation.mutate(data.name);
+      renameMutation.mutate(data);
     } else {
-      createMutation.mutate(data.name);
+      createMutation.mutate(data);
     }
   };
 
-  const isLoading = createMutation.isPending || renameMutation.isPending;
+  const isPending = createMutation.isPending || renameMutation.isPending;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{isEditing ? "Rename Status" : "Add New Status"}</CardTitle>
+          <CardTitle className="flex items-center space-x-2">
+            <Award className="h-5 w-5 text-indigo-500" />
+            <span>{isEditing ? "Rename Status" : "Create New Status"}</span>
+          </CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Status Name *</Label>
-              <Input
-                {...register("name", { required: "Status name is required" })}
-                placeholder="Enter status name"
-                autoFocus
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status Name</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Enter status name..." 
+                        className="glass border-0" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.name && (
-                <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-              )}
-            </div>
 
-            <div className="flex justify-end space-x-4 pt-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                <Save className="h-4 w-4 mr-2" />
-                {isLoading ? "Saving..." : (isEditing ? "Rename Status" : "Create Status")}
-              </Button>
-            </div>
-          </form>
+              <div className="flex space-x-3 pt-4">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex-1 gradient-button"
+                >
+                  {isPending ? "Saving..." : isEditing ? "Rename Status" : "Create Status"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="glass"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

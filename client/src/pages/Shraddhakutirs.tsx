@@ -1,93 +1,25 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/services/api";
-import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import ShraddhakutirForm from "@/components/forms/ShraddhakutirForm";
-import { 
-  Building, 
-  Plus, 
-  MapPin, 
-  Calendar, 
-  Hash,
-  Edit,
-  CheckCircle,
-  Search
-} from "lucide-react";
+import { Building, MapPin, Plus, Search, Code } from "lucide-react";
 import type { Shraddhakutir } from "@/lib/types";
 
-const createShraddhakutirSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name too long"),
-  districtCode: z.string().min(1, "District code is required").max(10, "District code too long"),
-});
-
 export default function Shraddhakutirs() {
-  const { toast } = useToast();
-  const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const { toast } = useToast();
 
   const { data: shraddhakutirs, isLoading } = useQuery({
     queryKey: ["/api/shraddhakutirs"],
     queryFn: () => api.getShraddhakutirs(),
   });
-
-  const { data: districts } = useQuery({
-    queryKey: ["/api/districts", "West Bengal"],
-    queryFn: () => api.getDistricts("West Bengal"),
-  });
-
-  const createForm = useForm<z.infer<typeof createShraddhakutirSchema>>({
-    resolver: zodResolver(createShraddhakutirSchema),
-    defaultValues: {
-      name: "",
-      districtCode: "",
-    },
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (data: z.infer<typeof createShraddhakutirSchema>) => {
-      // Generate code automatically: SK-<DISTRICT-CODE>-<SERIAL>
-      const existingCount = shraddhakutirs?.filter(s => s.districtCode === data.districtCode).length || 0;
-      const serial = (existingCount + 1).toString().padStart(3, '0');
-      const code = `SK-${data.districtCode}-${serial}`;
-      
-      return api.createShraddhakutir({
-        ...data,
-        code,
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Shraddhakutir created successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs"] });
-      setIsCreateDialogOpen(false);
-      createForm.reset();
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create Shraddhakutir",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const onCreateSubmit = (values: z.infer<typeof createShraddhakutirSchema>) => {
-    createMutation.mutate(values);
-  };
 
   const filteredShraddhakutirs = shraddhakutirs?.filter(shraddhakutir =>
     shraddhakutir.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -113,74 +45,6 @@ export default function Shraddhakutirs() {
           <Plus className="mr-2 h-4 w-4" />
           Create New Shraddhakutir
         </Button>
-      </div>
-            <Form {...createForm}>
-              <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
-                <FormField
-                  control={createForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Shraddhakutir Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter Shraddhakutir name..." className="glass border-0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={createForm.control}
-                  name="districtCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>District Code</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="glass border-0">
-                            <SelectValue placeholder="Select district..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {districts?.map((district) => (
-                            <SelectItem key={district} value={district.substring(0, 3).toUpperCase()}>
-                              {district} ({district.substring(0, 3).toUpperCase()})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="text-sm text-gray-600 dark:text-gray-400 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <p className="font-medium">Auto-generated code format:</p>
-                  <p>SK-{createForm.watch("districtCode") || "XXX"}-001</p>
-                </div>
-                
-                <div className="flex space-x-3">
-                  <Button
-                    type="submit"
-                    disabled={createMutation.isPending}
-                    className="gradient-button flex-1"
-                  >
-                    {createMutation.isPending ? "Creating..." : "Create Shraddhakutir"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsCreateDialogOpen(false)}
-                    className="glass"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
       </div>
 
       {/* Search and Statistics */}
@@ -320,51 +184,33 @@ function ShraddhakutirCard({
   };
 
   return (
-    <Card className="glass-card hover-lift group">
+    <Card className="glass-card hover:bg-white/90 dark:hover:bg-slate-600/50 transition-all duration-200">
       <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(index)} rounded-xl flex items-center justify-center`}>
+        <div className="flex items-start space-x-4">
+          {/* Icon */}
+          <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(index)} rounded-xl flex items-center justify-center flex-shrink-0`}>
             <Building className="h-6 w-6 text-white" />
           </div>
-          <Badge className="status-badge-active">
-            <CheckCircle className="mr-1 h-3 w-3" />
-            Active
-          </Badge>
-        </div>
-
-        {/* Content */}
-        <div className="space-y-3">
-          <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-            {shraddhakutir.name}
-          </h3>
-
-          <div className="space-y-2">
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Hash className="mr-2 h-3 w-3" />
-              <span className="font-mono font-medium">{shraddhakutir.code}</span>
+          
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-lg truncate">
+              {shraddhakutir.name}
+            </h3>
+            <div className="flex items-center space-x-2 mt-1">
+              <Badge variant="outline" className="glass">
+                <Code className="mr-1 h-3 w-3" />
+                {shraddhakutir.code}
+              </Badge>
+              <Badge variant="secondary" className="glass">
+                <MapPin className="mr-1 h-3 w-3" />
+                {shraddhakutir.districtCode}
+              </Badge>
             </div>
-            
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <MapPin className="mr-2 h-3 w-3" />
-              <span>District: {shraddhakutir.districtCode}</span>
-            </div>
-            
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Calendar className="mr-2 h-3 w-3" />
-              <span>Created {new Date(shraddhakutir.createdAt).toLocaleDateString()}</span>
-            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Created {new Date(shraddhakutir.createdAt).toLocaleDateString()}
+            </p>
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex space-x-2 mt-4 pt-4 border-t border-white/20 dark:border-slate-700/50">
-          <Button variant="secondary" className="flex-1 glass">
-            View Details
-          </Button>
-          <Button variant="outline" size="icon" className="glass">
-            <Edit className="h-4 w-4" />
-          </Button>
         </div>
       </CardContent>
     </Card>
@@ -374,9 +220,12 @@ function ShraddhakutirCard({
 function ShraddhakutirsSkeleton() {
   return (
     <div className="p-6 space-y-8">
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
+      <div className="flex justify-between items-center">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-10 w-40" />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -390,7 +239,13 @@ function ShraddhakutirsSkeleton() {
         {Array.from({ length: 2 }).map((_, i) => (
           <Card key={i} className="glass-card">
             <CardContent className="p-6">
-              <Skeleton className="h-20 w-full" />
+              <div className="flex items-center space-x-3">
+                <Skeleton className="w-12 h-12 rounded-xl" />
+                <div>
+                  <Skeleton className="h-4 w-20 mb-1" />
+                  <Skeleton className="h-6 w-12" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -402,7 +257,17 @@ function ShraddhakutirsSkeleton() {
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="glass-card">
                 <CardContent className="p-6">
-                  <Skeleton className="h-48 w-full" />
+                  <div className="flex items-start space-x-4">
+                    <Skeleton className="w-12 h-12 rounded-xl" />
+                    <div className="flex-1">
+                      <Skeleton className="h-6 w-32 mb-2" />
+                      <div className="flex space-x-2 mb-2">
+                        <Skeleton className="h-5 w-16" />
+                        <Skeleton className="h-5 w-12" />
+                      </div>
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}

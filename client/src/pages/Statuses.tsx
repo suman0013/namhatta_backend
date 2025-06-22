@@ -1,17 +1,10 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/services/api";
-import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import StatusForm from "@/components/forms/StatusForm";
 import { 
@@ -20,20 +13,9 @@ import {
   Edit, 
   Users, 
   TrendingUp, 
-  Award,
-  CheckCircle,
-  Save,
-  X
+  Award
 } from "lucide-react";
 import type { DevotionalStatus } from "@/lib/types";
-
-const createStatusSchema = z.object({
-  name: z.string().min(1, "Status name is required").max(100, "Status name too long"),
-});
-
-const renameStatusSchema = z.object({
-  newName: z.string().min(1, "Status name is required").max(100, "Status name too long"),
-});
 
 export default function Statuses() {
   const { toast } = useToast();
@@ -50,71 +32,6 @@ export default function Statuses() {
     queryFn: () => api.getDevotees(1, 1000), // Get all for counting
   });
 
-  const createForm = useForm<z.infer<typeof createStatusSchema>>({
-    resolver: zodResolver(createStatusSchema),
-    defaultValues: {
-      name: "",
-    },
-  });
-
-  const renameForm = useForm<z.infer<typeof renameStatusSchema>>({
-    resolver: zodResolver(renameStatusSchema),
-    defaultValues: {
-      newName: "",
-    },
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (name: string) => api.createStatus(name),
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Status created successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/statuses"] });
-      setIsCreateDialogOpen(false);
-      createForm.reset();
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create status",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const renameMutation = useMutation({
-    mutationFn: ({ id, newName }: { id: number; newName: string }) => 
-      api.renameStatus(id, newName),
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Status renamed successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/statuses"] });
-      setEditingStatus(null);
-      renameForm.reset();
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to rename status",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const onCreateSubmit = (values: z.infer<typeof createStatusSchema>) => {
-    createMutation.mutate(values.name);
-  };
-
-  const onRenameSubmit = (values: z.infer<typeof renameStatusSchema>) => {
-    if (editingStatus) {
-      renameMutation.mutate({ id: editingStatus.id, newName: values.newName });
-    }
-  };
-
   const getDevoteeCount = (statusId: number) => {
     if (!devotees?.data) return 0;
     return devotees.data.filter(devotee => devotee.statusId === statusId).length;
@@ -126,12 +43,7 @@ export default function Statuses() {
 
   const startEditing = (status: DevotionalStatus) => {
     setEditingStatus(status);
-    renameForm.setValue("newName", status.name);
-  };
-
-  const cancelEditing = () => {
-    setEditingStatus(null);
-    renameForm.reset();
+    setShowForm(true);
   };
 
   if (isLoading) {
@@ -153,50 +65,13 @@ export default function Statuses() {
           Add New Status
         </Button>
       </div>
-            <Form {...createForm}>
-              <form onSubmit={createForm.handleSubmit(onCreateSubmit)} className="space-y-4">
-                <FormField
-                  control={createForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter status name..." className="glass border-0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex space-x-3">
-                  <Button
-                    type="submit"
-                    disabled={createMutation.isPending}
-                    className="gradient-button flex-1"
-                  >
-                    {createMutation.isPending ? "Creating..." : "Create Status"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsCreateDialogOpen(false)}
-                    className="glass"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="glass-card">
           <CardContent className="p-6">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center">
                 <Layers className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -276,12 +151,7 @@ export default function Statuses() {
                   index={index}
                   devoteeCount={getDevoteeCount(status.id)}
                   totalDevotees={getTotalDevotees()}
-                  isEditing={editingStatus?.id === status.id}
                   onEdit={() => startEditing(status)}
-                  onCancelEdit={cancelEditing}
-                  onSave={(newName) => renameMutation.mutate({ id: status.id, newName })}
-                  renameForm={renameForm}
-                  isRenaming={renameMutation.isPending}
                 />
               ))}
             </div>
@@ -305,7 +175,7 @@ export default function Statuses() {
       </Card>
 
       {/* Form Modal */}
-      {(showForm || editingStatus) && (
+      {showForm && (
         <StatusForm
           status={editingStatus}
           onClose={() => {
@@ -327,23 +197,13 @@ function StatusCard({
   index,
   devoteeCount,
   totalDevotees,
-  isEditing,
   onEdit,
-  onCancelEdit,
-  onSave,
-  renameForm,
-  isRenaming,
 }: {
   status: DevotionalStatus;
   index: number;
   devoteeCount: number;
   totalDevotees: number;
-  isEditing: boolean;
   onEdit: () => void;
-  onCancelEdit: () => void;
-  onSave: (newName: string) => void;
-  renameForm: any;
-  isRenaming: boolean;
 }) {
   const percentage = totalDevotees > 0 ? (devoteeCount / totalDevotees) * 100 : 0;
 
@@ -358,15 +218,6 @@ function StatusCard({
     return gradients[index % gradients.length];
   };
 
-  const handleSave = () => {
-    const newName = renameForm.getValues("newName");
-    if (newName && newName !== status.name) {
-      onSave(newName);
-    } else {
-      onCancelEdit();
-    }
-  };
-
   return (
     <div className="flex items-center space-x-4 p-6 rounded-xl glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
       {/* Icon */}
@@ -376,53 +227,25 @@ function StatusCard({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        {isEditing ? (
-          <div className="flex items-center space-x-3">
-            <Input
-              {...renameForm.register("newName")}
-              className="glass border-0 font-semibold text-gray-900 dark:text-white"
-              placeholder="Enter new name..."
-            />
-            <div className="flex space-x-2">
-              <Button
-                size="sm"
-                onClick={handleSave}
-                disabled={isRenaming}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white"
-              >
-                <Save className="h-3 w-3" />
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={onCancelEdit}
-                className="glass"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+              {status.name}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Created {new Date(status.createdAt).toLocaleDateString()}
+            </p>
           </div>
-        ) : (
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
-                {status.name}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Created {new Date(status.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onEdit}
-              className="glass"
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              Rename
-            </Button>
-          </div>
-        )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onEdit}
+            className="glass"
+          >
+            <Edit className="h-3 w-3 mr-1" />
+            Rename
+          </Button>
+        </div>
 
         {/* Statistics */}
         <div className="mt-4 space-y-2">
@@ -454,28 +277,43 @@ function StatusCard({
 function StatusesSkeleton() {
   return (
     <div className="p-6 space-y-8">
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96" />
+      <div className="flex justify-between items-center">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <Skeleton className="h-10 w-32" />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="glass-card">
             <CardContent className="p-6">
-              <Skeleton className="h-20 w-full" />
+              <div className="flex items-center space-x-3">
+                <Skeleton className="w-12 h-12 rounded-xl" />
+                <div>
+                  <Skeleton className="h-4 w-20 mb-1" />
+                  <Skeleton className="h-6 w-12" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
       
       <Card className="glass-card">
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full" />
-            ))}
-          </div>
+        <CardContent className="p-6 space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center space-x-4 p-6 rounded-xl glass">
+              <Skeleton className="w-12 h-12 rounded-xl" />
+              <div className="flex-1">
+                <Skeleton className="h-6 w-48 mb-2" />
+                <Skeleton className="h-4 w-32 mb-4" />
+                <Skeleton className="h-2 w-full" />
+              </div>
+              <Skeleton className="h-8 w-20" />
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>
