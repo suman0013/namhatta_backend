@@ -51,19 +51,19 @@ export default function Map() {
   }, [zoomLevel, currentLevel]);
 
   // Always load all data - no conditional loading to avoid blank screens
-  const { data: countryData, isLoading: countryLoading } = useQuery({
+  const { data: countryData = [], isLoading: countryLoading } = useQuery({
     queryKey: ["/api/map/countries"],
     queryFn: getQueryFn({ on401: "throw" }),
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: stateData, isLoading: stateLoading } = useQuery({
+  const { data: stateData = [], isLoading: stateLoading } = useQuery({
     queryKey: ["/api/map/states"],
     queryFn: getQueryFn({ on401: "throw" }),
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: districtData, isLoading: districtLoading } = useQuery({
+  const { data: districtData = [], isLoading: districtLoading } = useQuery({
     queryKey: ["/api/map/districts"], 
     queryFn: getQueryFn({ on401: "throw" }),
     staleTime: 5 * 60 * 1000,
@@ -87,7 +87,7 @@ export default function Map() {
       'Jharkhand': [85.5, 23.5],
       'Assam': [94, 26.5],
       'Dhaka': [90.4, 23.8],
-      'Chittagong': [91.8, 22.3],
+      'Chittagong Division': [91.8, 22.3],
       'Western': [79.8, 6.9],
       'Bagmati': [85.3, 27.7],
       
@@ -151,9 +151,9 @@ export default function Map() {
       'Tinsukia': [95.4, 27.5],
       'Bongaigaon': [90.5, 26.5],
       
-      // Other countries
-      'Dhaka': [90.4, 23.8],
-      'Chittagong': [91.8, 22.3],
+      // Other countries/regions
+      'Dhaka Metro': [90.4, 23.8],
+      'Chittagong Metro': [91.8, 22.3],
       'Colombo': [79.8, 6.9],
       'Kathmandu': [85.3, 27.7],
       
@@ -169,33 +169,30 @@ export default function Map() {
 
     switch (currentLevel) {
       case 'COUNTRY':
-        if (!countryData) return [];
-        const countries = countryData.map((item: any) => ({
+        const countries = Array.isArray(countryData) ? countryData.map((item: any) => ({
           name: item.country,
           count: item.count,
           coordinates: coordinatesMap[item.country],
           level: 'COUNTRY' as MapLevel
-        })).filter((item: any) => item.coordinates);
+        })).filter((item: any) => item.coordinates) : [];
         console.log(`Showing ${countries.length} countries at zoom ${zoomLevel}`);
         return countries;
       case 'STATE':
-        if (!stateData) return [];
-        const states = stateData.map((item: any) => ({
+        const states = Array.isArray(stateData) ? stateData.map((item: any) => ({
           name: item.state,
           count: item.count,
           coordinates: coordinatesMap[item.state],
           level: 'STATE' as MapLevel
-        })).filter((item: any) => item.coordinates);
+        })).filter((item: any) => item.coordinates) : [];
         console.log(`Showing ${states.length} states at zoom ${zoomLevel}`);
         return states;
       case 'DISTRICT':
-        if (!districtData) return [];
-        const districts = districtData.map((item: any) => ({
+        const districts = Array.isArray(districtData) ? districtData.map((item: any) => ({
           name: item.district,
           count: item.count,
           coordinates: coordinatesMap[item.district],
           level: 'DISTRICT' as MapLevel
-        })).filter((item: any) => item.coordinates);
+        })).filter((item: any) => item.coordinates) : [];
         console.log(`Showing ${districts.length} districts at zoom ${zoomLevel}`);
         return districts;
       default:
@@ -229,7 +226,6 @@ export default function Map() {
           scrollWheelZoom: true, // Enable mouse wheel zoom
           touchZoom: true, // Enable touch zoom on mobile
           dragging: true, // Enable dragging
-          tap: true, // Enable tap on mobile
           boxZoom: true, // Enable box zoom with shift+drag
         }).setView([20, 77], 4); // Centered on South Asia
         
@@ -257,9 +253,10 @@ export default function Map() {
           crossOrigin: true
         });
         
-        tileLayer.on('tileerror', function(error, tile) {
-          console.log('Tile error:', error);
-        });
+        // Remove the problematic error handler for now
+        // tileLayer.on('tileerror', (e: L.LeafletEvent) => {
+        //   console.log('Tile error:', e);
+        // });
         
         tileLayer.addTo(map);
         
