@@ -283,6 +283,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       presentAddress,
       permanentAddress,
       devotionalCourses,
+      maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED",
     };
 
     if (isEditing) {
@@ -295,9 +296,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
+    <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-4xl max-h-[98vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-4">
           <CardTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -308,7 +309,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="legalName">Legal Name *</Label>
                   <Input
@@ -361,7 +362,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Family Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Family Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="fatherName">Father's Name</Label>
                   <Input {...register("fatherName")} placeholder="Enter father's name" />
@@ -395,7 +396,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Spiritual Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Spiritual Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="devotionalStatusId">Devotional Status</Label>
                   <Select
@@ -452,7 +453,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Personal Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Personal Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="education">Education</Label>
                   <Input {...register("education")} placeholder="Enter education details" />
@@ -469,7 +470,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Present Address */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Present Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country</Label>
                   <SearchableSelect
@@ -527,7 +528,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     placeholder="Enter postal code"
                   />
                 </div>
-                <div className="md:col-span-2 lg:col-span-3">
+                <div className="sm:col-span-2 lg:col-span-3">
                   <Label htmlFor="presentLandmark">Landmark</Label>
                   <Textarea
                     value={presentAddress.landmark || ""}
@@ -558,7 +559,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 </div>
               </div>
               {!sameAsPresentAddress && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="permanentCountry">Country</Label>
                     <SearchableSelect
@@ -616,7 +617,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       placeholder="Enter postal code"
                     />
                   </div>
-                  <div className="md:col-span-2 lg:col-span-3">
+                  <div className="sm:col-span-2 lg:col-span-3">
                     <Label htmlFor="permanentLandmark">Landmark</Label>
                     <Textarea
                       value={permanentAddress.landmark || ""}
@@ -640,7 +641,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 </Button>
               </div>
               {devotionalCourses.map((course, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg">
+                <div key={index} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
                   <div>
                     <Label htmlFor={`course-name-${index}`}>Course Name</Label>
                     <Input
@@ -682,7 +683,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
               <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                 Cancel
               </Button>

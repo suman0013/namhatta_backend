@@ -121,7 +121,7 @@ export default function Namhattas() {
           />
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <SearchableSelect
               value={filters.country || "All Countries"}
               onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
@@ -197,9 +197,9 @@ export default function Namhattas() {
       </Card>
 
       {/* Namhattas Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
         {namhattas?.data?.map((namhatta) => (
-          <NamhattaCard key={namhatta.id} namhatta={namhatta} />
+          <NamhattaCard key={namhatta.id} namhatta={namhatta} onEdit={handleEditNamhatta} />
         ))}
       </div>
 
@@ -238,7 +238,7 @@ export default function Namhattas() {
   );
 }
 
-function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
+function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namhatta: Namhatta) => void }) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
@@ -310,7 +310,7 @@ function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
             variant="outline" 
             size="icon" 
             className="glass"
-            onClick={() => setEditingNamhatta(namhatta)}
+            onClick={() => onEdit(namhatta)}
           >
             <Edit className="h-4 w-4" />
           </Button>

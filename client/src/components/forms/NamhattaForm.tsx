@@ -168,9 +168,9 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
+    <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+      <Card className="w-full max-w-2xl max-h-[98vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-4">
           <CardTitle>{isEditing ? "Edit Namhatta" : "Add New Namhatta"}</CardTitle>
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -181,7 +181,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Basic Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Namhatta Name *</Label>
                   <Input
@@ -203,10 +203,10 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="weeklyMeetingDay">Weekly Meeting Day</Label>
+                  <Label htmlFor="meetingDay">Meeting Day</Label>
                   <Select
-                    value={watch("weeklyMeetingDay")}
-                    onValueChange={(value) => setValue("weeklyMeetingDay", value)}
+                    value={watch("meetingDay")}
+                    onValueChange={(value) => setValue("meetingDay", value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select meeting day" />
@@ -223,9 +223,9 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="weeklyMeetingTime">Weekly Meeting Time</Label>
+                  <Label htmlFor="meetingTime">Meeting Time</Label>
                   <Input
-                    {...register("weeklyMeetingTime")}
+                    {...register("meetingTime")}
                     type="time"
                     placeholder="Select meeting time"
                   />
@@ -233,7 +233,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
               </div>
               
               {/* Leadership Roles */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="malaSenapoti">Mala Senapoti</Label>
                   <Input
@@ -270,7 +270,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
             {/* Address */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="country">Country</Label>
                   <SearchableSelect
@@ -321,18 +321,18 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   />
                 </div>
                 <div>
-                  <Label htmlFor="zipcode">ZIP Code</Label>
+                  <Label htmlFor="postalCode">ZIP Code</Label>
                   <Input
-                    value={address.zipcode || ""}
-                    onChange={(e) => handleAddressChange("zipcode", e.target.value)}
+                    value={address.postalCode || ""}
+                    onChange={(e) => handleAddressChange("postalCode", e.target.value)}
                     placeholder="Enter ZIP code"
                   />
                 </div>
-                <div className="md:col-span-2 lg:col-span-3">
-                  <Label htmlFor="details">Additional Details</Label>
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <Label htmlFor="landmark">Additional Details</Label>
                   <Textarea
-                    value={address.details || ""}
-                    onChange={(e) => handleAddressChange("details", e.target.value)}
+                    value={address.landmark || ""}
+                    onChange={(e) => handleAddressChange("landmark", e.target.value)}
                     placeholder="Enter additional address details"
                   />
                 </div>
@@ -342,7 +342,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
             <Separator />
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
               <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                 Cancel
               </Button>

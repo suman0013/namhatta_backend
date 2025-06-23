@@ -128,7 +128,7 @@ export default function Devotees() {
           />
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <SearchableSelect
               value={filters.country || "All Countries"}
               onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
@@ -261,8 +261,8 @@ export default function Devotees() {
       </div>
 
       {/* Devotees Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-        {devotees?.data?.map((devotee) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+        {devotees?.data?.map((devotee: any) => (
           <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses || []} />
         ))}
       </div>
