@@ -153,21 +153,57 @@ export default function Dashboard() {
           icon={Calendar}
           gradient="from-orange-400 to-orange-600"
         />
-        <StatsCard
-          title="Pending Approvals"
-          value={7}
-          change="Urgent"
-          changeLabel="needs attention"
-          icon={AlertTriangle}
-          gradient="from-red-400 to-red-600"
-          urgent
-        />
+
       </div>
 
 
 
       {/* Recent Activity & Updates */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Namhatta Updates */}
+        <Card className="glass-card">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center">
+                <Home className="mr-3 h-5 w-5 text-emerald-500" />
+                Recent Updates
+              </CardTitle>
+              <Button variant="link" className="text-emerald-600 dark:text-emerald-400">
+                View All
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {dashboard?.recentUpdates?.map((update, index) => (
+              <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer hover-lift">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Home className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                    {update.namhattaName}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {update.programType}
+                  </p>
+                  <div className="flex items-center mt-2 space-x-4">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                      <Calendar className="mr-1 h-3 w-3" />
+                      {update.date}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                      <Users className="mr-1 h-3 w-3" />
+                      {update.attendance} attendees
+                    </span>
+                  </div>
+                </div>
+                <Badge className="status-badge-active">Active</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
         {/* Devotional Status Distribution */}
         <Card className="glass-card">
           <CardHeader>
