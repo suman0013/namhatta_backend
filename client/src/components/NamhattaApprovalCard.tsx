@@ -76,13 +76,16 @@ export default function NamhattaApprovalCard({ namhatta }: NamhattaApprovalCardP
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
-        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Approved</Badge>;
+      case "approved":
+        return <Badge className="status-badge-active">Approved</Badge>;
       case "PENDING_APPROVAL":
-        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Pending Approval</Badge>;
+      case "pending":
+        return <Badge className="status-badge-pending">Pending</Badge>;
       case "REJECTED":
-        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Rejected</Badge>;
+      case "rejected":
+        return <Badge className="status-badge-inactive">Rejected</Badge>;
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <Badge className="status-badge-inactive">{status}</Badge>;
     }
   };
 

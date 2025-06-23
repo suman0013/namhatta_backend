@@ -242,9 +242,14 @@ function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namha
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
+      case "approved":
         return <Badge className="status-badge-active">Approved</Badge>;
       case "PENDING_APPROVAL":
-        return <Badge className="status-badge-pending">Pending Approval</Badge>;
+      case "pending":
+        return <Badge className="status-badge-pending">Pending</Badge>;
+      case "REJECTED":
+      case "rejected":
+        return <Badge className="status-badge-inactive">Rejected</Badge>;
       default:
         return <Badge className="status-badge-inactive">{status}</Badge>;
     }
