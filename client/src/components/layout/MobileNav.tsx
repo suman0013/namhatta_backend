@@ -6,7 +6,7 @@ const mobileNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Layout },
   { href: "/namhattas", label: "Namhattas", icon: Home },
   { href: "/devotees", label: "Devotees", icon: Users },
-  { href: "/hierarchy", label: "Hierarchy", icon: Map },
+  { href: "/map", label: "Map", icon: Map },
   { href: "/more", label: "More", icon: MoreHorizontal },
 ];
 
