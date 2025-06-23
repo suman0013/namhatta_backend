@@ -243,15 +243,15 @@ function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namha
     switch (status) {
       case "APPROVED":
       case "approved":
-        return <Badge className="status-badge-active">Approved</Badge>;
+        return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-1 rounded-full text-xs font-medium">Approved</Badge>;
       case "PENDING_APPROVAL":
       case "pending":
-        return <Badge className="status-badge-pending">Pending</Badge>;
+        return <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full text-xs font-medium">Pending</Badge>;
       case "REJECTED":
       case "rejected":
-        return <Badge className="status-badge-inactive">Rejected</Badge>;
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-2 py-1 rounded-full text-xs font-medium">Rejected</Badge>;
       default:
-        return <Badge className="status-badge-inactive">{status}</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium">{status}</Badge>;
     }
   };
 
