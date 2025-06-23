@@ -26,35 +26,37 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       {/* Desktop Layout */}
       <div className="flex flex-col min-h-screen">
-        {/* Header with Logo */}
-        <div className="flex items-center justify-between px-6 py-4 glass-card border-0 border-b border-white/20 dark:border-slate-700/50">
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-xl glass"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+        {/* Combined Header and Navigation */}
+        <div className="glass-card border-0 border-b border-white/20 dark:border-slate-700/50">
+          <div className="flex items-center justify-between px-6 py-4">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-xl glass"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
 
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white text-lg font-bold">ॐ</span>
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <span className="text-white text-lg font-bold">ॐ</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold gradient-text">Namhatta</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Management System</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold gradient-text">Namhatta</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Management System</p>
-            </div>
+
+            {/* Desktop Navigation */}
+            <TopNav />
+
+            {/* Theme Toggle */}
+            <Header onMenuClick={() => setSidebarOpen(true)} />
           </div>
-
-          {/* Theme Toggle */}
-          <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
-
-        {/* Top Navigation for Desktop */}
-        <TopNav />
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
