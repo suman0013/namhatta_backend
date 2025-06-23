@@ -106,6 +106,7 @@ RESTful endpoints organized by resource:
 - January 2, 2025: Removed search bar and notification icon from header interface for cleaner UI
 - January 2, 2025: Converted navigation from left sidebar to horizontal top navigation bar for desktop
 - January 2, 2025: Combined header and navigation into single horizontal bar for cleaner interface
+- January 2, 2025: Removed "health" and "about" items from navigation bar
 - June 22, 2025: Verified all popup and modal components have proper click-outside-to-close behavior
 - January 2, 2025: Replaced URL input with image upload functionality for better user experience
 - January 2, 2025: Added image preview and removal capabilities in update forms

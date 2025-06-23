@@ -17,8 +17,6 @@ const navigationItems = [
   { href: "/map", label: "Map View", icon: MapPin },
   { href: "/statuses", label: "Statuses", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
-  { href: "/health", label: "Health", icon: Settings },
-  { href: "/about", label: "About", icon: Settings },
 ];
 
 export default function Sidebar({ onClose }: SidebarProps) {
