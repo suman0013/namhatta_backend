@@ -48,16 +48,7 @@ export default function Dashboard() {
             Welcome back! Here's what's happening in your organization.
           </p>
         </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" className="glass" onClick={() => window.print()}>
-            <Download className="mr-2 h-4 w-4" />
-            Export Report
-          </Button>
-          <Button className="gradient-button" onClick={() => window.location.href = '/devotees'}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Devotee
-          </Button>
-        </div>
+
       </div>
 
       {/* Leadership Hierarchy Section - Moved above stats */}
@@ -176,51 +167,7 @@ export default function Dashboard() {
 
 
       {/* Recent Activity & Updates */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Namhatta Updates */}
-        <Card className="glass-card">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center">
-                <Home className="mr-3 h-5 w-5 text-emerald-500" />
-                Recent Updates
-              </CardTitle>
-              <Button variant="link" className="text-emerald-600 dark:text-emerald-400">
-                View All
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {dashboard?.recentUpdates?.map((update, index) => (
-              <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer hover-lift">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                    {update.namhattaName}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {update.programType}
-                  </p>
-                  <div className="flex items-center mt-2 space-x-4">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                      <Calendar className="mr-1 h-3 w-3" />
-                      {update.date}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                      <Users className="mr-1 h-3 w-3" />
-                      {update.attendance} attendees
-                    </span>
-                  </div>
-                </div>
-                <Badge className="status-badge-active">Active</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* Devotional Status Distribution */}
         <Card className="glass-card">
           <CardHeader>
@@ -244,51 +191,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Quick Actions Panel */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Zap className="mr-3 h-5 w-5 text-yellow-500" />
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <QuickActionCard
-              title="Add Devotee"
-              description="Register new member"
-              icon={UserPlus}
-              gradient="from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20"
-              iconGradient="from-indigo-500 to-purple-600"
-              onClick={() => window.location.href = '/devotees'}
-            />
-            <QuickActionCard
-              title="Create Namhatta"
-              description="New center setup"
-              icon={Home}
-              gradient="from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
-              iconGradient="from-emerald-500 to-teal-600"
-              onClick={() => window.location.href = '/namhattas'}
-            />
-            <QuickActionCard
-              title="Manage Statuses"
-              description="Update spiritual levels"
-              icon={CalendarPlus}
-              gradient="from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20"
-              iconGradient="from-orange-500 to-red-600"
-              onClick={() => window.location.href = '/statuses'}
-            />
-            <QuickActionCard
-              title="Health Check"
-              description="System status & monitoring"
-              icon={BarChart3}
-              gradient="from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20"
-              iconGradient="from-blue-500 to-cyan-600"
-              onClick={() => window.location.href = '/health'}
-            />
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
