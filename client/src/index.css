@@ -84,33 +84,21 @@
 @layer components {
   .glass {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 20px 40px var(--glass-shadow), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px var(--glass-shadow);
   }
   
   .glass-card {
-    @apply backdrop-blur-xl bg-white/85 dark:bg-slate-800/85 border border-white/30 dark:border-slate-700/60 shadow-2xl rounded-3xl;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .glass-card:hover {
-    @apply shadow-indigo-500/10 dark:shadow-indigo-400/10;
-    transform: translateY(-2px);
-    box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    @apply backdrop-blur-xl bg-white/80 dark:bg-slate-800/80 border border-white/20 dark:border-slate-700/50 shadow-xl rounded-2xl;
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent;
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease-in-out infinite;
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent;
   }
   
   .gradient-button {
-    @apply bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 hover:from-indigo-600 hover:via-purple-700 hover:to-pink-700 text-white transition-all duration-300 shadow-lg hover:shadow-xl;
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease-in-out infinite;
+    @apply bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white transition-all duration-200 shadow-lg hover:shadow-xl;
   }
   
   .status-badge-active {
