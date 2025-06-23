@@ -145,14 +145,7 @@ export default function Dashboard() {
           gradient="from-emerald-400 to-emerald-600"
           positive
         />
-        <StatsCard
-          title="Active Programs"
-          value={18}
-          change="This week"
-          changeLabel="scheduled"
-          icon={Calendar}
-          gradient="from-orange-400 to-orange-600"
-        />
+
 
       </div>
 
