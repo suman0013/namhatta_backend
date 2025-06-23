@@ -5,7 +5,7 @@ import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Shraddhakutir } from "@/lib/types";
@@ -72,6 +72,9 @@ export default function ShraddhakutirForm({ onClose, onSuccess }: ShraddhakutirF
       <DialogContent className="w-full max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Shraddhakutir</DialogTitle>
+          <DialogDescription>
+            Create a new Shraddhakutir administrative unit
+          </DialogDescription>
         </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>

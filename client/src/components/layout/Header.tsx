@@ -1,8 +1,6 @@
-import { Search, Bell, Menu, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useTheme } from "@/hooks/use-theme";
-import { Badge } from "@/components/ui/badge";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -27,35 +25,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Search Bar */}
-      <div className="hidden md:flex flex-1 max-w-md mx-6">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="Search devotees, namhattas..."
-            className="pl-10 glass border-0 focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-      </div>
+      {/* Spacer */}
+      <div className="flex-1"></div>
 
       {/* Header Actions */}
       <div className="flex items-center space-x-4">
-        {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative glass rounded-xl"
-        >
-          <Bell className="h-5 w-5" />
-          <Badge
-            variant="destructive"
-            className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs animate-pulse"
-          >
-            3
-          </Badge>
-        </Button>
-
         {/* Theme Toggle */}
         <Button
           variant="ghost"

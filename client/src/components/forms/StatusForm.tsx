@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/services/api";
 import { queryClient } from "@/lib/queryClient";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -93,6 +93,9 @@ export default function StatusForm({ status, onClose, onSuccess }: StatusFormPro
             <Award className="h-5 w-5 text-indigo-500" />
             <span>{isEditing ? "Rename Status" : "Create New Status"}</span>
           </DialogTitle>
+          <DialogDescription>
+            {isEditing ? "Change the name of this devotional status" : "Add a new devotional status level"}
+          </DialogDescription>
         </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
