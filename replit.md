@@ -108,6 +108,7 @@ RESTful endpoints organized by resource:
 - January 2, 2025: Combined header and navigation into single horizontal bar for cleaner interface
 - January 2, 2025: Removed "health" and "about" items from navigation bar
 - January 2, 2025: Reverted UI to cleaner, simpler design focusing on functionality over visual effects
+- January 2, 2025: Redesigned Leadership Hierarchy to show proper organizational structure with visual hierarchy, connection lines, and tiered layout
 - June 22, 2025: Verified all popup and modal components have proper click-outside-to-close behavior
 - January 2, 2025: Replaced URL input with image upload functionality for better user experience
 - January 2, 2025: Added image preview and removal capabilities in update forms
