@@ -5,7 +5,7 @@ import { api } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Shraddhakutir } from "@/lib/types";
@@ -68,15 +68,11 @@ export default function ShraddhakutirForm({ onClose, onSuccess }: ShraddhakutirF
   const isLoading = createMutation.isPending;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Add New Shraddhakutir</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add New Shraddhakutir</DialogTitle>
+        </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Label htmlFor="name">Shraddhakutir Name *</Label>
@@ -121,8 +117,7 @@ export default function ShraddhakutirForm({ onClose, onSuccess }: ShraddhakutirF
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+        </DialogContent>
+      </Dialog>
   );
 }

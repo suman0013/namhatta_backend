@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/services/api";
 import { queryClient } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -86,18 +86,14 @@ export default function StatusForm({ status, onClose, onSuccess }: StatusFormPro
   const isPending = createMutation.isPending || renameMutation.isPending;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center space-x-2">
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center space-x-2">
             <Award className="h-5 w-5 text-indigo-500" />
             <span>{isEditing ? "Rename Status" : "Create New Status"}</span>
-          </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
+          </DialogTitle>
+        </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -137,8 +133,7 @@ export default function StatusForm({ status, onClose, onSuccess }: StatusFormPro
               </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-    </div>
+        </DialogContent>
+      </Dialog>
   );
 }

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Save, X } from "lucide-react";
@@ -296,16 +297,12 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-start sm:items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-4xl max-h-[98vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-4">
-          <CardTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Basic Information</h3>
@@ -693,8 +690,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+        </DialogContent>
+      </Dialog>
   );
 }
