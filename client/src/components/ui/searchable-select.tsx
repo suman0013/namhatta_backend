@@ -34,8 +34,18 @@ export function SearchableSelect({
   const updateDropdownPosition = () => {
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const dropdownHeight = 240; // max-height in pixels
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      // Position dropdown above if there's not enough space below
+      const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+      
       setDropdownPosition({
-        top: rect.bottom + window.scrollY,
+        top: shouldPositionAbove 
+          ? rect.top + window.scrollY - dropdownHeight - 4
+          : rect.bottom + window.scrollY + 4,
         left: rect.left + window.scrollX,
         width: rect.width
       });
@@ -132,19 +142,20 @@ export function SearchableSelect({
         <div 
           className="searchable-dropdown-portal fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto"
           style={{
-            top: dropdownPosition.top + 4,
+            top: dropdownPosition.top,
             left: dropdownPosition.left,
             width: dropdownPosition.width,
-            zIndex: 9999
+            zIndex: 99999
           }}
         >
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-left"
                 onMouseDown={(e) => {
                   e.preventDefault();
+                  e.stopPropagation();
                   handleOptionSelect(option);
                 }}
                 onClick={(e) => {
