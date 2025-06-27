@@ -35,11 +35,10 @@ export function SearchableSelect({
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      const dropdownHeight = 240; // max-height in pixels
+      const dropdownHeight = 240;
       const spaceBelow = viewportHeight - rect.bottom;
       const spaceAbove = rect.top;
       
-      // Position dropdown above if there's not enough space below
       const shouldPositionAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
       
       setDropdownPosition({
@@ -95,7 +94,9 @@ export function SearchableSelect({
     onValueChange(option);
     setSearchTerm("");
     setIsOpen(false);
-    inputRef.current?.blur();
+    setTimeout(() => {
+      inputRef.current?.blur();
+    }, 0);
   };
 
   const handleInputFocus = () => {
@@ -104,14 +105,12 @@ export function SearchableSelect({
     setSearchTerm("");
   };
 
-  const displayValue = value || "";
-
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       <div className="relative">
         <Input
           ref={inputRef}
-          value={isOpen ? searchTerm : displayValue}
+          value={isOpen ? searchTerm : value}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
           placeholder={placeholder}
@@ -155,7 +154,6 @@ export function SearchableSelect({
                 className="w-full flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-left"
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  e.stopPropagation();
                   handleOptionSelect(option);
                 }}
                 onClick={(e) => {
