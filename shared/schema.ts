@@ -86,7 +86,6 @@ export const devotionalStatuses = pgTable("devotional_statuses", {
 export const shraddhakutirs = pgTable("shraddhakutirs", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  code: text("code").notNull().unique(),
   districtCode: text("district_code").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });

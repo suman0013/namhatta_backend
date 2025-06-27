@@ -473,52 +473,97 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country</Label>
-                  <SearchableSelect
+                  <Select
                     value={presentAddress.country || ""}
                     onValueChange={(value) => handlePresentAddressChange("country", value)}
-                    options={countries || []}
-                    placeholder="Select or type country"
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries?.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="presentState">State</Label>
-                  <SearchableSelect
+                  <Select
                     value={presentAddress.state || ""}
                     onValueChange={(value) => handlePresentAddressChange("state", value)}
-                    options={presentStates || []}
-                    placeholder="Select or type state"
                     disabled={!presentAddress.country}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {presentStates?.map((state) => (
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="presentDistrict">District</Label>
-                  <SearchableSelect
+                  <Select
                     value={presentAddress.district || ""}
                     onValueChange={(value) => handlePresentAddressChange("district", value)}
-                    options={presentDistricts || []}
-                    placeholder="Select or type district"
                     disabled={!presentAddress.state}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select district" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {presentDistricts?.map((district) => (
+                        <SelectItem key={district} value={district}>
+                          {district}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="presentSubDistrict">Sub-District</Label>
-                  <SearchableSelect
+                  <Select
                     value={presentAddress.subDistrict || ""}
                     onValueChange={(value) => handlePresentAddressChange("subDistrict", value)}
-                    options={presentSubDistricts || []}
-                    placeholder="Select or type sub-district"
                     disabled={!presentAddress.district}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select sub-district" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {presentSubDistricts?.map((subDistrict) => (
+                        <SelectItem key={subDistrict} value={subDistrict}>
+                          {subDistrict}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="presentVillage">Village</Label>
-                  <SearchableSelect
+                  <Select
                     value={presentAddress.village || ""}
                     onValueChange={(value) => handlePresentAddressChange("village", value)}
-                    options={presentVillages || []}
-                    placeholder="Select or type village"
                     disabled={!presentAddress.district}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select village" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {presentVillages?.map((village) => (
+                        <SelectItem key={village} value={village}>
+                          {village}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="presentPostalCode">Postal Code</Label>
@@ -562,52 +607,97 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="permanentCountry">Country</Label>
-                    <SearchableSelect
+                    <Select
                       value={permanentAddress.country || ""}
                       onValueChange={(value) => handlePermanentAddressChange("country", value)}
-                      options={countries || []}
-                      placeholder="Select or type country"
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries?.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="permanentState">State</Label>
-                    <SearchableSelect
+                    <Select
                       value={permanentAddress.state || ""}
                       onValueChange={(value) => handlePermanentAddressChange("state", value)}
-                      options={permanentStates || []}
-                      placeholder="Select or type state"
                       disabled={!permanentAddress.country}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {permanentStates?.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="permanentDistrict">District</Label>
-                    <SearchableSelect
+                    <Select
                       value={permanentAddress.district || ""}
                       onValueChange={(value) => handlePermanentAddressChange("district", value)}
-                      options={permanentDistricts || []}
-                      placeholder="Select or type district"
                       disabled={!permanentAddress.state}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select district" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {permanentDistricts?.map((district) => (
+                          <SelectItem key={district} value={district}>
+                            {district}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="permanentSubDistrict">Sub-District</Label>
-                    <SearchableSelect
+                    <Select
                       value={permanentAddress.subDistrict || ""}
                       onValueChange={(value) => handlePermanentAddressChange("subDistrict", value)}
-                      options={permanentSubDistricts || []}
-                      placeholder="Select or type sub-district"
                       disabled={!permanentAddress.district}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sub-district" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {permanentSubDistricts?.map((subDistrict) => (
+                          <SelectItem key={subDistrict} value={subDistrict}>
+                            {subDistrict}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="permanentVillage">Village</Label>
-                    <SearchableSelect
+                    <Select
                       value={permanentAddress.village || ""}
                       onValueChange={(value) => handlePermanentAddressChange("village", value)}
-                      options={permanentVillages || []}
-                      placeholder="Select or type village"
                       disabled={!permanentAddress.district}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select village" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {permanentVillages?.map((village) => (
+                          <SelectItem key={village} value={village}>
+                            {village}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="permanentPostalCode">Postal Code</Label>

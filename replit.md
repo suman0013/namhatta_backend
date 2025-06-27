@@ -98,6 +98,9 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 27, 2025: Fixed dropdown selection issues in modal dialogs by replacing SearchableSelect with standard Select components
+- June 27, 2025: Updated both Namhatta and Devotee forms to use reliable dropdown components for address fields
+- June 27, 2025: Ensured API compliance with OpenAPI 3.0.3 specification across all forms and endpoints
 - June 22, 2025: Added interactive map visualization showing Namhatta distribution by geographic regions
 - June 22, 2025: Implemented zoom-based geographic aggregation (country → state → district → sub-district)
 - June 22, 2025: Created map API endpoints for geographic data aggregation
