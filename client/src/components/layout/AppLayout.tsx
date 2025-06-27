@@ -52,7 +52,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
 
             {/* Desktop Navigation - Centered */}
-            <div className="hidden lg:block flex-1">
+            <div className="hidden lg:block flex-1 max-w-fit mx-auto">
               <TopNav />
             </div>
 
