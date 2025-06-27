@@ -7,7 +7,7 @@ export const devotees = pgTable("devotees", {
   id: serial("id").primaryKey(),
   legalName: text("legal_name").notNull(),
   name: text("name"), // Initiated/spiritual name
-  dob: timestamp("dob"),
+  dob: text("dob"), // Store as text to match OpenAPI format
   email: text("email"),
   phone: text("phone"),
   fatherName: text("father_name"),
@@ -37,8 +37,8 @@ export const devotees = pgTable("devotees", {
   gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
   gurudevPancharatrik: integer("gurudev_pancharatrik"), // Reference to leader ID
   initiatedName: text("initiated_name"),
-  harinamDate: timestamp("harinam_date"),
-  pancharatrikDate: timestamp("pancharatrik_date"),
+  harinamDate: text("harinam_date"), // Store as text to match OpenAPI format
+  pancharatrikDate: text("pancharatrik_date"), // Store as text to match OpenAPI format
   education: text("education"),
   occupation: text("occupation"),
   devotionalCourses: json("devotional_courses").$type<Array<{
@@ -71,7 +71,7 @@ export const namhattas = pgTable("namhattas", {
   chakraSenapoti: text("chakra_senapoti"),
   upaChakraSenapoti: text("upa_chakra_senapoti"),
   secretary: text("secretary"),
-  status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED
+  status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -94,10 +94,10 @@ export const shraddhakutirs = pgTable("shraddhakutirs", {
 export const statusHistory = pgTable("status_history", {
   id: serial("id").primaryKey(),
   devoteeId: integer("devotee_id").notNull(),
-  fromStatusId: integer("from_status_id"),
-  toStatusId: integer("to_status_id").notNull(),
-  changeDate: timestamp("change_date").defaultNow(),
-  notes: text("notes"),
+  previousStatus: text("previous_status"),
+  newStatus: text("new_status").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  comment: text("comment"),
 });
 
 // Namhatta Updates table

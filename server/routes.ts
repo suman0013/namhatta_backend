@@ -197,6 +197,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
+  app.get("/api/namhattas/pending", async (req, res) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const size = parseInt(req.query.size as string) || 10;
+    const result = await storage.getNamhattas(page, size, { status: "PENDING_APPROVAL" });
+    res.json(result.data);
+  });
+
   app.get("/api/namhattas/:id", async (req, res) => {
     const id = parseInt(req.params.id);
     const namhatta = await storage.getNamhatta(id);
@@ -242,6 +249,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       await storage.approveNamhatta(id);
       res.json({ message: "Namhatta approved successfully" });
+    } catch (error) {
+      res.status(404).json({ message: "Namhatta not found" });
+    }
+  });
+
+  app.post("/api/namhattas/:id/reject", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { reason } = req.body;
+    try {
+      await storage.rejectNamhatta(id, reason);
+      res.json({ message: "Namhatta rejected successfully" });
     } catch (error) {
       res.status(404).json({ message: "Namhatta not found" });
     }

@@ -701,17 +701,20 @@ export class MemStorage implements IStorage {
     const devotee = this.devotees.get(id);
     if (!devotee) throw new Error("Devotee not found");
     
+    const currentStatus = devotee.devotionalStatusId ? this.devotionalStatuses.get(devotee.devotionalStatusId)?.name : null;
+    const newStatus = this.devotionalStatuses.get(newStatusId)?.name || "Unknown";
+    
     const historyId = this.currentId++;
     this.statusHistory.set(historyId, {
       id: historyId,
       devoteeId: id,
-      fromStatusId: devotee.statusId || null,
-      toStatusId: newStatusId,
-      changeDate: new Date(),
-      notes: "Status upgraded"
+      previousStatus: currentStatus,
+      newStatus: newStatus,
+      updatedAt: new Date(),
+      comment: "Status upgraded"
     });
     
-    devotee.statusId = newStatusId;
+    devotee.devotionalStatusId = newStatusId;
     this.devotees.set(id, devotee);
   }
 
@@ -795,7 +798,14 @@ export class MemStorage implements IStorage {
   async approveNamhatta(id: number): Promise<void> {
     const namhatta = this.namhattas.get(id);
     if (!namhatta) throw new Error("Namhatta not found");
-    namhatta.status = "active";
+    namhatta.status = "APPROVED";
+    this.namhattas.set(id, namhatta);
+  }
+
+  async rejectNamhatta(id: number, reason?: string): Promise<void> {
+    const namhatta = this.namhattas.get(id);
+    if (!namhatta) throw new Error("Namhatta not found");
+    namhatta.status = "REJECTED";
     this.namhattas.set(id, namhatta);
   }
 
