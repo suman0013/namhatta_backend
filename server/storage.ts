@@ -534,7 +534,13 @@ export class MemStorage implements IStorage {
       const id = this.currentId++;
       this.devotees.set(id, { 
         ...devotee, 
-        id, 
+        id,
+        gender: devotee.gender || "MALE",
+        gurudevHarinam: devotee.gurudevHarinam || null,
+        gurudevPancharatrik: devotee.gurudevPancharatrik || null,
+        harinamInitiationGurudev: devotee.harinamInitiationGurudev || "",
+        pancharatrikInitiationGurudev: devotee.pancharatrikInitiationGurudev || "",
+        additionalComments: devotee.additionalComments || "",
         devotionalCourses: [], 
         createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000) // Random date within last year
       });

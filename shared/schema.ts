@@ -13,6 +13,7 @@ export const devotees = pgTable("devotees", {
   fatherName: text("father_name"),
   motherName: text("mother_name"),
   husbandName: text("husband_name"),
+  gender: text("gender"), // MALE, FEMALE, OTHER
   bloodGroup: text("blood_group"),
   maritalStatus: text("marital_status"), // MARRIED, UNMARRIED, WIDOWED
   presentAddress: json("present_address").$type<{
@@ -36,6 +37,8 @@ export const devotees = pgTable("devotees", {
   devotionalStatusId: integer("devotional_status_id"),
   gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
   gurudevPancharatrik: integer("gurudev_pancharatrik"), // Reference to leader ID
+  harinamInitiationGurudev: text("harinam_initiation_gurudev"), // Spiritual name of harinam guru
+  pancharatrikInitiationGurudev: text("pancharatrik_initiation_gurudev"), // Spiritual name of pancharatrik guru
   initiatedName: text("initiated_name"),
   harinamDate: text("harinam_date"), // Store as text to match OpenAPI format
   pancharatrikDate: text("pancharatrik_date"), // Store as text to match OpenAPI format
@@ -46,6 +49,7 @@ export const devotees = pgTable("devotees", {
     date: string;
     institute: string;
   }>>(),
+  additionalComments: text("additional_comments"),
   shraddhakutirId: integer("shraddhakutir_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });

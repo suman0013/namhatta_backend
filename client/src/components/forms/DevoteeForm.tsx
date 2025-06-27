@@ -31,6 +31,7 @@ interface FormData {
   fatherName: string;
   motherName: string;
   husbandName: string;
+  gender: string;
   bloodGroup: string;
   maritalStatus: string;
   presentAddress: Address;
@@ -38,6 +39,8 @@ interface FormData {
   devotionalStatusId: number | undefined;
   gurudevHarinam: number | undefined;
   gurudevPancharatrik: number | undefined;
+  harinamInitiationGurudev: string;
+  pancharatrikInitiationGurudev: string;
   initiatedName: string;
   harinamDate: string;
   pancharatrikDate: string;
@@ -48,6 +51,7 @@ interface FormData {
     date: string;
     institute: string;
   }>;
+  additionalComments: string;
   shraddhakutirId: number | undefined;
 }
 
@@ -66,6 +70,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       fatherName: devotee?.fatherName || "",
       motherName: devotee?.motherName || "",
       husbandName: devotee?.husbandName || "",
+      gender: devotee?.gender || "",
       bloodGroup: devotee?.bloodGroup || "",
       maritalStatus: devotee?.maritalStatus || "",
       presentAddress: devotee?.presentAddress || {},
@@ -73,13 +78,16 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       devotionalStatusId: devotee?.devotionalStatusId,
       gurudevHarinam: devotee?.gurudevHarinam,
       gurudevPancharatrik: devotee?.gurudevPancharatrik,
+      harinamInitiationGurudev: devotee?.harinamInitiationGurudev || "",
+      pancharatrikInitiationGurudev: devotee?.pancharatrikInitiationGurudev || "",
       initiatedName: devotee?.initiatedName || "",
       harinamDate: devotee?.harinamDate || "",
       pancharatrikDate: devotee?.pancharatrikDate || "",
       shraddhakutirId: devotee?.shraddhakutirId,
       education: devotee?.education || "",
       occupation: devotee?.occupation || "",
-      devotionalCourses: devotee?.devotionalCourses || []
+      devotionalCourses: devotee?.devotionalCourses || [],
+      additionalComments: devotee?.additionalComments || ""
     }
   });
 
@@ -321,8 +329,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="name">Initiated Name</Label>
-                  <Input {...register("name")} placeholder="Enter initiated/spiritual name" />
+                  <Label htmlFor="name">Spiritual Name</Label>
+                  <Input {...register("name")} placeholder="Enter spiritual name" />
                 </div>
                 <div>
                   <Label htmlFor="dob">Date of Birth</Label>
@@ -335,6 +343,19 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 <div>
                   <Label htmlFor="phone">Phone</Label>
                   <Input {...register("phone")} placeholder="Enter phone number" />
+                </div>
+                <div>
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select value={watch("gender")} onValueChange={(value) => setValue("gender", value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MALE">Male</SelectItem>
+                      <SelectItem value="FEMALE">Female</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="bloodGroup">Blood Group</Label>
@@ -420,8 +441,16 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Input {...register("initiatedName")} placeholder="Enter initiated name" />
                 </div>
                 <div>
+                  <Label htmlFor="harinamInitiationGurudev">Harinam Initiation Gurudev</Label>
+                  <Input {...register("harinamInitiationGurudev")} placeholder="Enter harinam initiation gurudev name" />
+                </div>
+                <div>
                   <Label htmlFor="harinamDate">Harinama Initiation Date</Label>
                   <Input type="date" {...register("harinamDate")} />
+                </div>
+                <div>
+                  <Label htmlFor="pancharatrikInitiationGurudev">Pancharatrik Initiation Gurudev</Label>
+                  <Input {...register("pancharatrikInitiationGurudev")} placeholder="Enter pancharatrik initiation gurudev name" />
                 </div>
                 <div>
                   <Label htmlFor="pancharatrikDate">Pancharatrik Initiation Date</Label>
@@ -461,6 +490,16 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 <div>
                   <Label htmlFor="occupation">Occupation</Label>
                   <Input {...register("occupation")} placeholder="Enter occupation" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="additionalComments">Additional Comments</Label>
+                  <textarea
+                    {...register("additionalComments")}
+                    placeholder="Enter any additional comments or notes"
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  />
                 </div>
               </div>
             </div>
