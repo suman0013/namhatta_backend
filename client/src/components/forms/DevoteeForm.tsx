@@ -287,12 +287,13 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   };
 
   const onSubmit = (data: FormData) => {
-    const submitData = {
+    const submitData: Partial<Devotee> = {
       ...data,
       presentAddress,
       permanentAddress,
       devotionalCourses,
-      maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED",
+      gender: data.gender as "MALE" | "FEMALE" | "OTHER" | undefined,
+      maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED" | undefined,
     };
 
     if (isEditing) {
@@ -328,10 +329,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     <p className="text-sm text-red-500 mt-1">{errors.legalName.message}</p>
                   )}
                 </div>
-                <div>
-                  <Label htmlFor="name">Spiritual Name</Label>
-                  <Input {...register("name")} placeholder="Enter spiritual name" />
-                </div>
+
                 <div>
                   <Label htmlFor="dob">Date of Birth</Label>
                   <Input type="date" {...register("dob")} />
@@ -418,6 +416,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Spiritual Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">Spiritual Name</Label>
+                  <Input {...register("name")} placeholder="Enter spiritual name" />
+                </div>
                 <div>
                   <Label htmlFor="devotionalStatusId">Devotional Status</Label>
                   <Select

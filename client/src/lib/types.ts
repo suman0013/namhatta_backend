@@ -42,6 +42,7 @@ export interface Address {
   district?: string;
   subDistrict?: string;
   village?: string;
+  zipcode?: string;
   postalCode?: string;
   landmark?: string;
 }
@@ -62,6 +63,7 @@ export interface Devotee {
   fatherName?: string;
   motherName?: string;
   husbandName?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
   bloodGroup?: string;
   maritalStatus?: 'MARRIED' | 'UNMARRIED' | 'WIDOWED';
   presentAddress?: Address;
@@ -69,12 +71,15 @@ export interface Devotee {
   devotionalStatusId?: number;
   gurudevHarinam?: number;
   gurudevPancharatrik?: number;
+  harinamInitiationGurudev?: string;
+  pancharatrikInitiationGurudev?: string;
   initiatedName?: string;
   harinamDate?: string;
   pancharatrikDate?: string;
   education?: string;
   occupation?: string;
   devotionalCourses?: DevotionalCourse[];
+  additionalComments?: string;
   shraddhakutirId?: number;
   createdAt: Date;
 }
