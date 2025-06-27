@@ -17,37 +17,39 @@ export default function TopNav() {
   const [location] = useLocation();
 
   return (
-    <nav className="hidden lg:flex flex-1 justify-center">
-      <div className="flex items-center space-x-1">
-        {navigationItems.map((item) => {
-          const isActive = location === item.href || 
-            (item.href !== "/dashboard" && location.startsWith(item.href));
-          const Icon = item.icon;
-          
-          return (
-            <Link key={item.href} href={item.href}>
-              <div
-                className={cn(
-                  "flex items-center px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 relative",
-                  isActive
-                    ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 shadow-sm"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white"
-                )}
-              >
-                <Icon className="w-4 h-4 mr-2" />
-                <span>{item.label}</span>
-                {item.badge && (
-                  <Badge
-                    variant={isActive ? "default" : "secondary"}
-                    className="ml-2 h-5 text-xs"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
-              </div>
-            </Link>
-          );
-        })}
+    <nav className="w-full">
+      <div className="flex items-center justify-center">
+        <div className="flex items-center flex-wrap gap-1 justify-center max-w-full">
+          {navigationItems.map((item) => {
+            const isActive = location === item.href || 
+              (item.href !== "/dashboard" && location.startsWith(item.href));
+            const Icon = item.icon;
+            
+            return (
+              <Link key={item.href} href={item.href}>
+                <div
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 relative whitespace-nowrap",
+                    isActive
+                      ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 shadow-sm"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  <Icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm">{item.label}</span>
+                  {item.badge && (
+                    <Badge
+                      variant={isActive ? "default" : "secondary"}
+                      className="ml-2 h-5 text-xs flex-shrink-0"
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

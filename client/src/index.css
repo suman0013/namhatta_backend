@@ -164,4 +164,22 @@
       @apply translate-y-0 shadow-md;
     }
   }
+
+  /* Ensure proper viewport handling */
+  @media (max-width: 1024px) {
+    .nav-item {
+      @apply px-2 py-2 text-xs;
+    }
+    
+    .nav-item span {
+      @apply hidden sm:inline;
+    }
+  }
+
+  /* Ultra-wide screen improvements */
+  @media (min-width: 1920px) {
+    .glass-card {
+      @apply max-w-7xl mx-auto;
+    }
+  }
 }
