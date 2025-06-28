@@ -261,6 +261,13 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                     placeholder="Enter Upa Chakra Senapoti name"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="secretary">Secretary</Label>
+                  <Input
+                    {...register("secretary")}
+                    placeholder="Enter Secretary name"
+                  />
+                </div>
               </div>
             </div>
 
