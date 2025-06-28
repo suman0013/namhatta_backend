@@ -13,6 +13,7 @@ import {
   InsertLeader,
   StatusHistory
 } from "@shared/schema";
+import { loadGeographicData, getCountries, getStates, getDistricts, getSubDistricts, getVillages } from './geographic-data.js';
 
 export interface IStorage {
   // Devotees
@@ -106,6 +107,11 @@ export class MemStorage implements IStorage {
     this.currentId = 1;
 
     this.initializeMockData();
+    this.initializeGeographicData();
+  }
+
+  private async initializeGeographicData() {
+    await loadGeographicData();
   }
 
   private initializeMockData() {
@@ -931,44 +937,23 @@ export class MemStorage implements IStorage {
   }
 
   async getCountries(): Promise<string[]> {
-    return ["India", "Bangladesh", "Sri Lanka", "Nepal"];
+    return getCountries();
   }
 
   async getStates(country: string): Promise<string[]> {
-    const statesByCountry: Record<string, string[]> = {
-      "India": ["West Bengal", "Odisha", "Bihar", "Jharkhand", "Assam"],
-      "Bangladesh": ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna"],
-      "Sri Lanka": ["Western", "Central", "Southern", "Northern", "Eastern"],
-      "Nepal": ["Province 1", "Madhesh", "Bagmati", "Gandaki", "Lumbini"]
-    };
-    return statesByCountry[country] || [];
+    return getStates(country);
   }
 
   async getDistricts(state: string): Promise<string[]> {
-    const districtsByState: Record<string, string[]> = {
-      "West Bengal": ["Kolkata", "Nadia", "North 24 Parganas", "South 24 Parganas", "Hooghly"],
-      "Dhaka": ["Dhaka", "Gazipur", "Narayanganj", "Manikganj", "Munshiganj"],
-      "Western": ["Colombo", "Gampaha", "Kalutara"],
-    };
-    return districtsByState[state] || [];
+    return getDistricts(state);
   }
 
   async getSubDistricts(district: string): Promise<string[]> {
-    const subDistrictsByDistrict: Record<string, string[]> = {
-      "Nadia": ["Mayapur", "Krishnanagar", "Ranaghat", "Kalyani"],
-      "Kolkata": ["Central", "North", "South", "East", "West"],
-      "Dhaka": ["Dhanmondi", "Gulshan", "Uttara", "Old Dhaka"],
-    };
-    return subDistrictsByDistrict[district] || [];
+    return getSubDistricts(district);
   }
 
   async getVillages(subDistrict: string): Promise<string[]> {
-    const villagesBySubDistrict: Record<string, string[]> = {
-      "Mayapur": ["Mayapur", "Antardwip", "Godrumadvip", "Madhyadvip"],
-      "Central": ["Park Street", "Esplanade", "Bow Barracks", "BBD Bagh"],
-      "Dhanmondi": ["Dhanmondi", "Lalmatia", "Mohammadpur"],
-    };
-    return villagesBySubDistrict[subDistrict] || [];
+    return getVillages(subDistrict);
   }
 
   async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {

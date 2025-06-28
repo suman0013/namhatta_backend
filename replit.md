@@ -98,6 +98,9 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 28, 2025: Successfully migrated project from Replit Agent to standard Replit environment
+- June 28, 2025: Imported comprehensive Indian geographic data (41,005 records) from CSV file with states, districts, sub-districts, and villages
+- June 28, 2025: Updated geographic API endpoints to use real data instead of mock data
 - June 28, 2025: Fixed dropdown filter issues in Namhattas page by replacing SearchableSelect with standard Select components
 - June 27, 2025: Fixed dropdown selection issues in modal dialogs by replacing SearchableSelect with standard Select components
 - June 27, 2025: Updated both Namhatta and Devotee forms to use reliable dropdown components for address fields
