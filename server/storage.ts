@@ -115,6 +115,16 @@ export class MemStorage implements IStorage {
   }
 
   private initializeMockData() {
+    // Clear all existing data
+    this.devotees.clear();
+    this.namhattas.clear();
+    this.devotionalStatuses.clear();
+    this.namhattaUpdates.clear();
+    this.statusHistory.clear();
+    this.shraddhakutirs.clear();
+    this.leaders.clear();
+    this.currentId = 1;
+
     // Initialize devotional statuses
     const statuses = [
       { name: "Shraddhavan" },
