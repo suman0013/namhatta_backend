@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 28, 2025: Fixed dropdown filter issues in Namhattas page by replacing SearchableSelect with standard Select components
 - June 27, 2025: Fixed dropdown selection issues in modal dialogs by replacing SearchableSelect with standard Select components
 - June 27, 2025: Updated both Namhatta and Devotee forms to use reliable dropdown components for address fields
 - June 27, 2025: Ensured API compliance with OpenAPI 3.0.3 specification across all forms and endpoints
