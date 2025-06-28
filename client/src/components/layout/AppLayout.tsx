@@ -28,31 +28,31 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="flex flex-col min-h-screen">
         {/* Combined Header and Navigation */}
         <div className="glass-card border-0 border-b border-white/20 dark:border-slate-700/50">
-          <div className="flex items-center justify-between px-4 sm:px-6 py-2">
+          <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1.5 lg:py-2">
             {/* Mobile Menu Button and Logo */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 lg:space-x-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-xl glass"
+                className="lg:hidden p-1.5 rounded-xl glass"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               
-              <div className="flex items-center space-x-3">
-                <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-sm sm:text-lg font-bold">ॐ</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-7 sm:w-8 lg:w-10 h-7 sm:h-8 lg:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center">
+                  <span className="text-white text-sm lg:text-lg font-bold">ॐ</span>
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-lg sm:text-xl font-bold gradient-text">Namhatta</h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Management System</p>
+                  <h1 className="text-base lg:text-xl font-bold gradient-text">Namhatta</h1>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">Management System</p>
                 </div>
               </div>
             </div>
 
             {/* Desktop Navigation - Centered */}
-            <div className="hidden lg:block flex-1 max-w-fit mx-auto">
+            <div className="hidden lg:block flex-1 max-w-4xl mx-auto">
               <TopNav />
             </div>
 
