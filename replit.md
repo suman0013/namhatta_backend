@@ -98,6 +98,8 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 28, 2025: Updated devotional status system to use specific spiritual hierarchy: Shraddhavan, Sadhusangi, Gour/Krishna Sevak, Gour/Krishna Sadhak, Sri Guru Charan Asraya, Harinam Diksha, Pancharatrik Diksha
+- June 28, 2025: Removed welcome message from dashboard page
 - June 28, 2025: Successfully migrated project from Replit Agent to standard Replit environment
 - June 28, 2025: Imported comprehensive Indian geographic data (41,005 records) from CSV file with states, districts, sub-districts, and villages
 - June 28, 2025: Updated geographic API endpoints to use real data instead of mock data

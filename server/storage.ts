@@ -117,11 +117,13 @@ export class MemStorage implements IStorage {
   private initializeMockData() {
     // Initialize devotional statuses
     const statuses = [
-      { name: "Bhakta" },
-      { name: "Bhaktin" },
-      { name: "Initiated" },
-      { name: "Brahmachari" },
-      { name: "Sannyasi" }
+      { name: "Shraddhavan" },
+      { name: "Sadhusangi" },
+      { name: "Gour/Krishna Sevak" },
+      { name: "Gour/Krishna Sadhak" },
+      { name: "Sri Guru Charan Asraya" },
+      { name: "Harinam Diksha" },
+      { name: "Pancharatrik Diksha" }
     ];
     
     statuses.forEach(status => {
@@ -317,7 +319,7 @@ export class MemStorage implements IStorage {
         maritalStatus: "UNMARRIED",
         presentAddress: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur", postalCode: "741313" },
         permanentAddress: { country: "India", state: "West Bengal", district: "Nadia", subDistrict: "Mayapur", village: "Mayapur", postalCode: "741313" },
-        devotionalStatusId: 3,
+        devotionalStatusId: 6,
         initiatedName: "Ananda Das",
         harinamDate: "2010-08-15",
         pancharatrikDate: "2015-03-20",
@@ -338,7 +340,7 @@ export class MemStorage implements IStorage {
         maritalStatus: "MARRIED",
         presentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street", postalCode: "700016" },
         permanentAddress: { country: "India", state: "West Bengal", district: "Kolkata", subDistrict: "Central", village: "Park Street", postalCode: "700016" },
-        devotionalStatusId: 2,
+        devotionalStatusId: 3,
         initiatedName: "Bhakti Devi",
         harinamDate: "2012-06-10",
         shraddhakutirId: 2,
@@ -395,7 +397,7 @@ export class MemStorage implements IStorage {
         maritalStatus: "MARRIED",
         presentAddress: { country: "India", state: "Gujarat", district: "Ahmedabad", subDistrict: "Satellite", village: "Prahlad Nagar", postalCode: "380015" },
         permanentAddress: { country: "India", state: "Gujarat", district: "Ahmedabad", subDistrict: "Satellite", village: "Prahlad Nagar", postalCode: "380015" },
-        devotionalStatusId: 1,
+        devotionalStatusId: 2,
         shraddhakutirId: 1,
         education: "B.Com",
         occupation: "Business - Grocery Store"
