@@ -307,18 +307,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</DialogTitle>
           <DialogDescription>
             {isEditing ? "Update devotee information" : "Fill in the details to register a new devotee"}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-lg font-semibold">Basic Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="legalName">Legal Name *</Label>
                   <Input
@@ -379,9 +379,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Family Information */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-lg font-semibold">Family Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="fatherName">Father's Name</Label>
                   <Input {...register("fatherName")} placeholder="Enter father's name" />
@@ -413,9 +413,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Spiritual Information */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-lg font-semibold">Spiritual Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="name">Spiritual Name</Label>
                   <Input {...register("name")} placeholder="Enter spiritual name" />
@@ -482,9 +482,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Personal Information */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-lg font-semibold">Personal Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="education">Education</Label>
                   <Input {...register("education")} placeholder="Enter education details" />
@@ -509,9 +509,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Present Address */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <h3 className="text-lg font-semibold">Present Address</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country</Label>
                   <Select
@@ -628,7 +628,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Permanent Address */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Permanent Address</h3>
                 <div className="flex items-center space-x-2">
@@ -645,7 +645,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 </div>
               </div>
               {!sameAsPresentAddress && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                   <div>
                     <Label htmlFor="permanentCountry">Country</Label>
                     <Select
@@ -763,7 +763,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             <Separator />
 
             {/* Devotional Courses */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Devotional Courses</h3>
                 <Button type="button" variant="outline" size="sm" onClick={addDevotionalCourse}>
