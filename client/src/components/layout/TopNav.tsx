@@ -17,8 +17,8 @@ export default function TopNav() {
   const [location] = useLocation();
 
   return (
-    <nav className="flex justify-center px-1 overflow-x-auto">
-      <div className="flex items-center space-x-0.5 min-w-fit">
+    <nav className="flex justify-center px-1 overflow-hidden">
+      <div className="flex items-center space-x-0.5 flex-wrap justify-center">
         {navigationItems.map((item) => {
           const isActive = location === item.href || 
             (item.href !== "/dashboard" && location.startsWith(item.href));
