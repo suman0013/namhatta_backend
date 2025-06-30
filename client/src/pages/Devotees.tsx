@@ -230,72 +230,7 @@ export default function Devotees() {
         </CardContent>
       </Card>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Devotees</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {devotees?.total || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
-                <Heart className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active This Month</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Math.floor((devotees?.total || 0) * 0.85)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Course Completions</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Math.floor((devotees?.total || 0) * 0.4)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
-                <Briefcase className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">New This Month</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Math.floor((devotees?.total || 0) * 0.08)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Devotees Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
