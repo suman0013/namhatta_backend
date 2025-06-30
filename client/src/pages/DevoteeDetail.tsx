@@ -571,9 +571,9 @@ export default function DevoteeDetail() {
                           <p className="text-xs text-gray-600 dark:text-gray-400">
                             {new Date(entry.changedAt).toLocaleDateString()}
                           </p>
-                          {entry.notes && (
+                          {entry.reason && (
                             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 italic">
-                              "{entry.notes}"
+                              "{entry.reason}"
                             </p>
                           )}
                         </div>

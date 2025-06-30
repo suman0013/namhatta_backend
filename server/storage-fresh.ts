@@ -9,7 +9,7 @@ export interface IStorage {
   createDevoteeForNamhatta(devotee: InsertDevotee, namhattaId: number): Promise<Devotee>;
   updateDevotee(id: number, devotee: Partial<InsertDevotee>): Promise<Devotee>;
   getDevoteesByNamhatta(namhattaId: number, page?: number, size?: number, statusId?: number): Promise<{ data: Devotee[], total: number }>;
-  upgradeDevoteeStatus(id: number, newStatusId: number): Promise<void>;
+  upgradeDevoteeStatus(id: number, newStatusId: number, notes?: string): Promise<void>;
   getDevoteeStatusHistory(id: number): Promise<StatusHistory[]>;
 
   // Namhattas
@@ -420,7 +420,7 @@ export class MemStorage implements IStorage {
     return { data, total };
   }
 
-  async upgradeDevoteeStatus(id: number, newStatusId: number): Promise<void> {
+  async upgradeDevoteeStatus(id: number, newStatusId: number, notes?: string): Promise<void> {
     const devotee = this.devotees.get(id);
     if (!devotee) throw new Error("Devotee not found");
 
@@ -432,7 +432,7 @@ export class MemStorage implements IStorage {
       newStatusId,
       changedAt: new Date(),
       changedBy: "System Admin",
-      reason: "Status upgrade",
+      reason: notes || "Status upgrade",
       createdAt: new Date()
     };
     

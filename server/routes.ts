@@ -169,14 +169,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/devotees/:id/upgrade-status", async (req, res) => {
     const id = parseInt(req.params.id);
-    const { newStatusId } = req.body;
+    const { newStatusId, notes } = req.body;
     
     if (!newStatusId) {
       return res.status(400).json({ message: "newStatusId is required" });
     }
     
     try {
-      await storage.upgradeDevoteeStatus(id, newStatusId);
+      await storage.upgradeDevoteeStatus(id, newStatusId, notes);
       res.json({ message: "Status updated successfully" });
     } catch (error) {
       res.status(404).json({ message: "Devotee not found" });
