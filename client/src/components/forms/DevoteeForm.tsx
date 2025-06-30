@@ -599,7 +599,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Label htmlFor="presentDistrict">District *</Label>
                   <Select
                     value={presentAddress.district || ""}
-                    onValueChange={(value) => handlePresentAddressChange("district", value)}
+                    onValueChange={(value) => {
+                      handlePresentAddressChange("district", value);
+                      clearErrors("presentAddress.district");
+                    }}
                     disabled={!presentAddress.state}
                   >
                     <SelectTrigger>
@@ -613,12 +616,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors["presentAddress.district" as keyof typeof errors] && (
+                    <p className="text-sm text-red-500 mt-1">District is required</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="presentSubDistrict">Sub-District *</Label>
                   <Select
                     value={presentAddress.subDistrict || ""}
-                    onValueChange={(value) => handlePresentAddressChange("subDistrict", value)}
+                    onValueChange={(value) => {
+                      handlePresentAddressChange("subDistrict", value);
+                      clearErrors("presentAddress.subDistrict");
+                    }}
                     disabled={!presentAddress.district}
                   >
                     <SelectTrigger>
@@ -632,12 +641,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors["presentAddress.subDistrict" as keyof typeof errors] && (
+                    <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="presentVillage">Village *</Label>
                   <Select
                     value={presentAddress.village || ""}
-                    onValueChange={(value) => handlePresentAddressChange("village", value)}
+                    onValueChange={(value) => {
+                      handlePresentAddressChange("village", value);
+                      clearErrors("presentAddress.village");
+                    }}
                     disabled={!presentAddress.district}
                   >
                     <SelectTrigger>
@@ -651,6 +666,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors["presentAddress.village" as keyof typeof errors] && (
+                    <p className="text-sm text-red-500 mt-1">Village is required</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="presentPostalCode">Postal Code *</Label>
@@ -705,7 +723,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     <Label htmlFor="permanentCountry">Country *</Label>
                     <Select
                       value={permanentAddress.country || ""}
-                      onValueChange={(value) => handlePermanentAddressChange("country", value)}
+                      onValueChange={(value) => {
+                        handlePermanentAddressChange("country", value);
+                        clearErrors("permanentAddress.country");
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select country" />
@@ -718,12 +739,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors["permanentAddress.country" as keyof typeof errors] && (
+                      <p className="text-sm text-red-500 mt-1">Country is required</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="permanentState">State *</Label>
                     <Select
                       value={permanentAddress.state || ""}
-                      onValueChange={(value) => handlePermanentAddressChange("state", value)}
+                      onValueChange={(value) => {
+                        handlePermanentAddressChange("state", value);
+                        clearErrors("permanentAddress.state");
+                      }}
                       disabled={!permanentAddress.country}
                     >
                       <SelectTrigger>
@@ -737,12 +764,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors["permanentAddress.state" as keyof typeof errors] && (
+                      <p className="text-sm text-red-500 mt-1">State is required</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="permanentDistrict">District *</Label>
                     <Select
                       value={permanentAddress.district || ""}
-                      onValueChange={(value) => handlePermanentAddressChange("district", value)}
+                      onValueChange={(value) => {
+                        handlePermanentAddressChange("district", value);
+                        clearErrors("permanentAddress.district");
+                      }}
                       disabled={!permanentAddress.state}
                     >
                       <SelectTrigger>
@@ -756,12 +789,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors["permanentAddress.district" as keyof typeof errors] && (
+                      <p className="text-sm text-red-500 mt-1">District is required</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="permanentSubDistrict">Sub-District *</Label>
                     <Select
                       value={permanentAddress.subDistrict || ""}
-                      onValueChange={(value) => handlePermanentAddressChange("subDistrict", value)}
+                      onValueChange={(value) => {
+                        handlePermanentAddressChange("subDistrict", value);
+                        clearErrors("permanentAddress.subDistrict");
+                      }}
                       disabled={!permanentAddress.district}
                     >
                       <SelectTrigger>
@@ -775,12 +814,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors["permanentAddress.subDistrict" as keyof typeof errors] && (
+                      <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="permanentVillage">Village *</Label>
                     <Select
                       value={permanentAddress.village || ""}
-                      onValueChange={(value) => handlePermanentAddressChange("village", value)}
+                      onValueChange={(value) => {
+                        handlePermanentAddressChange("village", value);
+                        clearErrors("permanentAddress.village");
+                      }}
                       disabled={!permanentAddress.district}
                     >
                       <SelectTrigger>
@@ -794,14 +839,23 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors["permanentAddress.village" as keyof typeof errors] && (
+                      <p className="text-sm text-red-500 mt-1">Village is required</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="permanentPostalCode">Postal Code *</Label>
                     <Input
                       value={permanentAddress.postalCode || ""}
-                      onChange={(e) => handlePermanentAddressChange("postalCode", e.target.value)}
+                      onChange={(e) => {
+                        handlePermanentAddressChange("postalCode", e.target.value);
+                        clearErrors("permanentAddress.postalCode");
+                      }}
                       placeholder="Enter postal code"
                     />
+                    {errors["permanentAddress.postalCode" as keyof typeof errors] && (
+                      <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
+                    )}
                   </div>
                   <div className="sm:col-span-2 lg:col-span-3">
                     <Label htmlFor="permanentLandmark">Landmark</Label>
@@ -832,7 +886,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Label htmlFor="devotionalStatusId">Devotional Status *</Label>
                   <Select
                     value={watch("devotionalStatusId")?.toString() || ""}
-                    onValueChange={(value) => setValue("devotionalStatusId", value ? parseInt(value) : undefined)}
+                    onValueChange={(value) => {
+                      setValue("devotionalStatusId", value ? parseInt(value) : undefined);
+                      clearErrors("devotionalStatusId");
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select devotional status" />
