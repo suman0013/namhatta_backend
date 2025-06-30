@@ -163,10 +163,7 @@ export default function NamhattaDetail() {
             <Edit className="mr-2 h-4 w-4" />
             Edit Details
           </Button>
-          <Button className="gradient-button" onClick={() => setShowUpdateForm(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Post Update
-          </Button>
+          
         </div>
       </div>
 
