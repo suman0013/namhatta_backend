@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 
 const navigationItems = [
   { href: "/dashboard", label: "Dashboard", shortLabel: "Dash", icon: Home },
-  { href: "/namhattas", label: "Namhattas", shortLabel: "Nam", icon: Home, badge: "24" },
-  { href: "/devotees", label: "Devotees", shortLabel: "Dev", icon: Users, badge: "1,247" },
-  { href: "/updates", label: "Updates", shortLabel: "Upd", icon: Bell, badge: "12" },
+  { href: "/namhattas", label: "Namhattas", shortLabel: "Nam", icon: Home },
+  { href: "/devotees", label: "Devotees", shortLabel: "Dev", icon: Users },
+  { href: "/updates", label: "Updates", shortLabel: "Upd", icon: Bell },
   { href: "/map", label: "Map View", shortLabel: "Map", icon: MapPin },
   { href: "/statuses", label: "Statuses", shortLabel: "Stat", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", shortLabel: "Shr", icon: Building },
