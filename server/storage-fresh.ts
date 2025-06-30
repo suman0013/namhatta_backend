@@ -268,6 +268,9 @@ export class MemStorage implements IStorage {
         const surname = isMataji ? "Devi" : "Das";
         const statusId = Math.floor(Math.random() * 7) + 1; // Random status 1-7
         
+        const createdDate = new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+        const updatedDate = new Date(createdDate.getTime() + Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)); // Random date after creation
+        
         const devotee = {
           legalName: `${firstName} ${surname}`,
           name: isMataji ? `Mataji ${firstName} ${surname}` : `Prabhu ${firstName} ${surname}`,
@@ -299,7 +302,10 @@ export class MemStorage implements IStorage {
           devotionalCourses: [],
           shraddhakutirId: null,
           education: ["B.A.", "M.A.", "B.Sc.", "M.Sc.", "B.Tech", "MBA", "Ph.D", "Diploma"][Math.floor(Math.random() * 8)],
-          occupation: ["Teacher", "Engineer", "Doctor", "Business", "Service", "Farmer", "Retired", "Student"][Math.floor(Math.random() * 8)]
+          occupation: ["Teacher", "Engineer", "Doctor", "Business", "Service", "Farmer", "Retired", "Student"][Math.floor(Math.random() * 8)],
+          id: devoteeId++,
+          createdAt: createdDate,
+          updatedAt: updatedDate
         };
         
         devotees.push(devotee);
@@ -416,6 +422,10 @@ export class MemStorage implements IStorage {
             aValue = a.createdAt?.getTime() || 0;
             bValue = b.createdAt?.getTime() || 0;
             break;
+          case "updatedAt":
+            aValue = a.updatedAt?.getTime() || a.createdAt?.getTime() || 0;
+            bValue = b.updatedAt?.getTime() || b.createdAt?.getTime() || 0;
+            break;
           default:
             aValue = (a.name || a.legalName || "").toLowerCase();
             bValue = (b.name || b.legalName || "").toLowerCase();
@@ -442,7 +452,8 @@ export class MemStorage implements IStorage {
 
   async createDevotee(devotee: InsertDevotee): Promise<Devotee> {
     const id = this.currentId++;
-    const newDevotee: Devotee = { ...devotee, id, createdAt: new Date() };
+    const now = new Date();
+    const newDevotee: Devotee = { ...devotee, id, createdAt: now, updatedAt: now };
     this.devotees.set(id, newDevotee);
     return newDevotee;
   }

@@ -211,6 +211,7 @@ export default function Devotees() {
                 <SelectContent>
                   <SelectItem value="name">Name</SelectItem>
                   <SelectItem value="createdAt">Created Date</SelectItem>
+                  <SelectItem value="updatedAt">Updated Date</SelectItem>
                 </SelectContent>
               </Select>
               <Button

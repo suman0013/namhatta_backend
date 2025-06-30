@@ -52,6 +52,7 @@ export const devotees = pgTable("devotees", {
   additionalComments: text("additional_comments"),
   shraddhakutirId: integer("shraddhakutir_id"),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Namhattas table
