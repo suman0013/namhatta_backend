@@ -34,18 +34,11 @@ export default function DevoteeDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
-  const [showHistory, setShowHistory] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
   const { data: devotee, isLoading } = useQuery({
     queryKey: ["/api/devotees", id],
     queryFn: () => api.getDevotee(parseInt(id!)),
-    enabled: !!id,
-  });
-
-  const { data: statusHistory } = useQuery({
-    queryKey: ["/api/devotees", id, "status-history"],
-    queryFn: () => api.getDevoteeStatusHistory(parseInt(id!)),
     enabled: !!id,
   });
 
@@ -159,7 +152,6 @@ export default function DevoteeDetail() {
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="status">Status Management</TabsTrigger>
           <TabsTrigger value="courses">Courses</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -510,39 +502,6 @@ export default function DevoteeDetail() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Status History */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="mr-2 h-5 w-5" />
-                  Status History
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {statusHistory?.length === 0 ? (
-                    <p className="text-gray-600 dark:text-gray-400 text-center py-4">
-                      No status changes recorded yet.
-                    </p>
-                  ) : (
-                    statusHistory?.map((entry: any, index: number) => (
-                      <div key={entry.id} className="flex items-center space-x-3 p-3 rounded-lg glass">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            Changed to {getStatusName(entry.newStatusId)}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            {new Date(entry.changedAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
 
@@ -591,50 +550,7 @@ export default function DevoteeDetail() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="history" className="space-y-6">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="mr-2 h-5 w-5" />
-                Activity Timeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 rounded-lg glass">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Profile created
-                    </p>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                      {new Date(devotee.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                
-                {statusHistory?.map((entry: any) => (
-                  <div key={entry.id} className="flex items-center space-x-3 p-3 rounded-lg glass">
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Status changed to {getStatusName(entry.newStatusId)}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {new Date(entry.changedAt).toLocaleDateString()}
-                      </p>
-                      {entry.notes && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          {entry.notes}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
       </Tabs>
 
       {/* Edit Form Modal */}
