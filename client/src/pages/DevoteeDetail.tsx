@@ -534,10 +534,10 @@ export default function DevoteeDetail() {
                         <div className="w-2 h-2 bg-indigo-500 rounded-full" />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            Upgraded to {getStatusName(entry.toStatusId)}
+                            Upgraded to {getStatusName(entry.newStatusId)}
                           </p>
                           <p className="text-xs text-gray-600 dark:text-gray-400">
-                            {new Date(entry.changeDate).toLocaleDateString()}
+                            {new Date(entry.changedAt).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -621,10 +621,10 @@ export default function DevoteeDetail() {
                     <div className="w-2 h-2 bg-indigo-500 rounded-full" />
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        Status upgraded to {getStatusName(entry.toStatusId)}
+                        Status upgraded to {getStatusName(entry.newStatusId)}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {new Date(entry.changeDate).toLocaleDateString()}
+                        {new Date(entry.changedAt).toLocaleDateString()}
                       </p>
                       {entry.notes && (
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">

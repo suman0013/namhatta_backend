@@ -98,6 +98,9 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Fixed devotee detail view to display all registration fields including legal name, date of birth, gender, blood group, family names, contact information, sub-district, postal code, and spiritual information
+- June 30, 2025: Fixed status history display issue - now correctly shows actual status names instead of "Unknown" by using proper field mappings (newStatusId and changedAt)
+- June 30, 2025: Successfully completed migration from Replit Agent to standard Replit environment with full functionality restored
 - June 30, 2025: Completed form validation system overhaul - toast notifications now auto-dismiss after 3 seconds as requested
 - June 30, 2025: Fixed village dropdown in Add New Devotee form - now properly loads villages based on selected sub-district using complete geographic dataset
 - June 30, 2025: Fixed form validation system in Add New Devotee form - all validation errors now display properly with red error messages for required fields
