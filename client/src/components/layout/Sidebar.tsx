@@ -11,9 +11,9 @@ interface SidebarProps {
 
 const navigationItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home, active: true },
-  { href: "/namhattas", label: "Namhattas", icon: Home, badge: "24" },
-  { href: "/devotees", label: "Devotees", icon: Users, badge: "1,247" },
-  { href: "/updates", label: "Updates", icon: Bell, badge: "12" },
+  { href: "/namhattas", label: "Namhattas", icon: Home },
+  { href: "/devotees", label: "Devotees", icon: Users },
+  { href: "/updates", label: "Updates", icon: Bell },
   { href: "/map", label: "Map View", icon: MapPin },
   { href: "/statuses", label: "Statuses", icon: Layers },
   { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
