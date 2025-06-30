@@ -98,6 +98,8 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Restructured devotee card layout - legal name displays first, initiated name below if present, status badge moved to separate line instead of right side
+- June 30, 2025: Added sorting functionality for devotees list by name and creation date with ascending/descending toggle
 - June 30, 2025: Added Devotional Courses section to devotee detail view matching form structure with course name, date, and institute fields
 - June 30, 2025: Removed "Initiated Devotee" and devotional course count text from devotee cards for cleaner UI
 - June 30, 2025: Fixed edit button functionality in devotee cards to properly open edit form

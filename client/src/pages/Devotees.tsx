@@ -384,22 +384,29 @@ function DevoteeCard({ devotee, statuses, onEdit }: { devotee: Devotee; statuses
     <Card className="glass-card hover-lift group">
       <CardContent className="p-6">
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
-                {(devotee.name || devotee.legalName).substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <Link href={`/devotees/${devotee.id}`}>
-                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                  {devotee.name || devotee.legalName}
-                </h3>
-              </Link>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
-            </div>
+        <div className="flex items-center space-x-3 mb-4">
+          <Avatar className="h-12 w-12">
+            <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
+              {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <Link href={`/devotees/${devotee.id}`}>
+              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                {devotee.legalName}
+              </h3>
+            </Link>
+            {devotee.name && devotee.name !== devotee.legalName && (
+              <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                {devotee.name}
+              </p>
+            )}
+            <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
           </div>
+        </div>
+
+        {/* Status Badge */}
+        <div className="mb-4">
           <Badge className={getStatusColor(devotee.devotionalStatusId)}>
             {getStatusName(devotee.devotionalStatusId)}
           </Badge>
