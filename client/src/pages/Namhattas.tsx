@@ -252,7 +252,7 @@ export default function Namhattas() {
       </Card>
 
       {/* Namhattas Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10 auto-rows-fr">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
         {namhattas?.data?.map((namhatta) => (
           <NamhattaCard key={namhatta.id} namhatta={namhatta} onEdit={handleEditNamhatta} />
         ))}
@@ -321,64 +321,66 @@ function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namha
   };
 
   return (
-    <Card className="glass-card hover-lift group cursor-pointer h-[280px]">
-      <CardContent className="p-6 h-full flex flex-col">
-        <div className="flex items-center justify-between mb-4">
-          <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center`}>
-            <Home className="h-6 w-6 text-white" />
+    <div className="h-[280px]">
+      <Card className="glass-card hover-lift group cursor-pointer h-full">
+        <CardContent className="p-6 h-full flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center`}>
+              <Home className="h-6 w-6 text-white" />
+            </div>
+            {getStatusBadge(namhatta.status)}
           </div>
-          {getStatusBadge(namhatta.status)}
-        </div>
-        
-        <Link href={`/namhattas/${namhatta.id}`}>
-          <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 line-clamp-2">
-            {namhatta.name}
-          </h3>
-        </Link>
-        
-        <div className="flex-grow">
-          {namhatta.address && (
-            <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-3">
-              <MapPin className="mr-1 h-3 w-3 flex-shrink-0" />
-              <span className="line-clamp-2">
-                {[
-                  namhatta.address.village,
-                  namhatta.address.district,
-                  namhatta.address.state
-                ].filter(Boolean).join(", ")}
+          
+          <Link href={`/namhattas/${namhatta.id}`}>
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 line-clamp-2">
+              {namhatta.name}
+            </h3>
+          </Link>
+          
+          <div className="flex-grow">
+            {namhatta.address && (
+              <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-3">
+                <MapPin className="mr-1 h-3 w-3 flex-shrink-0" />
+                <span className="line-clamp-2">
+                  {[
+                    namhatta.address.village,
+                    namhatta.address.district,
+                    namhatta.address.state
+                  ].filter(Boolean).join(", ")}
+                </span>
+              </div>
+            )}
+            
+            <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <span className="flex items-center">
+                <Users className="mr-1 h-3 w-3" />
+                45 devotees
+              </span>
+              <span className="flex items-center">
+                <Calendar className="mr-1 h-3 w-3" />
+                Weekly
               </span>
             </div>
-          )}
-          
-          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-            <span className="flex items-center">
-              <Users className="mr-1 h-3 w-3" />
-              45 devotees
-            </span>
-            <span className="flex items-center">
-              <Calendar className="mr-1 h-3 w-3" />
-              Weekly
-            </span>
           </div>
-        </div>
-        
-        <div className="flex space-x-2 mt-auto">
-          <Link href={`/namhattas/${namhatta.id}`} className="flex-1">
-            <Button variant="secondary" className="w-full glass">
-              View Details
+          
+          <div className="flex space-x-2 mt-auto">
+            <Link href={`/namhattas/${namhatta.id}`} className="flex-1">
+              <Button variant="secondary" className="w-full glass">
+                View Details
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="glass"
+              onClick={() => onEdit(namhatta)}
+            >
+              <Edit className="h-4 w-4" />
             </Button>
-          </Link>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="glass"
-            onClick={() => onEdit(namhatta)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
