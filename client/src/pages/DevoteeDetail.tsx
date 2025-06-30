@@ -125,14 +125,14 @@ export default function DevoteeDetail() {
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white text-xl">
-                {devotee.name.substring(0, 2).toUpperCase()}
+                {(devotee.name || devotee.legalName).substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{devotee.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{devotee.name || devotee.legalName}</h1>
               <div className="flex items-center space-x-4 mt-2">
-                <Badge className={getStatusColor(devotee.statusId)}>
-                  {getStatusName(devotee.statusId)}
+                <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+                  {getStatusName(devotee.devotionalStatusId)}
                 </Badge>
                 {devotee.occupation && (
                   <span className="text-gray-600 dark:text-gray-400 flex items-center">
@@ -178,22 +178,76 @@ export default function DevoteeDetail() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Full Name</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{devotee.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Legal Name</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{devotee.legalName}</p>
                   </div>
-                  {devotee.gurudev && (
+                  {devotee.name && (
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Spiritual Master</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Spiritual Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.name}</p>
+                    </div>
+                  )}
+                  {devotee.dob && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Date of Birth</p>
                       <p className="font-medium text-gray-900 dark:text-white flex items-center">
-                        <Heart className="mr-1 h-3 w-3 text-red-500" />
-                        {devotee.gurudev}
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {new Date(devotee.dob).toLocaleDateString()}
                       </p>
+                    </div>
+                  )}
+                  {devotee.gender && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Gender</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.gender}</p>
+                    </div>
+                  )}
+                  {devotee.bloodGroup && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Blood Group</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.bloodGroup}</p>
                     </div>
                   )}
                   {devotee.maritalStatus && (
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Marital Status</p>
                       <p className="font-medium text-gray-900 dark:text-white">{devotee.maritalStatus}</p>
+                    </div>
+                  )}
+                  {devotee.fatherName && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Father's Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.fatherName}</p>
+                    </div>
+                  )}
+                  {devotee.motherName && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Mother's Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.motherName}</p>
+                    </div>
+                  )}
+                  {devotee.husbandName && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Husband's Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.husbandName}</p>
+                    </div>
+                  )}
+                  {devotee.email && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                      <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                        <Mail className="mr-1 h-3 w-3" />
+                        {devotee.email}
+                      </p>
+                    </div>
+                  )}
+                  {devotee.phone && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Phone</p>
+                      <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                        <Phone className="mr-1 h-3 w-3" />
+                        {devotee.phone}
+                      </p>
                     </div>
                   )}
                   {devotee.education && (
@@ -248,10 +302,22 @@ export default function DevoteeDetail() {
                           <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.district}</span>
                         </div>
                       )}
+                      {devotee.presentAddress.subDistrict && (
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Sub-District:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.subDistrict}</span>
+                        </div>
+                      )}
                       {devotee.presentAddress.village && (
                         <div>
                           <span className="text-gray-500 dark:text-gray-400">Village:</span>
                           <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.village}</span>
+                        </div>
+                      )}
+                      {devotee.presentAddress.postalCode && (
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Postal Code:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.postalCode}</span>
                         </div>
                       )}
                       {devotee.presentAddress.zipcode && (
@@ -286,10 +352,22 @@ export default function DevoteeDetail() {
                           <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.district}</span>
                         </div>
                       )}
+                      {devotee.permanentAddress.subDistrict && (
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Sub-District:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.subDistrict}</span>
+                        </div>
+                      )}
                       {devotee.permanentAddress.village && (
                         <div>
                           <span className="text-gray-500 dark:text-gray-400">Village:</span>
                           <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.village}</span>
+                        </div>
+                      )}
+                      {devotee.permanentAddress.postalCode && (
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Postal Code:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.postalCode}</span>
                         </div>
                       )}
                       {devotee.permanentAddress.zipcode && (
@@ -304,6 +382,90 @@ export default function DevoteeDetail() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Spiritual Information */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Heart className="mr-2 h-5 w-5" />
+                Spiritual Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {devotee.harinamInitiationGurudev && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Harinam Initiation Gurudev</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{devotee.harinamInitiationGurudev}</p>
+                  </div>
+                )}
+                {devotee.harinamDate && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Harinam Initiation Date</p>
+                    <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                      <Calendar className="mr-1 h-3 w-3" />
+                      {new Date(devotee.harinamDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                {devotee.pancharatrikInitiationGurudev && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Pancharatrik Initiation Gurudev</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{devotee.pancharatrikInitiationGurudev}</p>
+                  </div>
+                )}
+                {devotee.pancharatrikDate && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Pancharatrik Initiation Date</p>
+                    <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                      <Calendar className="mr-1 h-3 w-3" />
+                      {new Date(devotee.pancharatrikDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                {devotee.initiatedName && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Initiated Name</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{devotee.initiatedName}</p>
+                  </div>
+                )}
+              </div>
+              
+              {devotee.devotionalCourses && devotee.devotionalCourses.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Devotional Courses</p>
+                  <div className="space-y-2">
+                    {devotee.devotionalCourses.map((course, index) => (
+                      <div key={index} className="p-3 rounded-lg glass">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                              <Book className="mr-1 h-3 w-3" />
+                              {course.name}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {course.institute} • {new Date(course.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
+                            <Award className="mr-1 h-3 w-3" />
+                            Completed
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {devotee.additionalComments && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Additional Comments</p>
+                  <p className="text-gray-900 dark:text-white mt-1">{devotee.additionalComments}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="status" className="space-y-6">
@@ -321,10 +483,10 @@ export default function DevoteeDetail() {
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Current Status</p>
                     <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {getStatusName(devotee.statusId)}
+                      {getStatusName(devotee.devotionalStatusId)}
                     </p>
                   </div>
-                  <Badge className={getStatusColor(devotee.statusId)}>
+                  <Badge className={getStatusColor(devotee.devotionalStatusId)}>
                     Active
                   </Badge>
                 </div>
@@ -340,7 +502,7 @@ export default function DevoteeDetail() {
                         <SelectValue placeholder="Select new status" />
                       </SelectTrigger>
                       <SelectContent>
-                        {statuses?.filter(status => status.id !== devotee.statusId).map((status) => (
+                        {statuses?.filter(status => status.id !== devotee.devotionalStatusId).map((status) => (
                           <SelectItem key={status.id} value={status.id.toString()}>
                             {status.name}
                           </SelectItem>
@@ -367,7 +529,7 @@ export default function DevoteeDetail() {
                       No status changes recorded yet.
                     </p>
                   ) : (
-                    statusHistory?.map((entry, index) => (
+                    statusHistory?.map((entry: any, index: number) => (
                       <div key={entry.id} className="flex items-center space-x-3 p-3 rounded-lg glass">
                         <div className="w-2 h-2 bg-indigo-500 rounded-full" />
                         <div className="flex-1">
@@ -454,7 +616,7 @@ export default function DevoteeDetail() {
                   </div>
                 </div>
                 
-                {statusHistory?.map((entry) => (
+                {statusHistory?.map((entry: any) => (
                   <div key={entry.id} className="flex items-center space-x-3 p-3 rounded-lg glass">
                     <div className="w-2 h-2 bg-indigo-500 rounded-full" />
                     <div>
@@ -478,13 +640,7 @@ export default function DevoteeDetail() {
         </TabsContent>
       </Tabs>
 
-      {/* Status History Modal */}
-      {showHistory && devotee && (
-        <StatusHistoryView
-          devoteeId={devotee.id}
-          onClose={() => setShowHistory(false)}
-        />
-      )}
+
     </div>
   );
 }
