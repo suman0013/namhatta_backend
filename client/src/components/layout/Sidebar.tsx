@@ -64,17 +64,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
               >
                 <Icon className="mr-3 h-5 w-5" />
                 {item.label}
-                {item.badge && (
-                  <Badge
-                    variant="secondary"
-                    className="ml-auto bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
-                {item.notification && (
-                  <div className="ml-auto w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                )}
               </div>
             </Link>
           );

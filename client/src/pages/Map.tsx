@@ -246,7 +246,7 @@ export default function Map() {
         
         // Add OpenStreetMap tiles with better error handling
         const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap contributors',
+          attribution: '',
           maxZoom: 19,
           minZoom: 2,
           detectRetina: true,
