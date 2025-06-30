@@ -312,14 +312,14 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     }
     
     // Validate present address
-    if (!presentAddress.country || !presentAddress.state || !presentAddress.district) {
-      setError("presentAddress" as any, { type: "required", message: "Present Address (Country, State, District) is required" });
+    if (!presentAddress.country || !presentAddress.state || !presentAddress.district || !presentAddress.subDistrict || !presentAddress.village || !presentAddress.postalCode) {
+      setError("presentAddress" as any, { type: "required", message: "Present Address (All fields: Country, State, District, Sub-District, Village, Postal Code) is required" });
       hasErrors = true;
     }
     
     // Validate permanent address
-    if (!sameAsPresentAddress && (!permanentAddress.country || !permanentAddress.state || !permanentAddress.district)) {
-      setError("permanentAddress" as any, { type: "required", message: "Permanent Address (Country, State, District) is required" });
+    if (!sameAsPresentAddress && (!permanentAddress.country || !permanentAddress.state || !permanentAddress.district || !permanentAddress.subDistrict || !permanentAddress.village || !permanentAddress.postalCode)) {
+      setError("permanentAddress" as any, { type: "required", message: "Permanent Address (All fields: Country, State, District, Sub-District, Village, Postal Code) is required" });
       hasErrors = true;
     }
     
@@ -502,7 +502,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               <h3 className="text-lg font-semibold">Present Address *</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 <div>
-                  <Label htmlFor="presentCountry">Country</Label>
+                  <Label htmlFor="presentCountry">Country *</Label>
                   <Select
                     value={presentAddress.country || ""}
                     onValueChange={(value) => handlePresentAddressChange("country", value)}
@@ -520,7 +520,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="presentState">State</Label>
+                  <Label htmlFor="presentState">State *</Label>
                   <Select
                     value={presentAddress.state || ""}
                     onValueChange={(value) => handlePresentAddressChange("state", value)}
@@ -539,7 +539,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="presentDistrict">District</Label>
+                  <Label htmlFor="presentDistrict">District *</Label>
                   <Select
                     value={presentAddress.district || ""}
                     onValueChange={(value) => handlePresentAddressChange("district", value)}
@@ -558,7 +558,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="presentSubDistrict">Sub-District</Label>
+                  <Label htmlFor="presentSubDistrict">Sub-District *</Label>
                   <Select
                     value={presentAddress.subDistrict || ""}
                     onValueChange={(value) => handlePresentAddressChange("subDistrict", value)}
@@ -577,7 +577,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="presentVillage">Village</Label>
+                  <Label htmlFor="presentVillage">Village *</Label>
                   <Select
                     value={presentAddress.village || ""}
                     onValueChange={(value) => handlePresentAddressChange("village", value)}
@@ -596,7 +596,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="presentPostalCode">Postal Code</Label>
+                  <Label htmlFor="presentPostalCode">Postal Code *</Label>
                   <Input
                     value={presentAddress.postalCode || ""}
                     onChange={(e) => handlePresentAddressChange("postalCode", e.target.value)}
@@ -639,7 +639,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               {!sameAsPresentAddress && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                   <div>
-                    <Label htmlFor="permanentCountry">Country</Label>
+                    <Label htmlFor="permanentCountry">Country *</Label>
                     <Select
                       value={permanentAddress.country || ""}
                       onValueChange={(value) => handlePermanentAddressChange("country", value)}
@@ -657,7 +657,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="permanentState">State</Label>
+                    <Label htmlFor="permanentState">State *</Label>
                     <Select
                       value={permanentAddress.state || ""}
                       onValueChange={(value) => handlePermanentAddressChange("state", value)}
@@ -676,7 +676,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="permanentDistrict">District</Label>
+                    <Label htmlFor="permanentDistrict">District *</Label>
                     <Select
                       value={permanentAddress.district || ""}
                       onValueChange={(value) => handlePermanentAddressChange("district", value)}
@@ -695,7 +695,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="permanentSubDistrict">Sub-District</Label>
+                    <Label htmlFor="permanentSubDistrict">Sub-District *</Label>
                     <Select
                       value={permanentAddress.subDistrict || ""}
                       onValueChange={(value) => handlePermanentAddressChange("subDistrict", value)}
@@ -714,7 +714,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="permanentVillage">Village</Label>
+                    <Label htmlFor="permanentVillage">Village *</Label>
                     <Select
                       value={permanentAddress.village || ""}
                       onValueChange={(value) => handlePermanentAddressChange("village", value)}
@@ -733,7 +733,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="permanentPostalCode">Postal Code</Label>
+                    <Label htmlFor="permanentPostalCode">Postal Code *</Label>
                     <Input
                       value={permanentAddress.postalCode || ""}
                       onChange={(e) => handlePermanentAddressChange("postalCode", e.target.value)}
