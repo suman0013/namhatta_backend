@@ -98,6 +98,12 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Added Devotional Courses section to devotee detail view matching form structure with course name, date, and institute fields
+- June 30, 2025: Removed "Initiated Devotee" and devotional course count text from devotee cards for cleaner UI
+- June 30, 2025: Fixed edit button functionality in devotee cards to properly open edit form
+- June 30, 2025: Fixed DOM nesting warning by replacing Badge container from p tag to div in devotee detail view
+- June 30, 2025: Restructured devotee detail view to match form segments: Basic Information, Family Information, Personal Information, Present Address, Permanent Address, Spiritual Information
+- June 30, 2025: Successfully completed migration from Replit Agent to standard Replit environment
 - June 30, 2025: Fixed toast notifications to auto-dismiss after 4 seconds instead of staying indefinitely
 - June 30, 2025: Updated status upgrade UI to use manual trigger button - users now select status and add comments, then click "Change Status" button to apply changes instead of automatic triggering
 - June 30, 2025: Added optional comment field to status upgrade functionality - users can now add comments when changing devotee status, and comments are displayed in status history

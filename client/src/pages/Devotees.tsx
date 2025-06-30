@@ -263,7 +263,12 @@ export default function Devotees() {
       {/* Devotees Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
         {devotees?.data?.map((devotee: any) => (
-          <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses || []} />
+          <DevoteeCard 
+            key={devotee.id} 
+            devotee={devotee} 
+            statuses={statuses || []} 
+            onEdit={(devotee) => setEditingDevotee(devotee)}
+          />
         ))}
       </div>
 
@@ -322,7 +327,7 @@ export default function Devotees() {
   );
 }
 
-function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] }) {
+function DevoteeCard({ devotee, statuses, onEdit }: { devotee: Devotee; statuses: any[]; onEdit?: (devotee: Devotee) => void }) {
   const getStatusName = (statusId?: number) => {
     if (!statusId) return "Unknown";
     const status = statuses.find(s => s.id === statusId);
@@ -366,13 +371,6 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
 
         {/* Details */}
         <div className="space-y-2 mb-4">
-          {(devotee.gurudevHarinam || devotee.gurudevPancharatrik) && (
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Heart className="mr-2 h-3 w-3" />
-              <span>Initiated Devotee</span>
-            </div>
-          )}
-          
           {devotee.presentAddress && (
             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
               <MapPin className="mr-2 h-3 w-3" />
@@ -408,19 +406,15 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
               View Profile
             </Button>
           </Link>
-          <Button variant="outline" size="icon" className="glass">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="glass"
+            onClick={() => onEdit?.(devotee)}
+          >
             <Edit className="h-4 w-4" />
           </Button>
         </div>
-
-        {/* Courses Count */}
-        {devotee.devotionalCourses && devotee.devotionalCourses.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-white/20 dark:border-slate-700/50">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Completed {devotee.devotionalCourses.length} devotional course{devotee.devotionalCourses.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
