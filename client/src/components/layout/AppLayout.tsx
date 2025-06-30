@@ -63,7 +63,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
-          <div className="animate-fade-in">
+          <div className="animate-fade-in max-w-7xl mx-auto px-4 py-6">
             {children}
           </div>
         </main>

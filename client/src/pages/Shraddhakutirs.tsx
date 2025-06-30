@@ -32,7 +32,7 @@ export default function Shraddhakutirs() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
@@ -219,7 +219,7 @@ function ShraddhakutirCard({
 
 function ShraddhakutirsSkeleton() {
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <Skeleton className="h-8 w-64 mb-2" />

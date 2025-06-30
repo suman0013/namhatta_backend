@@ -30,7 +30,7 @@ export default function About() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
@@ -283,7 +283,7 @@ function FeatureCard({
 
 function AboutSkeleton() {
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-6">
       <div className="space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />

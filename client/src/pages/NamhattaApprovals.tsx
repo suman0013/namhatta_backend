@@ -50,7 +50,7 @@ export default function NamhattaApprovals() {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>

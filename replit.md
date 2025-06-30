@@ -98,6 +98,10 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Successfully completed migration from Replit Agent to standard Replit environment with proper alignment fixes
+- June 30, 2025: Fixed alignment issues across all pages by removing double padding and ensuring proper content centering
+- June 30, 2025: Updated main layout to use max-width container with proper horizontal centering
+- June 30, 2025: Standardized page spacing from space-y-8 to space-y-6 for better visual consistency
 - June 28, 2025: Updated devotional status system to use specific spiritual hierarchy: Shraddhavan, Sadhusangi, Gour/Krishna Sevak, Gour/Krishna Sadhak, Sri Guru Charan Asraya, Harinam Diksha, Pancharatrik Diksha
 - June 28, 2025: Removed welcome message from dashboard page
 - June 28, 2025: Successfully migrated project from Replit Agent to standard Replit environment
