@@ -10,6 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft,
@@ -35,6 +37,7 @@ export default function DevoteeDetail() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
   const [showEditForm, setShowEditForm] = useState(false);
+  const [statusComment, setStatusComment] = useState("");
 
   const { data: devotee, isLoading } = useQuery({
     queryKey: ["/api/devotees", id],
@@ -54,12 +57,14 @@ export default function DevoteeDetail() {
   });
 
   const upgradeStatusMutation = useMutation({
-    mutationFn: (newStatusId: number) => api.upgradeDevoteeStatus(parseInt(id!), newStatusId),
+    mutationFn: ({ newStatusId, notes }: { newStatusId: number; notes?: string }) => 
+      api.upgradeDevoteeStatus(parseInt(id!), newStatusId, notes),
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Devotional status upgraded successfully",
       });
+      setStatusComment(""); // Clear the comment after successful update
       queryClient.invalidateQueries({ queryKey: ["/api/devotees", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/devotees", id, "status-history"] });
     },
@@ -488,9 +493,15 @@ export default function DevoteeDetail() {
                 
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Upgrade Status</p>
-                  <div className="flex space-x-3">
+                  <div className="space-y-3">
                     <Select
-                      onValueChange={(value) => upgradeStatusMutation.mutate(parseInt(value))}
+                      onValueChange={(value) => {
+                        const newStatusId = parseInt(value);
+                        upgradeStatusMutation.mutate({ 
+                          newStatusId, 
+                          notes: statusComment.trim() || undefined 
+                        });
+                      }}
                       disabled={upgradeStatusMutation.isPending}
                     >
                       <SelectTrigger className="glass border-0">
@@ -504,6 +515,19 @@ export default function DevoteeDetail() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <div>
+                      <Label htmlFor="statusComment" className="text-sm text-gray-600 dark:text-gray-400">
+                        Comment (Optional)
+                      </Label>
+                      <Textarea
+                        id="statusComment"
+                        value={statusComment}
+                        onChange={(e) => setStatusComment(e.target.value)}
+                        placeholder="Add a comment about this status change..."
+                        className="glass border-0 mt-1"
+                        rows={2}
+                      />
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -534,6 +558,11 @@ export default function DevoteeDetail() {
                           <p className="text-xs text-gray-600 dark:text-gray-400">
                             {new Date(entry.changedAt).toLocaleDateString()}
                           </p>
+                          {entry.notes && (
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 italic">
+                              "{entry.notes}"
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))

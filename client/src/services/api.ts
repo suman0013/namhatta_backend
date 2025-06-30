@@ -75,8 +75,8 @@ export const api = {
     return res.json();
   },
 
-  upgradeDevoteeStatus: async (id: number, newStatusId: number): Promise<void> => {
-    await apiRequest("POST", `/api/devotees/${id}/upgrade-status`, { newStatusId });
+  upgradeDevoteeStatus: async (id: number, newStatusId: number, notes?: string): Promise<void> => {
+    await apiRequest("POST", `/api/devotees/${id}/upgrade-status`, { newStatusId, notes });
   },
 
   getDevoteeStatusHistory: async (id: number) => {
