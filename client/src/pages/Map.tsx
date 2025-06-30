@@ -227,6 +227,7 @@ export default function Map() {
           touchZoom: true, // Enable touch zoom on mobile
           dragging: true, // Enable dragging
           boxZoom: true, // Enable box zoom with shift+drag
+          attributionControl: false, // Disable attribution control
         }).setView([20, 77], 4); // Centered on South Asia
         
         // Listen for zoom changes to update level automatically
