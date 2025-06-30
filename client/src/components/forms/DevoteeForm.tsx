@@ -96,6 +96,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const [permanentAddress, setPermanentAddress] = useState<Address>(devotee?.permanentAddress || {});
   const [devotionalCourses, setDevotionalCourses] = useState(devotee?.devotionalCourses || []);
   const [sameAsPresentAddress, setSameAsPresentAddress] = useState(false);
+  const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
 
 
   // Geography queries for present address
@@ -291,88 +292,95 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const onSubmit = (data: FormData) => {
     // Clear previous errors
     clearErrors();
+    setAddressErrors({});
     
-    // Validate mandatory fields and set individual field errors
-    let hasErrors = false;
+    // Simple validation - check required fields
+    const errors: string[] = [];
+    const newAddressErrors: Record<string, string> = {};
     
-    // Basic fields validation
-    if (!data.legalName) {
+    // Check basic required fields
+    if (!data.legalName?.trim()) {
       setError("legalName", { type: "required", message: "Legal Name is required" });
-      hasErrors = true;
+      errors.push("Legal Name");
     }
+    
     if (!data.dob) {
       setError("dob", { type: "required", message: "Date of Birth is required" });
-      hasErrors = true;
+      errors.push("Date of Birth");
     }
+    
     if (!data.gender) {
       setError("gender", { type: "required", message: "Gender is required" });
-      hasErrors = true;
+      errors.push("Gender");
     }
+    
     if (!data.devotionalStatusId) {
       setError("devotionalStatusId", { type: "required", message: "Devotional Status is required" });
-      hasErrors = true;
+      errors.push("Devotional Status");
     }
     
-    // Present address validation
+    // Check present address
     if (!presentAddress.country) {
-      setError("presentAddress.country" as any, { type: "required", message: "Country is required" });
-      hasErrors = true;
+      newAddressErrors["presentAddress.country"] = "Country is required";
+      errors.push("Present Address Country");
     }
     if (!presentAddress.state) {
-      setError("presentAddress.state" as any, { type: "required", message: "State is required" });
-      hasErrors = true;
+      newAddressErrors["presentAddress.state"] = "State is required";
+      errors.push("Present Address State");
     }
     if (!presentAddress.district) {
-      setError("presentAddress.district" as any, { type: "required", message: "District is required" });
-      hasErrors = true;
+      newAddressErrors["presentAddress.district"] = "District is required";
+      errors.push("Present Address District");
     }
     if (!presentAddress.subDistrict) {
-      setError("presentAddress.subDistrict" as any, { type: "required", message: "Sub-District is required" });
-      hasErrors = true;
+      newAddressErrors["presentAddress.subDistrict"] = "Sub-District is required";
+      errors.push("Present Address Sub-District");
     }
     if (!presentAddress.village) {
-      setError("presentAddress.village" as any, { type: "required", message: "Village is required" });
-      hasErrors = true;
+      newAddressErrors["presentAddress.village"] = "Village is required";
+      errors.push("Present Address Village");
     }
     if (!presentAddress.postalCode) {
-      setError("presentAddress.postalCode" as any, { type: "required", message: "Postal Code is required" });
-      hasErrors = true;
+      newAddressErrors["presentAddress.postalCode"] = "Postal Code is required";
+      errors.push("Present Address Postal Code");
     }
     
-    // Permanent address validation (only if not same as present)
+    // Check permanent address (if not same as present)
     if (!sameAsPresentAddress) {
       if (!permanentAddress.country) {
-        setError("permanentAddress.country" as any, { type: "required", message: "Country is required" });
-        hasErrors = true;
+        newAddressErrors["permanentAddress.country"] = "Country is required";
+        errors.push("Permanent Address Country");
       }
       if (!permanentAddress.state) {
-        setError("permanentAddress.state" as any, { type: "required", message: "State is required" });
-        hasErrors = true;
+        newAddressErrors["permanentAddress.state"] = "State is required";
+        errors.push("Permanent Address State");
       }
       if (!permanentAddress.district) {
-        setError("permanentAddress.district" as any, { type: "required", message: "District is required" });
-        hasErrors = true;
+        newAddressErrors["permanentAddress.district"] = "District is required";
+        errors.push("Permanent Address District");
       }
       if (!permanentAddress.subDistrict) {
-        setError("permanentAddress.subDistrict" as any, { type: "required", message: "Sub-District is required" });
-        hasErrors = true;
+        newAddressErrors["permanentAddress.subDistrict"] = "Sub-District is required";
+        errors.push("Permanent Address Sub-District");
       }
       if (!permanentAddress.village) {
-        setError("permanentAddress.village" as any, { type: "required", message: "Village is required" });
-        hasErrors = true;
+        newAddressErrors["permanentAddress.village"] = "Village is required";
+        errors.push("Permanent Address Village");
       }
       if (!permanentAddress.postalCode) {
-        setError("permanentAddress.postalCode" as any, { type: "required", message: "Postal Code is required" });
-        hasErrors = true;
+        newAddressErrors["permanentAddress.postalCode"] = "Postal Code is required";
+        errors.push("Permanent Address Postal Code");
       }
     }
     
-    if (hasErrors) {
+    // If there are errors, show them and stop
+    if (errors.length > 0) {
+      setAddressErrors(newAddressErrors);
       toast({
-        title: "Please fill in all required fields",  
-        description: "Check the highlighted fields below and fill in all required information.",
+        title: `Please fill in ${errors.length} required fields`,
+        description: `Missing: ${errors.join(", ")}`,
         variant: "destructive",
-        duration: 5000,
+        duration: 8000,
       });
       return;
     }
@@ -568,8 +576,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors["presentAddress.country" as keyof typeof errors] && (
-                    <p className="text-sm text-red-500 mt-1">Country is required</p>
+                  {addressErrors["presentAddress.country"] && (
+                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.country"]}</p>
                   )}
                 </div>
                 <div>
@@ -593,8 +601,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors["presentAddress.state" as keyof typeof errors] && (
-                    <p className="text-sm text-red-500 mt-1">State is required</p>
+                  {addressErrors["presentAddress.state"] && (
+                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.state"]}</p>
                   )}
                 </div>
                 <div>
@@ -618,8 +626,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors["presentAddress.district" as keyof typeof errors] && (
-                    <p className="text-sm text-red-500 mt-1">District is required</p>
+                  {addressErrors["presentAddress.district"] && (
+                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.district"]}</p>
                   )}
                 </div>
                 <div>
@@ -643,8 +651,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors["presentAddress.subDistrict" as keyof typeof errors] && (
-                    <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
+                  {addressErrors["presentAddress.subDistrict"] && (
+                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.subDistrict"]}</p>
                   )}
                 </div>
                 <div>
@@ -668,8 +676,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors["presentAddress.village" as keyof typeof errors] && (
-                    <p className="text-sm text-red-500 mt-1">Village is required</p>
+                  {addressErrors["presentAddress.village"] && (
+                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.village"]}</p>
                   )}
                 </div>
                 <div>
@@ -682,8 +690,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     }}
                     placeholder="Enter postal code"
                   />
-                  {errors["presentAddress.postalCode" as keyof typeof errors] && (
-                    <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
+                  {addressErrors["presentAddress.postalCode"] && (
+                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.postalCode"]}</p>
                   )}
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">
@@ -741,8 +749,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors["permanentAddress.country" as keyof typeof errors] && (
-                      <p className="text-sm text-red-500 mt-1">Country is required</p>
+                    {addressErrors["permanentAddress.country"] && (
+                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.country"]}</p>
                     )}
                   </div>
                   <div>
@@ -766,8 +774,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors["permanentAddress.state" as keyof typeof errors] && (
-                      <p className="text-sm text-red-500 mt-1">State is required</p>
+                    {addressErrors["permanentAddress.state"] && (
+                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.state"]}</p>
                     )}
                   </div>
                   <div>
@@ -791,8 +799,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors["permanentAddress.district" as keyof typeof errors] && (
-                      <p className="text-sm text-red-500 mt-1">District is required</p>
+                    {addressErrors["permanentAddress.district"] && (
+                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.district"]}</p>
                     )}
                   </div>
                   <div>
@@ -816,8 +824,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors["permanentAddress.subDistrict" as keyof typeof errors] && (
-                      <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
+                    {addressErrors["permanentAddress.subDistrict"] && (
+                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.subDistrict"]}</p>
                     )}
                   </div>
                   <div>
@@ -841,8 +849,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors["permanentAddress.village" as keyof typeof errors] && (
-                      <p className="text-sm text-red-500 mt-1">Village is required</p>
+                    {addressErrors["permanentAddress.village"] && (
+                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.village"]}</p>
                     )}
                   </div>
                   <div>
@@ -855,8 +863,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       }}
                       placeholder="Enter postal code"
                     />
-                    {errors["permanentAddress.postalCode" as keyof typeof errors] && (
-                      <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
+                    {addressErrors["permanentAddress.postalCode"] && (
+                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.postalCode"]}</p>
                     )}
                   </div>
                   <div className="sm:col-span-2 lg:col-span-3">
