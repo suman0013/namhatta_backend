@@ -382,85 +382,87 @@ function DevoteeCard({ devotee, statuses, onEdit }: { devotee: Devotee; statuses
   };
 
   return (
-    <Card className="glass-card hover-lift group">
-      <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-center space-x-3 mb-4">
-          <Avatar className="h-12 w-12">
-            <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
-              {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <Link href={`/devotees/${devotee.id}`}>
-              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                {devotee.legalName}
-              </h3>
-            </Link>
-            {devotee.initiatedName && (
-              <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                {devotee.initiatedName}
-              </p>
-            )}
-            <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
+    <div className="h-[280px]">
+      <Card className="glass-card hover-lift group h-full">
+        <CardContent className="p-6 h-full flex flex-col">
+          {/* Header */}
+          <div className="flex items-center space-x-3 mb-4">
+            <Avatar className="h-12 w-12">
+              <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
+                {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <Link href={`/devotees/${devotee.id}`}>
+                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                  {devotee.legalName}
+                </h3>
+              </Link>
+              {devotee.initiatedName && (
+                <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                  {devotee.initiatedName}
+                </p>
+              )}
+              <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
+            </div>
           </div>
-        </div>
 
-        {/* Status Badge */}
-        <div className="mb-4">
-          <Badge className={getStatusColor(devotee.devotionalStatusId)}>
-            {getStatusName(devotee.devotionalStatusId)}
-          </Badge>
-        </div>
+          {/* Status Badge */}
+          <div className="mb-4">
+            <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+              {getStatusName(devotee.devotionalStatusId)}
+            </Badge>
+          </div>
 
-        {/* Details */}
-        <div className="space-y-2 mb-4">
-          {devotee.presentAddress && (
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <MapPin className="mr-2 h-3 w-3" />
-              <span>
-                {[
-                  devotee.presentAddress.village,
-                  devotee.presentAddress.district,
-                  devotee.presentAddress.state
-                ].filter(Boolean).join(", ")}
-              </span>
-            </div>
-          )}
+          {/* Details */}
+          <div className="space-y-2 mb-4 flex-grow">
+            {devotee.presentAddress && (
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <MapPin className="mr-2 h-3 w-3" />
+                <span>
+                  {[
+                    devotee.presentAddress.village,
+                    devotee.presentAddress.district,
+                    devotee.presentAddress.state
+                  ].filter(Boolean).join(", ")}
+                </span>
+              </div>
+            )}
 
-          {devotee.education && (
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <GraduationCap className="mr-2 h-3 w-3" />
-              <span>{devotee.education}</span>
-            </div>
-          )}
+            {devotee.education && (
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <GraduationCap className="mr-2 h-3 w-3" />
+                <span>{devotee.education}</span>
+              </div>
+            )}
 
-          {devotee.maritalStatus && (
-            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-              <Users className="mr-2 h-3 w-3" />
-              <span>{devotee.maritalStatus}</span>
-            </div>
-          )}
-        </div>
+            {devotee.maritalStatus && (
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                <Users className="mr-2 h-3 w-3" />
+                <span>{devotee.maritalStatus}</span>
+              </div>
+            )}
+          </div>
 
-        {/* Actions */}
-        <div className="flex space-x-2">
-          <Link href={`/devotees/${devotee.id}`} className="flex-1">
-            <Button variant="secondary" className="w-full glass">
-              View Profile
+          {/* Actions */}
+          <div className="flex space-x-2 mt-auto">
+            <Link href={`/devotees/${devotee.id}`} className="flex-1">
+              <Button variant="secondary" className="w-full glass">
+                View Profile
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="glass"
+              onClick={() => onEdit?.(devotee)}
+            >
+              <Edit className="h-4 w-4" />
             </Button>
-          </Link>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            className="glass"
-            onClick={() => onEdit?.(devotee)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
