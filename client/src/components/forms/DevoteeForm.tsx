@@ -290,6 +290,12 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   };
 
   const onSubmit = (data: FormData) => {
+    console.log("=== FORM SUBMISSION DEBUG ===");
+    console.log("Form data:", data);
+    console.log("Present address:", presentAddress);
+    console.log("Permanent address:", permanentAddress);
+    console.log("Same as present:", sameAsPresentAddress);
+    
     // Clear previous errors
     clearErrors();
     setAddressErrors({});
@@ -300,47 +306,57 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     
     // Check basic required fields
     if (!data.legalName?.trim()) {
+      console.log("Missing: Legal Name");
       setError("legalName", { type: "required", message: "Legal Name is required" });
       errors.push("Legal Name");
     }
     
     if (!data.dob) {
+      console.log("Missing: Date of Birth");
       setError("dob", { type: "required", message: "Date of Birth is required" });
       errors.push("Date of Birth");
     }
     
     if (!data.gender) {
+      console.log("Missing: Gender");
       setError("gender", { type: "required", message: "Gender is required" });
       errors.push("Gender");
     }
     
     if (!data.devotionalStatusId) {
+      console.log("Missing: Devotional Status");
       setError("devotionalStatusId", { type: "required", message: "Devotional Status is required" });
       errors.push("Devotional Status");
     }
     
     // Check present address
     if (!presentAddress.country) {
+      console.log("Missing: Present Address Country");
       newAddressErrors["presentAddress.country"] = "Country is required";
       errors.push("Present Address Country");
     }
     if (!presentAddress.state) {
+      console.log("Missing: Present Address State");
       newAddressErrors["presentAddress.state"] = "State is required";
       errors.push("Present Address State");
     }
     if (!presentAddress.district) {
+      console.log("Missing: Present Address District");
       newAddressErrors["presentAddress.district"] = "District is required";
       errors.push("Present Address District");
     }
     if (!presentAddress.subDistrict) {
+      console.log("Missing: Present Address Sub-District");
       newAddressErrors["presentAddress.subDistrict"] = "Sub-District is required";
       errors.push("Present Address Sub-District");
     }
     if (!presentAddress.village) {
+      console.log("Missing: Present Address Village");
       newAddressErrors["presentAddress.village"] = "Village is required";
       errors.push("Present Address Village");
     }
     if (!presentAddress.postalCode) {
+      console.log("Missing: Present Address Postal Code");
       newAddressErrors["presentAddress.postalCode"] = "Postal Code is required";
       errors.push("Present Address Postal Code");
     }
@@ -348,26 +364,32 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     // Check permanent address (if not same as present)
     if (!sameAsPresentAddress) {
       if (!permanentAddress.country) {
+        console.log("Missing: Permanent Address Country");
         newAddressErrors["permanentAddress.country"] = "Country is required";
         errors.push("Permanent Address Country");
       }
       if (!permanentAddress.state) {
+        console.log("Missing: Permanent Address State");
         newAddressErrors["permanentAddress.state"] = "State is required";
         errors.push("Permanent Address State");
       }
       if (!permanentAddress.district) {
+        console.log("Missing: Permanent Address District");
         newAddressErrors["permanentAddress.district"] = "District is required";
         errors.push("Permanent Address District");
       }
       if (!permanentAddress.subDistrict) {
+        console.log("Missing: Permanent Address Sub-District");
         newAddressErrors["permanentAddress.subDistrict"] = "Sub-District is required";
         errors.push("Permanent Address Sub-District");
       }
       if (!permanentAddress.village) {
+        console.log("Missing: Permanent Address Village");
         newAddressErrors["permanentAddress.village"] = "Village is required";
         errors.push("Permanent Address Village");
       }
       if (!permanentAddress.postalCode) {
+        console.log("Missing: Permanent Address Postal Code");
         newAddressErrors["permanentAddress.postalCode"] = "Postal Code is required";
         errors.push("Permanent Address Postal Code");
       }
@@ -375,6 +397,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     
     // If there are errors, show them and stop
     if (errors.length > 0) {
+      console.log("Total errors found:", errors.length);
+      console.log("Error list:", errors);
+      console.log("Address errors:", newAddressErrors);
       setAddressErrors(newAddressErrors);
       toast({
         title: `Please fill in ${errors.length} required fields`,
@@ -384,6 +409,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       });
       return;
     }
+    
+    console.log("No validation errors, proceeding with submission...");
 
     const submitData: Partial<Devotee> = {
       ...data,
