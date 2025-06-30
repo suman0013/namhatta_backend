@@ -476,8 +476,8 @@ export default function NamhattaDetail() {
 
 function DevoteeCard({ devotee }: { devotee: Devotee }) {
   return (
-    <Card className="glass-card hover-lift group">
-      <CardContent className="p-4">
+    <Card className="glass-card hover-lift group h-full">
+      <CardContent className="p-4 h-full flex flex-col">
         <div className="flex items-center space-x-3 mb-3">
           <Avatar>
             <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
@@ -493,21 +493,25 @@ function DevoteeCard({ devotee }: { devotee: Devotee }) {
             <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
           </div>
         </div>
-        {devotee.presentAddress && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-            {[
-              devotee.presentAddress.village,
-              devotee.presentAddress.district
-            ].filter(Boolean).join(", ")}
-          </p>
-        )}
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {devotee.initiatedName || "Aspiring Devotee"}
-          </span>
-          <Badge variant="secondary" className="text-xs">
-            Status ID: {devotee.devotionalStatusId}
-          </Badge>
+        
+        <div className="flex-1 flex flex-col justify-between">
+          {devotee.presentAddress && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+              {[
+                devotee.presentAddress.village,
+                devotee.presentAddress.district
+              ].filter(Boolean).join(", ")}
+            </p>
+          )}
+          
+          <div className="flex justify-between items-center mt-auto">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {devotee.initiatedName || "Aspiring Devotee"}
+            </span>
+            <Badge variant="secondary" className="text-xs">
+              Status ID: {devotee.devotionalStatusId}
+            </Badge>
+          </div>
         </div>
       </CardContent>
     </Card>
