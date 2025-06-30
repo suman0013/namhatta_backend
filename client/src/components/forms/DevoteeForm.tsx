@@ -381,7 +381,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
         title: `Please fill in ${errors.length} required fields`,
         description: `Missing: ${errors.join(", ")}`,
         variant: "destructive",
-        duration: 8000,
+        duration: 3000,
       });
       return;
     }

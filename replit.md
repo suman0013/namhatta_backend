@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Completed form validation system overhaul - toast notifications now auto-dismiss after 3 seconds as requested
 - June 30, 2025: Fixed village dropdown in Add New Devotee form - now properly loads villages based on selected sub-district using complete geographic dataset
 - June 30, 2025: Fixed form validation system in Add New Devotee form - all validation errors now display properly with red error messages for required fields
 - June 30, 2025: Made all address fields mandatory in Add New Devotee form: Country, State, District, Sub-District, Village, and Postal Code for both Present and Permanent addresses
