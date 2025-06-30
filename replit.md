@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Fixed inconsistent heights in statistics cards on Updates page by setting fixed height of 128px (h-32) for uniform sizing and proper alignment
 - June 30, 2025: Fixed inconsistent heights in update cards by setting fixed height of 280px for uniform sizing on all screen sizes
 - June 30, 2025: Fixed inconsistent heights in Namhatta cards by setting fixed height of 280px for uniform sizing on all screen sizes
 - June 30, 2025: Added sorting functionality to Namhattas page with options for name, created date, and updated date with ascending/descending toggle - includes backend API support and UI sorting controls
