@@ -252,7 +252,7 @@ export default function Namhattas() {
       </Card>
 
       {/* Namhattas Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10 auto-rows-fr">
         {namhattas?.data?.map((namhatta) => (
           <NamhattaCard key={namhatta.id} namhatta={namhatta} onEdit={handleEditNamhatta} />
         ))}
@@ -321,7 +321,7 @@ function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namha
   };
 
   return (
-    <Card className="glass-card hover-lift group cursor-pointer h-full">
+    <Card className="glass-card hover-lift group cursor-pointer h-full min-h-[280px]">
       <CardContent className="p-6 h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center`}>
