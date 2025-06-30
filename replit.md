@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Made mandatory fields required in Add New Devotee form: Legal Name, Date of Birth, Gender, Present Address, Permanent Address, and Devotional Status
 - June 30, 2025: Moved Spiritual Information section below address sections in Add New Devotee form
 - June 30, 2025: Fixed inconsistent heights in devotee cards by adding proper flexbox layout for uniform sizing
 - June 30, 2025: Made Total Devotees and Total Namhattas stats cards clickable to navigate to respective pages

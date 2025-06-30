@@ -287,10 +287,37 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   };
 
   const onSubmit = (data: FormData) => {
+    // Validate mandatory fields
+    const validationErrors: string[] = [];
+    
+    if (!data.legalName) validationErrors.push("Legal Name is required");
+    if (!data.dob) validationErrors.push("Date of Birth is required");
+    if (!data.gender) validationErrors.push("Gender is required");
+    if (!data.devotionalStatusId) validationErrors.push("Devotional Status is required");
+    
+    // Validate present address
+    if (!presentAddress.country || !presentAddress.state || !presentAddress.district) {
+      validationErrors.push("Present Address (Country, State, District) is required");
+    }
+    
+    // Validate permanent address
+    if (!sameAsPresentAddress && (!permanentAddress.country || !permanentAddress.state || !permanentAddress.district)) {
+      validationErrors.push("Permanent Address (Country, State, District) is required");
+    }
+    
+    if (validationErrors.length > 0) {
+      toast({
+        title: "Validation Error",
+        description: validationErrors.join(", "),
+        variant: "destructive",
+      });
+      return;
+    }
+
     const submitData: Partial<Devotee> = {
       ...data,
       presentAddress,
-      permanentAddress,
+      permanentAddress: sameAsPresentAddress ? presentAddress : permanentAddress,
       devotionalCourses,
       gender: data.gender as "MALE" | "FEMALE" | "OTHER" | undefined,
       maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED" | undefined,
@@ -331,8 +358,14 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 </div>
 
                 <div>
-                  <Label htmlFor="dob">Date of Birth</Label>
-                  <Input type="date" {...register("dob")} />
+                  <Label htmlFor="dob">Date of Birth *</Label>
+                  <Input 
+                    type="date" 
+                    {...register("dob", { required: "Date of birth is required" })} 
+                  />
+                  {errors.dob && (
+                    <p className="text-sm text-red-500 mt-1">{errors.dob.message}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
@@ -343,8 +376,11 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Input {...register("phone")} placeholder="Enter phone number" />
                 </div>
                 <div>
-                  <Label htmlFor="gender">Gender</Label>
-                  <Select value={watch("gender")} onValueChange={(value) => setValue("gender", value)}>
+                  <Label htmlFor="gender">Gender *</Label>
+                  <Select 
+                    value={watch("gender")} 
+                    onValueChange={(value) => setValue("gender", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -354,6 +390,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                  {errors.gender && (
+                    <p className="text-sm text-red-500 mt-1">{errors.gender.message}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="bloodGroup">Blood Group</Label>
@@ -441,7 +480,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
             {/* Present Address */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Present Address</h3>
+              <h3 className="text-lg font-semibold">Present Address *</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country</Label>
@@ -561,7 +600,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Permanent Address */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Permanent Address</h3>
+                <h3 className="text-lg font-semibold">Permanent Address *</h3>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -702,7 +741,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Input {...register("name")} placeholder="Enter spiritual name" />
                 </div>
                 <div>
-                  <Label htmlFor="devotionalStatusId">Devotional Status</Label>
+                  <Label htmlFor="devotionalStatusId">Devotional Status *</Label>
                   <Select
                     value={watch("devotionalStatusId")?.toString() || ""}
                     onValueChange={(value) => setValue("devotionalStatusId", value ? parseInt(value) : undefined)}
@@ -718,6 +757,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.devotionalStatusId && (
+                    <p className="text-sm text-red-500 mt-1">{errors.devotionalStatusId.message}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="initiatedName">Initiated Name</Label>
