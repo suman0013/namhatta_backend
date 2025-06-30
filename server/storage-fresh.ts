@@ -518,13 +518,95 @@ export class MemStorage implements IStorage {
   async getNamhattas(page = 1, size = 10, filters?: any): Promise<{ data: Namhatta[], total: number }> {
     let allNamhattas = Array.from(this.namhattas.values());
     
+    // Apply search filter
     if (filters?.search) {
       const searchTerm = filters.search.toLowerCase();
       allNamhattas = allNamhattas.filter(namhatta => 
         namhatta.name?.toLowerCase().includes(searchTerm) ||
-        namhatta.code?.toLowerCase().includes(searchTerm)
+        namhatta.code?.toLowerCase().includes(searchTerm) ||
+        namhatta.malaSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.mahaChakraSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.chakraSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.upaChakraSenapoti?.toLowerCase().includes(searchTerm) ||
+        namhatta.secretary?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.country?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.state?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.district?.toLowerCase().includes(searchTerm) ||
+        namhatta.address?.village?.toLowerCase().includes(searchTerm)
       );
     }
+    
+    // Apply country filter
+    if (filters?.country) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.country === filters.country
+      );
+    }
+    
+    // Apply state filter
+    if (filters?.state) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.state === filters.state
+      );
+    }
+    
+    // Apply district filter
+    if (filters?.district) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.district === filters.district
+      );
+    }
+    
+    // Apply sub-district filter
+    if (filters?.subDistrict) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.subDistrict === filters.subDistrict
+      );
+    }
+    
+    // Apply village filter
+    if (filters?.village) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.address?.village === filters.village
+      );
+    }
+    
+    // Apply status filter
+    if (filters?.status) {
+      allNamhattas = allNamhattas.filter(namhatta => 
+        namhatta.status === filters.status
+      );
+    }
+    
+    // Apply sorting
+    const sortBy = filters?.sortBy || 'name';
+    const sortOrder = filters?.sortOrder || 'asc';
+    
+    allNamhattas.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name?.toLowerCase() || '';
+          bValue = b.name?.toLowerCase() || '';
+          break;
+        case 'createdAt':
+          aValue = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          bValue = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          break;
+        case 'updatedAt':
+          aValue = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+          bValue = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+          break;
+        default:
+          aValue = a.name?.toLowerCase() || '';
+          bValue = b.name?.toLowerCase() || '';
+      }
+      
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
 
     const total = allNamhattas.length;
     const startIndex = (page - 1) * size;

@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Added sorting functionality to Namhattas page with options for name, created date, and updated date with ascending/descending toggle - includes backend API support and UI sorting controls
 - June 30, 2025: Added "updatedAt" as third sorting option alongside name and creation date - backend and frontend now support sorting by Updated Date
 - June 30, 2025: Fixed initiated name display in devotee cards - now properly shows initiated names for devotees with status 6+ (Harinam Diksha or higher)
 - June 30, 2025: Restructured devotee card layout - legal name displays first, initiated name below if present, status badge moved to separate line instead of right side

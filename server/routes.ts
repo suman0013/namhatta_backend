@@ -197,7 +197,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/namhattas", async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const size = parseInt(req.query.size as string) || 10;
-    const result = await storage.getNamhattas(page, size, req.query);
+    const sortBy = req.query.sortBy as string;
+    const sortOrder = req.query.sortOrder as string;
+    
+    const filters = {
+      search: req.query.search as string,
+      country: req.query.country as string,
+      state: req.query.state as string,
+      district: req.query.district as string,
+      subDistrict: req.query.subDistrict as string,
+      village: req.query.village as string,
+      status: req.query.status as string,
+      sortBy,
+      sortOrder,
+    };
+    const result = await storage.getNamhattas(page, size, filters);
     res.json(result);
   });
 

@@ -29,10 +29,12 @@ export default function Namhattas() {
     village: "",
     status: "",
   });
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const { data: namhattas, isLoading } = useQuery({
-    queryKey: ["/api/namhattas", page, pageSize, searchTerm, filters],
-    queryFn: () => api.getNamhattas(page, pageSize, { ...filters, search: searchTerm }),
+    queryKey: ["/api/namhattas", page, pageSize, searchTerm, filters, sortBy, sortOrder],
+    queryFn: () => api.getNamhattas(page, pageSize, { ...filters, search: searchTerm, sortBy, sortOrder }),
   });
 
   const handleCreateNamhatta = () => {
@@ -208,6 +210,44 @@ export default function Namhattas() {
               setPage(1);
             }}
           />
+        </CardContent>
+      </Card>
+
+      {/* Sorting Controls */}
+      <Card className="glass-card">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {namhattas?.total ? `Showing ${namhattas.total} namhattas` : 'No namhattas found'}
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</span>
+              <Select value={sortBy} onValueChange={(value) => {
+                setSortBy(value);
+                setPage(1);
+              }}>
+                <SelectTrigger className="w-40 glass border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="createdAt">Created Date</SelectItem>
+                  <SelectItem value="updatedAt">Updated Date</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                  setPage(1);
+                }}
+                className="glass border-0 px-3"
+              >
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

@@ -78,6 +78,7 @@ export const namhattas = pgTable("namhattas", {
   secretary: text("secretary"),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Devotional Statuses table
