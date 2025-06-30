@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Added missing Secretary field to Leadership Roles and corrected address fields (Pincode, Additional Details) in Namhatta detail view
 - June 30, 2025: Enhanced map zoom transitions with complete geographic hierarchy (Country→State→District→Sub-district→Village)
 - June 30, 2025: Removed all map attribution text and badge numbers from navigation for cleaner UI
 - June 30, 2025: Fixed navigation bar alignment to maintain single-line layout with improved responsive design

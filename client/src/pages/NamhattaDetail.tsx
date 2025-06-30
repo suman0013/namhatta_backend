@@ -236,7 +236,7 @@ export default function NamhattaDetail() {
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Meeting Schedule</p>
                     <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                      {namhatta.weeklyMeetingDay ? `${namhatta.weeklyMeetingDay} ${namhatta.weeklyMeetingTime || ''}` : "Not scheduled"}
+                      {namhatta.meetingDay ? `${namhatta.meetingDay} ${namhatta.meetingTime || ''}` : "Not scheduled"}
                     </p>
                   </div>
                 </div>
@@ -278,7 +278,13 @@ export default function NamhattaDetail() {
                     <p className="font-medium text-gray-900 dark:text-white">{namhatta.upaChakraSenapoti}</p>
                   </div>
                 )}
-                {!namhatta.malaSenapoti && !namhatta.mahaChakraSenapoti && !namhatta.chakraSenapoti && !namhatta.upaChakraSenapoti && (
+                {namhatta.secretary && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Secretary</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{namhatta.secretary}</p>
+                  </div>
+                )}
+                {!namhatta.malaSenapoti && !namhatta.mahaChakraSenapoti && !namhatta.chakraSenapoti && !namhatta.upaChakraSenapoti && !namhatta.secretary && (
                   <div className="col-span-2 text-center text-gray-500 dark:text-gray-400 py-8">
                     No leadership roles assigned yet
                   </div>
@@ -328,16 +334,16 @@ export default function NamhattaDetail() {
                       <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.village}</p>
                     </div>
                   )}
-                  {namhatta.address.zipcode && (
+                  {namhatta.address.postalCode && (
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">ZIP Code</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.zipcode}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Pincode</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.postalCode}</p>
                     </div>
                   )}
-                  {namhatta.address.details && (
+                  {namhatta.address.landmark && (
                     <div className="md:col-span-2 lg:col-span-3">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Additional Details</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.details}</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{namhatta.address.landmark}</p>
                     </div>
                   )}
                 </div>
