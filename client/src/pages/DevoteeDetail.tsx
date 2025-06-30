@@ -488,6 +488,45 @@ export default function DevoteeDetail() {
               )}
             </CardContent>
           </Card>
+
+          {/* Devotional Courses */}
+          {devotee.devotionalCourses && devotee.devotionalCourses.length > 0 && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Book className="mr-2 h-5 w-5" />
+                  Devotional Courses
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {devotee.devotionalCourses.map((course, index) => (
+                    <div key={index} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Course Name</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{course.name}</p>
+                        </div>
+                        {course.date && (
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Date</p>
+                            <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                              <Calendar className="mr-1 h-3 w-3" />
+                              {new Date(course.date).toLocaleDateString()}
+                            </p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Institute</p>
+                          <p className="font-medium text-gray-900 dark:text-white">{course.institute}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="status" className="space-y-6">
