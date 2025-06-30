@@ -412,75 +412,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
             <Separator />
 
-            {/* Spiritual Information */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Spiritual Information</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="name">Spiritual Name</Label>
-                  <Input {...register("name")} placeholder="Enter spiritual name" />
-                </div>
-                <div>
-                  <Label htmlFor="devotionalStatusId">Devotional Status</Label>
-                  <Select
-                    value={watch("devotionalStatusId")?.toString() || ""}
-                    onValueChange={(value) => setValue("devotionalStatusId", value ? parseInt(value) : undefined)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select devotional status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statuses?.map((status) => (
-                        <SelectItem key={status.id} value={status.id.toString()}>
-                          {status.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="initiatedName">Initiated Name</Label>
-                  <Input {...register("initiatedName")} placeholder="Enter initiated name" />
-                </div>
-                <div>
-                  <Label htmlFor="harinamInitiationGurudev">Harinam Initiation Gurudev</Label>
-                  <Input {...register("harinamInitiationGurudev")} placeholder="Enter harinam initiation gurudev name" />
-                </div>
-                <div>
-                  <Label htmlFor="harinamDate">Harinama Initiation Date</Label>
-                  <Input type="date" {...register("harinamDate")} />
-                </div>
-                <div>
-                  <Label htmlFor="pancharatrikInitiationGurudev">Pancharatrik Initiation Gurudev</Label>
-                  <Input {...register("pancharatrikInitiationGurudev")} placeholder="Enter pancharatrik initiation gurudev name" />
-                </div>
-                <div>
-                  <Label htmlFor="pancharatrikDate">Pancharatrik Initiation Date</Label>
-                  <Input type="date" {...register("pancharatrikDate")} />
-                </div>
-                <div>
-                  <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
-                  <Select
-                    value={watch("shraddhakutirId")?.toString() || ""}
-                    onValueChange={(value) => setValue("shraddhakutirId", value ? parseInt(value) : undefined)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Shraddhakutir" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {shraddhakutirs?.map((sk) => (
-                        <SelectItem key={sk.id} value={sk.id.toString()}>
-                          {sk.name} ({sk.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
             {/* Personal Information */}
             <div className="space-y-3">
               <h3 className="text-lg font-semibold">Personal Information</h3>
@@ -758,6 +689,75 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </div>
                 </div>
               )}
+            </div>
+
+            <Separator />
+
+            {/* Spiritual Information */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Spiritual Information</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="name">Spiritual Name</Label>
+                  <Input {...register("name")} placeholder="Enter spiritual name" />
+                </div>
+                <div>
+                  <Label htmlFor="devotionalStatusId">Devotional Status</Label>
+                  <Select
+                    value={watch("devotionalStatusId")?.toString() || ""}
+                    onValueChange={(value) => setValue("devotionalStatusId", value ? parseInt(value) : undefined)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select devotional status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses?.map((status) => (
+                        <SelectItem key={status.id} value={status.id.toString()}>
+                          {status.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="initiatedName">Initiated Name</Label>
+                  <Input {...register("initiatedName")} placeholder="Enter initiated name" />
+                </div>
+                <div>
+                  <Label htmlFor="harinamInitiationGurudev">Harinam Initiation Gurudev</Label>
+                  <Input {...register("harinamInitiationGurudev")} placeholder="Enter harinam initiation gurudev name" />
+                </div>
+                <div>
+                  <Label htmlFor="harinamDate">Harinama Initiation Date</Label>
+                  <Input type="date" {...register("harinamDate")} />
+                </div>
+                <div>
+                  <Label htmlFor="pancharatrikInitiationGurudev">Pancharatrik Initiation Gurudev</Label>
+                  <Input {...register("pancharatrikInitiationGurudev")} placeholder="Enter pancharatrik initiation gurudev name" />
+                </div>
+                <div>
+                  <Label htmlFor="pancharatrikDate">Pancharatrik Initiation Date</Label>
+                  <Input type="date" {...register("pancharatrikDate")} />
+                </div>
+                <div>
+                  <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
+                  <Select
+                    value={watch("shraddhakutirId")?.toString() || ""}
+                    onValueChange={(value) => setValue("shraddhakutirId", value ? parseInt(value) : undefined)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Shraddhakutir" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {shraddhakutirs?.map((sk) => (
+                        <SelectItem key={sk.id} value={sk.id.toString()}>
+                          {sk.name} ({sk.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
 
             <Separator />
