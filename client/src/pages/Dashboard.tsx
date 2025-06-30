@@ -131,6 +131,7 @@ export default function Dashboard() {
           icon={Users}
           gradient="from-blue-400 to-blue-600"
           positive
+          onClick={() => setLocation("/devotees")}
         />
         <StatsCard
           title="Total Namhattas"
@@ -140,6 +141,7 @@ export default function Dashboard() {
           icon={Home}
           gradient="from-emerald-400 to-emerald-600"
           positive
+          onClick={() => setLocation("/namhattas")}
         />
 
 
@@ -240,7 +242,8 @@ function StatsCard({
   icon: Icon, 
   gradient, 
   positive = false, 
-  urgent = false 
+  urgent = false,
+  onClick
 }: {
   title: string;
   value: number;
@@ -250,9 +253,10 @@ function StatsCard({
   gradient: string;
   positive?: boolean;
   urgent?: boolean;
+  onClick?: () => void;
 }) {
   return (
-    <Card className="glass-card">
+    <Card className={`glass-card ${onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105' : ''}`} onClick={onClick}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>

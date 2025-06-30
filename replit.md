@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Made Total Devotees and Total Namhattas stats cards clickable to navigate to respective pages
 - June 30, 2025: Fixed non-functional "View All" and "Manage Statuses" buttons in Dashboard by adding proper navigation handlers
 - June 30, 2025: Added missing Secretary field to Leadership Roles and corrected address fields (Pincode, Additional Details) in Namhatta detail view
 - June 30, 2025: Enhanced map zoom transitions with complete geographic hierarchy (Country→State→District→Sub-district→Village)
