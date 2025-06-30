@@ -34,10 +34,10 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Determine level based on zoom - simplified thresholds
+  // Determine level based on zoom - adjusted for smoother transitions
   const getLevelFromZoom = (zoom: number): MapLevel => {
-    if (zoom >= 10) return 'DISTRICT';
-    if (zoom >= 6) return 'STATE';
+    if (zoom >= 8) return 'DISTRICT';
+    if (zoom >= 5) return 'STATE';
     return 'COUNTRY';
   };
 
