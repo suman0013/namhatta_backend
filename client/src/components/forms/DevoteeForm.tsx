@@ -60,7 +60,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const queryClient = useQueryClient();
   const isEditing = !!devotee;
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors }, setError, clearErrors } = useForm<FormData>({
+    mode: "onChange",
     defaultValues: {
       legalName: devotee?.legalName || "",
       name: devotee?.name || "",
@@ -287,29 +288,47 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   };
 
   const onSubmit = (data: FormData) => {
-    // Validate mandatory fields
-    const validationErrors: string[] = [];
+    // Clear previous errors
+    clearErrors();
     
-    if (!data.legalName) validationErrors.push("Legal Name is required");
-    if (!data.dob) validationErrors.push("Date of Birth is required");
-    if (!data.gender) validationErrors.push("Gender is required");
-    if (!data.devotionalStatusId) validationErrors.push("Devotional Status is required");
+    // Validate mandatory fields and set individual field errors
+    let hasErrors = false;
+    
+    if (!data.legalName) {
+      setError("legalName", { type: "required", message: "Legal Name is required" });
+      hasErrors = true;
+    }
+    if (!data.dob) {
+      setError("dob", { type: "required", message: "Date of Birth is required" });
+      hasErrors = true;
+    }
+    if (!data.gender) {
+      setError("gender", { type: "required", message: "Gender is required" });
+      hasErrors = true;
+    }
+    if (!data.devotionalStatusId) {
+      setError("devotionalStatusId", { type: "required", message: "Devotional Status is required" });
+      hasErrors = true;
+    }
     
     // Validate present address
     if (!presentAddress.country || !presentAddress.state || !presentAddress.district) {
-      validationErrors.push("Present Address (Country, State, District) is required");
+      setError("presentAddress" as any, { type: "required", message: "Present Address (Country, State, District) is required" });
+      hasErrors = true;
     }
     
     // Validate permanent address
     if (!sameAsPresentAddress && (!permanentAddress.country || !permanentAddress.state || !permanentAddress.district)) {
-      validationErrors.push("Permanent Address (Country, State, District) is required");
+      setError("permanentAddress" as any, { type: "required", message: "Permanent Address (Country, State, District) is required" });
+      hasErrors = true;
     }
     
-    if (validationErrors.length > 0) {
+    if (hasErrors) {
       toast({
-        title: "Validation Error",
-        description: validationErrors.join(", "),
+        title: "Please fill in required fields",  
+        description: "Check the highlighted fields below and fill in all required information.",
         variant: "destructive",
+        duration: 3000, // Auto-dismiss after 3 seconds
       });
       return;
     }
@@ -593,6 +612,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   />
                 </div>
               </div>
+              {errors.presentAddress && (
+                <p className="text-sm text-red-500 mt-2">{errors.presentAddress.message}</p>
+              )}
             </div>
 
             <Separator />
@@ -727,6 +749,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     />
                   </div>
                 </div>
+              )}
+              {errors.permanentAddress && (
+                <p className="text-sm text-red-500 mt-2">{errors.permanentAddress.message}</p>
               )}
             </div>
 
