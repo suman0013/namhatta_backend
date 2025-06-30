@@ -372,6 +372,62 @@ export class MemStorage implements IStorage {
       );
     }
 
+    // Apply filters
+    if (filters?.country) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.presentAddress?.country === filters.country ||
+        devotee.permanentAddress?.country === filters.country
+      );
+    }
+    
+    if (filters?.state) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.presentAddress?.state === filters.state ||
+        devotee.permanentAddress?.state === filters.state
+      );
+    }
+    
+    if (filters?.district) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.presentAddress?.district === filters.district ||
+        devotee.permanentAddress?.district === filters.district
+      );
+    }
+    
+    if (filters?.statusId) {
+      allDevotees = allDevotees.filter(devotee => 
+        devotee.devotionalStatusId?.toString() === filters.statusId
+      );
+    }
+
+    // Apply sorting
+    if (filters?.sortBy) {
+      allDevotees.sort((a, b) => {
+        let aValue: any;
+        let bValue: any;
+        
+        switch (filters.sortBy) {
+          case "name":
+            aValue = (a.name || a.legalName || "").toLowerCase();
+            bValue = (b.name || b.legalName || "").toLowerCase();
+            break;
+          case "createdAt":
+            aValue = a.createdAt?.getTime() || 0;
+            bValue = b.createdAt?.getTime() || 0;
+            break;
+          default:
+            aValue = (a.name || a.legalName || "").toLowerCase();
+            bValue = (b.name || b.legalName || "").toLowerCase();
+        }
+        
+        if (filters.sortOrder === "desc") {
+          return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+        } else {
+          return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+        }
+      });
+    }
+
     const total = allDevotees.length;
     const startIndex = (page - 1) * size;
     const data = allDevotees.slice(startIndex, startIndex + size);

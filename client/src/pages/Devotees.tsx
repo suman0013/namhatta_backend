@@ -40,13 +40,18 @@ export default function Devotees() {
     district: "",
     statusId: "",
   });
+  
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const { data: devotees, isLoading } = useQuery({
-    queryKey: ["/api/devotees", page, pageSize, searchTerm, filters],
+    queryKey: ["/api/devotees", page, pageSize, searchTerm, filters, sortBy, sortOrder],
     queryFn: () => {
       const params = new URLSearchParams({
         page: page.toString(),
-        size: pageSize.toString()
+        size: pageSize.toString(),
+        sortBy,
+        sortOrder
       });
       
       // Add search and filters
@@ -190,6 +195,37 @@ export default function Devotees() {
               setPage(1);
             }}
           />
+        </CardContent>
+      </Card>
+
+      {/* Sorting Controls */}
+      <Card className="glass-card">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</span>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-32 glass border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="createdAt">Created Date</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="glass border-0"
+              >
+                {sortOrder === "asc" ? "↑ Ascending" : "↓ Descending"}
+              </Button>
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {devotees?.total || 0} devotees found
+            </div>
+          </div>
         </CardContent>
       </Card>
 
