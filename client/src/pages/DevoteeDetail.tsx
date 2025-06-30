@@ -47,6 +47,12 @@ export default function DevoteeDetail() {
     queryFn: () => api.getStatuses(),
   });
 
+  const { data: statusHistory } = useQuery({
+    queryKey: ["/api/devotees", id, "status-history"],
+    queryFn: () => api.getDevoteeStatusHistory(parseInt(id!)),
+    enabled: !!id,
+  });
+
   const upgradeStatusMutation = useMutation({
     mutationFn: (newStatusId: number) => api.upgradeDevoteeStatus(parseInt(id!), newStatusId),
     onSuccess: () => {
@@ -499,6 +505,39 @@ export default function DevoteeDetail() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Status History */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Status History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {statusHistory?.length === 0 ? (
+                    <p className="text-gray-600 dark:text-gray-400 text-center py-4">
+                      No status changes recorded yet.
+                    </p>
+                  ) : (
+                    statusHistory?.map((entry: any, index: number) => (
+                      <div key={entry.id} className="flex items-center space-x-3 p-3 rounded-lg glass">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            Changed to {getStatusName(entry.newStatusId)}
+                          </p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            {new Date(entry.changedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
