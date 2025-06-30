@@ -167,26 +167,20 @@ export default function DevoteeDetail() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-            {/* Personal Information */}
+            {/* Basic Information */}
             <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <User className="mr-2 h-5 w-5" />
-                  Personal Information
+                  Basic Information
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Legal Name</p>
                     <p className="font-medium text-gray-900 dark:text-white">{devotee.legalName}</p>
                   </div>
-                  {devotee.name && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Spiritual Name</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.name}</p>
-                    </div>
-                  )}
                   {devotee.dob && (
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Date of Birth</p>
@@ -194,42 +188,6 @@ export default function DevoteeDetail() {
                         <Calendar className="mr-1 h-3 w-3" />
                         {new Date(devotee.dob).toLocaleDateString()}
                       </p>
-                    </div>
-                  )}
-                  {devotee.gender && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Gender</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.gender}</p>
-                    </div>
-                  )}
-                  {devotee.bloodGroup && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Blood Group</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.bloodGroup}</p>
-                    </div>
-                  )}
-                  {devotee.maritalStatus && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Marital Status</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.maritalStatus}</p>
-                    </div>
-                  )}
-                  {devotee.fatherName && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Father's Name</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.fatherName}</p>
-                    </div>
-                  )}
-                  {devotee.motherName && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Mother's Name</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.motherName}</p>
-                    </div>
-                  )}
-                  {devotee.husbandName && (
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Husband's Name</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{devotee.husbandName}</p>
                     </div>
                   )}
                   {devotee.email && (
@@ -250,6 +208,70 @@ export default function DevoteeDetail() {
                       </p>
                     </div>
                   )}
+                  {devotee.gender && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Gender</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.gender}</p>
+                    </div>
+                  )}
+                  {devotee.bloodGroup && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Blood Group</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.bloodGroup}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Family Information */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="mr-2 h-5 w-5" />
+                  Family Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {devotee.fatherName && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Father's Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.fatherName}</p>
+                    </div>
+                  )}
+                  {devotee.motherName && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Mother's Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.motherName}</p>
+                    </div>
+                  )}
+                  {devotee.maritalStatus && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Marital Status</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.maritalStatus}</p>
+                    </div>
+                  )}
+                  {devotee.husbandName && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Husband's Name</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{devotee.husbandName}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Personal Information */}
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <GraduationCap className="mr-2 h-5 w-5" />
+                  Personal Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {devotee.education && (
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Education</p>
@@ -259,9 +281,24 @@ export default function DevoteeDetail() {
                       </p>
                     </div>
                   )}
+                  {devotee.occupation && (
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Occupation</p>
+                      <p className="font-medium text-gray-900 dark:text-white flex items-center">
+                        <Briefcase className="mr-1 h-3 w-3" />
+                        {devotee.occupation}
+                      </p>
+                    </div>
+                  )}
                 </div>
+                {devotee.additionalComments && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Additional Comments</p>
+                    <p className="font-medium text-gray-900 dark:text-white mt-1">{devotee.additionalComments}</p>
+                  </div>
+                )}
                 {devotee.shraddhakutirId && (
-                  <div>
+                  <div className="mt-4">
                     <p className="text-sm text-gray-600 dark:text-gray-400">Shraddhakutir</p>
                     <p className="font-medium text-gray-900 dark:text-white">
                       Shraddhakutir ID: {devotee.shraddhakutirId}
@@ -271,116 +308,121 @@ export default function DevoteeDetail() {
               </CardContent>
             </Card>
 
-            {/* Address Information */}
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MapPin className="mr-2 h-5 w-5" />
-                  Address Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {devotee.presentAddress && (
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Present Address</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                      {devotee.presentAddress.country && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Country:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.country}</span>
-                        </div>
-                      )}
-                      {devotee.presentAddress.state && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">State:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.state}</span>
-                        </div>
-                      )}
-                      {devotee.presentAddress.district && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">District:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.district}</span>
-                        </div>
-                      )}
-                      {devotee.presentAddress.subDistrict && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Sub-District:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.subDistrict}</span>
-                        </div>
-                      )}
-                      {devotee.presentAddress.village && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Village:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.village}</span>
-                        </div>
-                      )}
-                      {devotee.presentAddress.postalCode && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Postal Code:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.postalCode}</span>
-                        </div>
-                      )}
-                      {devotee.presentAddress.zipcode && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">ZIP Code:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.presentAddress.zipcode}</span>
-                        </div>
-                      )}
-                    </div>
+            {/* Present Address */}
+            {devotee.presentAddress && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MapPin className="mr-2 h-5 w-5" />
+                    Present Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {devotee.presentAddress.country && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Country</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.country}</p>
+                      </div>
+                    )}
+                    {devotee.presentAddress.state && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">State</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.state}</p>
+                      </div>
+                    )}
+                    {devotee.presentAddress.district && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">District</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.district}</p>
+                      </div>
+                    )}
+                    {devotee.presentAddress.subDistrict && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Sub-District</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.subDistrict}</p>
+                      </div>
+                    )}
+                    {devotee.presentAddress.village && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Village</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.village}</p>
+                      </div>
+                    )}
+                    {devotee.presentAddress.postalCode && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Postal Code</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.postalCode}</p>
+                      </div>
+                    )}
+                    {devotee.presentAddress.landmark && (
+                      <div className="md:col-span-2 lg:col-span-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Landmark</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.presentAddress.landmark}</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </CardContent>
+              </Card>
+            )}
 
-                {devotee.permanentAddress && (
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Permanent Address</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                      {devotee.permanentAddress.country && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Country:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.country}</span>
-                        </div>
-                      )}
-                      {devotee.permanentAddress.state && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">State:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.state}</span>
-                        </div>
-                      )}
-                      {devotee.permanentAddress.district && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">District:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.district}</span>
-                        </div>
-                      )}
-                      {devotee.permanentAddress.subDistrict && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Sub-District:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.subDistrict}</span>
-                        </div>
-                      )}
-                      {devotee.permanentAddress.village && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Village:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.village}</span>
-                        </div>
-                      )}
-                      {devotee.permanentAddress.postalCode && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">Postal Code:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.postalCode}</span>
-                        </div>
-                      )}
-                      {devotee.permanentAddress.zipcode && (
-                        <div>
-                          <span className="text-gray-500 dark:text-gray-400">ZIP Code:</span>
-                          <span className="ml-2 text-gray-900 dark:text-white">{devotee.permanentAddress.zipcode}</span>
-                        </div>
-                      )}
-                    </div>
+            {/* Permanent Address */}
+            {devotee.permanentAddress && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MapPin className="mr-2 h-5 w-5" />
+                    Permanent Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {devotee.permanentAddress.country && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Country</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.country}</p>
+                      </div>
+                    )}
+                    {devotee.permanentAddress.state && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">State</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.state}</p>
+                      </div>
+                    )}
+                    {devotee.permanentAddress.district && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">District</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.district}</p>
+                      </div>
+                    )}
+                    {devotee.permanentAddress.subDistrict && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Sub-District</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.subDistrict}</p>
+                      </div>
+                    )}
+                    {devotee.permanentAddress.village && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Village</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.village}</p>
+                      </div>
+                    )}
+                    {devotee.permanentAddress.postalCode && (
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Postal Code</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.postalCode}</p>
+                      </div>
+                    )}
+                    {devotee.permanentAddress.landmark && (
+                      <div className="md:col-span-2 lg:col-span-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Landmark</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{devotee.permanentAddress.landmark}</p>
+                      </div>
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Spiritual Information */}
           <Card className="glass-card">
@@ -394,11 +436,11 @@ export default function DevoteeDetail() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Devotional Status</p>
-                  <p className="font-medium text-gray-900 dark:text-white">
+                  <div className="font-medium text-gray-900 dark:text-white">
                     <Badge className={getStatusColor(devotee.devotionalStatusId)}>
                       {getStatusName(devotee.devotionalStatusId)}
                     </Badge>
-                  </p>
+                  </div>
                 </div>
                 {devotee.harinamInitiationGurudev && (
                   <div>
