@@ -396,9 +396,9 @@ function DevoteeCard({ devotee, statuses, onEdit }: { devotee: Devotee; statuses
                 {devotee.legalName}
               </h3>
             </Link>
-            {devotee.name && devotee.name !== devotee.legalName && (
+            {devotee.initiatedName && (
               <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                {devotee.name}
+                {devotee.initiatedName}
               </p>
             )}
             <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>

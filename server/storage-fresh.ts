@@ -271,6 +271,7 @@ export class MemStorage implements IStorage {
         const devotee = {
           legalName: `${firstName} ${surname}`,
           name: isMataji ? `Mataji ${firstName} ${surname}` : `Prabhu ${firstName} ${surname}`,
+          initiatedName: statusId >= 6 ? `${firstName} ${surname}` : null, // Only initiated devotees have spiritual names
           dob: `${1950 + Math.floor(Math.random() * 50)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
           email: `${firstName.toLowerCase()}.${surname.toLowerCase()}@iskcon.org`,
           phone: `+91-${Math.floor(Math.random() * 9000000000) + 1000000000}`,
