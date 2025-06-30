@@ -20,6 +20,7 @@ import {
   Heart,
   GraduationCap,
   Briefcase,
+  User,
   Users,
   Calendar,
   TrendingUp,
@@ -163,16 +164,14 @@ export default function DevoteeDetail() {
         <TabsList className="glass">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="status">Status Management</TabsTrigger>
-          <TabsTrigger value="courses">Courses</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Personal Information */}
             <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Users className="mr-2 h-5 w-5" />
+                  <User className="mr-2 h-5 w-5" />
                   Personal Information
                 </CardTitle>
               </CardHeader>
@@ -382,7 +381,6 @@ export default function DevoteeDetail() {
                 )}
               </CardContent>
             </Card>
-          </div>
 
           {/* Spiritual Information */}
           <Card className="glass-card">
@@ -392,8 +390,16 @@ export default function DevoteeDetail() {
                 Spiritual Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Devotional Status</p>
+                  <p className="font-medium text-gray-900 dark:text-white">
+                    <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+                      {getStatusName(devotee.devotionalStatusId)}
+                    </Badge>
+                  </p>
+                </div>
                 {devotee.harinamInitiationGurudev && (
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Harinam Initiation Gurudev</p>
@@ -402,7 +408,7 @@ export default function DevoteeDetail() {
                 )}
                 {devotee.harinamDate && (
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Harinam Initiation Date</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Harinama Initiation Date</p>
                     <p className="font-medium text-gray-900 dark:text-white flex items-center">
                       <Calendar className="mr-1 h-3 w-3" />
                       {new Date(devotee.harinamDate).toLocaleDateString()}
@@ -431,33 +437,6 @@ export default function DevoteeDetail() {
                   </div>
                 )}
               </div>
-              
-              {devotee.devotionalCourses && devotee.devotionalCourses.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Devotional Courses</p>
-                  <div className="space-y-2">
-                    {devotee.devotionalCourses.map((course, index) => (
-                      <div key={index} className="p-3 rounded-lg glass">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white flex items-center">
-                              <Book className="mr-1 h-3 w-3" />
-                              {course.name}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {course.institute} • {new Date(course.date).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
-                            <Award className="mr-1 h-3 w-3" />
-                            Completed
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {devotee.additionalComments && (
                 <div className="mt-4">
@@ -586,50 +565,7 @@ export default function DevoteeDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="courses" className="space-y-6">
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Book className="mr-2 h-5 w-5" />
-                Devotional Courses
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {devotee.devotionalCourses && devotee.devotionalCourses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {devotee.devotionalCourses.map((course, index) => (
-                    <div key={index} className="p-4 rounded-lg glass">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center">
-                          <Award className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{course.name}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{course.institute}</p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Completed on {new Date(course.date).toLocaleDateString()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Book className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No courses completed</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    This devotee hasn't completed any devotional courses yet.
-                  </p>
-                  <Button className="gradient-button">
-                    <Book className="mr-2 h-4 w-4" />
-                    Add Course
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
 
 
       </Tabs>
