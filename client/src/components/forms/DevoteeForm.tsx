@@ -97,6 +97,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const [devotionalCourses, setDevotionalCourses] = useState(devotee?.devotionalCourses || []);
   const [sameAsPresentAddress, setSameAsPresentAddress] = useState(false);
 
+
   // Geography queries for present address
   const { data: countries } = useQuery({
     queryKey: ["/api/countries"],
@@ -294,6 +295,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     // Validate mandatory fields and set individual field errors
     let hasErrors = false;
     
+    // Basic fields validation
     if (!data.legalName) {
       setError("legalName", { type: "required", message: "Legal Name is required" });
       hasErrors = true;
@@ -311,7 +313,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       hasErrors = true;
     }
     
-    // Validate present address fields individually
+    // Present address validation
     if (!presentAddress.country) {
       setError("presentAddress.country" as any, { type: "required", message: "Country is required" });
       hasErrors = true;
@@ -337,7 +339,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       hasErrors = true;
     }
     
-    // Validate permanent address fields individually (only if not same as present)
+    // Permanent address validation (only if not same as present)
     if (!sameAsPresentAddress) {
       if (!permanentAddress.country) {
         setError("permanentAddress.country" as any, { type: "required", message: "Country is required" });
@@ -367,10 +369,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     
     if (hasErrors) {
       toast({
-        title: "Please fill in required fields",  
+        title: "Please fill in all required fields",  
         description: "Check the highlighted fields below and fill in all required information.",
         variant: "destructive",
-        duration: 3000, // Auto-dismiss after 3 seconds
+        duration: 5000,
       });
       return;
     }
