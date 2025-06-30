@@ -24,6 +24,8 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
+  
   const { data: dashboard, isLoading: dashboardLoading } = useQuery({
     queryKey: ["/api/dashboard"],
     queryFn: () => api.getDashboard(),
@@ -155,7 +157,11 @@ export default function Dashboard() {
                 <Home className="mr-3 h-5 w-5 text-emerald-500" />
                 Recent Updates
               </CardTitle>
-              <Button variant="link" className="text-emerald-600 dark:text-emerald-400">
+              <Button 
+                variant="link" 
+                className="text-emerald-600 dark:text-emerald-400"
+                onClick={() => setLocation("/updates")}
+              >
                 View All
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -199,7 +205,11 @@ export default function Dashboard() {
                 <BarChart3 className="mr-3 h-5 w-5 text-purple-500" />
                 Status Distribution
               </CardTitle>
-              <Button variant="link" className="text-purple-600 dark:text-purple-400">
+              <Button 
+                variant="link" 
+                className="text-purple-600 dark:text-purple-400"
+                onClick={() => setLocation("/statuses")}
+              >
                 Manage Statuses
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
