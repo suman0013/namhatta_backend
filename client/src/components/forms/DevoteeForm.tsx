@@ -311,16 +311,58 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       hasErrors = true;
     }
     
-    // Validate present address
-    if (!presentAddress.country || !presentAddress.state || !presentAddress.district || !presentAddress.subDistrict || !presentAddress.village || !presentAddress.postalCode) {
-      setError("presentAddress" as any, { type: "required", message: "Present Address (All fields: Country, State, District, Sub-District, Village, Postal Code) is required" });
+    // Validate present address fields individually
+    if (!presentAddress.country) {
+      setError("presentAddress.country" as any, { type: "required", message: "Country is required" });
+      hasErrors = true;
+    }
+    if (!presentAddress.state) {
+      setError("presentAddress.state" as any, { type: "required", message: "State is required" });
+      hasErrors = true;
+    }
+    if (!presentAddress.district) {
+      setError("presentAddress.district" as any, { type: "required", message: "District is required" });
+      hasErrors = true;
+    }
+    if (!presentAddress.subDistrict) {
+      setError("presentAddress.subDistrict" as any, { type: "required", message: "Sub-District is required" });
+      hasErrors = true;
+    }
+    if (!presentAddress.village) {
+      setError("presentAddress.village" as any, { type: "required", message: "Village is required" });
+      hasErrors = true;
+    }
+    if (!presentAddress.postalCode) {
+      setError("presentAddress.postalCode" as any, { type: "required", message: "Postal Code is required" });
       hasErrors = true;
     }
     
-    // Validate permanent address
-    if (!sameAsPresentAddress && (!permanentAddress.country || !permanentAddress.state || !permanentAddress.district || !permanentAddress.subDistrict || !permanentAddress.village || !permanentAddress.postalCode)) {
-      setError("permanentAddress" as any, { type: "required", message: "Permanent Address (All fields: Country, State, District, Sub-District, Village, Postal Code) is required" });
-      hasErrors = true;
+    // Validate permanent address fields individually (only if not same as present)
+    if (!sameAsPresentAddress) {
+      if (!permanentAddress.country) {
+        setError("permanentAddress.country" as any, { type: "required", message: "Country is required" });
+        hasErrors = true;
+      }
+      if (!permanentAddress.state) {
+        setError("permanentAddress.state" as any, { type: "required", message: "State is required" });
+        hasErrors = true;
+      }
+      if (!permanentAddress.district) {
+        setError("permanentAddress.district" as any, { type: "required", message: "District is required" });
+        hasErrors = true;
+      }
+      if (!permanentAddress.subDistrict) {
+        setError("permanentAddress.subDistrict" as any, { type: "required", message: "Sub-District is required" });
+        hasErrors = true;
+      }
+      if (!permanentAddress.village) {
+        setError("permanentAddress.village" as any, { type: "required", message: "Village is required" });
+        hasErrors = true;
+      }
+      if (!permanentAddress.postalCode) {
+        setError("permanentAddress.postalCode" as any, { type: "required", message: "Postal Code is required" });
+        hasErrors = true;
+      }
     }
     
     if (hasErrors) {
@@ -398,7 +440,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Label htmlFor="gender">Gender *</Label>
                   <Select 
                     value={watch("gender")} 
-                    onValueChange={(value) => setValue("gender", value)}
+                    onValueChange={(value) => {
+                      setValue("gender", value);
+                      clearErrors("gender");
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
@@ -505,7 +550,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Label htmlFor="presentCountry">Country *</Label>
                   <Select
                     value={presentAddress.country || ""}
-                    onValueChange={(value) => handlePresentAddressChange("country", value)}
+                    onValueChange={(value) => {
+                      handlePresentAddressChange("country", value);
+                      clearErrors("presentAddress.country");
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select country" />
@@ -518,12 +566,18 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors["presentAddress.country" as keyof typeof errors] && (
+                    <p className="text-sm text-red-500 mt-1">Country is required</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="presentState">State *</Label>
                   <Select
                     value={presentAddress.state || ""}
-                    onValueChange={(value) => handlePresentAddressChange("state", value)}
+                    onValueChange={(value) => {
+                      handlePresentAddressChange("state", value);
+                      clearErrors("presentAddress.state");
+                    }}
                     disabled={!presentAddress.country}
                   >
                     <SelectTrigger>
@@ -537,6 +591,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors["presentAddress.state" as keyof typeof errors] && (
+                    <p className="text-sm text-red-500 mt-1">State is required</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="presentDistrict">District *</Label>
@@ -599,9 +656,15 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Label htmlFor="presentPostalCode">Postal Code *</Label>
                   <Input
                     value={presentAddress.postalCode || ""}
-                    onChange={(e) => handlePresentAddressChange("postalCode", e.target.value)}
+                    onChange={(e) => {
+                      handlePresentAddressChange("postalCode", e.target.value);
+                      clearErrors("presentAddress.postalCode");
+                    }}
                     placeholder="Enter postal code"
                   />
+                  {errors["presentAddress.postalCode" as keyof typeof errors] && (
+                    <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
+                  )}
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">
                   <Label htmlFor="presentLandmark">Landmark</Label>
