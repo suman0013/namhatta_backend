@@ -28,6 +28,7 @@ import {
   Zap
 } from "lucide-react";
 import type { Devotee } from "@/lib/types";
+import DevoteeForm from "../components/forms/DevoteeForm";
 
 export default function DevoteeDetail() {
   const { id } = useParams();
@@ -148,10 +149,6 @@ export default function DevoteeDetail() {
           <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Profile
-          </Button>
-          <Button variant="outline" className="glass" onClick={() => setShowHistory(true)}>
-            <Zap className="mr-2 h-4 w-4" />
-            Status History
           </Button>
         </div>
       </div>
@@ -640,7 +637,18 @@ export default function DevoteeDetail() {
         </TabsContent>
       </Tabs>
 
-
+      {/* Edit Form Modal */}
+      {showEditForm && devotee && (
+        <DevoteeForm
+          devotee={devotee}
+          onClose={() => setShowEditForm(false)}
+          onSuccess={() => {
+            setShowEditForm(false);
+            // Refresh the devotee data
+            queryClient.invalidateQueries({ queryKey: ["/api/devotees", id] });
+          }}
+        />
+      )}
     </div>
   );
 }
