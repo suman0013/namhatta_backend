@@ -20,7 +20,7 @@ export async function loadGeographicData(): Promise<void> {
   if (isDataLoaded) return;
 
   try {
-    const csvPath = path.join(process.cwd(), 'attached_assets', 'f17a1608-5f10-4610-bb50-a63c80d83974_5440046a63c72fe90e3dc31777d48358_1751117921697.csv');
+    const csvPath = path.join(process.cwd(), 'attached_assets', 'f17a1608-5f10-4610-bb50-a63c80d83974_5440046a63c72fe90e3dc31777d48358_1751270269902.csv');
     const csvContent = fs.readFileSync(csvPath, 'utf-8');
     const lines = csvContent.split('\n');
     

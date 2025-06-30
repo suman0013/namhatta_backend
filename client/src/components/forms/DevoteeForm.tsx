@@ -122,9 +122,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   });
 
   const { data: presentVillages } = useQuery({
-    queryKey: ["/api/villages", presentAddress.district],
-    queryFn: () => api.getVillages(presentAddress.district!),
-    enabled: !!presentAddress.district,
+    queryKey: ["/api/villages", presentAddress.subDistrict],
+    queryFn: () => api.getVillages(presentAddress.subDistrict!),
+    enabled: !!presentAddress.subDistrict,
   });
 
   // Geography queries for permanent address
@@ -147,9 +147,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   });
 
   const { data: permanentVillages } = useQuery({
-    queryKey: ["/api/villages", permanentAddress.district],
-    queryFn: () => api.getVillages(permanentAddress.district!),
-    enabled: !!permanentAddress.district && !sameAsPresentAddress,
+    queryKey: ["/api/villages", permanentAddress.subDistrict],
+    queryFn: () => api.getVillages(permanentAddress.subDistrict!),
+    enabled: !!permanentAddress.subDistrict && !sameAsPresentAddress,
   });
 
   // Other data queries
@@ -653,7 +653,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       handlePresentAddressChange("village", value);
                       clearErrors("presentAddress.village");
                     }}
-                    disabled={!presentAddress.district}
+                    disabled={!presentAddress.subDistrict}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select village" />
@@ -826,7 +826,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         handlePermanentAddressChange("village", value);
                         clearErrors("permanentAddress.village");
                       }}
-                      disabled={!permanentAddress.district}
+                      disabled={!permanentAddress.subDistrict}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select village" />
