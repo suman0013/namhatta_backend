@@ -98,6 +98,9 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Enhanced map zoom transitions with complete geographic hierarchy (Country→State→District→Sub-district→Village)
+- June 30, 2025: Removed all map attribution text and badge numbers from navigation for cleaner UI
+- June 30, 2025: Fixed navigation bar alignment to maintain single-line layout with improved responsive design
 - June 30, 2025: Successfully completed migration from Replit Agent to standard Replit environment with proper alignment fixes
 - June 30, 2025: Fixed alignment issues across all pages by removing double padding and ensuring proper content centering
 - June 30, 2025: Updated main layout to use max-width container with proper horizontal centering

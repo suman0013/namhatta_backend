@@ -34,8 +34,10 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Determine level based on zoom - adjusted for smoother transitions
+  // Determine level based on zoom - complete geographic hierarchy
   const getLevelFromZoom = (zoom: number): MapLevel => {
+    if (zoom >= 12) return 'VILLAGE';
+    if (zoom >= 10) return 'SUB_DISTRICT';
     if (zoom >= 8) return 'DISTRICT';
     if (zoom >= 5) return 'STATE';
     return 'COUNTRY';
