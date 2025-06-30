@@ -119,11 +119,11 @@ export default function DevoteeDetail() {
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white text-xl">
-                {(devotee.name || devotee.legalName).substring(0, 2).toUpperCase()}
+                {devotee.legalName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{devotee.name || devotee.legalName}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{devotee.legalName}</h1>
               <div className="flex items-center space-x-4 mt-2">
                 <Badge className={getStatusColor(devotee.devotionalStatusId)}>
                   {getStatusName(devotee.devotionalStatusId)}
@@ -397,6 +397,12 @@ export default function DevoteeDetail() {
                     </p>
                   </div>
                 )}
+                {devotee.initiatedName && (
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Initiated Name</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{devotee.initiatedName}</p>
+                  </div>
+                )}
                 {devotee.pancharatrikInitiationGurudev && (
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Pancharatrik Initiation Gurudev</p>
@@ -410,12 +416,6 @@ export default function DevoteeDetail() {
                       <Calendar className="mr-1 h-3 w-3" />
                       {new Date(devotee.pancharatrikDate).toLocaleDateString()}
                     </p>
-                  </div>
-                )}
-                {devotee.initiatedName && (
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Initiated Name</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{devotee.initiatedName}</p>
                   </div>
                 )}
               </div>

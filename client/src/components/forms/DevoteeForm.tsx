@@ -24,7 +24,6 @@ interface DevoteeFormProps {
 
 interface FormData {
   legalName: string;
-  name: string;
   dob: string;
   email: string;
   phone: string;
@@ -63,7 +62,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const { register, handleSubmit, watch, setValue, formState: { errors }, setError, clearErrors } = useForm<FormData>({
     defaultValues: {
       legalName: devotee?.legalName || "",
-      name: devotee?.name || "",
       dob: devotee?.dob || "",
       email: devotee?.email || "",
       phone: devotee?.phone || "",
@@ -387,10 +385,24 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     }
 
     const submitData: Partial<Devotee> = {
-      ...data,
+      legalName: data.legalName,
+      dob: data.dob,
+      email: data.email,
+      phone: data.phone,
+      fatherName: data.fatherName,
+      motherName: data.motherName,
+      husbandName: data.husbandName,
+      bloodGroup: data.bloodGroup,
       presentAddress,
       permanentAddress: sameAsPresentAddress ? presentAddress : permanentAddress,
       devotionalCourses,
+      devotionalStatusId: data.devotionalStatusId,
+      harinamInitiationGurudev: data.harinamInitiationGurudev,
+      pancharatrikInitiationGurudev: data.pancharatrikInitiationGurudev,
+      initiatedName: data.initiatedName,
+      harinamDate: data.harinamDate,
+      pancharatrikDate: data.pancharatrikDate,
+      shraddhakutirId: data.shraddhakutirId,
       gender: data.gender as "MALE" | "FEMALE" | "OTHER" | undefined,
       maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED" | undefined,
     };
@@ -890,10 +902,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               <h3 className="text-lg font-semibold">Spiritual Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="name">Spiritual Name</Label>
-                  <Input {...register("name")} placeholder="Enter spiritual name" />
-                </div>
-                <div>
                   <Label htmlFor="devotionalStatusId">Devotional Status *</Label>
                   <Select
                     value={watch("devotionalStatusId")?.toString() || ""}
@@ -918,16 +926,16 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="initiatedName">Initiated Name</Label>
-                  <Input {...register("initiatedName")} placeholder="Enter initiated name" />
-                </div>
-                <div>
                   <Label htmlFor="harinamInitiationGurudev">Harinam Initiation Gurudev</Label>
                   <Input {...register("harinamInitiationGurudev")} placeholder="Enter harinam initiation gurudev name" />
                 </div>
                 <div>
                   <Label htmlFor="harinamDate">Harinama Initiation Date</Label>
                   <Input type="date" {...register("harinamDate")} />
+                </div>
+                <div>
+                  <Label htmlFor="initiatedName">Initiated Name</Label>
+                  <Input {...register("initiatedName")} placeholder="Enter initiated name" />
                 </div>
                 <div>
                   <Label htmlFor="pancharatrikInitiationGurudev">Pancharatrik Initiation Gurudev</Label>

@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Removed Spiritual Name field from devotee forms and reordered initiation fields so Initiated Name appears after Harinama Initiation Date in both forms and detail views
 - June 30, 2025: Fixed devotee detail view to display all registration fields including legal name, date of birth, gender, blood group, family names, contact information, sub-district, postal code, and spiritual information
 - June 30, 2025: Fixed status history display issue - now correctly shows actual status names instead of "Unknown" by using proper field mappings (newStatusId and changedAt)
 - June 30, 2025: Successfully completed migration from Replit Agent to standard Replit environment with full functionality restored
