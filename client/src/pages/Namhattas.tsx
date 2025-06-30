@@ -321,8 +321,8 @@ function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namha
   };
 
   return (
-    <Card className="glass-card hover-lift group cursor-pointer">
-      <CardContent className="p-6">
+    <Card className="glass-card hover-lift group cursor-pointer h-full">
+      <CardContent className="p-6 h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center`}>
             <Home className="h-6 w-6 text-white" />
@@ -331,36 +331,38 @@ function NamhattaCard({ namhatta, onEdit }: { namhatta: Namhatta; onEdit: (namha
         </div>
         
         <Link href={`/namhattas/${namhatta.id}`}>
-          <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+          <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 line-clamp-2">
             {namhatta.name}
           </h3>
         </Link>
         
-        {namhatta.address && (
-          <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-3">
-            <MapPin className="mr-1 h-3 w-3" />
-            <span>
-              {[
-                namhatta.address.village,
-                namhatta.address.district,
-                namhatta.address.state
-              ].filter(Boolean).join(", ")}
+        <div className="flex-grow">
+          {namhatta.address && (
+            <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-3">
+              <MapPin className="mr-1 h-3 w-3 flex-shrink-0" />
+              <span className="line-clamp-2">
+                {[
+                  namhatta.address.village,
+                  namhatta.address.district,
+                  namhatta.address.state
+                ].filter(Boolean).join(", ")}
+              </span>
+            </div>
+          )}
+          
+          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <span className="flex items-center">
+              <Users className="mr-1 h-3 w-3" />
+              45 devotees
+            </span>
+            <span className="flex items-center">
+              <Calendar className="mr-1 h-3 w-3" />
+              Weekly
             </span>
           </div>
-        )}
-        
-        <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <span className="flex items-center">
-            <Users className="mr-1 h-3 w-3" />
-            45 devotees
-          </span>
-          <span className="flex items-center">
-            <Calendar className="mr-1 h-3 w-3" />
-            Weekly
-          </span>
         </div>
         
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 mt-auto">
           <Link href={`/namhattas/${namhatta.id}`} className="flex-1">
             <Button variant="secondary" className="w-full glass">
               View Details
