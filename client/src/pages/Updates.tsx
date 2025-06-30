@@ -100,8 +100,8 @@ export default function Updates() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="glass-card h-32 flex items-center">
-          <div className="flex items-center justify-between w-full p-6">
+        <div className="glass-card h-32 rounded-lg border flex items-center p-6">
+          <div className="flex items-center justify-between w-full">
             <div className="flex flex-col justify-center">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Updates</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
@@ -112,10 +112,10 @@ export default function Updates() {
               <Calendar className="h-6 w-6 text-white" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="glass-card h-32 flex items-center">
-          <div className="flex items-center justify-between w-full p-6">
+        <div className="glass-card h-32 rounded-lg border flex items-center p-6">
+          <div className="flex items-center justify-between w-full">
             <div className="flex flex-col justify-center">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Attendance</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
@@ -126,10 +126,10 @@ export default function Updates() {
               <Users className="h-6 w-6 text-white" />
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="glass-card h-32 flex items-center">
-          <div className="flex items-center justify-between w-full p-6">
+        <div className="glass-card h-32 rounded-lg border flex items-center p-6">
+          <div className="flex items-center justify-between w-full">
             <div className="flex flex-col justify-center">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Namhattas</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
@@ -140,7 +140,7 @@ export default function Updates() {
               <Home className="h-6 w-6 text-white" />
             </div>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Filters and Search */}
