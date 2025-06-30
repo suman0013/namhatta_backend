@@ -18,7 +18,7 @@ export default function TopNav() {
 
   return (
     <nav className="flex justify-center px-1 overflow-hidden">
-      <div className="flex items-center space-x-0.5 justify-center min-w-0">
+      <div className="flex items-center space-x-1 justify-center min-w-0">
         {navigationItems.map((item) => {
           const isActive = location === item.href || 
             (item.href !== "/dashboard" && location.startsWith(item.href));
@@ -28,23 +28,15 @@ export default function TopNav() {
             <Link key={item.href} href={item.href}>
               <div
                 className={cn(
-                  "flex items-center px-1 lg:px-2 py-1 lg:py-1.5 text-xs lg:text-sm font-medium rounded-md lg:rounded-lg transition-all duration-200 relative whitespace-nowrap",
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 relative whitespace-nowrap",
                   isActive
                     ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 shadow-sm"
                     : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white"
                 )}
               >
-                <Icon className="w-3 lg:w-4 h-3 lg:h-4 mr-1 flex-shrink-0" />
-                <span className="hidden xl:inline text-xs">{item.label}</span>
-                <span className="xl:hidden text-xs">{item.shortLabel}</span>
-                {item.badge && (
-                  <Badge
-                    variant={isActive ? "default" : "secondary"}
-                    className="ml-1 h-3 text-xs flex-shrink-0 px-1 py-0"
-                  >
-                    {item.badge}
-                  </Badge>
-                )}
+                <Icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                <span className="hidden md:inline text-sm">{item.label}</span>
+                <span className="md:hidden text-xs">{item.shortLabel}</span>
               </div>
             </Link>
           );
