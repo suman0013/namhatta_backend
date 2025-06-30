@@ -61,7 +61,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const isEditing = !!devotee;
 
   const { register, handleSubmit, watch, setValue, formState: { errors }, setError, clearErrors } = useForm<FormData>({
-    mode: "onChange",
     defaultValues: {
       legalName: devotee?.legalName || "",
       name: devotee?.name || "",
@@ -97,6 +96,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const [devotionalCourses, setDevotionalCourses] = useState(devotee?.devotionalCourses || []);
   const [sameAsPresentAddress, setSameAsPresentAddress] = useState(false);
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
+  const [showValidation, setShowValidation] = useState(false);
 
 
   // Geography queries for present address
@@ -290,12 +290,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   };
 
   const onSubmit = (data: FormData) => {
-    console.log("=== FORM SUBMISSION DEBUG ===");
-    console.log("Form data:", data);
-    console.log("Present address:", presentAddress);
-    console.log("Permanent address:", permanentAddress);
-    console.log("Same as present:", sameAsPresentAddress);
-    
     // Clear previous errors
     clearErrors();
     setAddressErrors({});
@@ -306,57 +300,47 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     
     // Check basic required fields
     if (!data.legalName?.trim()) {
-      console.log("Missing: Legal Name");
       setError("legalName", { type: "required", message: "Legal Name is required" });
       errors.push("Legal Name");
     }
     
     if (!data.dob) {
-      console.log("Missing: Date of Birth");
       setError("dob", { type: "required", message: "Date of Birth is required" });
       errors.push("Date of Birth");
     }
     
     if (!data.gender) {
-      console.log("Missing: Gender");
       setError("gender", { type: "required", message: "Gender is required" });
       errors.push("Gender");
     }
     
     if (!data.devotionalStatusId) {
-      console.log("Missing: Devotional Status");
       setError("devotionalStatusId", { type: "required", message: "Devotional Status is required" });
       errors.push("Devotional Status");
     }
     
     // Check present address
     if (!presentAddress.country) {
-      console.log("Missing: Present Address Country");
       newAddressErrors["presentAddress.country"] = "Country is required";
       errors.push("Present Address Country");
     }
     if (!presentAddress.state) {
-      console.log("Missing: Present Address State");
       newAddressErrors["presentAddress.state"] = "State is required";
       errors.push("Present Address State");
     }
     if (!presentAddress.district) {
-      console.log("Missing: Present Address District");
       newAddressErrors["presentAddress.district"] = "District is required";
       errors.push("Present Address District");
     }
     if (!presentAddress.subDistrict) {
-      console.log("Missing: Present Address Sub-District");
       newAddressErrors["presentAddress.subDistrict"] = "Sub-District is required";
       errors.push("Present Address Sub-District");
     }
     if (!presentAddress.village) {
-      console.log("Missing: Present Address Village");
       newAddressErrors["presentAddress.village"] = "Village is required";
       errors.push("Present Address Village");
     }
     if (!presentAddress.postalCode) {
-      console.log("Missing: Present Address Postal Code");
       newAddressErrors["presentAddress.postalCode"] = "Postal Code is required";
       errors.push("Present Address Postal Code");
     }
@@ -364,32 +348,26 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     // Check permanent address (if not same as present)
     if (!sameAsPresentAddress) {
       if (!permanentAddress.country) {
-        console.log("Missing: Permanent Address Country");
         newAddressErrors["permanentAddress.country"] = "Country is required";
         errors.push("Permanent Address Country");
       }
       if (!permanentAddress.state) {
-        console.log("Missing: Permanent Address State");
         newAddressErrors["permanentAddress.state"] = "State is required";
         errors.push("Permanent Address State");
       }
       if (!permanentAddress.district) {
-        console.log("Missing: Permanent Address District");
         newAddressErrors["permanentAddress.district"] = "District is required";
         errors.push("Permanent Address District");
       }
       if (!permanentAddress.subDistrict) {
-        console.log("Missing: Permanent Address Sub-District");
         newAddressErrors["permanentAddress.subDistrict"] = "Sub-District is required";
         errors.push("Permanent Address Sub-District");
       }
       if (!permanentAddress.village) {
-        console.log("Missing: Permanent Address Village");
         newAddressErrors["permanentAddress.village"] = "Village is required";
         errors.push("Permanent Address Village");
       }
       if (!permanentAddress.postalCode) {
-        console.log("Missing: Permanent Address Postal Code");
         newAddressErrors["permanentAddress.postalCode"] = "Postal Code is required";
         errors.push("Permanent Address Postal Code");
       }
@@ -397,9 +375,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     
     // If there are errors, show them and stop
     if (errors.length > 0) {
-      console.log("Total errors found:", errors.length);
-      console.log("Error list:", errors);
-      console.log("Address errors:", newAddressErrors);
+      setShowValidation(true);
       setAddressErrors(newAddressErrors);
       toast({
         title: `Please fill in ${errors.length} required fields`,
@@ -409,8 +385,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       });
       return;
     }
-    
-    console.log("No validation errors, proceeding with submission...");
 
     const submitData: Partial<Devotee> = {
       ...data,
@@ -447,7 +421,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 <div>
                   <Label htmlFor="legalName">Legal Name *</Label>
                   <Input
-                    {...register("legalName", { required: "Legal name is required" })}
+                    {...register("legalName")}
                     placeholder="Enter legal name"
                   />
                   {errors.legalName && (
@@ -459,7 +433,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   <Label htmlFor="dob">Date of Birth *</Label>
                   <Input 
                     type="date" 
-                    {...register("dob", { required: "Date of birth is required" })} 
+                    {...register("dob")} 
                   />
                   {errors.dob && (
                     <p className="text-sm text-red-500 mt-1">{errors.dob.message}</p>
@@ -603,8 +577,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {addressErrors["presentAddress.country"] && (
-                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.country"]}</p>
+                  {showValidation && !presentAddress.country && (
+                    <p className="text-sm text-red-500 mt-1">Country is required</p>
                   )}
                 </div>
                 <div>
@@ -628,8 +602,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {addressErrors["presentAddress.state"] && (
-                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.state"]}</p>
+                  {showValidation && !presentAddress.state && (
+                    <p className="text-sm text-red-500 mt-1">State is required</p>
                   )}
                 </div>
                 <div>
@@ -653,8 +627,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {addressErrors["presentAddress.district"] && (
-                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.district"]}</p>
+                  {showValidation && !presentAddress.district && (
+                    <p className="text-sm text-red-500 mt-1">District is required</p>
                   )}
                 </div>
                 <div>
@@ -678,8 +652,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {addressErrors["presentAddress.subDistrict"] && (
-                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.subDistrict"]}</p>
+                  {showValidation && !presentAddress.subDistrict && (
+                    <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
                   )}
                 </div>
                 <div>
@@ -703,8 +677,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       ))}
                     </SelectContent>
                   </Select>
-                  {addressErrors["presentAddress.village"] && (
-                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.village"]}</p>
+                  {showValidation && !presentAddress.village && (
+                    <p className="text-sm text-red-500 mt-1">Village is required</p>
                   )}
                 </div>
                 <div>
@@ -717,8 +691,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                     }}
                     placeholder="Enter postal code"
                   />
-                  {addressErrors["presentAddress.postalCode"] && (
-                    <p className="text-sm text-red-500 mt-1">{addressErrors["presentAddress.postalCode"]}</p>
+                  {showValidation && !presentAddress.postalCode && (
+                    <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
                   )}
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">
@@ -776,8 +750,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {addressErrors["permanentAddress.country"] && (
-                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.country"]}</p>
+                    {showValidation && !sameAsPresentAddress && !permanentAddress.country && (
+                      <p className="text-sm text-red-500 mt-1">Country is required</p>
                     )}
                   </div>
                   <div>
@@ -801,8 +775,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {addressErrors["permanentAddress.state"] && (
-                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.state"]}</p>
+                    {showValidation && !sameAsPresentAddress && !permanentAddress.state && (
+                      <p className="text-sm text-red-500 mt-1">State is required</p>
                     )}
                   </div>
                   <div>
@@ -826,8 +800,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {addressErrors["permanentAddress.district"] && (
-                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.district"]}</p>
+                    {showValidation && !sameAsPresentAddress && !permanentAddress.district && (
+                      <p className="text-sm text-red-500 mt-1">District is required</p>
                     )}
                   </div>
                   <div>
@@ -851,8 +825,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {addressErrors["permanentAddress.subDistrict"] && (
-                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.subDistrict"]}</p>
+                    {showValidation && !sameAsPresentAddress && !permanentAddress.subDistrict && (
+                      <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
                     )}
                   </div>
                   <div>
@@ -876,8 +850,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    {addressErrors["permanentAddress.village"] && (
-                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.village"]}</p>
+                    {showValidation && !sameAsPresentAddress && !permanentAddress.village && (
+                      <p className="text-sm text-red-500 mt-1">Village is required</p>
                     )}
                   </div>
                   <div>
@@ -890,8 +864,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                       }}
                       placeholder="Enter postal code"
                     />
-                    {addressErrors["permanentAddress.postalCode"] && (
-                      <p className="text-sm text-red-500 mt-1">{addressErrors["permanentAddress.postalCode"]}</p>
+                    {showValidation && !sameAsPresentAddress && !permanentAddress.postalCode && (
+                      <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
                     )}
                   </div>
                   <div className="sm:col-span-2 lg:col-span-3">
