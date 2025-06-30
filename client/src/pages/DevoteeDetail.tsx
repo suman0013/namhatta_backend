@@ -38,6 +38,7 @@ export default function DevoteeDetail() {
   const [activeTab, setActiveTab] = useState("profile");
   const [showEditForm, setShowEditForm] = useState(false);
   const [statusComment, setStatusComment] = useState("");
+  const [selectedStatusId, setSelectedStatusId] = useState<number | null>(null);
 
   const { data: devotee, isLoading } = useQuery({
     queryKey: ["/api/devotees", id],
@@ -496,11 +497,7 @@ export default function DevoteeDetail() {
                   <div className="space-y-3">
                     <Select
                       onValueChange={(value) => {
-                        const newStatusId = parseInt(value);
-                        upgradeStatusMutation.mutate({ 
-                          newStatusId, 
-                          notes: statusComment.trim() || undefined 
-                        });
+                        setSelectedStatusId(parseInt(value));
                       }}
                       disabled={upgradeStatusMutation.isPending}
                     >
@@ -528,6 +525,22 @@ export default function DevoteeDetail() {
                         rows={2}
                       />
                     </div>
+                    <Button
+                      onClick={() => {
+                        if (selectedStatusId) {
+                          upgradeStatusMutation.mutate({ 
+                            newStatusId: selectedStatusId, 
+                            notes: statusComment.trim() || undefined 
+                          });
+                          setSelectedStatusId(null);
+                          setStatusComment("");
+                        }
+                      }}
+                      disabled={!selectedStatusId || upgradeStatusMutation.isPending}
+                      className="w-full"
+                    >
+                      {upgradeStatusMutation.isPending ? "Updating Status..." : "Change Status"}
+                    </Button>
                   </div>
                 </div>
               </CardContent>

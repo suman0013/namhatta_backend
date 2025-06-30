@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- June 30, 2025: Updated status upgrade UI to use manual trigger button - users now select status and add comments, then click "Change Status" button to apply changes instead of automatic triggering
 - June 30, 2025: Added optional comment field to status upgrade functionality - users can now add comments when changing devotee status, and comments are displayed in status history
 - June 30, 2025: Restored status change history to Status Management tab after removing separate History tab - status history now properly displays within Status Management section
 - June 30, 2025: Removed Spiritual Name field from devotee forms and reordered initiation fields so Initiated Name appears after Harinama Initiation Date in both forms and detail views
