@@ -34,8 +34,7 @@ export default function DevoteeDetail() {
   const { id } = useParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
-  const [showHistory, setShowHistory] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
+
 
   const { data: devotee, isLoading } = useQuery({
     queryKey: ["/api/devotees", id],
@@ -145,12 +144,7 @@ export default function DevoteeDetail() {
             </div>
           </div>
         </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Profile
-          </Button>
-        </div>
+
       </div>
 
       {/* Tabs */}
@@ -637,18 +631,7 @@ export default function DevoteeDetail() {
         </TabsContent>
       </Tabs>
 
-      {/* Edit Form Modal */}
-      {showEditForm && devotee && (
-        <DevoteeForm
-          devotee={devotee}
-          onClose={() => setShowEditForm(false)}
-          onSuccess={() => {
-            setShowEditForm(false);
-            // Refresh the devotee data
-            queryClient.invalidateQueries({ queryKey: ["/api/devotees", id] });
-          }}
-        />
-      )}
+
     </div>
   );
 }
