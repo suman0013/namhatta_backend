@@ -60,51 +60,106 @@ export function getCountries(): string[] {
 }
 
 export function getStates(country?: string): string[] {
-  if (!isDataLoaded) return [];
-  
   const states = new Set<string>();
-  geographicData.forEach(record => {
-    states.add(record.stateNameEnglish);
-  });
+  
+  // Add states from CSV data
+  if (isDataLoaded) {
+    geographicData.forEach(record => {
+      states.add(record.stateNameEnglish);
+    });
+  }
+  
+  // Add states from existing Namhatta data to ensure coverage
+  const additionalStates = [
+    "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+    "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", 
+    "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", 
+    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", 
+    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "Andhra Pradesh",
+    "Delhi", "Jammu and Kashmir", "Ladakh", "Puducherry", "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu", "Lakshadweep",
+    "Andaman and Nicobar Islands"
+  ];
+  
+  additionalStates.forEach(state => states.add(state));
   
   return Array.from(states).sort();
 }
 
 export function getDistricts(state: string): string[] {
-  if (!isDataLoaded) return [];
-  
   const districts = new Set<string>();
-  geographicData
-    .filter(record => record.stateNameEnglish === state)
-    .forEach(record => {
-      districts.add(record.districtNameEnglish);
-    });
+  
+  // Add districts from CSV data
+  if (isDataLoaded) {
+    geographicData
+      .filter(record => record.stateNameEnglish === state)
+      .forEach(record => {
+        districts.add(record.districtNameEnglish);
+      });
+  }
+  
+  // Add fallback districts for states not in CSV data
+  const additionalDistricts: Record<string, string[]> = {
+    "Arunachal Pradesh": ["East Siang", "West Siang", "Upper Siang", "East Kameng", "West Kameng", "Papum Pare", "Lower Subansiri", "Upper Subansiri", "Kurung Kumey", "Dibang Valley", "Upper Dibang Valley", "Lohit", "Anjaw", "Changlang", "Tirap", "Longding", "Namsai", "Lower Dibang Valley", "Central Siang", "Siang", "Kamle", "Kra Daadi", "Lower Siang", "Shi Yomi", "Tawang"],
+    "Assam": ["Kamrup", "Guwahati", "Dibrugarh", "Silchar", "Jorhat", "Tinsukia", "Nagaon", "Barpeta", "Dhubri"],
+    // Add more states and their districts as needed
+  };
+  
+  if (additionalDistricts[state]) {
+    additionalDistricts[state].forEach(district => districts.add(district));
+  }
   
   return Array.from(districts).sort();
 }
 
 export function getSubDistricts(district: string): string[] {
-  if (!isDataLoaded) return [];
-  
   const subDistricts = new Set<string>();
-  geographicData
-    .filter(record => record.districtNameEnglish === district)
-    .forEach(record => {
-      subDistricts.add(record.subdistrictNameEnglish);
-    });
+  
+  // Add sub-districts from CSV data
+  if (isDataLoaded) {
+    geographicData
+      .filter(record => record.districtNameEnglish === district)
+      .forEach(record => {
+        subDistricts.add(record.subdistrictNameEnglish);
+      });
+  }
+  
+  // Add fallback sub-districts for districts not in CSV data
+  const additionalSubDistricts: Record<string, string[]> = {
+    "East Siang": ["Pasighat", "Ruksin", "Boleng", "Nari", "Koyu"],
+    "West Siang": ["Along", "Basar", "Bagra", "Liromoba"],
+    // Add more districts and their sub-districts as needed
+  };
+  
+  if (additionalSubDistricts[district]) {
+    additionalSubDistricts[district].forEach(subDistrict => subDistricts.add(subDistrict));
+  }
   
   return Array.from(subDistricts).sort();
 }
 
 export function getVillages(subDistrict: string): string[] {
-  if (!isDataLoaded) return [];
-  
   const villages = new Set<string>();
-  geographicData
-    .filter(record => record.subdistrictNameEnglish === subDistrict)
-    .forEach(record => {
-      villages.add(record.villageNameEnglish);
-    });
+  
+  // Add villages from CSV data
+  if (isDataLoaded) {
+    geographicData
+      .filter(record => record.subdistrictNameEnglish === subDistrict)
+      .forEach(record => {
+        villages.add(record.villageNameEnglish);
+      });
+  }
+  
+  // Add fallback villages for sub-districts not in CSV data
+  const additionalVillages: Record<string, string[]> = {
+    "Pasighat": ["Pasighat", "Borguli", "Ruksin", "Pangin", "Bilat", "Sille", "Rebo"],
+    "Along": ["Along", "Basar", "Daporijo", "Yingkiong"],
+    // Add more sub-districts and their villages as needed
+  };
+  
+  if (additionalVillages[subDistrict]) {
+    additionalVillages[subDistrict].forEach(village => villages.add(village));
+  }
   
   return Array.from(villages).sort();
 }
