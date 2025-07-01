@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 1, 2025: Removed "View Profile" button and edit icon from devotee cards - entire card is now clickable to navigate to profile for cleaner UI
 - June 30, 2025: Fixed inconsistent heights in devotee detail Status Management cards by using min-height (min-h-96) instead of fixed height, with scrollable content only when needed to eliminate unnecessary scrollbars
 - June 30, 2025: Fixed inconsistent heights in Dashboard Recent Updates and Status Distribution cards by using min-height (min-h-96) instead of fixed height, with scrollable content only when needed to eliminate unnecessary scrollbars
 - June 30, 2025: Fixed inconsistent heights in statistics cards on Updates page by replacing Card components with direct div elements using glass-card styling, fixed height of 128px (h-32), and flex centering for uniform sizing
