@@ -98,6 +98,7 @@ export interface Namhatta {
   secretary?: string;
   status: 'PENDING_APPROVAL' | 'APPROVED';
   createdAt: Date;
+  devoteeCount?: number;
 }
 
 export interface DevotionalStatus {

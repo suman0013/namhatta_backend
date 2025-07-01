@@ -10,7 +10,7 @@ import { ActiveFilters } from "@/components/ui/filter-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdvancedPagination } from "@/components/ui/advanced-pagination";
-import { Home, Users, Calendar, Search, Plus, MapPin } from "lucide-react";
+import { Home, Users, Calendar, Search, Plus, MapPin, User } from "lucide-react";
 import { Link } from "wouter";
 import NamhattaForm from "@/components/forms/NamhattaForm";
 import type { Namhatta } from "@/lib/types";
@@ -350,15 +350,27 @@ function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
                 </div>
               )}
               
-              <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
-                <span className="flex items-center">
-                  <Users className="mr-1 h-3 w-3" />
-                  45 devotees
-                </span>
-                <span className="flex items-center">
-                  <Calendar className="mr-1 h-3 w-3" />
-                  Weekly
-                </span>
+              <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                <div className="flex items-center">
+                  <Users className="mr-2 h-3 w-3" />
+                  <span>{namhatta.devoteeCount || 0} members</span>
+                </div>
+                {namhatta.secretary && (
+                  <div className="flex items-center">
+                    <User className="mr-2 h-3 w-3" />
+                    <span>Secretary: {namhatta.secretary}</span>
+                  </div>
+                )}
+                {(namhatta.meetingDay || namhatta.meetingTime) && (
+                  <div className="flex items-center">
+                    <Calendar className="mr-2 h-3 w-3" />
+                    <span>
+                      {namhatta.meetingDay && namhatta.meetingTime 
+                        ? `${namhatta.meetingDay} at ${namhatta.meetingTime}`
+                        : namhatta.meetingDay || namhatta.meetingTime}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

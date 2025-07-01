@@ -610,7 +610,19 @@ export class MemStorage implements IStorage {
 
     const total = allNamhattas.length;
     const startIndex = (page - 1) * size;
-    const data = allNamhattas.slice(startIndex, startIndex + size);
+    const paginatedNamhattas = allNamhattas.slice(startIndex, startIndex + size);
+    
+    // Add devotee count to each Namhatta
+    const data = paginatedNamhattas.map(namhatta => {
+      const devoteeCount = Array.from(this.devotees.values()).filter(devotee => 
+        devotee.namhattaId === namhatta.id
+      ).length;
+      
+      return {
+        ...namhatta,
+        devoteeCount
+      };
+    });
     
     return { data, total };
   }
