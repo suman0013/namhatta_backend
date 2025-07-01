@@ -152,7 +152,7 @@ export default function Dashboard() {
       {/* Recent Activity & Updates */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Namhatta Updates */}
-        <Card className="glass-card h-96">
+        <Card className="glass-card min-h-96">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
@@ -169,38 +169,40 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4 overflow-y-auto h-72">
-            {dashboard?.recentUpdates?.map((update, index) => (
-              <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                    {update.namhattaName}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {update.programType}
-                  </p>
-                  <div className="flex items-center mt-2 space-x-4">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                      <Calendar className="mr-1 h-3 w-3" />
-                      {update.date}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                      <Users className="mr-1 h-3 w-3" />
-                      {update.attendance} attendees
-                    </span>
+          <CardContent className="space-y-4">
+            <div className="space-y-4 max-h-72 overflow-y-auto">
+              {dashboard?.recentUpdates?.map((update, index) => (
+                <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer">
+                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Home className="h-5 w-5 text-white" />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                      {update.namhattaName}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {update.programType}
+                    </p>
+                    <div className="flex items-center mt-2 space-x-4">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {update.date}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                        <Users className="mr-1 h-3 w-3" />
+                        {update.attendance} attendees
+                      </span>
+                    </div>
+                  </div>
+                  <Badge className="status-badge-active">Active</Badge>
                 </div>
-                <Badge className="status-badge-active">Active</Badge>
-              </div>
-            ))}
+              ))}
+            </div>
           </CardContent>
         </Card>
 
         {/* Devotional Status Distribution */}
-        <Card className="glass-card h-96">
+        <Card className="glass-card min-h-96">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
@@ -217,14 +219,16 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4 overflow-y-auto h-72">
-            <StatusProgressBar label="Shraddhavan" count={156} percentage={35} color="from-blue-400 to-blue-600" />
-            <StatusProgressBar label="Sadhusangi" count={98} percentage={22} color="from-emerald-400 to-emerald-600" />
-            <StatusProgressBar label="Gour/Krishna Sevak" count={89} percentage={20} color="from-purple-400 to-purple-600" />
-            <StatusProgressBar label="Gour/Krishna Sadhak" count={67} percentage={15} color="from-orange-400 to-orange-600" />
-            <StatusProgressBar label="Sri Guru Charan Asraya" count={23} percentage={5} color="from-pink-400 to-pink-600" />
-            <StatusProgressBar label="Harinam Diksha" count={9} percentage={2} color="from-indigo-400 to-indigo-600" />
-            <StatusProgressBar label="Pancharatrik Diksha" count={4} percentage={1} color="from-cyan-400 to-cyan-600" />
+          <CardContent className="space-y-4">
+            <div className="space-y-4 max-h-72 overflow-y-auto">
+              <StatusProgressBar label="Shraddhavan" count={156} percentage={35} color="from-blue-400 to-blue-600" />
+              <StatusProgressBar label="Sadhusangi" count={98} percentage={22} color="from-emerald-400 to-emerald-600" />
+              <StatusProgressBar label="Gour/Krishna Sevak" count={89} percentage={20} color="from-purple-400 to-purple-600" />
+              <StatusProgressBar label="Gour/Krishna Sadhak" count={67} percentage={15} color="from-orange-400 to-orange-600" />
+              <StatusProgressBar label="Sri Guru Charan Asraya" count={23} percentage={5} color="from-pink-400 to-pink-600" />
+              <StatusProgressBar label="Harinam Diksha" count={9} percentage={2} color="from-indigo-400 to-indigo-600" />
+              <StatusProgressBar label="Pancharatrik Diksha" count={4} percentage={1} color="from-cyan-400 to-cyan-600" />
+            </div>
           </CardContent>
         </Card>
       </div>

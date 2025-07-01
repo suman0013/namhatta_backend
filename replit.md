@@ -99,7 +99,7 @@ RESTful endpoints organized by resource:
 
 ## Changelog
 - June 30, 2025: Fixed inconsistent heights in devotee detail Status Management cards by using min-height (min-h-96) instead of fixed height, with scrollable content only when needed to eliminate unnecessary scrollbars
-- June 30, 2025: Fixed inconsistent heights in Dashboard Recent Updates and Status Distribution cards by setting fixed height of 384px (h-96) with scrollable content areas for uniform sizing across screen sizes
+- June 30, 2025: Fixed inconsistent heights in Dashboard Recent Updates and Status Distribution cards by using min-height (min-h-96) instead of fixed height, with scrollable content only when needed to eliminate unnecessary scrollbars
 - June 30, 2025: Fixed inconsistent heights in statistics cards on Updates page by replacing Card components with direct div elements using glass-card styling, fixed height of 128px (h-32), and flex centering for uniform sizing
 - June 30, 2025: Removed statistics cards section from Devotees page (Total Devotees, Active This Month, Course Completions, New This Month) as requested
 - June 30, 2025: Fixed inconsistent heights in update cards by setting fixed height of 280px for uniform sizing on all screen sizes
