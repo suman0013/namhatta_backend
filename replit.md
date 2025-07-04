@@ -98,7 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
-- July 4, 2025: Made Dashboard statistics cards horizontal layout - Total Devotees and Total Namhattas now display in a single row on larger screens while remaining stacked on mobile for better responsive design
+- July 4, 2025: Made Dashboard statistics cards horizontal layout with compact design - Total Devotees and Total Namhattas now display in a single row on larger screens with title and number on the same line, reduced vertical height for cleaner appearance
 - July 4, 2025: Removed percentage changes and monthly indicators from Dashboard statistics cards for cleaner UI (removed "+12.5% vs last month" and "+3 new this month")
 - July 4, 2025: Implemented dynamic event status badges in Dashboard Recent Updates - now shows "Past Event", "Today", or "Future Event" instead of generic "Active" status based on event date
 - July 4, 2025: Made Leadership Roles and Address Information sections more compact in Namhatta detail page, and Spiritual Information section in devotee detail page - reduced spacing, padding, and card sizes for better mobile experience

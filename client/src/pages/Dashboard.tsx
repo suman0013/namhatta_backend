@@ -285,15 +285,17 @@ function StatsCard({
       {/* Floating Background Shapes */}
       <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-xl group-hover:scale-110 transition-transform duration-500"></div>
       
-      <CardContent className="p-6 relative z-10">
+      <CardContent className="p-4 relative z-10">
         <div className="flex items-center justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
-            <p className="text-3xl font-bold gradient-text mb-4">
-              {value.toLocaleString()}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
+              <p className="text-2xl font-bold gradient-text">
+                {value.toLocaleString()}
+              </p>
+            </div>
             {change && changeLabel && (
-              <div className="flex items-center">
+              <div className="flex items-center mt-2">
                 <span className={`flex items-center text-sm font-medium px-2 py-1 rounded-full ${
                   positive 
                     ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
@@ -312,10 +314,10 @@ function StatsCard({
               </div>
             )}
           </div>
-          <div className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 relative overflow-hidden`}>
+          <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 relative overflow-hidden`}>
             {/* Icon background glow */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
-            <Icon className="h-8 w-8 text-white relative z-10 drop-shadow-sm" />
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
+            <Icon className="h-6 w-6 text-white relative z-10 drop-shadow-sm" />
           </div>
         </div>
       </CardContent>
