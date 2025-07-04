@@ -124,20 +124,24 @@ export default function Dashboard() {
 
       {/* Stats Cards */}
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-        <StatsCard
-          title="Total Devotees"
-          value={dashboard?.totalDevotees || 0}
-          icon={Users}
-          gradient="from-blue-400 to-blue-600"
-          onClick={() => setLocation("/devotees")}
-        />
-        <StatsCard
-          title="Total Namhattas"
-          value={dashboard?.totalNamhattas || 0}
-          icon={Home}
-          gradient="from-emerald-400 to-emerald-600"
-          onClick={() => setLocation("/namhattas")}
-        />
+        <div className="flex-1">
+          <StatsCard
+            title="Total Devotees"
+            value={dashboard?.totalDevotees || 0}
+            icon={Users}
+            gradient="from-blue-400 to-blue-600"
+            onClick={() => setLocation("/devotees")}
+          />
+        </div>
+        <div className="flex-1">
+          <StatsCard
+            title="Total Namhattas"
+            value={dashboard?.totalNamhattas || 0}
+            icon={Home}
+            gradient="from-emerald-400 to-emerald-600"
+            onClick={() => setLocation("/namhattas")}
+          />
+        </div>
       </div>
 
 
