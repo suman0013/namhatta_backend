@@ -40,7 +40,7 @@ export const getQueryFn: <T>(options: {
     // Use the same URL building logic as apiRequest
     const fullUrl = endpoint.startsWith('http') ? endpoint : buildApiUrl(endpoint);
     
-    console.log('Fetching:', fullUrl); // Debug log
+    // Debug log removed
     
     const res = await fetch(fullUrl, {
       credentials: "include",

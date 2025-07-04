@@ -6,7 +6,12 @@
  * Can be overridden with VITE_API_BASE_URL environment variable
  */
 export const getApiBaseUrl = (): string => {
-  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  // In development, use relative URLs since both frontend and backend are served from same port
+  // In production, use the environment variable or default to same origin
+  if (import.meta.env.MODE === 'development') {
+    return ''; // Use relative URLs for development
+  }
+  return import.meta.env.VITE_API_BASE_URL || '';
 };
 
 /**
