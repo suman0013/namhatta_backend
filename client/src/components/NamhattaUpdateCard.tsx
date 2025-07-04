@@ -14,7 +14,8 @@ import {
   Youtube
 } from "lucide-react";
 import { format } from "date-fns";
-import { useLocation } from "wouter";
+import { useState } from "react";
+import UpdateDetailModal from "./UpdateDetailModal";
 
 interface NamhattaUpdate {
   id: number;
@@ -46,7 +47,7 @@ export default function NamhattaUpdateCard({
   showNamhattaName = false, 
   namhattaName 
 }: NamhattaUpdateCardProps) {
-  const [, setLocation] = useLocation();
+  const [showDetailModal, setShowDetailModal] = useState(false);
   
   const activities = [
     { key: 'nagarKirtan', label: 'Nagar Kirtan', icon: Music, color: 'text-orange-500' },
@@ -61,7 +62,7 @@ export default function NamhattaUpdateCard({
   );
 
   const handleCardClick = () => {
-    setLocation(`/namhattas/${update.namhattaId}`);
+    setShowDetailModal(true);
   };
 
   return (
@@ -155,6 +156,14 @@ export default function NamhattaUpdateCard({
           </CardContent>
         </div>
       </Card>
+      
+      {/* Update Detail Modal */}
+      <UpdateDetailModal
+        update={update}
+        namhattaName={namhattaName}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+      />
     </div>
   );
 }
