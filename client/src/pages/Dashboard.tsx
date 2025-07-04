@@ -191,23 +191,25 @@ export default function Dashboard() {
                 const status = getEventStatus();
                 
                 return (
-                  <div key={index} className="flex items-center space-x-3 p-3 rounded-lg glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Calendar className="h-4 w-4 text-white" />
+                  <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Home className="h-5 w-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="font-medium text-sm text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
-                          {update.namhattaName}
-                        </h3>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">•</span>
-                        <span className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                          {update.programType}
+                      <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                        {update.namhattaName}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {update.programType}
+                      </p>
+                      <div className="flex items-center mt-2 space-x-4">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                          <Calendar className="mr-1 h-3 w-3" />
+                          {update.date}
                         </span>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">•</span>
                         <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                           <Users className="mr-1 h-3 w-3" />
-                          {update.attendance}
+                          {update.attendance} attendees
                         </span>
                       </div>
                     </div>
