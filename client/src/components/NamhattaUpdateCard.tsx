@@ -14,6 +14,7 @@ import {
   Youtube
 } from "lucide-react";
 import { format } from "date-fns";
+import { useLocation } from "wouter";
 
 interface NamhattaUpdate {
   id: number;
@@ -45,6 +46,8 @@ export default function NamhattaUpdateCard({
   showNamhattaName = false, 
   namhattaName 
 }: NamhattaUpdateCardProps) {
+  const [, setLocation] = useLocation();
+  
   const activities = [
     { key: 'nagarKirtan', label: 'Nagar Kirtan', icon: Music, color: 'text-orange-500' },
     { key: 'bookDistribution', label: 'Book Distribution', icon: BookOpen, color: 'text-blue-500' },
@@ -57,9 +60,13 @@ export default function NamhattaUpdateCard({
     update[activity.key as keyof NamhattaUpdate] === true
   );
 
+  const handleCardClick = () => {
+    setLocation(`/namhattas/${update.namhattaId}`);
+  };
+
   return (
     <div className="h-[280px]">
-      <Card className="glass-card hover-lift h-full">
+      <Card className="glass-card hover-lift h-full cursor-pointer" onClick={handleCardClick}>
         <div className="h-full flex flex-col">
           <CardHeader className="pb-3 flex-shrink-0">
             <div className="flex items-start justify-between">
