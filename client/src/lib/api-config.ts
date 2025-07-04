@@ -6,12 +6,17 @@
  * Can be overridden with VITE_API_BASE_URL environment variable
  */
 export const getApiBaseUrl = (): string => {
+  // Check if we should use external backend
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
   // In development, use relative URLs since both frontend and backend are served from same port
   // In production, use the environment variable or default to same origin
   if (import.meta.env.MODE === 'development') {
     return ''; // Use relative URLs for development
   }
-  return import.meta.env.VITE_API_BASE_URL || '';
+  return '';
 };
 
 /**
