@@ -431,8 +431,8 @@ export default function Map() {
         <CardContent className="p-0">
           <div 
             id="leaflet-map" 
-            className="w-full h-[80vh] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
-            style={{ minHeight: '80vh' }}
+            className="w-full h-[68vh] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
+            style={{ minHeight: '68vh' }}
           />
         </CardContent>
       </Card>
