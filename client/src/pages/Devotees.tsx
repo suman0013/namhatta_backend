@@ -339,7 +339,12 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
                     {devotee.initiatedName}
                   </p>
                 )}
-                <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
+                {devotee.occupation && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    {devotee.occupation}
+                  </p>
+                )}
               </div>
             </div>
 
