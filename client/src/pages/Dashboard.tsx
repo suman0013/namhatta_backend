@@ -97,7 +97,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {/* Founder Acharya */}
               {hierarchy?.founder?.map((founder) => (
-                <div key={founder.id} className="flex items-center space-x-3 p-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50">
+                <div key={founder.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
                     <Crown className="h-5 w-5 text-white float-animation" />
                   </div>
@@ -110,7 +110,7 @@ export default function Dashboard() {
               
               {/* GBC */}
               {hierarchy?.gbc?.map((leader) => (
-                <div key={leader.id} className="flex items-center space-x-3 p-2 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200/50 dark:border-purple-700/50">
+                <div key={leader.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
                   <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
                     <Crown className="h-5 w-5 text-white float-animation" />
                   </div>
@@ -126,7 +126,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {/* Regional Directors */}
               {hierarchy?.regionalDirectors?.map((director) => (
-                <div key={director.id} className="flex items-center space-x-3 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/50 dark:border-blue-700/50">
+                <div key={director.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
                     <UserCheck className="h-5 w-5 text-white" />
                   </div>
@@ -139,7 +139,7 @@ export default function Dashboard() {
 
               {/* Co-Regional Directors */}
               {hierarchy?.coRegionalDirectors?.map((coDirector) => (
-                <div key={coDirector.id} className="flex items-center space-x-3 p-2 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-700/50">
+                <div key={coDirector.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
                   <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
                     <Users className="h-5 w-5 text-white" />
                   </div>
