@@ -36,8 +36,11 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // Build full URL using configured base URL
-    const fullUrl = (queryKey[0] as string).startsWith('http') ? (queryKey[0] as string) : buildApiUrl(queryKey[0] as string);
+    const endpoint = queryKey[0] as string;
+    // Use the same URL building logic as apiRequest
+    const fullUrl = endpoint.startsWith('http') ? endpoint : buildApiUrl(endpoint);
+    
+    console.log('Fetching:', fullUrl); // Debug log
     
     const res = await fetch(fullUrl, {
       credentials: "include",
