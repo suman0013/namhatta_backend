@@ -13,7 +13,14 @@ import {
   Edit, 
   Users, 
   TrendingUp, 
-  Award
+  Award,
+  Heart,
+  HandHeart,
+  Star,
+  Crown,
+  Shield,
+  Flame,
+  Sparkles
 } from "lucide-react";
 import type { DevotionalStatus } from "@/lib/types";
 
@@ -218,15 +225,44 @@ function StatusCard({
       "from-purple-400 to-purple-600",
       "from-orange-400 to-orange-600",
       "from-pink-400 to-pink-600",
+      "from-cyan-400 to-cyan-600",
+      "from-indigo-400 to-indigo-600",
     ];
     return gradients[index % gradients.length];
   };
 
+  const getStatusIcon = (statusName: string, index: number) => {
+    const iconClass = "h-4 w-4 text-white";
+    
+    // Map specific status names to icons
+    const statusIconMap: { [key: string]: JSX.Element } = {
+      "Shraddhavan": <Heart className={iconClass} />,
+      "Sadhusangi": <HandHeart className={iconClass} />,
+      "Gour/Krishna Sevak": <Star className={iconClass} />,
+      "Gour/Krishna Sadhak": <Award className={iconClass} />,
+      "Sri Guru Charan Asraya": <Shield className={iconClass} />,
+      "Harinam Diksha": <Crown className={iconClass} />,
+      "Pancharatrik Diksha": <Sparkles className={iconClass} />,
+    };
+
+    // Return specific icon if found, otherwise use default icons
+    return statusIconMap[statusName] || (() => {
+      const defaultIcons = [Heart, HandHeart, Star, Award, Shield, Crown, Sparkles];
+      const IconComponent = defaultIcons[index % defaultIcons.length];
+      return <IconComponent className={iconClass} />;
+    })();
+  };
+
   return (
     <div className="space-y-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
-      {/* Top row: Status name + Count + Rename icon */}
+      {/* Top row: Icon + Status name + Count + Rename icon */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
+          {/* Status Icon */}
+          <div className={`w-8 h-8 bg-gradient-to-br ${getGradientClass(index)} rounded-lg flex items-center justify-center flex-shrink-0`}>
+            {getStatusIcon(status.name, index)}
+          </div>
+          
           {/* Status name */}
           <h3 className="font-medium text-gray-900 dark:text-white text-sm">
             {status.name}
