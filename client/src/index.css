@@ -120,6 +120,11 @@
     border-color: hsla(240, 3.7%, 50%, 0.9);
   }
   
+  /* Fix double border issue when using glass with border-0 */
+  .glass.border-0 {
+    border: none !important;
+  }
+  
 
   
   .glass-card {
