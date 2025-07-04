@@ -219,41 +219,34 @@ function StatusCard({
   };
 
   return (
-    <div className="flex items-center space-x-2 p-2.5 rounded-lg glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
-      {/* Icon */}
-      <div className={`w-8 h-8 bg-gradient-to-br ${getGradientClass(index)} rounded-lg flex items-center justify-center flex-shrink-0`}>
-        <Award className="h-4 w-4 text-white" />
+    <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
+      <div className="flex items-center space-x-3 flex-1">
+        <h3 className="font-medium text-gray-900 dark:text-white text-sm min-w-0">
+          {status.name}
+        </h3>
+        <span className="text-sm text-gray-600 dark:text-gray-400 ml-auto">
+          {devoteeCount} ({percentage.toFixed(0)}%)
+        </span>
       </div>
 
-      {/* Content - Single Line Layout */}
-      <div className="flex-1 min-w-0 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-            {status.name}
-          </h3>
-          <span className="text-xs text-gray-600 dark:text-gray-400">
-            {devoteeCount} devotees ({percentage.toFixed(1)}%)
-          </span>
-          {/* Progress Bar */}
-          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-            <div
-              className={`h-1.5 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
-              style={{ width: `${Math.max(percentage, 2)}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Rename Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onEdit}
-          className="glass text-xs px-2 py-1 flex-shrink-0"
-        >
-          <Edit className="h-3 w-3 mr-1" />
-          Rename
-        </Button>
+      {/* Progress Bar */}
+      <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-4">
+        <div
+          className={`h-2 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
+          style={{ width: `${Math.max(percentage, 2)}%` }}
+        />
       </div>
+
+      {/* Rename Icon Only */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onEdit}
+        className="h-8 w-8 p-0 opacity-60 hover:opacity-100 flex-shrink-0"
+      >
+        <Edit className="h-4 w-4" />
+        <span className="sr-only">Rename</span>
+      </Button>
     </div>
   );
 }
