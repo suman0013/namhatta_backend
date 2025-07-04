@@ -585,34 +585,42 @@ export default function DevoteeDetail() {
           {/* Devotional Courses */}
           {devotee.devotionalCourses && devotee.devotionalCourses.length > 0 && (
             <Card className="glass-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Book className="mr-2 h-5 w-5" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-2">
+                    <Book className="h-3 w-3 text-white" />
+                  </div>
                   Devotional Courses
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="pt-2">
+                <div className="space-y-2">
                   {devotee.devotionalCourses.map((course, index) => (
-                    <div key={index} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Course Name</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{course.name}</p>
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center mb-1">
+                          <Book className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                          <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Course Name</p>
                         </div>
-                        {course.date && (
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Date</p>
-                            <p className="font-medium text-gray-900 dark:text-white flex items-center">
-                              <Calendar className="mr-1 h-3 w-3" />
-                              {new Date(course.date).toLocaleDateString()}
-                            </p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{course.name}</p>
+                      </div>
+                      {course.date && (
+                        <div className="p-2 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                          <div className="flex items-center mb-1">
+                            <Calendar className="h-3 w-3 text-green-600 dark:text-green-400 mr-1" />
+                            <p className="text-xs font-medium text-green-600 dark:text-green-400">Date</p>
                           </div>
-                        )}
-                        <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Institute</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{course.institute}</p>
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                            {new Date(course.date).toLocaleDateString()}
+                          </p>
                         </div>
+                      )}
+                      <div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="flex items-center mb-1">
+                          <Building className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                          <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Institute</p>
+                        </div>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{course.institute}</p>
                       </div>
                     </div>
                   ))}

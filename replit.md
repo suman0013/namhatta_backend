@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Updated Devotional Courses section in devotee detail page to match gradient card design of other sections - course name, date, and institute now display in beautiful gradient cards with consistent styling and icons
 - July 4, 2025: Made Dashboard statistics cards horizontal layout with compact design - Total Devotees and Total Namhattas now display in a single row on larger screens with title and number on the same line, reduced vertical height for cleaner appearance
 - July 4, 2025: Removed percentage changes and monthly indicators from Dashboard statistics cards for cleaner UI (removed "+12.5% vs last month" and "+3 new this month")
 - July 4, 2025: Implemented dynamic event status badges in Dashboard Recent Updates - now shows "Past Event", "Today", or "Future Event" instead of generic "Active" status based on event date
