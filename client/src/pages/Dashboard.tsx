@@ -123,7 +123,7 @@ export default function Dashboard() {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
         <StatsCard
           title="Total Devotees"
           value={dashboard?.totalDevotees || 0}
@@ -138,8 +138,6 @@ export default function Dashboard() {
           gradient="from-emerald-400 to-emerald-600"
           onClick={() => setLocation("/namhattas")}
         />
-
-
       </div>
 
 
