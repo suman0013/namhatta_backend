@@ -1,4 +1,4 @@
-import { loadGeographicData, getCountries, getStates, getDistricts, getSubDistricts, getVillages } from "./geographic-data";
+import { loadGeographicData, getCountries, getStates, getDistricts, getSubDistricts, getVillages, getPincodes } from "./geographic-data";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "../shared/schema";
 
 export interface IStorage {
@@ -63,6 +63,7 @@ export interface IStorage {
   getDistricts(state: string): Promise<string[]>;
   getSubDistricts(district: string): Promise<string[]>;
   getVillages(subDistrict: string): Promise<string[]>;
+  getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]>;
 
   // Map data
   getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>>;
@@ -812,6 +813,10 @@ export class MemStorage implements IStorage {
 
   async getVillages(subDistrict: string): Promise<string[]> {
     return getVillages(subDistrict);
+  }
+
+  async getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]> {
+    return getPincodes(village, district, subDistrict);
   }
 
   async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
