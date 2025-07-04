@@ -98,6 +98,8 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Fixed excessive background animation blinking by removing animate-pulse effects from floating orbs in AppLayout - background elements now remain static for better user experience
+- July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment with all functionality preserved and working correctly
 - July 4, 2025: Fixed Select dropdown positioning issue in Namhatta Update Form - removed glass styling from form elements that caused dropdown to follow cursor movement, ensuring proper dropdown positioning
 - July 4, 2025: Fixed dark mode visibility issues in form labels and section headers - enhanced Label component, Dialog titles, and form section headers with proper dark mode styling for better visibility and readability
 - July 4, 2025: Implemented automatic scroll-to-top functionality when navigating between pages - new pages now open at the top position instead of maintaining previous scroll position
