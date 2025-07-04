@@ -120,7 +120,7 @@ export default function Devotees() {
       </div>
 
       {/* Search and Filters */}
-      <Card className="glass-card relative z-50">
+      <Card className="glass-card relative z-40">
         <CardContent className="p-6 space-y-4">
           {/* Search Bar */}
           <SearchInput
@@ -134,7 +134,7 @@ export default function Devotees() {
           />
 
           {/* Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
             <SearchableSelect
               value={filters.country || "All Countries"}
               onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
