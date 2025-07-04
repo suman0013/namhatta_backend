@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Fixed dark mode visibility issues in form labels and section headers - enhanced Label component, Dialog titles, and form section headers with proper dark mode styling for better visibility and readability
 - July 4, 2025: Implemented automatic scroll-to-top functionality when navigating between pages - new pages now open at the top position instead of maintaining previous scroll position
 - July 4, 2025: Removed bottom navigation bar (MobileNav component) from mobile interface - users now access navigation through the mobile menu button in the top-left corner
 - July 4, 2025: Further enhanced dark mode styling for Input and Select components - improved form visibility with darker backgrounds, lighter borders, and white text for better contrast and readability in dark mode

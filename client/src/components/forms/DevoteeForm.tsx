@@ -428,7 +428,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Basic Information</h3>
+              <h3 className="form-section-header">Basic Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="legalName">Legal Name *</Label>
@@ -506,7 +506,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
             {/* Family Information */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Family Information</h3>
+              <h3 className="form-section-header">Family Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="fatherName">Father's Name</Label>
@@ -540,7 +540,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
             {/* Personal Information */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Personal Information</h3>
+              <h3 className="form-section-header">Personal Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <Label htmlFor="education">Education</Label>
@@ -567,7 +567,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
             {/* Present Address */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Present Address *</h3>
+              <h3 className="form-section-header">Present Address *</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country *</Label>
@@ -726,7 +726,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Permanent Address */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Permanent Address *</h3>
+                <h3 className="form-section-header">Permanent Address *</h3>
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -899,7 +899,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
             {/* Spiritual Information */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold">Spiritual Information</h3>
+              <h3 className="form-section-header">Spiritual Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="devotionalStatusId">Devotional Status *</Label>
@@ -971,7 +971,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
             {/* Devotional Courses */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Devotional Courses</h3>
+                <h3 className="form-section-header">Devotional Courses</h3>
                 <Button type="button" variant="outline" size="sm" onClick={addDevotionalCourse}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Course
