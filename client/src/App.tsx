@@ -12,6 +12,7 @@ import Namhattas from "@/pages/Namhattas";
 import NamhattaDetail from "@/pages/NamhattaDetail";
 import Devotees from "@/pages/Devotees";
 import DevoteeDetail from "@/pages/DevoteeDetail";
+import { logApiConfig } from "@/lib/api-config";
 
 import Statuses from "@/pages/Statuses";
 import Shraddhakutirs from "@/pages/Shraddhakutirs";
@@ -48,6 +49,9 @@ function Router() {
 }
 
 function App() {
+  // Log API configuration on app start
+  logApiConfig();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="namhatta-ui-theme">
