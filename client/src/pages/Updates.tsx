@@ -81,9 +81,9 @@ export default function Updates() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-1">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-1 md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">All Updates</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -99,9 +99,9 @@ export default function Updates() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-stretch">
         <Card className="glass-card h-32">
-          <CardContent className="p-6 h-full flex items-center">
+          <CardContent className="p-2 h-full flex items-center">
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col justify-center min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap leading-tight">Total Updates</p>
@@ -117,7 +117,7 @@ export default function Updates() {
         </Card>
 
         <Card className="glass-card h-32">
-          <CardContent className="p-6 h-full flex items-center">
+          <CardContent className="p-2 h-full flex items-center">
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col justify-center min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap leading-tight">Total Attendance</p>
@@ -133,7 +133,7 @@ export default function Updates() {
         </Card>
 
         <Card className="glass-card h-32">
-          <CardContent className="p-6 h-full flex items-center">
+          <CardContent className="p-2 h-full flex items-center">
             <div className="flex items-center justify-between w-full">
               <div className="flex flex-col justify-center min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap leading-tight">Active Namhattas</p>
@@ -151,7 +151,7 @@ export default function Updates() {
 
       {/* Filters and Search */}
       <Card className="glass-card">
-        <CardContent className="p-6 space-y-4">
+        <CardContent className="p-2 space-y-1">
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -165,7 +165,7 @@ export default function Updates() {
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Program Type</label>
               <Select value={selectedProgramType} onValueChange={setSelectedProgramType}>
@@ -215,7 +215,7 @@ export default function Updates() {
 
       {/* Updates Grid */}
       {filteredUpdates && filteredUpdates.length > 0 ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
           {filteredUpdates.map((update: any) => (
             <NamhattaUpdateCard
               key={`${update.namhattaId}-${update.id}`}
@@ -244,16 +244,16 @@ export default function Updates() {
 
 function UpdatesSkeleton() {
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-1">
+      <div className="space-y-1">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="glass-card">
-            <CardContent className="p-6">
+            <CardContent className="p-2">
               <Skeleton className="h-16 w-full" />
             </CardContent>
           </Card>
@@ -261,9 +261,9 @@ function UpdatesSkeleton() {
       </div>
 
       <Card className="glass-card">
-        <CardContent className="p-6 space-y-4">
+        <CardContent className="p-2 space-y-1">
           <Skeleton className="h-10 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-10 w-full" />
             ))}
@@ -271,10 +271,10 @@ function UpdatesSkeleton() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
         {[1, 2, 3, 4, 5, 6].map((i) => (
           <Card key={i} className="glass-card">
-            <CardContent className="p-6">
+            <CardContent className="p-2">
               <Skeleton className="h-48 w-full" />
             </CardContent>
           </Card>
