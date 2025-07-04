@@ -633,28 +633,41 @@ export default function DevoteeDetail() {
         <TabsContent value="status" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Current Status */}
-            <Card className="glass-card min-h-96">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="mr-2 h-5 w-5" />
+            <Card className="glass-card min-h-96 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-2">
+                    <TrendingUp className="h-3 w-3 text-white" />
+                  </div>
                   Current Devotional Status
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Current Status</p>
-                    <p className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {getStatusName(devotee.devotionalStatusId)}
-                    </p>
+              <CardContent className="relative z-10 space-y-4">
+                {/* Current Status Display */}
+                <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center mb-1">
+                        <Award className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-1" />
+                        <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Current Status</p>
+                      </div>
+                      <p className="text-xl font-bold gradient-text">
+                        {getStatusName(devotee.devotionalStatusId)}
+                      </p>
+                    </div>
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-lg">
+                      Active
+                    </Badge>
                   </div>
-                  <Badge className={getStatusColor(devotee.devotionalStatusId)}>
-                    Active
-                  </Badge>
                 </div>
                 
+                {/* Upgrade Status Section */}
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Upgrade Status</p>
+                  <div className="flex items-center mb-2">
+                    <Zap className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
+                    <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Upgrade Status</p>
+                  </div>
                   <div className="space-y-3">
                     <Select
                       onValueChange={(value) => {
@@ -662,7 +675,7 @@ export default function DevoteeDetail() {
                       }}
                       disabled={upgradeStatusMutation.isPending}
                     >
-                      <SelectTrigger className="glass border-0">
+                      <SelectTrigger className="glass border-0 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
                         <SelectValue placeholder="Select new status" />
                       </SelectTrigger>
                       <SelectContent>
@@ -674,7 +687,8 @@ export default function DevoteeDetail() {
                       </SelectContent>
                     </Select>
                     <div>
-                      <Label htmlFor="statusComment" className="text-sm text-gray-600 dark:text-gray-400">
+                      <Label htmlFor="statusComment" className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center mb-2">
+                        <Book className="h-3 w-3 mr-1" />
                         Comment (Optional)
                       </Label>
                       <Textarea
@@ -682,7 +696,7 @@ export default function DevoteeDetail() {
                         value={statusComment}
                         onChange={(e) => setStatusComment(e.target.value)}
                         placeholder="Add a comment about this status change..."
-                        className="glass border-0 mt-1"
+                        className="glass border-0 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20"
                         rows={2}
                       />
                     </div>
@@ -698,7 +712,7 @@ export default function DevoteeDetail() {
                         }
                       }}
                       disabled={!selectedStatusId || upgradeStatusMutation.isPending}
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0 shadow-lg transition-all duration-200"
                     >
                       {upgradeStatusMutation.isPending ? "Updating Status..." : "Change Status"}
                     </Button>
@@ -708,36 +722,54 @@ export default function DevoteeDetail() {
             </Card>
 
             {/* Status History */}
-            <Card className="glass-card min-h-96">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="mr-2 h-5 w-5" />
+            <Card className="glass-card min-h-96 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5"></div>
+              <CardHeader className="relative z-10">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center mr-2">
+                    <Calendar className="h-3 w-3 text-white" />
+                  </div>
                   Status History
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="relative z-10">
                 <div className="space-y-3 max-h-72 overflow-y-auto">
                   {statusHistory?.length === 0 ? (
-                    <p className="text-gray-600 dark:text-gray-400 text-center py-4">
-                      No status changes recorded yet.
-                    </p>
+                    <div className="text-center py-8">
+                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-600 dark:text-gray-400 font-medium">
+                        No status changes recorded yet.
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                        Status changes will appear here when they occur.
+                      </p>
+                    </div>
                   ) : (
                     statusHistory?.map((entry: any, index: number) => (
-                      <div key={entry.id} className="flex items-center space-x-3 p-3 rounded-lg glass">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            Changed to {getStatusName(entry.newStatusId)}
-                          </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            {new Date(entry.changedAt).toLocaleDateString()}
-                          </p>
-                          {entry.reason && (
-                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 italic">
-                              "{entry.reason}"
+                      <div key={entry.id} className="relative">
+                        <div className="flex items-start space-x-3 p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-all duration-200">
+                          <div className="w-3 h-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full mt-1 shadow-sm" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                              Changed to {getStatusName(entry.newStatusId)}
                             </p>
-                          )}
+                            <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400 mb-1">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {new Date(entry.changedAt).toLocaleDateString()}
+                            </div>
+                            {entry.reason && (
+                              <div className="mt-2 p-2 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <p className="text-xs text-gray-600 dark:text-gray-400 italic">
+                                  "{entry.reason}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        {/* Timeline connector */}
+                        {index < (statusHistory?.length - 1) && (
+                          <div className="absolute left-7 top-14 w-px h-4 bg-gradient-to-b from-emerald-300 to-teal-300 dark:from-emerald-700 dark:to-teal-700" />
+                        )}
                       </div>
                     ))
                   )}
