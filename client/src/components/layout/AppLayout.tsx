@@ -77,9 +77,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="animate-fade-in max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 lg:py-10">
+          <div className="animate-fade-in max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
             <div className="backdrop-blur-sm bg-white/30 dark:bg-slate-900/30 rounded-3xl p-1 shadow-2xl border border-white/20 dark:border-slate-700/50">
-              <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 lg:p-8 shadow-inner">
+              <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl p-4 lg:p-6 shadow-inner">
                 {children}
               </div>
             </div>

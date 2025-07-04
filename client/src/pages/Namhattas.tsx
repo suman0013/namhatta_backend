@@ -94,9 +94,9 @@ export default function Namhattas() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-1 md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Namhattas Management</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and monitor all Namhatta centers</p>
@@ -109,7 +109,7 @@ export default function Namhattas() {
 
       {/* Search and Filters Section */}
       <Card className="glass-card relative z-50">
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-3 space-y-2">
           {/* Search Bar */}
           <SearchInput
             value={searchTerm}
