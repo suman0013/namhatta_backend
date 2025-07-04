@@ -30,7 +30,8 @@ import {
   Mail,
   Zap,
   Home,
-  Activity
+  Activity,
+  Building
 } from "lucide-react";
 import type { Devotee } from "@/lib/types";
 import DevoteeForm from "@/components/forms/DevoteeForm";
@@ -293,48 +294,51 @@ export default function DevoteeDetail() {
 
             {/* Personal Information */}
             <Card className="glass-card">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center mr-3">
-                    <GraduationCap className="h-5 w-5 text-white" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg flex items-center justify-center mr-2">
+                    <GraduationCap className="h-3 w-3 text-white" />
                   </div>
                   Personal Information
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {devotee.education && (
-                    <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                      <div className="flex items-center mb-2">
-                        <GraduationCap className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
-                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Education</p>
+                    <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center mb-1">
+                        <GraduationCap className="h-3 w-3 text-orange-600 dark:text-orange-400 mr-1" />
+                        <p className="text-xs font-medium text-orange-600 dark:text-orange-400">Education</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.education}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.education}</p>
                     </div>
                   )}
                   {devotee.occupation && (
-                    <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl border border-cyan-200 dark:border-cyan-800">
-                      <div className="flex items-center mb-2">
-                        <Briefcase className="h-4 w-4 text-cyan-600 dark:text-cyan-400 mr-2" />
-                        <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400">Occupation</p>
+                    <div className="p-2 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                      <div className="flex items-center mb-1">
+                        <Briefcase className="h-3 w-3 text-cyan-600 dark:text-cyan-400 mr-1" />
+                        <p className="text-xs font-medium text-cyan-600 dark:text-cyan-400">Occupation</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.occupation}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.occupation}</p>
                     </div>
                   )}
                 </div>
                 {devotee.additionalComments && (
-                  <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl border border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center mb-2">
-                      <Book className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-2" />
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Additional Comments</p>
+                  <div className="mt-2 p-2 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div className="flex items-center mb-1">
+                      <Book className="h-3 w-3 text-gray-600 dark:text-gray-400 mr-1" />
+                      <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Additional Comments</p>
                     </div>
-                    <p className="font-medium text-gray-900 dark:text-white">{devotee.additionalComments}</p>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">{devotee.additionalComments}</p>
                   </div>
                 )}
                 {devotee.shraddhakutirId && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Shraddhakutir</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
+                  <div className="mt-2 p-2 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/20 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center mb-1">
+                      <Home className="h-3 w-3 text-slate-600 dark:text-slate-400 mr-1" />
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Shraddhakutir</p>
+                    </div>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
                       Shraddhakutir ID: {devotee.shraddhakutirId}
                     </p>
                   </div>
@@ -345,77 +349,77 @@ export default function DevoteeDetail() {
             {/* Present Address */}
             {devotee.presentAddress && (
               <Card className="glass-card">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-3">
-                      <MapPin className="h-5 w-5 text-white float-animation" />
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-base">
+                    <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center mr-2">
+                      <MapPin className="h-3 w-3 text-white" />
                     </div>
                     Present Address
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <CardContent className="pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {devotee.presentAddress.country && (
-                      <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                        <div className="flex items-center mb-2">
-                          <Home className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
-                          <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Country</p>
+                      <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center mb-1">
+                          <Home className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                          <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Country</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.country}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.country}</p>
                       </div>
                     )}
                     {devotee.presentAddress.state && (
-                      <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                        <div className="flex items-center mb-2">
-                          <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
-                          <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">State</p>
+                      <div className="p-2 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                          <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">State</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.state}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.state}</p>
                       </div>
                     )}
                     {devotee.presentAddress.district && (
-                      <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                        <div className="flex items-center mb-2">
-                          <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                          <p className="text-sm font-medium text-purple-600 dark:text-purple-400">District</p>
+                      <div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <div className="flex items-center mb-1">
+                          <Activity className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                          <p className="text-xs font-medium text-purple-600 dark:text-purple-400">District</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.district}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.district}</p>
                       </div>
                     )}
                     {devotee.presentAddress.subDistrict && (
-                      <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                        <div className="flex items-center mb-2">
-                          <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
-                          <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Sub-District</p>
+                      <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                        <div className="flex items-center mb-1">
+                          <TrendingUp className="h-3 w-3 text-orange-600 dark:text-orange-400 mr-1" />
+                          <p className="text-xs font-medium text-orange-600 dark:text-orange-400">Sub-District</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.subDistrict}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.subDistrict}</p>
                       </div>
                     )}
                     {devotee.presentAddress.village && (
-                      <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl border border-pink-200 dark:border-pink-800">
-                        <div className="flex items-center mb-2">
-                          <Home className="h-4 w-4 text-pink-600 dark:text-pink-400 mr-2" />
-                          <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Village</p>
+                      <div className="p-2 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                        <div className="flex items-center mb-1">
+                          <Home className="h-3 w-3 text-pink-600 dark:text-pink-400 mr-1" />
+                          <p className="text-xs font-medium text-pink-600 dark:text-pink-400">Village</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.village}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.village}</p>
                       </div>
                     )}
                     {devotee.presentAddress.postalCode && (
-                      <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl border border-cyan-200 dark:border-cyan-800">
-                        <div className="flex items-center mb-2">
-                          <MapPin className="h-4 w-4 text-cyan-600 dark:text-cyan-400 mr-2" />
-                          <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400">Postal Code</p>
+                      <div className="p-2 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 text-cyan-600 dark:text-cyan-400 mr-1" />
+                          <p className="text-xs font-medium text-cyan-600 dark:text-cyan-400">Postal Code</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.postalCode}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.postalCode}</p>
                       </div>
                     )}
                     {devotee.presentAddress.landmark && (
-                      <div className="md:col-span-2 lg:col-span-3 p-4 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl border border-gray-200 dark:border-gray-800">
-                        <div className="flex items-center mb-2">
-                          <MapPin className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-2" />
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Landmark</p>
+                      <div className="md:col-span-2 lg:col-span-3 p-2 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 text-gray-600 dark:text-gray-400 mr-1" />
+                          <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Landmark</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.presentAddress.landmark}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.presentAddress.landmark}</p>
                       </div>
                     )}
                   </div>
@@ -426,77 +430,77 @@ export default function DevoteeDetail() {
             {/* Permanent Address */}
             {devotee.permanentAddress && (
               <Card className="glass-card">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center mr-3">
-                      <MapPin className="h-5 w-5 text-white float-animation" />
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-base">
+                    <div className="w-6 h-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center mr-2">
+                      <MapPin className="h-3 w-3 text-white" />
                     </div>
                     Permanent Address
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <CardContent className="pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {devotee.permanentAddress.country && (
-                      <div className="p-4 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                        <div className="flex items-center mb-2">
-                          <Home className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
-                          <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Country</p>
+                      <div className="p-2 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                        <div className="flex items-center mb-1">
+                          <Home className="h-3 w-3 text-indigo-600 dark:text-indigo-400 mr-1" />
+                          <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Country</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.country}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.country}</p>
                       </div>
                     )}
                     {devotee.permanentAddress.state && (
-                      <div className="p-4 bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
-                        <div className="flex items-center mb-2">
-                          <MapPin className="h-4 w-4 text-teal-600 dark:text-teal-400 mr-2" />
-                          <p className="text-sm font-medium text-teal-600 dark:text-teal-400">State</p>
+                      <div className="p-2 bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 text-teal-600 dark:text-teal-400 mr-1" />
+                          <p className="text-xs font-medium text-teal-600 dark:text-teal-400">State</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.state}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.state}</p>
                       </div>
                     )}
                     {devotee.permanentAddress.district && (
-                      <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl border border-violet-200 dark:border-violet-800">
-                        <div className="flex items-center mb-2">
-                          <Activity className="h-4 w-4 text-violet-600 dark:text-violet-400 mr-2" />
-                          <p className="text-sm font-medium text-violet-600 dark:text-violet-400">District</p>
+                      <div className="p-2 bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/20 rounded-lg border border-violet-200 dark:border-violet-800">
+                        <div className="flex items-center mb-1">
+                          <Activity className="h-3 w-3 text-violet-600 dark:text-violet-400 mr-1" />
+                          <p className="text-xs font-medium text-violet-600 dark:text-violet-400">District</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.district}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.district}</p>
                       </div>
                     )}
                     {devotee.permanentAddress.subDistrict && (
-                      <div className="p-4 bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
-                        <div className="flex items-center mb-2">
-                          <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400 mr-2" />
-                          <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Sub-District</p>
+                      <div className="p-2 bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                        <div className="flex items-center mb-1">
+                          <TrendingUp className="h-3 w-3 text-amber-600 dark:text-amber-400 mr-1" />
+                          <p className="text-xs font-medium text-amber-600 dark:text-amber-400">Sub-District</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.subDistrict}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.subDistrict}</p>
                       </div>
                     )}
                     {devotee.permanentAddress.village && (
-                      <div className="p-4 bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
-                        <div className="flex items-center mb-2">
-                          <Home className="h-4 w-4 text-rose-600 dark:text-rose-400 mr-2" />
-                          <p className="text-sm font-medium text-rose-600 dark:text-rose-400">Village</p>
+                      <div className="p-2 bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
+                        <div className="flex items-center mb-1">
+                          <Home className="h-3 w-3 text-rose-600 dark:text-rose-400 mr-1" />
+                          <p className="text-xs font-medium text-rose-600 dark:text-rose-400">Village</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.village}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.village}</p>
                       </div>
                     )}
                     {devotee.permanentAddress.postalCode && (
-                      <div className="p-4 bg-gradient-to-br from-sky-50 to-blue-100 dark:from-sky-900/20 dark:to-blue-900/20 rounded-xl border border-sky-200 dark:border-sky-800">
-                        <div className="flex items-center mb-2">
-                          <MapPin className="h-4 w-4 text-sky-600 dark:text-sky-400 mr-2" />
-                          <p className="text-sm font-medium text-sky-600 dark:text-sky-400">Postal Code</p>
+                      <div className="p-2 bg-gradient-to-br from-sky-50 to-blue-100 dark:from-sky-900/20 dark:to-blue-900/20 rounded-lg border border-sky-200 dark:border-sky-800">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 text-sky-600 dark:text-sky-400 mr-1" />
+                          <p className="text-xs font-medium text-sky-600 dark:text-sky-400">Postal Code</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.postalCode}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.postalCode}</p>
                       </div>
                     )}
                     {devotee.permanentAddress.landmark && (
-                      <div className="md:col-span-2 lg:col-span-3 p-4 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/20 rounded-xl border border-slate-200 dark:border-slate-800">
-                        <div className="flex items-center mb-2">
-                          <MapPin className="h-4 w-4 text-slate-600 dark:text-slate-400 mr-2" />
-                          <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Landmark</p>
+                      <div className="md:col-span-2 lg:col-span-3 p-2 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/20 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center mb-1">
+                          <MapPin className="h-3 w-3 text-slate-600 dark:text-slate-400 mr-1" />
+                          <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Landmark</p>
                         </div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{devotee.permanentAddress.landmark}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.permanentAddress.landmark}</p>
                       </div>
                     )}
                   </div>
