@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import NamhattaForm from "@/components/forms/NamhattaForm";
 import NamhattaUpdateForm from "@/components/forms/NamhattaUpdateForm";
+import DevoteeForm from "@/components/forms/DevoteeForm";
 import NamhattaUpdateCard from "@/components/NamhattaUpdateCard";
 import { 
   Home, 
@@ -42,6 +43,7 @@ export default function NamhattaDetail() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showEditForm, setShowEditForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [showDevoteeForm, setShowDevoteeForm] = useState(false);
 
   const { data: namhatta, isLoading } = useQuery({
     queryKey: ["/api/namhattas", id],
@@ -377,7 +379,7 @@ export default function NamhattaDetail() {
         <TabsContent value="devotees" className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Devotees</h3>
-            <Button className="gradient-button">
+            <Button className="gradient-button" onClick={() => setShowDevoteeForm(true)}>
               <UserPlus className="mr-2 h-4 w-4" />
               Add Devotee
             </Button>
@@ -395,7 +397,7 @@ export default function NamhattaDetail() {
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No devotees found</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">This Namhatta doesn't have any devotees yet.</p>
-                <Button className="gradient-button">
+                <Button className="gradient-button" onClick={() => setShowDevoteeForm(true)}>
                   <UserPlus className="mr-2 h-4 w-4" />
                   Add First Devotee
                 </Button>
@@ -509,6 +511,18 @@ export default function NamhattaDetail() {
           namhattaId={namhatta.id}
           isOpen={showUpdateForm}
           onClose={() => setShowUpdateForm(false)}
+        />
+      )}
+
+      {/* Devotee Form Modal */}
+      {showDevoteeForm && (
+        <DevoteeForm
+          onClose={() => setShowDevoteeForm(false)}
+          onSuccess={() => {
+            setShowDevoteeForm(false);
+            queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id, "devotees"] });
+          }}
+          namhattaId={parseInt(id!)}
         />
       )}
     </div>
