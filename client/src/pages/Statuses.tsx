@@ -143,7 +143,7 @@ export default function Statuses() {
         </CardHeader>
         <CardContent>
           {statuses && statuses.length > 0 ? (
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               {statuses.map((status, index) => (
                 <StatusCard
                   key={status.id}
@@ -219,7 +219,7 @@ function StatusCard({
   };
 
   return (
-    <div className="flex items-center space-x-3 p-4 rounded-lg glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
+    <div className="flex items-center space-x-2.5 p-3 rounded-lg glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
       {/* Icon */}
       <div className={`w-10 h-10 bg-gradient-to-br ${getGradientClass(index)} rounded-lg flex items-center justify-center flex-shrink-0`}>
         <Award className="h-5 w-5 text-white" />
@@ -248,23 +248,23 @@ function StatusCard({
         </div>
 
         {/* Statistics */}
-        <div className="mt-2 space-y-1.5">
-          <div className="flex items-center justify-between text-sm">
+        <div className="mt-1.5 space-y-1">
+          <div className="flex items-center justify-between text-xs">
             <span className="text-gray-600 dark:text-gray-400">
               {devoteeCount} devotees ({percentage.toFixed(1)}%)
             </span>
             <Badge
               variant="secondary"
-              className={percentage > 20 ? "status-badge-active" : percentage > 10 ? "status-badge-pending" : "status-badge-inactive"}
+              className={`text-xs px-2 py-0.5 ${percentage > 20 ? "status-badge-active" : percentage > 10 ? "status-badge-pending" : "status-badge-inactive"}`}
             >
               {percentage > 20 ? "High" : percentage > 10 ? "Medium" : "Low"} adoption
             </Badge>
           </div>
           
           {/* Progress Bar */}
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div
-              className={`h-2 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
+              className={`h-1.5 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
               style={{ width: `${Math.max(percentage, 2)}%` }}
             />
           </div>
