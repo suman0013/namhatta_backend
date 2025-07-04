@@ -100,6 +100,7 @@ RESTful endpoints organized by resource:
 ## Changelog
 - July 4, 2025: Implemented automatic scroll-to-top functionality when navigating between pages - new pages now open at the top position instead of maintaining previous scroll position
 - July 4, 2025: Removed bottom navigation bar (MobileNav component) from mobile interface - users now access navigation through the mobile menu button in the top-left corner
+- July 4, 2025: Further enhanced dark mode styling for Input and Select components - improved form visibility with darker backgrounds, lighter borders, and white text for better contrast and readability in dark mode
 - July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment and comprehensively fixed all dark mode styling issues - improved form input visibility, pagination button contrast, text readability, Select dropdown styling, and glass effect backgrounds for complete dark mode support across all components
 - July 4, 2025: Removed "Add New Devotee" button from Devotees page - devotees can now only be added from Namhatta page as requested, kept edit functionality for existing devotees
 - July 4, 2025: Made Devotees page more compact by reducing white space - reduced spacing between sections, cards, and filters for better visual density and improved layout
