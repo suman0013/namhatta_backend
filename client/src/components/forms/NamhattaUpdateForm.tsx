@@ -163,7 +163,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
           <div className="space-y-2">
             <Label htmlFor="programType">Program Type</Label>
             <Select onValueChange={(value) => setValue("programType", value)}>
-              <SelectTrigger className="glass">
+              <SelectTrigger>
                 <SelectValue placeholder="Select program type" />
               </SelectTrigger>
               <SelectContent>
@@ -184,7 +184,6 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
               <Input
                 type="date"
                 {...register("date", { required: "Date is required" })}
-                className="glass"
               />
               {errors.date && (
                 <p className="text-sm text-red-500">{errors.date.message}</p>
@@ -202,7 +201,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                     required: "Attendance is required",
                     min: { value: 0, message: "Attendance must be positive" }
                   })}
-                  className="pl-10 glass"
+                  className="pl-10"
                   placeholder="Number of attendees"
                 />
               </div>
@@ -221,7 +220,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 type="number"
                 min="0"
                 {...register("prasadDistribution")}
-                className="pl-10 glass"
+                className="pl-10"
                 placeholder="Number of prasadam distributed"
               />
             </div>
@@ -231,7 +230,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
           <div className="space-y-4">
             <Label className="text-base font-semibold">Program Activities</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center justify-between p-3 rounded-lg glass">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center space-x-2">
                   <Music className="h-4 w-4 text-orange-500" />
                   <span>Nagar Kirtan</span>
@@ -241,7 +240,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg glass">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center space-x-2">
                   <BookOpen className="h-4 w-4 text-blue-500" />
                   <span>Book Distribution</span>
@@ -251,7 +250,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg glass">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center space-x-2">
                   <Music className="h-4 w-4 text-purple-500" />
                   <span>Chanting</span>
@@ -261,7 +260,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg glass">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 <div className="flex items-center space-x-2">
                   <Sparkles className="h-4 w-4 text-yellow-500" />
                   <span>Arati</span>
@@ -271,7 +270,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg glass md:col-span-2">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 md:col-span-2">
                 <div className="flex items-center space-x-2">
                   <BookOpen className="h-4 w-4 text-green-500" />
                   <span>Bhagwat Path</span>
@@ -288,7 +287,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
             <Label htmlFor="specialAttraction">Special Attraction (optional)</Label>
             <Textarea
               {...register("specialAttraction")}
-              className="glass"
+              className=""
               placeholder="Describe any special highlights or attractions..."
               rows={3}
             />
@@ -303,7 +302,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 <Input
                   type="url"
                   {...register("facebookLink")}
-                  className="pl-10 glass"
+                  className="pl-10"
                   placeholder="https://facebook.com/..."
                 />
               </div>
@@ -316,7 +315,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
                 <Input
                   type="url"
                   {...register("youtubeLink")}
-                  className="pl-10 glass"
+                  className="pl-10"
                   placeholder="https://youtube.com/..."
                 />
               </div>

@@ -98,9 +98,17 @@
   }
   
   .dark .glass {
-    background: hsla(240, 10%, 15%, 0.8);
-    border: 1px solid hsla(240, 3.7%, 25%, 0.5);
+    background: hsla(240, 10%, 15%, 0.9);
+    border: 1px solid hsla(240, 3.7%, 40%, 0.8);
     color: hsl(0, 0%, 98%);
+  }
+  
+  .dark .glass::placeholder {
+    color: hsl(240, 5%, 65%);
+  }
+  
+  .dark .glass [data-placeholder] {
+    color: hsl(240, 5%, 65%);
   }
   
   .glass:hover {
@@ -109,8 +117,8 @@
   }
   
   .dark .glass:hover {
-    background: hsla(240, 10%, 20%, 0.9);
-    border-color: hsla(240, 3.7%, 35%, 0.6);
+    background: hsla(240, 10%, 20%, 0.95);
+    border-color: hsla(240, 3.7%, 50%, 0.9);
   }
   
 
