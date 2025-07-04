@@ -147,7 +147,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-card max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Calendar className="mr-2 h-5 w-5 text-indigo-500" />
