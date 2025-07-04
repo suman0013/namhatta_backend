@@ -33,7 +33,7 @@ import {
   Activity
 } from "lucide-react";
 import type { Devotee } from "@/lib/types";
-import DevoteeForm from "../components/forms/DevoteeForm";
+import DevoteeForm from "@/components/forms/DevoteeForm";
 
 export default function DevoteeDetail() {
   const { id } = useParams();
