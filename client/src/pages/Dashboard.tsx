@@ -127,21 +127,15 @@ export default function Dashboard() {
         <StatsCard
           title="Total Devotees"
           value={dashboard?.totalDevotees || 0}
-          change="+12.5%"
-          changeLabel="vs last month"
           icon={Users}
           gradient="from-blue-400 to-blue-600"
-          positive
           onClick={() => setLocation("/devotees")}
         />
         <StatsCard
           title="Total Namhattas"
           value={dashboard?.totalNamhattas || 0}
-          change="+3 new"
-          changeLabel="this month"
           icon={Home}
           gradient="from-emerald-400 to-emerald-600"
-          positive
           onClick={() => setLocation("/namhattas")}
         />
 
@@ -273,8 +267,8 @@ function StatsCard({
 }: {
   title: string;
   value: number;
-  change: string;
-  changeLabel: string;
+  change?: string;
+  changeLabel?: string;
   icon: any;
   gradient: string;
   positive?: boolean;
@@ -296,23 +290,25 @@ function StatsCard({
             <p className="text-3xl font-bold gradient-text mb-4">
               {value.toLocaleString()}
             </p>
-            <div className="flex items-center">
-              <span className={`flex items-center text-sm font-medium px-2 py-1 rounded-full ${
-                positive 
-                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
-                  : urgent 
-                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" 
-                    : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
-              }`}>
-                {positive ? (
-                  <TrendingUp className="mr-1 h-3 w-3" />
-                ) : (
-                  <AlertTriangle className="mr-1 h-3 w-3" />
-                )}
-                {change}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{changeLabel}</span>
-            </div>
+            {change && changeLabel && (
+              <div className="flex items-center">
+                <span className={`flex items-center text-sm font-medium px-2 py-1 rounded-full ${
+                  positive 
+                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
+                    : urgent 
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" 
+                      : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
+                }`}>
+                  {positive ? (
+                    <TrendingUp className="mr-1 h-3 w-3" />
+                  ) : (
+                    <AlertTriangle className="mr-1 h-3 w-3" />
+                  )}
+                  {change}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{changeLabel}</span>
+              </div>
+            )}
           </div>
           <div className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 relative overflow-hidden`}>
             {/* Icon background glow */}
