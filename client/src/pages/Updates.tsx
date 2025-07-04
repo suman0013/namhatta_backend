@@ -100,47 +100,53 @@ export default function Updates() {
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card h-32 rounded-lg border flex items-center p-6">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex flex-col justify-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Updates</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {allUpdates?.length || 0}
-              </p>
+        <Card className="glass-card">
+          <CardContent className="p-6 h-32 flex items-center">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col justify-center">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Total Updates</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {allUpdates?.length || 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Calendar className="h-6 w-6 text-white" />
+              </div>
             </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Calendar className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-card h-32 rounded-lg border flex items-center p-6">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex flex-col justify-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Attendance</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {allUpdates?.reduce((sum: number, update: any) => sum + update.attendance, 0) || 0}
-              </p>
+        <Card className="glass-card">
+          <CardContent className="p-6 h-32 flex items-center">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col justify-center">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Total Attendance</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {allUpdates?.reduce((sum: number, update: any) => sum + update.attendance, 0) || 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Users className="h-6 w-6 text-white" />
+              </div>
             </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Users className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-card h-32 rounded-lg border flex items-center p-6">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex flex-col justify-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Namhattas</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {namhattas?.data?.length || 0}
-              </p>
+        <Card className="glass-card">
+          <CardContent className="p-6 h-32 flex items-center">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex flex-col justify-center">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Active Namhattas</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                  {namhattas?.data?.length || 0}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                <Home className="h-6 w-6 text-white" />
+              </div>
             </div>
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Home className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters and Search */}
