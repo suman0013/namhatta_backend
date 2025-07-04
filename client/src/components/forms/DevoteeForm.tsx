@@ -571,124 +571,79 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                 <div>
                   <Label htmlFor="presentCountry">Country *</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.country || ""}
                     onValueChange={(value) => {
                       handlePresentAddressChange("country", value);
                       clearErrors("presentAddress.country");
                     }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries?.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={countries || []}
+                    placeholder="Select or type country"
+                  />
                   {showValidation && !presentAddress.country && (
                     <p className="text-sm text-red-500 mt-1">Country is required</p>
                   )}
                 </div>
                 <div>
                   <Label htmlFor="presentState">State *</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.state || ""}
                     onValueChange={(value) => {
                       handlePresentAddressChange("state", value);
                       clearErrors("presentAddress.state");
                     }}
+                    options={presentStates || []}
+                    placeholder="Select or type state"
                     disabled={!presentAddress.country}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentStates?.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   {showValidation && !presentAddress.state && (
                     <p className="text-sm text-red-500 mt-1">State is required</p>
                   )}
                 </div>
                 <div>
                   <Label htmlFor="presentDistrict">District *</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.district || ""}
                     onValueChange={(value) => {
                       handlePresentAddressChange("district", value);
                       clearErrors("presentAddress.district");
                     }}
+                    options={presentDistricts || []}
+                    placeholder="Select or type district"
                     disabled={!presentAddress.state}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentDistricts?.map((district) => (
-                        <SelectItem key={district} value={district}>
-                          {district}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   {showValidation && !presentAddress.district && (
                     <p className="text-sm text-red-500 mt-1">District is required</p>
                   )}
                 </div>
                 <div>
                   <Label htmlFor="presentSubDistrict">Sub-District *</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.subDistrict || ""}
                     onValueChange={(value) => {
                       handlePresentAddressChange("subDistrict", value);
                       clearErrors("presentAddress.subDistrict");
                     }}
+                    options={presentSubDistricts || []}
+                    placeholder="Select or type sub-district"
                     disabled={!presentAddress.district}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select sub-district" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentSubDistricts?.map((subDistrict) => (
-                        <SelectItem key={subDistrict} value={subDistrict}>
-                          {subDistrict}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   {showValidation && !presentAddress.subDistrict && (
                     <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
                   )}
                 </div>
                 <div>
                   <Label htmlFor="presentVillage">Village *</Label>
-                  <Select
+                  <SearchableSelect
                     value={presentAddress.village || ""}
                     onValueChange={(value) => {
                       handlePresentAddressChange("village", value);
                       clearErrors("presentAddress.village");
                     }}
+                    options={presentVillages || []}
+                    placeholder="Select or type village"
                     disabled={!presentAddress.subDistrict}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select village" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {presentVillages?.map((village) => (
-                        <SelectItem key={village} value={village}>
-                          {village}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
                   {showValidation && !presentAddress.village && (
                     <p className="text-sm text-red-500 mt-1">Village is required</p>
                   )}
@@ -744,124 +699,79 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                   <div>
                     <Label htmlFor="permanentCountry">Country *</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.country || ""}
                       onValueChange={(value) => {
                         handlePermanentAddressChange("country", value);
                         clearErrors("permanentAddress.country");
                       }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries?.map((country) => (
-                          <SelectItem key={country} value={country}>
-                            {country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      options={countries || []}
+                      placeholder="Select or type country"
+                    />
                     {showValidation && !sameAsPresentAddress && !permanentAddress.country && (
                       <p className="text-sm text-red-500 mt-1">Country is required</p>
                     )}
                   </div>
                   <div>
                     <Label htmlFor="permanentState">State *</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.state || ""}
                       onValueChange={(value) => {
                         handlePermanentAddressChange("state", value);
                         clearErrors("permanentAddress.state");
                       }}
+                      options={permanentStates || []}
+                      placeholder="Select or type state"
                       disabled={!permanentAddress.country}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentStates?.map((state) => (
-                          <SelectItem key={state} value={state}>
-                            {state}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                     {showValidation && !sameAsPresentAddress && !permanentAddress.state && (
                       <p className="text-sm text-red-500 mt-1">State is required</p>
                     )}
                   </div>
                   <div>
                     <Label htmlFor="permanentDistrict">District *</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.district || ""}
                       onValueChange={(value) => {
                         handlePermanentAddressChange("district", value);
                         clearErrors("permanentAddress.district");
                       }}
+                      options={permanentDistricts || []}
+                      placeholder="Select or type district"
                       disabled={!permanentAddress.state}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select district" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentDistricts?.map((district) => (
-                          <SelectItem key={district} value={district}>
-                            {district}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                     {showValidation && !sameAsPresentAddress && !permanentAddress.district && (
                       <p className="text-sm text-red-500 mt-1">District is required</p>
                     )}
                   </div>
                   <div>
                     <Label htmlFor="permanentSubDistrict">Sub-District *</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.subDistrict || ""}
                       onValueChange={(value) => {
                         handlePermanentAddressChange("subDistrict", value);
                         clearErrors("permanentAddress.subDistrict");
                       }}
+                      options={permanentSubDistricts || []}
+                      placeholder="Select or type sub-district"
                       disabled={!permanentAddress.district}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select sub-district" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentSubDistricts?.map((subDistrict) => (
-                          <SelectItem key={subDistrict} value={subDistrict}>
-                            {subDistrict}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                     {showValidation && !sameAsPresentAddress && !permanentAddress.subDistrict && (
                       <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
                     )}
                   </div>
                   <div>
                     <Label htmlFor="permanentVillage">Village *</Label>
-                    <Select
+                    <SearchableSelect
                       value={permanentAddress.village || ""}
                       onValueChange={(value) => {
                         handlePermanentAddressChange("village", value);
                         clearErrors("permanentAddress.village");
                       }}
+                      options={permanentVillages || []}
+                      placeholder="Select or type village"
                       disabled={!permanentAddress.subDistrict}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select village" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {permanentVillages?.map((village) => (
-                          <SelectItem key={village} value={village}>
-                            {village}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
                     {showValidation && !sameAsPresentAddress && !permanentAddress.village && (
                       <p className="text-sm text-red-500 mt-1">Village is required</p>
                     )}
