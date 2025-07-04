@@ -103,7 +103,7 @@ export default function Devotees() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Devotees Management</h1>
@@ -114,7 +114,7 @@ export default function Devotees() {
 
       {/* Search and Filters */}
       <Card className="glass-card relative z-40">
-        <CardContent className="p-4 space-y-3">
+        <CardContent className="p-3 space-y-2">
           {/* Search Bar */}
           <SearchInput
             value={searchTerm}
