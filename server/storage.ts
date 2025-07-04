@@ -13,7 +13,7 @@ import {
   InsertLeader,
   StatusHistory
 } from "@shared/schema";
-import { loadGeographicData, getCountries, getStates, getDistricts, getSubDistricts, getVillages, getPincodes } from './geographic-data.js';
+import { loadGeographicData, getCountries, getStates, getDistricts, getSubDistricts, getVillages, getPincodes as getGeographicPincodes } from './geographic-data.js';
 
 export interface IStorage {
   // Devotees
@@ -970,7 +970,7 @@ export class MemStorage implements IStorage {
   }
 
   async getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]> {
-    return getPincodes(village, district, subDistrict);
+    return getGeographicPincodes(village, district, subDistrict);
   }
 
   async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
