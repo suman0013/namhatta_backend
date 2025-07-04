@@ -169,7 +169,7 @@ export default function DevoteeDetail() {
           <TabsTrigger value="status">Status Management</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-2">
+        <TabsContent value="profile" className="space-y-1">
             {/* Basic Information */}
             <Card className="glass-card">
               <CardHeader className="pb-2">
