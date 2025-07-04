@@ -219,17 +219,17 @@ function StatusCard({
   };
 
   return (
-    <div className="flex items-center space-x-2.5 p-3 rounded-lg glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
+    <div className="flex items-center space-x-2 p-2.5 rounded-lg glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
       {/* Icon */}
-      <div className={`w-10 h-10 bg-gradient-to-br ${getGradientClass(index)} rounded-lg flex items-center justify-center flex-shrink-0`}>
-        <Award className="h-5 w-5 text-white" />
+      <div className={`w-8 h-8 bg-gradient-to-br ${getGradientClass(index)} rounded-lg flex items-center justify-center flex-shrink-0`}>
+        <Award className="h-4 w-4 text-white" />
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white text-base">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
               {status.name}
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -248,25 +248,18 @@ function StatusCard({
         </div>
 
         {/* Statistics */}
-        <div className="mt-1.5 space-y-1">
+        <div className="mt-1">
           <div className="flex items-center justify-between text-xs">
             <span className="text-gray-600 dark:text-gray-400">
               {devoteeCount} devotees ({percentage.toFixed(1)}%)
             </span>
-            <Badge
-              variant="secondary"
-              className={`text-xs px-2 py-0.5 ${percentage > 20 ? "status-badge-active" : percentage > 10 ? "status-badge-pending" : "status-badge-inactive"}`}
-            >
-              {percentage > 20 ? "High" : percentage > 10 ? "Medium" : "Low"} adoption
-            </Badge>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-            <div
-              className={`h-1.5 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
-              style={{ width: `${Math.max(percentage, 2)}%` }}
-            />
+            {/* Progress Bar on same line */}
+            <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 ml-2">
+              <div
+                className={`h-1.5 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
+                style={{ width: `${Math.max(percentage, 2)}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
