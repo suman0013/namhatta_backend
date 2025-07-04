@@ -61,6 +61,24 @@ export default function UpdateDetailModal({
     update[activity.key as keyof NamhattaUpdate] === true
   );
 
+  // Determine event status based on date
+  const getEventStatus = () => {
+    const eventDate = new Date(update.date);
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const eventStart = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+
+    if (eventStart < todayStart) {
+      return { label: "Past Event", variant: "secondary" as const, className: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" };
+    } else if (eventStart.getTime() === todayStart.getTime()) {
+      return { label: "Today", variant: "default" as const, className: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" };
+    } else {
+      return { label: "Future Event", variant: "outline" as const, className: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" };
+    }
+  };
+
+  const eventStatus = getEventStatus();
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -80,8 +98,8 @@ export default function UpdateDetailModal({
                 </div>
               )}
             </div>
-            <Badge variant="secondary" className="status-badge-active">
-              Active
+            <Badge variant={eventStatus.variant} className={eventStatus.className}>
+              {eventStatus.label}
             </Badge>
           </div>
         </DialogHeader>

@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Implemented dynamic event status badges in update cards - now shows "Past Event", "Today", or "Future Event" instead of generic "Active" status based on event date
 - July 4, 2025: Fixed update cards content overflow - changed to minimum height instead of fixed height to prevent content cutoff at bottom
 - July 4, 2025: Fixed Special Attraction text truncation in update cards - removed line clamp to show full text content
 - July 4, 2025: Fixed update cards in Updates page - made them clickable to navigate to respective Namhatta detail pages for better user experience
