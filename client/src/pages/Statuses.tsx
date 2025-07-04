@@ -225,43 +225,34 @@ function StatusCard({
         <Award className="h-4 w-4 text-white" />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-              {status.name}
-            </h3>
-            <p className="text-xs text-gray-600 dark:text-gray-400">
-              Created {new Date(status.createdAt).toLocaleDateString()}
-            </p>
+      {/* Content - Single Line Layout */}
+      <div className="flex-1 min-w-0 flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+            {status.name}
+          </h3>
+          <span className="text-xs text-gray-600 dark:text-gray-400">
+            {devoteeCount} devotees ({percentage.toFixed(1)}%)
+          </span>
+          {/* Progress Bar */}
+          <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+            <div
+              className={`h-1.5 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
+              style={{ width: `${Math.max(percentage, 2)}%` }}
+            />
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onEdit}
-            className="glass text-xs px-2 py-1"
-          >
-            <Edit className="h-3 w-3 mr-1" />
-            Rename
-          </Button>
         </div>
 
-        {/* Statistics */}
-        <div className="mt-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-600 dark:text-gray-400">
-              {devoteeCount} devotees ({percentage.toFixed(1)}%)
-            </span>
-            {/* Progress Bar on same line */}
-            <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 ml-2">
-              <div
-                className={`h-1.5 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
-                style={{ width: `${Math.max(percentage, 2)}%` }}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Rename Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onEdit}
+          className="glass text-xs px-2 py-1 flex-shrink-0"
+        >
+          <Edit className="h-3 w-3 mr-1" />
+          Rename
+        </Button>
       </div>
     </div>
   );
