@@ -54,13 +54,13 @@
   --popover-foreground: hsl(0, 0%, 98%);
   --card: hsl(240, 10%, 3.9%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
+  --border: hsl(240, 5%, 35%);
+  --input: hsl(240, 5%, 25%);
   --primary: hsl(239, 84%, 67%);
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(240, 3.7%, 15.9%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
+  --accent: hsl(240, 5%, 30%);
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
@@ -111,6 +111,39 @@
   .dark .glass:hover {
     background: hsla(240, 10%, 20%, 0.9);
     border-color: hsla(240, 3.7%, 35%, 0.6);
+  }
+  
+  /* Improve form inputs in dark mode */
+  .dark input, .dark select, .dark textarea {
+    background: hsl(240, 5%, 25%) !important;
+    border-color: hsl(240, 5%, 35%) !important;
+    color: hsl(0, 0%, 98%) !important;
+  }
+  
+  .dark input:focus, .dark select:focus, .dark textarea:focus {
+    background: hsl(240, 5%, 30%) !important;
+    border-color: hsl(239, 84%, 67%) !important;
+  }
+  
+  .dark input::placeholder, .dark select::placeholder, .dark textarea::placeholder {
+    color: hsl(240, 5%, 65%) !important;
+  }
+  
+  /* Specific Radix Select styling for dark mode */
+  .dark [data-radix-select-trigger] {
+    background: hsl(240, 5%, 25%) !important;
+    border-color: hsl(240, 5%, 35%) !important;
+    color: hsl(0, 0%, 98%) !important;
+  }
+  
+  .dark [data-radix-select-trigger]:focus {
+    background: hsl(240, 5%, 30%) !important;
+    border-color: hsl(239, 84%, 67%) !important;
+  }
+  
+  .dark [data-radix-select-content] {
+    background: hsl(240, 10%, 15%) !important;
+    border-color: hsl(240, 5%, 35%) !important;
   }
   
   .glass-card {
