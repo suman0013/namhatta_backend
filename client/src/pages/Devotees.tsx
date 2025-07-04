@@ -15,7 +15,6 @@ import { AdvancedPagination } from "@/components/ui/advanced-pagination";
 import { 
   Users, 
   Search, 
-  Plus, 
   MapPin, 
   Phone, 
   Mail, 
@@ -33,7 +32,7 @@ export default function Devotees() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showForm, setShowForm] = useState(false);
+
   const [editingDevotee, setEditingDevotee] = useState<Devotee | undefined>();
   const [filters, setFilters] = useState({
     country: "",
@@ -106,17 +105,11 @@ export default function Devotees() {
   return (
     <div className="space-y-3">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Devotees Management</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage devotee profiles and spiritual progress
-          </p>
-        </div>
-        <Button className="gradient-button" onClick={() => setShowForm(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Devotee
-        </Button>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Devotees Management</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
+          Manage devotee profiles and spiritual progress
+        </p>
       </div>
 
       {/* Search and Filters */}
@@ -248,16 +241,12 @@ export default function Devotees() {
           <CardContent className="p-12 text-center">
             <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No devotees found</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-gray-600 dark:text-gray-400">
               {searchTerm || Object.values(filters).some(Boolean)
                 ? "Try adjusting your search criteria or filters."
-                : "Start by adding your first devotee to the system."
+                : "Devotees can be added from the Namhatta page."
               }
             </p>
-            <Button className="gradient-button" onClick={() => setShowForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add First Devotee
-            </Button>
           </CardContent>
         </Card>
       )}
@@ -279,16 +268,14 @@ export default function Devotees() {
         />
       )}
 
-      {/* Form Modal */}
-      {(showForm || editingDevotee) && (
+      {/* Edit Form Modal */}
+      {editingDevotee && (
         <DevoteeForm
           devotee={editingDevotee}
           onClose={() => {
-            setShowForm(false);
             setEditingDevotee(undefined);
           }}
           onSuccess={() => {
-            setShowForm(false);
             setEditingDevotee(undefined);
           }}
         />

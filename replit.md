@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Removed "Add New Devotee" button from Devotees page - devotees can now only be added from Namhatta page as requested, kept edit functionality for existing devotees
 - July 4, 2025: Made Devotees page more compact by reducing white space - reduced spacing between sections, cards, and filters for better visual density and improved layout
 - July 4, 2025: Made Namhattas page more compact by reducing white space - reduced spacing between sections, cards, and filters for better visual density and improved layout
 - July 4, 2025: Made devotee detail page sections more compact by reducing spacing between cards for better visual density and improved layout
