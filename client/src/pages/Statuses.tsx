@@ -34,7 +34,7 @@ export default function Statuses() {
 
   const getDevoteeCount = (statusId: number) => {
     if (!devotees?.data) return 0;
-    return devotees.data.filter(devotee => devotee.statusId === statusId).length;
+    return devotees.data.filter(devotee => devotee.devotionalStatusId === statusId).length;
   };
 
   const getTotalDevotees = () => {
@@ -220,10 +220,17 @@ function StatusCard({
 
   return (
     <div className="space-y-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
-      {/* Top row: Rename icon + Status name + Count */}
+      {/* Top row: Status name + Count + Rename icon */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          {/* Rename Icon on the left */}
+          {/* Status name */}
+          <h3 className="font-medium text-gray-900 dark:text-white text-sm">
+            {status.name}
+          </h3>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          {/* Rename Icon on the right */}
           <Button
             variant="ghost"
             size="sm"
@@ -233,11 +240,6 @@ function StatusCard({
             <Edit className="h-3 w-3" />
             <span className="sr-only">Rename</span>
           </Button>
-          
-          {/* Status name */}
-          <h3 className="font-medium text-gray-900 dark:text-white text-sm">
-            {status.name}
-          </h3>
         </div>
 
         {/* Count and percentage */}

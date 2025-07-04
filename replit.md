@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment and moved edit icons to right side in status management interface for better UI alignment as requested
 - July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment - fixed API connection issues by configuring relative URLs for development mode (both frontend and backend served from same Express server on port 5000), resolved TypeScript errors in Dashboard component, and verified all API endpoints working correctly including dashboard, hierarchy, namhattas, devotees, and geographic data
 - July 4, 2025: Successfully implemented dynamic API configuration system with environment variables - added VITE_API_BASE_URL configuration, created client/src/lib/api-config.ts for dynamic base URL switching, updated queryClient.ts to use configurable endpoints, added comprehensive API_CONFIGURATION.md guide, and implemented debug logging for API configuration. Frontend can now easily switch between Node.js development backend and Java Spring Boot production backend by changing environment variables
 - July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment - fixed getPincodes function import conflict in storage-fresh.ts, added missing function implementation, restored all searchable dropdown functionality across address fields, verified server startup and API functionality
