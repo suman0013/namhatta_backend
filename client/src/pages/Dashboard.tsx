@@ -67,7 +67,7 @@ export default function Dashboard() {
               {hierarchy?.founder?.map((founder) => (
                 <div key={founder.id} className="flex items-center space-x-3 p-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
-                    <Crown className="h-5 w-5 text-white" />
+                    <Crown className="h-5 w-5 text-white float-animation" />
                   </div>
                   <div>
                     <h3 className="font-medium text-sm text-gray-900 dark:text-white">{founder.name}</h3>
@@ -80,7 +80,7 @@ export default function Dashboard() {
               {hierarchy?.gbc?.map((leader) => (
                 <div key={leader.id} className="flex items-center space-x-3 p-2 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200/50 dark:border-purple-700/50">
                   <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                    <Crown className="h-5 w-5 text-white" />
+                    <Crown className="h-5 w-5 text-white float-animation" />
                   </div>
                   <div>
                     <h3 className="font-medium text-sm text-gray-900 dark:text-white">{leader.name}</h3>

@@ -522,7 +522,7 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses?: any[]
   return (
     <div className="h-[280px]">
       <Link href={`/devotees/${devotee.id}`}>
-        <Card className="glass-card hover-lift group h-full cursor-pointer">
+        <Card className="glass-card card-hover-effect group h-full cursor-pointer">
           <CardContent className="p-6 h-full flex flex-col">
             {/* Header */}
             <div className="flex items-center space-x-3 mb-4">
