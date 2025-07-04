@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import NotFound from "@/pages/not-found";
 import AppLayout from "@/components/layout/AppLayout";
+import ScrollToTop from "@/components/ScrollToTop";
 import Dashboard from "@/pages/Dashboard";
 import Namhattas from "@/pages/Namhattas";
 import NamhattaDetail from "@/pages/NamhattaDetail";
@@ -24,6 +25,7 @@ import More from "@/pages/More";
 function Router() {
   return (
     <AppLayout>
+      <ScrollToTop />
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/dashboard" component={Dashboard} />
