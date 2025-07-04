@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Enhanced Analytics tab in Namhatta detail view with colored progress bars and percentages matching Dashboard's status distribution format
 - July 4, 2025: Added Briefcase icon before occupation field in devotee cards for better visual identification
 - July 4, 2025: Updated devotee cards in Namhatta detail view to match main devotee list format with consistent styling, status badges, and layout
 - July 4, 2025: Added icons before legal name (User icon) and initiated name (Crown icon) in devotee cards for better visual identification

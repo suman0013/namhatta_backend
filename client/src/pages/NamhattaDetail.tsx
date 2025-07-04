@@ -435,22 +435,41 @@ export default function NamhattaDetail() {
               <CardHeader>
                 <CardTitle>Devotional Status Distribution</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <div className="space-y-4">
-                  {Object.entries(statusCounts).map(([status, count]) => (
-                    <div key={status} className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 dark:text-white">{status}</span>
-                      <div className="flex items-center space-x-3">
-                        <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  {Object.entries(statusCounts).map(([status, count], index) => {
+                    const totalDevotees = devotees?.total || 1;
+                    const percentage = Math.round((Number(count) / totalDevotees) * 100);
+                    
+                    // Define colors for different statuses
+                    const colors = [
+                      "from-blue-400 to-blue-600",
+                      "from-emerald-400 to-emerald-600", 
+                      "from-purple-400 to-purple-600",
+                      "from-orange-400 to-orange-600",
+                      "from-pink-400 to-pink-600",
+                      "from-indigo-400 to-indigo-600",
+                      "from-cyan-400 to-cyan-600"
+                    ];
+                    const colorClass = colors[index % colors.length];
+                    
+                    return (
+                      <div key={status} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-900 dark:text-white">{status}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {count} ({percentage}%)
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                           <div 
-                            className="h-2 bg-gradient-to-r from-indigo-400 to-purple-600 rounded-full"
-                            style={{ width: `${(count / (devotees?.total || 1)) * 100}%` }}
+                            className={`h-2 bg-gradient-to-r ${colorClass} rounded-full transition-all duration-300`}
+                            style={{ width: `${percentage}%` }}
                           />
                         </div>
-                        <span className="text-sm text-gray-600 dark:text-gray-400 w-8 text-right">{count}</span>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
