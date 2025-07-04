@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Fixed logo text blinking by replacing animated gradient-text class with static gradient - "Namhatta" text now displays stable gradient colors without animation
 - July 4, 2025: Enhanced scrollbar styling with custom CSS - made scrollbars thinner, more subtle, and properly styled for both light and dark themes with smooth hover effects
 - July 4, 2025: Fixed dialog blinking issue by removing glass-card class from NamhattaUpdateForm - dialogs now display properly without visual overlapping or blinking effects
 - July 4, 2025: Fixed excessive background animation blinking by removing animate-pulse effects from floating orbs in AppLayout - background elements now remain static for better user experience

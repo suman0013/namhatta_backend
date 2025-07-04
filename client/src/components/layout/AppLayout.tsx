@@ -59,7 +59,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   <span className="text-white text-sm lg:text-lg font-bold relative z-10 drop-shadow-sm">ॐ</span>
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-base lg:text-xl font-bold gradient-text hover:scale-105 transition-transform duration-300">Namhatta</h1>
+                  <h1 className="text-base lg:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">Namhatta</h1>
                   <p className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">Management System</p>
                 </div>
               </div>
