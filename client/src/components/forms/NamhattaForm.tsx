@@ -85,6 +85,12 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     enabled: !!address.district,
   });
 
+  const { data: pincodes } = useQuery({
+    queryKey: ["/api/pincodes", address.village, address.district, address.subDistrict],
+    queryFn: () => api.getPincodes(address.village, address.district, address.subDistrict),
+    enabled: !!address.subDistrict,
+  });
+
   // Mutations
   const createMutation = useMutation({
     mutationFn: (data: Partial<Namhatta>) => api.createNamhatta(data),
@@ -328,10 +334,12 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                 </div>
                 <div>
                   <Label htmlFor="postalCode">ZIP Code</Label>
-                  <Input
+                  <SearchableSelect
                     value={address.postalCode || ""}
-                    onChange={(e) => handleAddressChange("postalCode", e.target.value)}
-                    placeholder="Enter ZIP code"
+                    onValueChange={(value) => handleAddressChange("postalCode", value)}
+                    options={pincodes || []}
+                    placeholder="Select or type ZIP code"
+                    disabled={!address.subDistrict}
                   />
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">

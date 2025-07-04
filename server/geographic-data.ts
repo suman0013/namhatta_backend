@@ -20,7 +20,7 @@ export async function loadGeographicData(): Promise<void> {
   if (isDataLoaded) return;
 
   try {
-    const csvPath = path.join(process.cwd(), 'attached_assets', 'f17a1608-5f10-4610-bb50-a63c80d83974_5440046a63c72fe90e3dc31777d48358_1751270269902.csv');
+    const csvPath = path.join(process.cwd(), 'geographic_data_with_pincode.csv');
     const csvContent = fs.readFileSync(csvPath, 'utf-8');
     const lines = csvContent.split('\n');
     
@@ -162,6 +162,27 @@ export function getVillages(subDistrict: string): string[] {
   }
   
   return Array.from(villages).sort();
+}
+
+export function getPincodes(village?: string, district?: string, subDistrict?: string): string[] {
+  const pincodes = new Set<string>();
+  
+  if (isDataLoaded) {
+    geographicData
+      .filter(record => {
+        if (village) return record.villageNameEnglish === village;
+        if (subDistrict) return record.subdistrictNameEnglish === subDistrict;
+        if (district) return record.districtNameEnglish === district;
+        return true;
+      })
+      .forEach(record => {
+        if (record.pincode && record.pincode.trim()) {
+          pincodes.add(record.pincode.trim());
+        }
+      });
+  }
+  
+  return Array.from(pincodes).sort();
 }
 
 export function getGeographicCounts() {

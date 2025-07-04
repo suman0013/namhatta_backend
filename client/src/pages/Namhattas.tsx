@@ -28,6 +28,7 @@ export default function Namhattas() {
     district: "",
     subDistrict: "",
     village: "",
+    postalCode: "",
     status: "",
   });
   const [sortBy, setSortBy] = useState("name");
@@ -77,15 +78,22 @@ export default function Namhattas() {
     enabled: !!filters.subDistrict,
   });
 
+  const { data: pincodes } = useQuery({
+    queryKey: ["/api/pincodes", filters.village, filters.district, filters.subDistrict],
+    queryFn: () => api.getPincodes(filters.village, filters.district, filters.subDistrict),
+    enabled: !!filters.subDistrict,
+  });
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({
       ...prev,
       [key]: value,
       // Reset dependent filters
-      ...(key === "country" && { state: "", district: "", subDistrict: "", village: "" }),
-      ...(key === "state" && { district: "", subDistrict: "", village: "" }),
-      ...(key === "district" && { subDistrict: "", village: "" }),
-      ...(key === "subDistrict" && { village: "" }),
+      ...(key === "country" && { state: "", district: "", subDistrict: "", village: "", postalCode: "" }),
+      ...(key === "state" && { district: "", subDistrict: "", village: "", postalCode: "" }),
+      ...(key === "district" && { subDistrict: "", village: "", postalCode: "" }),
+      ...(key === "subDistrict" && { village: "", postalCode: "" }),
+      ...(key === "village" && { postalCode: "" }),
     }));
     setPage(1);
   };
@@ -123,7 +131,7 @@ export default function Namhattas() {
           />
 
           {/* Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
             <SearchableSelect
               value={filters.country || "All Countries"}
               onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
@@ -169,6 +177,15 @@ export default function Namhattas() {
             />
 
             <SearchableSelect
+              value={filters.postalCode || "All Postal Codes"}
+              onValueChange={(value) => handleFilterChange("postalCode", value === "All Postal Codes" ? "" : value)}
+              options={["All Postal Codes", ...(pincodes || [])]}
+              placeholder="All Postal Codes"
+              disabled={!filters.subDistrict}
+              className="glass border-0"
+            />
+
+            <SearchableSelect
               value={filters.status || "All Statuses"}
               onValueChange={(value) => handleFilterChange("status", value === "All Statuses" ? "" : value)}
               options={["All Statuses", "APPROVED", "PENDING_APPROVAL"]}
@@ -183,7 +200,7 @@ export default function Namhattas() {
             searchTerm={searchTerm}
             onRemoveFilter={(key) => handleFilterChange(key, "")}
             onClearAll={() => {
-              setFilters({ country: "", state: "", district: "", subDistrict: "", village: "", status: "" });
+              setFilters({ country: "", state: "", district: "", subDistrict: "", village: "", postalCode: "", status: "" });
               setSearchTerm("");
               setPage(1);
             }}

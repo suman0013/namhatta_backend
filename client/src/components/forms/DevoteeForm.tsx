@@ -127,6 +127,12 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     enabled: !!presentAddress.subDistrict,
   });
 
+  const { data: presentPincodes } = useQuery({
+    queryKey: ["/api/pincodes", presentAddress.village, presentAddress.district, presentAddress.subDistrict],
+    queryFn: () => api.getPincodes(presentAddress.village, presentAddress.district, presentAddress.subDistrict),
+    enabled: !!presentAddress.subDistrict,
+  });
+
   // Geography queries for permanent address
   const { data: permanentStates } = useQuery({
     queryKey: ["/api/states", permanentAddress.country],
@@ -149,6 +155,12 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const { data: permanentVillages } = useQuery({
     queryKey: ["/api/villages", permanentAddress.subDistrict],
     queryFn: () => api.getVillages(permanentAddress.subDistrict!),
+    enabled: !!permanentAddress.subDistrict && !sameAsPresentAddress,
+  });
+
+  const { data: permanentPincodes } = useQuery({
+    queryKey: ["/api/pincodes", permanentAddress.village, permanentAddress.district, permanentAddress.subDistrict],
+    queryFn: () => api.getPincodes(permanentAddress.village, permanentAddress.district, permanentAddress.subDistrict),
     enabled: !!permanentAddress.subDistrict && !sameAsPresentAddress,
   });
 
@@ -650,13 +662,15 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 </div>
                 <div>
                   <Label htmlFor="presentPostalCode">Postal Code *</Label>
-                  <Input
+                  <SearchableSelect
                     value={presentAddress.postalCode || ""}
-                    onChange={(e) => {
-                      handlePresentAddressChange("postalCode", e.target.value);
+                    onValueChange={(value) => {
+                      handlePresentAddressChange("postalCode", value);
                       clearErrors("presentAddress.postalCode");
                     }}
-                    placeholder="Enter postal code"
+                    options={presentPincodes || []}
+                    placeholder="Select or type postal code"
+                    disabled={!presentAddress.subDistrict}
                   />
                   {showValidation && !presentAddress.postalCode && (
                     <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
@@ -778,13 +792,15 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                   </div>
                   <div>
                     <Label htmlFor="permanentPostalCode">Postal Code *</Label>
-                    <Input
+                    <SearchableSelect
                       value={permanentAddress.postalCode || ""}
-                      onChange={(e) => {
-                        handlePermanentAddressChange("postalCode", e.target.value);
+                      onValueChange={(value) => {
+                        handlePermanentAddressChange("postalCode", value);
                         clearErrors("permanentAddress.postalCode");
                       }}
-                      placeholder="Enter postal code"
+                      options={permanentPincodes || []}
+                      placeholder="Select or type postal code"
+                      disabled={!permanentAddress.subDistrict}
                     />
                     {showValidation && !sameAsPresentAddress && !permanentAddress.postalCode && (
                       <p className="text-sm text-red-500 mt-1">Postal Code is required</p>

@@ -54,6 +54,18 @@ export const api = {
     return res.json();
   },
 
+  getPincodes: async (village?: string, district?: string, subDistrict?: string): Promise<string[]> => {
+    let url = "/api/pincodes";
+    const params = new URLSearchParams();
+    if (village) params.append("village", village);
+    if (district) params.append("district", district);
+    if (subDistrict) params.append("subDistrict", subDistrict);
+    if (params.toString()) url += `?${params.toString()}`;
+    
+    const res = await apiRequest("GET", url);
+    return res.json();
+  },
+
   // Devotees
   getDevotees: async (page = 1, size = 10): Promise<PaginatedResponse<Devotee>> => {
     const res = await apiRequest("GET", `/api/devotees?page=${page}&size=${size}`);

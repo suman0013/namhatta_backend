@@ -60,6 +60,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(villages);
   });
 
+  app.get("/api/pincodes", async (req, res) => {
+    const { village, district, subDistrict } = req.query;
+    const pincodes = await storage.getPincodes(village as string, district as string, subDistrict as string);
+    res.json(pincodes);
+  });
+
   // Map data endpoints
   app.get("/api/map/countries", async (req, res) => {
     const data = await storage.getNamhattaCountsByCountry();
