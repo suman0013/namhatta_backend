@@ -168,71 +168,71 @@ export default function DevoteeDetail() {
           <TabsTrigger value="status">Status Management</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-3">
+        <TabsContent value="profile" className="space-y-2">
             {/* Basic Information */}
             <Card className="glass-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                    <User className="h-4 w-4 text-white" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-2">
+                    <User className="h-3 w-3 text-white" />
                   </div>
                   Basic Information
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center mb-2">
-                      <User className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Legal Name</p>
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center mb-1">
+                      <User className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                      <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Legal Name</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{devotee.legalName}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.legalName}</p>
                   </div>
                   {devotee.dob && (
-                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                      <div className="flex items-center mb-2">
-                        <Calendar className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
-                        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Date of Birth</p>
+                    <div className="p-2 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                      <div className="flex items-center mb-1">
+                        <Calendar className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Date of Birth</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">
                         {new Date(devotee.dob).toLocaleDateString()}
                       </p>
                     </div>
                   )}
                   {devotee.email && (
-                    <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                      <div className="flex items-center mb-2">
-                        <Mail className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Email</p>
+                    <div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center mb-1">
+                        <Mail className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                        <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Email</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.email}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.email}</p>
                     </div>
                   )}
                   {devotee.phone && (
-                    <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                      <div className="flex items-center mb-2">
-                        <Phone className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
-                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Phone</p>
+                    <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center mb-1">
+                        <Phone className="h-3 w-3 text-orange-600 dark:text-orange-400 mr-1" />
+                        <p className="text-xs font-medium text-orange-600 dark:text-orange-400">Phone</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.phone}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.phone}</p>
                     </div>
                   )}
                   {devotee.gender && (
-                    <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl border border-pink-200 dark:border-pink-800">
-                      <div className="flex items-center mb-2">
-                        <Users className="h-4 w-4 text-pink-600 dark:text-pink-400 mr-2" />
-                        <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Gender</p>
+                    <div className="p-2 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                      <div className="flex items-center mb-1">
+                        <Users className="h-3 w-3 text-pink-600 dark:text-pink-400 mr-1" />
+                        <p className="text-xs font-medium text-pink-600 dark:text-pink-400">Gender</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.gender}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.gender}</p>
                     </div>
                   )}
                   {devotee.bloodGroup && (
-                    <div className="p-4 bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 rounded-xl border border-red-200 dark:border-red-800">
-                      <div className="flex items-center mb-2">
-                        <Zap className="h-4 w-4 text-red-600 dark:text-red-400 mr-2" />
-                        <p className="text-sm font-medium text-red-600 dark:text-red-400">Blood Group</p>
+                    <div className="p-2 bg-gradient-to-br from-red-50 to-pink-100 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                      <div className="flex items-center mb-1">
+                        <Zap className="h-3 w-3 text-red-600 dark:text-red-400 mr-1" />
+                        <p className="text-xs font-medium text-red-600 dark:text-red-400">Blood Group</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.bloodGroup}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.bloodGroup}</p>
                     </div>
                   )}
                 </div>
@@ -241,50 +241,50 @@ export default function DevoteeDetail() {
 
             {/* Family Information */}
             <Card className="glass-card">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center">
-                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mr-3">
-                    <Users className="h-4 w-4 text-white" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mr-2">
+                    <Users className="h-3 w-3 text-white" />
                   </div>
                   Family Information
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                   {devotee.fatherName && (
-                    <div className="p-3 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    <div className="p-2 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
                       <div className="flex items-center mb-1">
-                        <User className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-2" />
+                        <User className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
                         <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Father's Name</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.fatherName}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.fatherName}</p>
                     </div>
                   )}
                   {devotee.motherName && (
-                    <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl border border-pink-200 dark:border-pink-800">
-                      <div className="flex items-center mb-2">
-                        <Heart className="h-4 w-4 text-pink-600 dark:text-pink-400 mr-2" />
-                        <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Mother's Name</p>
+                    <div className="p-2 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                      <div className="flex items-center mb-1">
+                        <Heart className="h-3 w-3 text-pink-600 dark:text-pink-400 mr-1" />
+                        <p className="text-xs font-medium text-pink-600 dark:text-pink-400">Mother's Name</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.motherName}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.motherName}</p>
                     </div>
                   )}
                   {devotee.maritalStatus && (
-                    <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                      <div className="flex items-center mb-2">
-                        <Users className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Marital Status</p>
+                    <div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center mb-1">
+                        <Users className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                        <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Marital Status</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.maritalStatus}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.maritalStatus}</p>
                     </div>
                   )}
                   {devotee.husbandName && (
-                    <div className="p-4 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                      <div className="flex items-center mb-2">
-                        <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
-                        <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Husband's Name</p>
+                    <div className="p-2 bg-gradient-to-br from-indigo-50 to-blue-100 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                      <div className="flex items-center mb-1">
+                        <User className="h-3 w-3 text-indigo-600 dark:text-indigo-400 mr-1" />
+                        <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400">Husband's Name</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{devotee.husbandName}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.husbandName}</p>
                     </div>
                   )}
                 </div>
