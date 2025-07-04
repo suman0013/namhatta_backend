@@ -66,9 +66,9 @@ export default function NamhattaUpdateCard({
   };
 
   return (
-    <div className="h-[280px]">
+    <div className="min-h-[280px]">
       <Card className="glass-card hover-lift h-full cursor-pointer" onClick={handleCardClick}>
-        <div className="h-full flex flex-col">
+        <div className="flex flex-col">
           <CardHeader className="pb-3 flex-shrink-0">
             <div className="flex items-start justify-between">
               <div className="space-y-1">
@@ -89,8 +89,8 @@ export default function NamhattaUpdateCard({
             </div>
           </CardHeader>
 
-          <CardContent className="flex-grow overflow-hidden">
-            <div className="space-y-3 h-full">
+          <CardContent className="flex-grow">
+            <div className="space-y-3">
               {/* Attendance and Distribution */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center space-x-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">

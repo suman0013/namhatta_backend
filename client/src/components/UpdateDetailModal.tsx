@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -70,6 +70,9 @@ export default function UpdateDetailModal({
               <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white">
                 {update.programType}
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Detailed information about the {update.programType} program update
+              </DialogDescription>
               {namhattaName && (
                 <div className="flex items-center mt-2 text-gray-600 dark:text-gray-400">
                   <MapPin className="mr-1 h-4 w-4" />
