@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Enhanced all address field dropdowns with searchable functionality - replaced standard Select components with SearchableSelect in DevoteeForm, NamhattaForm, and Namhattas filter page. Users can now type to search through long lists instead of scrolling, improving efficiency when selecting Country, State, District, Sub-District, and Village fields
 - July 4, 2025: Further optimized spacing for ultra-compact layout - minimized padding and margins across all components for maximum content density while maintaining readability
 - July 4, 2025: Removed borders from Leadership Hierarchy cards for cleaner visual design - eliminated border lines and increased padding for better visual balance and modern appearance
 - July 4, 2025: Refined glass-card border styling for cleaner appearance - made borders more subtle with reduced opacity and softer shadows, eliminating visual clutter while maintaining elegant glass morphism effect

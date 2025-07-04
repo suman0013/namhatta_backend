@@ -124,76 +124,57 @@ export default function Namhattas() {
 
           {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Select value={filters.country || "All Countries"} onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Countries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Countries">All Countries</SelectItem>
-                {countries?.map((country) => (
-                  <SelectItem key={country} value={country}>{country}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.country || "All Countries"}
+              onValueChange={(value) => handleFilterChange("country", value === "All Countries" ? "" : value)}
+              options={["All Countries", ...(countries || [])]}
+              placeholder="All Countries"
+              className="glass border-0"
+            />
 
-            <Select value={filters.state || "All States"} onValueChange={(value) => handleFilterChange("state", value === "All States" ? "" : value)} disabled={!filters.country}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All States" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All States">All States</SelectItem>
-                {states?.map((state) => (
-                  <SelectItem key={state} value={state}>{state}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.state || "All States"}
+              onValueChange={(value) => handleFilterChange("state", value === "All States" ? "" : value)}
+              options={["All States", ...(states || [])]}
+              placeholder="All States"
+              disabled={!filters.country}
+              className="glass border-0"
+            />
 
-            <Select value={filters.district || "All Districts"} onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "" : value)} disabled={!filters.state}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Districts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Districts">All Districts</SelectItem>
-                {districts?.map((district) => (
-                  <SelectItem key={district} value={district}>{district}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.district || "All Districts"}
+              onValueChange={(value) => handleFilterChange("district", value === "All Districts" ? "" : value)}
+              options={["All Districts", ...(districts || [])]}
+              placeholder="All Districts"
+              disabled={!filters.state}
+              className="glass border-0"
+            />
 
-            <Select value={filters.subDistrict || "All Sub-Districts"} onValueChange={(value) => handleFilterChange("subDistrict", value === "All Sub-Districts" ? "" : value)} disabled={!filters.district}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Sub-Districts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Sub-Districts">All Sub-Districts</SelectItem>
-                {subDistricts?.map((subDistrict) => (
-                  <SelectItem key={subDistrict} value={subDistrict}>{subDistrict}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.subDistrict || "All Sub-Districts"}
+              onValueChange={(value) => handleFilterChange("subDistrict", value === "All Sub-Districts" ? "" : value)}
+              options={["All Sub-Districts", ...(subDistricts || [])]}
+              placeholder="All Sub-Districts"
+              disabled={!filters.district}
+              className="glass border-0"
+            />
 
-            <Select value={filters.village || "All Villages"} onValueChange={(value) => handleFilterChange("village", value === "All Villages" ? "" : value)} disabled={!filters.subDistrict}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="All Villages" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Villages">All Villages</SelectItem>
-                {villages?.map((village) => (
-                  <SelectItem key={village} value={village}>{village}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.village || "All Villages"}
+              onValueChange={(value) => handleFilterChange("village", value === "All Villages" ? "" : value)}
+              options={["All Villages", ...(villages || [])]}
+              placeholder="All Villages"
+              disabled={!filters.subDistrict}
+              className="glass border-0"
+            />
 
-            <Select value={filters.status || "All Statuses"} onValueChange={(value) => handleFilterChange("status", value === "All Statuses" ? "" : value)}>
-              <SelectTrigger className="glass border-0">
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All Statuses">All Statuses</SelectItem>
-                <SelectItem value="APPROVED">Approved</SelectItem>
-                <SelectItem value="PENDING_APPROVAL">Pending Approval</SelectItem>
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={filters.status || "All Statuses"}
+              onValueChange={(value) => handleFilterChange("status", value === "All Statuses" ? "" : value)}
+              options={["All Statuses", "APPROVED", "PENDING_APPROVAL"]}
+              placeholder="Filter by Status"
+              className="glass border-0"
+            />
           </div>
           
           {/* Active Filters */}
