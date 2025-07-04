@@ -63,7 +63,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="glass border-0"
+          className="glass border-0 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
           Previous
@@ -82,8 +82,8 @@ export function Pagination({
                 onClick={() => onPageChange(page as number)}
                 className={
                   page === currentPage 
-                    ? "bg-indigo-500 hover:bg-indigo-600" 
-                    : "glass border-0"
+                    ? "bg-indigo-500 hover:bg-indigo-600 text-white" 
+                    : "glass border-0 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
                 }
               >
                 {page}
@@ -97,7 +97,7 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="glass border-0"
+          className="glass border-0 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
         >
           Next
           <ChevronRight className="h-4 w-4" />
