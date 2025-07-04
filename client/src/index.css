@@ -120,6 +120,18 @@
     color: hsl(0, 0%, 98%) !important;
   }
   
+  .dark input[type="text"], 
+  .dark input[type="email"], 
+  .dark input[type="tel"], 
+  .dark input[type="password"], 
+  .dark input[type="date"], 
+  .dark input[type="time"], 
+  .dark input[type="number"] {
+    background: hsl(240, 5%, 25%) !important;
+    border-color: hsl(240, 5%, 35%) !important;
+    color: hsl(0, 0%, 98%) !important;
+  }
+  
   .dark input:focus, .dark select:focus, .dark textarea:focus {
     background: hsl(240, 5%, 30%) !important;
     border-color: hsl(239, 84%, 67%) !important;
@@ -144,6 +156,23 @@
   .dark [data-radix-select-content] {
     background: hsl(240, 10%, 15%) !important;
     border-color: hsl(240, 5%, 35%) !important;
+  }
+  
+  /* Target specific input classes for dark mode */
+  .dark .bg-background {
+    background: hsl(240, 5%, 25%) !important;
+  }
+  
+  .dark .text-foreground {
+    color: hsl(0, 0%, 98%) !important;
+  }
+  
+  /* Override any input styling in dark mode */
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+    background-color: hsl(240, 5%, 25%) !important;
+    border-color: hsl(240, 5%, 35%) !important;
+    color: hsl(0, 0%, 98%) !important;
+    -webkit-text-fill-color: hsl(0, 0%, 98%) !important;
   }
   
   .glass-card {
