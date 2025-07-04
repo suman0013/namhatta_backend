@@ -94,7 +94,7 @@ export default function Namhattas() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-1 md:space-y-0">
         <div>
@@ -109,7 +109,7 @@ export default function Namhattas() {
 
       {/* Search and Filters Section */}
       <Card className="glass-card relative z-50">
-        <CardContent className="p-3 space-y-2">
+        <CardContent className="p-2 space-y-1">
           {/* Search Bar */}
           <SearchInput
             value={searchTerm}
