@@ -122,7 +122,7 @@ export default function DevoteeDetail() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -162,26 +162,26 @@ export default function DevoteeDetail() {
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="glass">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="status">Status Management</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-6">
+        <TabsContent value="profile" className="space-y-3">
             {/* Basic Information */}
             <Card className="glass-card">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
-                    <User className="h-5 w-5 text-white" />
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                    <User className="h-4 w-4 text-white" />
                   </div>
                   Basic Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center mb-2">
                       <User className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
                       <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Legal Name</p>
@@ -241,21 +241,21 @@ export default function DevoteeDetail() {
 
             {/* Family Information */}
             <Card className="glass-card">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center mr-3">
-                    <Users className="h-5 w-5 text-white" />
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                    <Users className="h-4 w-4 text-white" />
                   </div>
                   Family Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {devotee.fatherName && (
-                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                      <div className="flex items-center mb-2">
-                        <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
-                        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Father's Name</p>
+                    <div className="p-3 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                      <div className="flex items-center mb-1">
+                        <User className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-2" />
+                        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Father's Name</p>
                       </div>
                       <p className="font-semibold text-gray-900 dark:text-white">{devotee.fatherName}</p>
                     </div>
