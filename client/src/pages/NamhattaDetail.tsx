@@ -30,7 +30,8 @@ import {
   Youtube,
   Crown,
   Plus,
-  User
+  User,
+  GraduationCap
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
@@ -63,6 +64,11 @@ export default function NamhattaDetail() {
     queryKey: ["/api/namhattas", id, "status-count"],
     queryFn: () => api.getNamhattaDevoteeStatusCount(parseInt(id!)),
     enabled: !!id,
+  });
+
+  const { data: statuses } = useQuery({
+    queryKey: ["/api/statuses"],
+    queryFn: () => api.getStatuses(),
   });
 
   const approveMutation = useMutation({
@@ -364,7 +370,7 @@ export default function NamhattaDetail() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {devotees?.data?.map((devotee) => (
-              <DevoteeCard key={devotee.id} devotee={devotee} />
+              <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses} />
             ))}
           </div>
 
@@ -475,51 +481,91 @@ export default function NamhattaDetail() {
   );
 }
 
-function DevoteeCard({ devotee }: { devotee: Devotee }) {
+function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses?: any[] }) {
+  const getStatusName = (statusId?: number) => {
+    if (!statusId || !statuses) return "Unknown";
+    const status = statuses.find(s => s.id === statusId);
+    return status?.name || "Unknown";
+  };
+
+  const getStatusColor = (statusId?: number) => {
+    if (!statusId) return "bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300";
+    
+    const statusName = getStatusName(statusId).toLowerCase();
+    if (statusName.includes("shraddhavan")) return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300";
+    if (statusName.includes("diksha")) return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300";
+    if (statusName.includes("guru")) return "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300";
+    if (statusName.includes("sevak")) return "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300";
+    return "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300";
+  };
+
   return (
-    <Card className="glass-card hover-lift group h-full">
-      <CardContent className="p-4 h-full flex flex-col">
-        <div className="flex items-center space-x-3 mb-3">
-          <Avatar>
-            <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
-              {(devotee.name || devotee.legalName).substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <Link href={`/devotees/${devotee.id}`}>
-              <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate flex items-center">
-                <User className="mr-2 h-4 w-4 flex-shrink-0" />
-                {devotee.legalName}
-              </h4>
-            </Link>
-            {devotee.initiatedName && (
-              <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center mt-1">
-                <Crown className="mr-2 h-4 w-4 flex-shrink-0" />
-                {devotee.initiatedName}
-              </p>
-            )}
-            <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
-          </div>
-        </div>
-        
-        <div className="flex-1 flex flex-col justify-between">
-          {devotee.presentAddress && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-              {[
-                devotee.presentAddress.village,
-                devotee.presentAddress.district
-              ].filter(Boolean).join(", ")}
-            </p>
-          )}
-          
-          <div className="flex justify-between items-center mt-auto">
-            <Badge variant="secondary" className="text-xs">
-              Status ID: {devotee.devotionalStatusId}
-            </Badge>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="h-[280px]">
+      <Link href={`/devotees/${devotee.id}`}>
+        <Card className="glass-card hover-lift group h-full cursor-pointer">
+          <CardContent className="p-6 h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
+                  {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 flex items-center">
+                  <User className="mr-2 h-4 w-4" />
+                  {devotee.legalName}
+                </h3>
+                {devotee.initiatedName && (
+                  <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
+                    <Crown className="mr-2 h-4 w-4" />
+                    {devotee.initiatedName}
+                  </p>
+                )}
+                <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
+              </div>
+            </div>
+
+            {/* Status Badge */}
+            <div className="mb-4">
+              <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+                {getStatusName(devotee.devotionalStatusId)}
+              </Badge>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-2 mb-4 flex-grow">
+              {devotee.presentAddress && (
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <MapPin className="mr-2 h-3 w-3" />
+                  <span>
+                    {[
+                      devotee.presentAddress.village,
+                      devotee.presentAddress.district,
+                      devotee.presentAddress.state
+                    ].filter(Boolean).join(", ")}
+                  </span>
+                </div>
+              )}
+
+              {devotee.education && (
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <GraduationCap className="mr-2 h-3 w-3" />
+                  <span>{devotee.education}</span>
+                </div>
+              )}
+
+              {devotee.maritalStatus && (
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <Users className="mr-2 h-3 w-3" />
+                  <span>{devotee.maritalStatus}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    </div>
   );
 }
 

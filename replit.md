@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Updated devotee cards in Namhatta detail view to match main devotee list format with consistent styling, status badges, and layout
 - July 4, 2025: Added icons before legal name (User icon) and initiated name (Crown icon) in devotee cards for better visual identification
 - July 4, 2025: Removed unwanted scrolling from Dashboard cards (Recent Updates and Status Distribution) for cleaner UI
 - July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment - all functionality preserved and working correctly
