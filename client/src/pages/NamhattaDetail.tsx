@@ -387,7 +387,7 @@ export default function NamhattaDetail() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {devotees?.data?.map((devotee) => (
-              <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses} />
+              <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses} namhattaId={namhatta.id} />
             ))}
           </div>
 
@@ -529,7 +529,7 @@ export default function NamhattaDetail() {
   );
 }
 
-function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses?: any[] }) {
+function DevoteeCard({ devotee, statuses, namhattaId }: { devotee: Devotee; statuses?: any[]; namhattaId: number }) {
   const getStatusName = (statusId?: number) => {
     if (!statusId || !statuses) return "Unknown";
     const status = statuses.find(s => s.id === statusId);
@@ -549,7 +549,7 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses?: any[]
 
   return (
     <div className="h-[280px]">
-      <Link href={`/devotees/${devotee.id}`}>
+      <Link href={`/devotees/${devotee.id}?from=${namhattaId}`}>
         <Card className="glass-card card-hover-effect group h-full cursor-pointer">
           <CardContent className="p-6 h-full flex flex-col">
             {/* Header */}

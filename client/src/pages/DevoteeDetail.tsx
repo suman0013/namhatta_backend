@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useParams, Link, useLocation } from "wouter";
 import { api } from "@/services/api";
 import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,11 +38,22 @@ import DevoteeForm from "@/components/forms/DevoteeForm";
 
 export default function DevoteeDetail() {
   const { id } = useParams();
+  const [location] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
   const [showEditForm, setShowEditForm] = useState(false);
   const [statusComment, setStatusComment] = useState("");
   const [selectedStatusId, setSelectedStatusId] = useState<number | null>(null);
+  const [backUrl, setBackUrl] = useState("/devotees");
+
+  // Check if we came from a Namhatta page
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromNamhatta = urlParams.get('from');
+    if (fromNamhatta) {
+      setBackUrl(`/namhattas/${fromNamhatta}`);
+    }
+  }, []);
 
   const { data: devotee, isLoading } = useQuery({
     queryKey: ["/api/devotees", id],
@@ -97,8 +108,8 @@ export default function DevoteeDetail() {
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               The requested devotee could not be found.
             </p>
-            <Link href="/devotees">
-              <Button>Back to Devotees</Button>
+            <Link href={backUrl}>
+              <Button>Back</Button>
             </Link>
           </CardContent>
         </Card>
@@ -127,7 +138,7 @@ export default function DevoteeDetail() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link href="/devotees">
+          <Link href={backUrl}>
             <Button variant="outline" size="icon" className="glass">
               <ArrowLeft className="h-4 w-4" />
             </Button>
