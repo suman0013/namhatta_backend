@@ -60,7 +60,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </div>
                 <div className="hidden sm:block">
                   <h1 className="text-base lg:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">Namhatta</h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">Management System</p>
+                  <p className="text-xs font-medium bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent hidden lg:block">Management System</p>
                 </div>
               </div>
             </div>
