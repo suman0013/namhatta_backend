@@ -95,6 +95,13 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const [sameAsPresentAddress, setSameAsPresentAddress] = useState(false);
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
   const [showValidation, setShowValidation] = useState(false);
+  const [showShraddhakutirForm, setShowShraddhakutirForm] = useState(false);
+  const [newShraddhakutir, setNewShraddhakutir] = useState({
+    name: "",
+    code: "",
+    region: "",
+    description: ""
+  });
 
 
   // Geography queries for present address
@@ -217,6 +224,27 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     },
   });
 
+  const createShraddhakutirMutation = useMutation({
+    mutationFn: (data: any) => api.createShraddhakutir(data),
+    onSuccess: (newShraddhakutir) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs"] });
+      setValue("shraddhakutirId", newShraddhakutir.id);
+      setShowShraddhakutirForm(false);
+      setNewShraddhakutir({ name: "", code: "", region: "", description: "" });
+      toast({
+        title: "Success",
+        description: "Shraddhakutir created successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create Shraddhakutir",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Handle address changes
   const handlePresentAddressChange = (field: keyof Address, value: string) => {
     const newAddress = { ...presentAddress, [field]: value };
@@ -245,6 +273,19 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       setPermanentAddress(newAddress);
       setValue("permanentAddress", newAddress);
     }
+  };
+
+  const handleCreateShraddhakutir = () => {
+    if (!newShraddhakutir.name || !newShraddhakutir.code || !newShraddhakutir.region) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields (Name, Code, Region)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createShraddhakutirMutation.mutate(newShraddhakutir);
   };
 
   const handlePermanentAddressChange = (field: keyof Address, value: string) => {
@@ -429,15 +470,16 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</DialogTitle>
-          <DialogDescription>
-            {isEditing ? "Update devotee information" : "Fill in the details to register a new devotee"}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <>
+      <Dialog open={true} onOpenChange={onClose}>
+        <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</DialogTitle>
+            <DialogDescription>
+              {isEditing ? "Update devotee information" : "Fill in the details to register a new devotee"}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Basic Information */}
             <div className="space-y-3">
               <h3 className="form-section-header">Basic Information</h3>
@@ -873,21 +915,32 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 </div>
                 <div>
                   <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
-                  <Select
-                    value={watch("shraddhakutirId")?.toString() || ""}
-                    onValueChange={(value) => setValue("shraddhakutirId", value ? parseInt(value) : undefined)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Shraddhakutir" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {shraddhakutirs?.map((sk) => (
-                        <SelectItem key={sk.id} value={sk.id.toString()}>
-                          {sk.name} ({sk.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select
+                      value={watch("shraddhakutirId")?.toString() || ""}
+                      onValueChange={(value) => setValue("shraddhakutirId", value ? parseInt(value) : undefined)}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select Shraddhakutir" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {shraddhakutirs?.map((sk) => (
+                          <SelectItem key={sk.id} value={sk.id.toString()}>
+                            {sk.name} ({sk.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowShraddhakutirForm(true)}
+                      className="shrink-0"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -958,5 +1011,77 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Add New Shraddhakutir Dialog */}
+      <Dialog open={showShraddhakutirForm} onOpenChange={setShowShraddhakutirForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Shraddhakutir</DialogTitle>
+            <DialogDescription>
+              Create a new Shraddhakutir to assign to this devotee
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="shraddhakutir-name">Name *</Label>
+              <Input
+                id="shraddhakutir-name"
+                value={newShraddhakutir.name}
+                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, name: e.target.value })}
+                placeholder="Enter Shraddhakutir name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="shraddhakutir-code">Code *</Label>
+              <Input
+                id="shraddhakutir-code"
+                value={newShraddhakutir.code}
+                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, code: e.target.value })}
+                placeholder="Enter unique code (e.g., SRK001)"
+              />
+            </div>
+            <div>
+              <Label htmlFor="shraddhakutir-region">Region *</Label>
+              <Input
+                id="shraddhakutir-region"
+                value={newShraddhakutir.region}
+                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, region: e.target.value })}
+                placeholder="Enter region (e.g., West Bengal, Maharashtra)"
+              />
+            </div>
+            <div>
+              <Label htmlFor="shraddhakutir-description">Description</Label>
+              <Textarea
+                id="shraddhakutir-description"
+                value={newShraddhakutir.description}
+                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, description: e.target.value })}
+                placeholder="Optional description"
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowShraddhakutirForm(false);
+                  setNewShraddhakutir({ name: "", code: "", region: "", description: "" });
+                }}
+                disabled={createShraddhakutirMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCreateShraddhakutir}
+                disabled={createShraddhakutirMutation.isPending}
+              >
+                {createShraddhakutirMutation.isPending ? "Creating..." : "Create Shraddhakutir"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
