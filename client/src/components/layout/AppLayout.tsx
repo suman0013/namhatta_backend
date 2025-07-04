@@ -13,7 +13,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Enhanced Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900"></div>
+      
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Floating Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-indigo-400/15 to-cyan-600/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-br from-purple-400/30 to-pink-600/30 rounded-full blur-2xl animate-pulse delay-2000"></div>
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-900/50 dark:to-transparent"></div>
+      </div>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -25,7 +38,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Desktop Layout */}
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen relative z-10">
         {/* Combined Header and Navigation */}
         <div className="glass-card border-0 border-b border-white/20 dark:border-slate-700/50">
           <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1.5 lg:py-2">
@@ -41,11 +54,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </button>
               
               <div className="flex items-center space-x-2">
-                <div className="w-7 sm:w-8 lg:w-10 h-7 sm:h-8 lg:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center">
-                  <span className="text-white text-sm lg:text-lg font-bold">ॐ</span>
+                <div className="w-7 sm:w-8 lg:w-10 h-7 sm:h-8 lg:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 relative overflow-hidden">
+                  {/* Inner glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg lg:rounded-xl"></div>
+                  <span className="text-white text-sm lg:text-lg font-bold relative z-10 drop-shadow-sm">ॐ</span>
                 </div>
                 <div className="hidden sm:block">
-                  <h1 className="text-base lg:text-xl font-bold gradient-text">Namhatta</h1>
+                  <h1 className="text-base lg:text-xl font-bold gradient-text hover:scale-105 transition-transform duration-300">Namhatta</h1>
                   <p className="text-xs text-gray-500 dark:text-gray-400 hidden lg:block">Management System</p>
                 </div>
               </div>
@@ -63,8 +78,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
-          <div className="animate-fade-in max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-8 lg:py-10">
-            {children}
+          <div className="animate-fade-in max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 lg:py-10">
+            <div className="backdrop-blur-sm bg-white/30 dark:bg-slate-900/30 rounded-3xl p-1 shadow-2xl border border-white/20 dark:border-slate-700/50">
+              <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl rounded-2xl p-6 lg:p-8 shadow-inner">
+                {children}
+              </div>
+            </div>
           </div>
         </main>
       </div>

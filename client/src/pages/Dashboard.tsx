@@ -41,11 +41,12 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your spiritual organization management center</p>
         </div>
 
       </div>
@@ -260,30 +261,42 @@ function StatsCard({
   onClick?: () => void;
 }) {
   return (
-    <Card className={`glass-card ${onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105' : ''}`} onClick={onClick}>
-      <CardContent className="p-6">
+    <Card className={`glass-card relative overflow-hidden group ${onClick ? 'cursor-pointer hover-lift' : ''}`} onClick={onClick}>
+      {/* Gradient Background Effect */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}></div>
+      
+      {/* Floating Background Shapes */}
+      <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-xl group-hover:scale-110 transition-transform duration-500"></div>
+      
+      <CardContent className="p-6 relative z-10">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{title}</p>
+            <p className="text-3xl font-bold gradient-text mb-4">
               {value.toLocaleString()}
             </p>
-            <div className="flex items-center mt-4">
-              <span className={`flex items-center text-sm font-medium ${
-                positive ? "text-emerald-600 dark:text-emerald-400" : urgent ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400"
+            <div className="flex items-center">
+              <span className={`flex items-center text-sm font-medium px-2 py-1 rounded-full ${
+                positive 
+                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" 
+                  : urgent 
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" 
+                    : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
               }`}>
                 {positive ? (
-                  <TrendingUp className="mr-1 h-4 w-4" />
+                  <TrendingUp className="mr-1 h-3 w-3" />
                 ) : (
-                  <AlertTriangle className="mr-1 h-4 w-4" />
+                  <AlertTriangle className="mr-1 h-3 w-3" />
                 )}
                 {change}
               </span>
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{changeLabel}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{changeLabel}</span>
             </div>
           </div>
-          <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-xl flex items-center justify-center`}>
-            <Icon className="h-6 w-6 text-white" />
+          <div className={`w-16 h-16 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 relative overflow-hidden`}>
+            {/* Icon background glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
+            <Icon className="h-8 w-8 text-white relative z-10 drop-shadow-sm" />
           </div>
         </div>
       </CardContent>

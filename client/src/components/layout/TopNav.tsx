@@ -28,15 +28,18 @@ export default function TopNav() {
             <Link key={item.href} href={item.href}>
               <div
                 className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 relative whitespace-nowrap",
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300 relative whitespace-nowrap group overflow-hidden",
                   isActive
-                    ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 shadow-sm"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 shadow-lg scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gradient-to-r hover:from-white/60 hover:to-white/40 dark:hover:from-slate-800/60 dark:hover:to-slate-700/40 hover:text-gray-900 dark:hover:text-white hover:scale-105 hover:shadow-md"
                 )}
               >
-                <Icon className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span className="hidden md:inline text-sm">{item.label}</span>
-                <span className="md:hidden text-xs">{item.shortLabel}</span>
+                {/* Background shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                
+                <Icon className="w-4 h-4 mr-2 flex-shrink-0 relative z-10" />
+                <span className="hidden md:inline text-sm relative z-10">{item.label}</span>
+                <span className="md:hidden text-xs relative z-10">{item.shortLabel}</span>
               </div>
             </Link>
           );
