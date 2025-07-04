@@ -332,7 +332,7 @@ function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
               {getStatusBadge(namhatta.status)}
             </div>
             
-            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 line-clamp-2">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
               {namhatta.name}
             </h3>
             
