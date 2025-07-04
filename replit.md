@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Made Namhattas page more compact by reducing white space - reduced spacing between sections, cards, and filters for better visual density and improved layout
 - July 4, 2025: Made devotee detail page sections more compact by reducing spacing between cards for better visual density and improved layout
 - July 4, 2025: Redesigned Status Management tab in devotee detail page with attractive gradient design - Current Status and Status History sections now feature beautiful gradient backgrounds, timeline-style history display, and enhanced visual elements
 - July 4, 2025: Updated Devotional Courses section in devotee detail page to match gradient card design of other sections - course name, date, and institute now display in beautiful gradient cards with consistent styling and icons

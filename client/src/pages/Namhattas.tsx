@@ -94,9 +94,9 @@ export default function Namhattas() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Namhattas Management</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage and monitor all Namhatta centers</p>
@@ -109,7 +109,7 @@ export default function Namhattas() {
 
       {/* Search and Filters Section */}
       <Card className="glass-card relative z-50">
-        <CardContent className="p-6 space-y-4">
+        <CardContent className="p-4 space-y-3">
           {/* Search Bar */}
           <SearchInput
             value={searchTerm}
@@ -215,7 +215,7 @@ export default function Namhattas() {
 
       {/* Sorting Controls */}
       <Card className="glass-card">
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {namhattas?.total ? `Showing ${namhattas.total} namhattas` : 'No namhattas found'}
@@ -252,7 +252,7 @@ export default function Namhattas() {
       </Card>
 
       {/* Namhattas Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 relative z-10">
         {namhattas?.data?.map((namhatta) => (
           <NamhattaCard key={namhatta.id} namhatta={namhatta} />
         ))}
