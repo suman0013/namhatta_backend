@@ -98,6 +98,9 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Implemented dynamic event status badges in Dashboard Recent Updates - now shows "Past Event", "Today", or "Future Event" instead of generic "Active" status based on event date
+- July 4, 2025: Made Leadership Roles and Address Information sections more compact in Namhatta detail page, and Spiritual Information section in devotee detail page - reduced spacing, padding, and card sizes for better mobile experience
+- July 4, 2025: Removed Programs and Avg Attendance statistics cards from Namhatta detail page for cleaner UI
 - July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment - all functionality preserved and working correctly
 - July 4, 2025: Fixed SearchableSelect dropdown z-index overlapping issues and made devotee detail page more compact by reducing spacing, padding, and card sizes for better mobile experience
 - July 4, 2025: Enhanced devotee detail view address and spiritual information sections with beautiful gradient cards, floating animations, and modern styling to match other sections
