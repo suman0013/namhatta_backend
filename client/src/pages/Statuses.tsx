@@ -141,9 +141,9 @@ export default function Statuses() {
             Status Management
           </CardTitle>
         </CardHeader>
-        <CardContent className="py-3 px-4">
+        <CardContent>
           {statuses && statuses.length > 0 ? (
-            <div className="space-y-0.5">
+            <div className="space-y-1.5">
               {statuses.map((status, index) => (
                 <StatusCard
                   key={status.id}
@@ -219,7 +219,7 @@ function StatusCard({
   };
 
   return (
-    <div className="space-y-1 py-1 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
+    <div className="space-y-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
       {/* Top row: Status name + Count + Rename icon */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
