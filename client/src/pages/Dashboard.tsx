@@ -19,12 +19,44 @@ import {
   Zap,
   UserPlus,
   CalendarPlus,
-  BarChart3
+  BarChart3,
+  Music,
+  BookOpen,
+  Sparkles,
+  Heart,
+  Star,
+  Gift,
+  Utensils
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  
+  // Function to get appropriate icon and colors based on program type
+  const getProgramIcon = (programType: string) => {
+    const type = programType.toLowerCase();
+    
+    if (type.includes('satsang') || type.includes('weekly')) {
+      return { icon: Heart, gradient: 'from-red-400 to-red-600', bgColor: 'bg-red-50 dark:bg-red-900/20' };
+    } else if (type.includes('kirtan') || type.includes('music')) {
+      return { icon: Music, gradient: 'from-orange-400 to-orange-600', bgColor: 'bg-orange-50 dark:bg-orange-900/20' };
+    } else if (type.includes('book') || type.includes('gita') || type.includes('bhagavat')) {
+      return { icon: BookOpen, gradient: 'from-blue-400 to-blue-600', bgColor: 'bg-blue-50 dark:bg-blue-900/20' };
+    } else if (type.includes('festival') || type.includes('celebration')) {
+      return { icon: Star, gradient: 'from-yellow-400 to-yellow-600', bgColor: 'bg-yellow-50 dark:bg-yellow-900/20' };
+    } else if (type.includes('prasadam') || type.includes('distribution')) {
+      return { icon: Utensils, gradient: 'from-green-400 to-green-600', bgColor: 'bg-green-50 dark:bg-green-900/20' };
+    } else if (type.includes('youth') || type.includes('ladies')) {
+      return { icon: UserPlus, gradient: 'from-purple-400 to-purple-600', bgColor: 'bg-purple-50 dark:bg-purple-900/20' };
+    } else if (type.includes('service') || type.includes('community')) {
+      return { icon: Gift, gradient: 'from-pink-400 to-pink-600', bgColor: 'bg-pink-50 dark:bg-pink-900/20' };
+    } else if (type.includes('rath') || type.includes('yatra')) {
+      return { icon: Sparkles, gradient: 'from-indigo-400 to-indigo-600', bgColor: 'bg-indigo-50 dark:bg-indigo-900/20' };
+    } else {
+      return { icon: Home, gradient: 'from-emerald-400 to-teal-500', bgColor: 'bg-emerald-50 dark:bg-emerald-900/20' };
+    }
+  };
   
   const { data: dashboard, isLoading: dashboardLoading } = useQuery({
     queryKey: ["/api/dashboard"],
@@ -185,11 +217,13 @@ export default function Dashboard() {
                 };
                 
                 const status = getEventStatus();
+                const programIconInfo = getProgramIcon(update.programType);
+                const IconComponent = programIconInfo.icon;
                 
                 return (
                   <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Home className="h-5 w-5 text-white" />
+                    <div className={`w-10 h-10 bg-gradient-to-br ${programIconInfo.gradient} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <IconComponent className="h-5 w-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">

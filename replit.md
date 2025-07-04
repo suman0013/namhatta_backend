@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Enhanced Recent Updates icons with contextual program-specific icons and colors - different program types now display unique icons (Heart for Satsang, Music for Kirtan, BookOpen for study classes, etc.) with matching gradient backgrounds
 - July 4, 2025: Applied consistent gradient styling to both "Namhatta" and "Management System" text in logo for unified visual design
 - July 4, 2025: Fixed logo text blinking by replacing animated gradient-text class with static gradient - "Namhatta" text now displays stable gradient colors without animation
 - July 4, 2025: Enhanced scrollbar styling with custom CSS - made scrollbars thinner, more subtle, and properly styled for both light and dark themes with smooth hover effects
