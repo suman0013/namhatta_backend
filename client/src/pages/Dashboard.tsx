@@ -152,7 +152,7 @@ export default function Dashboard() {
       {/* Recent Activity & Updates */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Namhatta Updates */}
-        <Card className="glass-card min-h-96">
+        <Card className="glass-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
@@ -170,7 +170,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-4 max-h-72 overflow-y-auto">
+            <div className="space-y-4">
               {dashboard?.recentUpdates?.map((update, index) => (
                 <div key={index} className="flex items-start space-x-4 p-4 rounded-xl glass hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200 group cursor-pointer">
                   <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -202,7 +202,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Devotional Status Distribution */}
-        <Card className="glass-card min-h-96">
+        <Card className="glass-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
@@ -220,7 +220,7 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-4 max-h-72 overflow-y-auto">
+            <div className="space-y-4">
               <StatusProgressBar label="Shraddhavan" count={156} percentage={35} color="from-blue-400 to-blue-600" />
               <StatusProgressBar label="Sadhusangi" count={98} percentage={22} color="from-emerald-400 to-emerald-600" />
               <StatusProgressBar label="Gour/Krishna Sevak" count={89} percentage={20} color="from-purple-400 to-purple-600" />
