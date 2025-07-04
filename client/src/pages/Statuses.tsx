@@ -229,8 +229,13 @@ function StatusCard({
           </h3>
         </div>
         
-        <div className="flex items-center space-x-2">
-          {/* Rename Icon on the right */}
+        <div className="flex items-center space-x-3">
+          {/* Count and percentage */}
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {devoteeCount} ({percentage.toFixed(0)}%)
+          </div>
+          
+          {/* Rename Icon on the far right */}
           <Button
             variant="ghost"
             size="sm"
@@ -241,15 +246,10 @@ function StatusCard({
             <span className="sr-only">Rename</span>
           </Button>
         </div>
-
-        {/* Count and percentage */}
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {devoteeCount} ({percentage.toFixed(0)}%)
-        </div>
       </div>
 
-      {/* Progress Bar - full width */}
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+      {/* Progress Bar - 60% width */}
+      <div className="w-3/5 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div
           className={`h-2 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
           style={{ width: `${Math.max(percentage, 2)}%` }}
