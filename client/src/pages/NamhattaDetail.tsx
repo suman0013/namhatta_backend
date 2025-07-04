@@ -203,37 +203,7 @@ export default function NamhattaDetail() {
               </CardContent>
             </Card>
 
-            <Card className="glass-card card-hover-effect">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
-                    <Activity className="h-6 w-6 text-white float-animation" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Programs</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {updates?.length || 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="glass-card card-hover-effect">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
-                    <TrendingUp className="h-6 w-6 text-white float-animation" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Avg Attendance</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {updates?.length ? Math.round(updates.reduce((acc: any, update: any) => acc + update.attendance, 0) / updates.length) : 0}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
             <Card className="glass-card card-hover-effect">
               <CardContent className="p-6">
