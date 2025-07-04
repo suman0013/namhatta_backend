@@ -133,46 +133,50 @@ export default function Statuses() {
         </Card>
       </div>
 
-      {/* Status List */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Layers className="mr-2 h-5 w-5" />
-            Status Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {statuses && statuses.length > 0 ? (
-            <div className="space-y-1.5">
-              {statuses.map((status, index) => (
-                <StatusCard
-                  key={status.id}
-                  status={status}
-                  index={index}
-                  devoteeCount={getDevoteeCount(status.id)}
-                  totalDevotees={getTotalDevotees()}
-                  onEdit={() => startEditing(status)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Layers className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No statuses found</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Create your first devotional status to start tracking spiritual progress.
-              </p>
-              <Button
-                onClick={() => setShowForm(true)}
-                className="gradient-button"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add First Status
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Status List - Centered with reduced width */}
+      <div className="flex justify-center">
+        <div className="w-full max-w-2xl">
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Layers className="mr-2 h-5 w-5" />
+                Status Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {statuses && statuses.length > 0 ? (
+                <div className="space-y-1.5">
+                  {statuses.map((status, index) => (
+                    <StatusCard
+                      key={status.id}
+                      status={status}
+                      index={index}
+                      devoteeCount={getDevoteeCount(status.id)}
+                      totalDevotees={getTotalDevotees()}
+                      onEdit={() => startEditing(status)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Layers className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No statuses found</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                    Create your first devotional status to start tracking spiritual progress.
+                  </p>
+                  <Button
+                    onClick={() => setShowForm(true)}
+                    className="gradient-button"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add First Status
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Form Modal */}
       {showForm && (
