@@ -21,7 +21,9 @@ import {
   Mail, 
   GraduationCap,
   Briefcase,
-  Heart
+  Heart,
+  User,
+  Crown
 } from "lucide-react";
 import { Link } from "wouter";
 import DevoteeForm from "@/components/forms/DevoteeForm";
@@ -327,11 +329,13 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 flex items-center">
+                  <User className="mr-2 h-4 w-4" />
                   {devotee.legalName}
                 </h3>
                 {devotee.initiatedName && (
-                  <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                  <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
+                    <Crown className="mr-2 h-4 w-4" />
                     {devotee.initiatedName}
                   </p>
                 )}

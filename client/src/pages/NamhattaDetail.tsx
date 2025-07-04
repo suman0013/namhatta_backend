@@ -29,7 +29,8 @@ import {
   Facebook,
   Youtube,
   Crown,
-  Plus
+  Plus,
+  User
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
@@ -486,10 +487,17 @@ function DevoteeCard({ devotee }: { devotee: Devotee }) {
           </Avatar>
           <div className="flex-1 min-w-0">
             <Link href={`/devotees/${devotee.id}`}>
-              <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
-                {devotee.name || devotee.legalName}
+              <h4 className="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate flex items-center">
+                <User className="mr-2 h-4 w-4 flex-shrink-0" />
+                {devotee.legalName}
               </h4>
             </Link>
+            {devotee.initiatedName && (
+              <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center mt-1">
+                <Crown className="mr-2 h-4 w-4 flex-shrink-0" />
+                {devotee.initiatedName}
+              </p>
+            )}
             <p className="text-sm text-gray-600 dark:text-gray-400">{devotee.occupation}</p>
           </div>
         </div>
@@ -505,9 +513,6 @@ function DevoteeCard({ devotee }: { devotee: Devotee }) {
           )}
           
           <div className="flex justify-between items-center mt-auto">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {devotee.initiatedName || "Aspiring Devotee"}
-            </span>
             <Badge variant="secondary" className="text-xs">
               Status ID: {devotee.devotionalStatusId}
             </Badge>
