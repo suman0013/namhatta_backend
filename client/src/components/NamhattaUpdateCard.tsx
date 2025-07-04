@@ -146,7 +146,7 @@ export default function NamhattaUpdateCard({
               {update.specialAttraction && (
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Special Attraction</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 italic line-clamp-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 italic">
                     "{update.specialAttraction}"
                   </p>
                 </div>
