@@ -219,34 +219,40 @@ function StatusCard({
   };
 
   return (
-    <div className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
-      <div className="flex items-center space-x-3 flex-1">
-        <h3 className="font-medium text-gray-900 dark:text-white text-sm min-w-0">
-          {status.name}
-        </h3>
-        <span className="text-sm text-gray-600 dark:text-gray-400 ml-auto">
+    <div className="space-y-2 py-2 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-all duration-200">
+      {/* Top row: Rename icon + Status name + Count */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {/* Rename Icon on the left */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onEdit}
+            className="h-6 w-6 p-0 opacity-60 hover:opacity-100 flex-shrink-0"
+          >
+            <Edit className="h-3 w-3" />
+            <span className="sr-only">Rename</span>
+          </Button>
+          
+          {/* Status name */}
+          <h3 className="font-medium text-gray-900 dark:text-white text-sm">
+            {status.name}
+          </h3>
+        </div>
+
+        {/* Count and percentage */}
+        <div className="text-sm text-gray-600 dark:text-gray-400">
           {devoteeCount} ({percentage.toFixed(0)}%)
-        </span>
+        </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mx-4">
+      {/* Progress Bar - full width */}
+      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
         <div
           className={`h-2 bg-gradient-to-r ${getGradientClass(index)} rounded-full transition-all duration-300`}
           style={{ width: `${Math.max(percentage, 2)}%` }}
         />
       </div>
-
-      {/* Rename Icon Only */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onEdit}
-        className="h-8 w-8 p-0 opacity-60 hover:opacity-100 flex-shrink-0"
-      >
-        <Edit className="h-4 w-4" />
-        <span className="sr-only">Rename</span>
-      </Button>
     </div>
   );
 }
