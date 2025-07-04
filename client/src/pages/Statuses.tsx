@@ -51,12 +51,12 @@ export default function Statuses() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Devotional Statuses</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Devotional Statuses</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-0.5 text-sm">
             Manage spiritual progression levels and track devotee advancement
           </p>
         </div>
@@ -67,16 +67,16 @@ export default function Statuses() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center">
-                <Layers className="h-6 w-6 text-white" />
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Layers className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Statuses</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xs text-gray-600 dark:text-gray-400">Total Statuses</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {statuses?.length || 0}
                 </p>
               </div>
@@ -85,14 +85,14 @@ export default function Statuses() {
         </Card>
 
         <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
-                <Users className="h-6 w-6 text-white" />
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-9 h-9 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
+                <Users className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Devotees</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xs text-gray-600 dark:text-gray-400">Total Devotees</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {getTotalDevotees()}
                 </p>
               </div>
@@ -101,14 +101,14 @@ export default function Statuses() {
         </Card>
 
         <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
-                <Award className="h-6 w-6 text-white" />
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-9 h-9 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg flex items-center justify-center">
+                <Award className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Highest Level</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                <p className="text-xs text-gray-600 dark:text-gray-400">Highest Level</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white">
                   {statuses?.[statuses.length - 1]?.name || "N/A"}
                 </p>
               </div>
@@ -117,14 +117,14 @@ export default function Statuses() {
         </Card>
 
         <Card className="glass-card">
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-white" />
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-9 h-9 bg-gradient-to-br from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Avg per Status</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-xs text-gray-600 dark:text-gray-400">Avg per Status</p>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
                   {statuses?.length ? Math.round(getTotalDevotees() / statuses.length) : 0}
                 </p>
               </div>
@@ -143,7 +143,7 @@ export default function Statuses() {
         </CardHeader>
         <CardContent>
           {statuses && statuses.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-2.5">
               {statuses.map((status, index) => (
                 <StatusCard
                   key={status.id}
@@ -219,20 +219,20 @@ function StatusCard({
   };
 
   return (
-    <div className="flex items-center space-x-4 p-6 rounded-xl glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
+    <div className="flex items-center space-x-3 p-4 rounded-lg glass border border-white/20 dark:border-slate-700/50 hover:bg-white/80 dark:hover:bg-slate-600/50 transition-all duration-200">
       {/* Icon */}
-      <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(index)} rounded-xl flex items-center justify-center flex-shrink-0`}>
-        <Award className="h-6 w-6 text-white" />
+      <div className={`w-10 h-10 bg-gradient-to-br ${getGradientClass(index)} rounded-lg flex items-center justify-center flex-shrink-0`}>
+        <Award className="h-5 w-5 text-white" />
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-base">
               {status.name}
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               Created {new Date(status.createdAt).toLocaleDateString()}
             </p>
           </div>
@@ -240,7 +240,7 @@ function StatusCard({
             variant="outline"
             size="sm"
             onClick={onEdit}
-            className="glass"
+            className="glass text-xs px-2 py-1"
           >
             <Edit className="h-3 w-3 mr-1" />
             Rename
@@ -248,7 +248,7 @@ function StatusCard({
         </div>
 
         {/* Statistics */}
-        <div className="mt-4 space-y-2">
+        <div className="mt-2 space-y-1.5">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600 dark:text-gray-400">
               {devoteeCount} devotees ({percentage.toFixed(1)}%)
