@@ -64,7 +64,7 @@ export function SearchableSelect({
   };
 
   return (
-    <div ref={containerRef} className={`relative ${className}`} style={{ zIndex: 999999 }}>
+    <div ref={containerRef} className={`relative ${className}`} data-searchable-select-open={isOpen}>
       <div className="relative">
         <Input
           ref={inputRef}
@@ -93,7 +93,7 @@ export function SearchableSelect({
       </div>
       
       {isOpen && !disabled && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto" style={{ zIndex: 999999 }}>
+        <div className="searchable-select-dropdown absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto">
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <div

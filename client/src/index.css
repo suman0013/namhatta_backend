@@ -422,4 +422,24 @@
       @apply max-w-7xl mx-auto;
     }
   }
+
+  /* SearchableSelect dropdown z-index fixes */
+  .searchable-select-dropdown {
+    z-index: 10000 !important;
+  }
+  
+  /* Ensure all SearchableSelect containers have proper stacking context */
+  [data-searchable-select-open="true"] {
+    z-index: 9999 !important;
+    position: relative !important;
+  }
+  
+  /* Override any conflicting z-index rules for form elements */
+  .form-field {
+    z-index: auto;
+  }
+  
+  .form-field.active {
+    z-index: 9999;
+  }
 }
