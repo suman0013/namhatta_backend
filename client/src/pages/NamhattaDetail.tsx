@@ -254,59 +254,59 @@ export default function NamhattaDetail() {
 
           {/* Leadership Roles */}
           <Card className="glass-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
-                  <Crown className="h-5 w-5 text-white float-animation" />
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center text-base">
+                <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center mr-2">
+                  <Crown className="h-3 w-3 text-white" />
                 </div>
                 Leadership Roles
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {namhatta.malaSenapoti && (
-                  <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                    <div className="flex items-center mb-2">
-                      <Crown className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                      <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Mala Senapoti</p>
+                  <div className="p-2 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <div className="flex items-center mb-1">
+                      <Crown className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                      <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Mala Senapoti</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{namhatta.malaSenapoti}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.malaSenapoti}</p>
                   </div>
                 )}
                 {namhatta.mahaChakraSenapoti && (
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center mb-2">
-                      <Users className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Maha Chakra Senapoti</p>
+                  <div className="p-2 bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center mb-1">
+                      <Users className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                      <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Maha Chakra Senapoti</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{namhatta.mahaChakraSenapoti}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.mahaChakraSenapoti}</p>
                   </div>
                 )}
                 {namhatta.chakraSenapoti && (
-                  <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                    <div className="flex items-center mb-2">
-                      <Activity className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
-                      <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Chakra Senapoti</p>
+                  <div className="p-2 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center mb-1">
+                      <Activity className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                      <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Chakra Senapoti</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{namhatta.chakraSenapoti}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.chakraSenapoti}</p>
                   </div>
                 )}
                 {namhatta.upaChakraSenapoti && (
-                  <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                    <div className="flex items-center mb-2">
-                      <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
-                      <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Upa Chakra Senapoti</p>
+                  <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center mb-1">
+                      <TrendingUp className="h-3 w-3 text-orange-600 dark:text-orange-400 mr-1" />
+                      <p className="text-xs font-medium text-orange-600 dark:text-orange-400">Upa Chakra Senapoti</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{namhatta.upaChakraSenapoti}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.upaChakraSenapoti}</p>
                   </div>
                 )}
                 {namhatta.secretary && (
-                  <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl border border-pink-200 dark:border-pink-800">
-                    <div className="flex items-center mb-2">
-                      <User className="h-4 w-4 text-pink-600 dark:text-pink-400 mr-2" />
-                      <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Secretary</p>
+                  <div className="p-2 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                    <div className="flex items-center mb-1">
+                      <User className="h-3 w-3 text-pink-600 dark:text-pink-400 mr-1" />
+                      <p className="text-xs font-medium text-pink-600 dark:text-pink-400">Secretary</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{namhatta.secretary}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.secretary}</p>
                   </div>
                 )}
                 {!namhatta.malaSenapoti && !namhatta.mahaChakraSenapoti && !namhatta.chakraSenapoti && !namhatta.upaChakraSenapoti && !namhatta.secretary && (
@@ -325,77 +325,77 @@ export default function NamhattaDetail() {
           {/* Address Details */}
           {namhatta.address && (
             <Card className="glass-card">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-3">
-                    <MapPin className="h-5 w-5 text-white float-animation" />
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center mr-2">
+                    <MapPin className="h-3 w-3 text-white" />
                   </div>
                   Address Information
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <CardContent className="pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                   {namhatta.address.country && (
-                    <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                      <div className="flex items-center mb-2">
-                        <Home className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
-                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Country</p>
+                    <div className="p-2 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center mb-1">
+                        <Home className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                        <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Country</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.country}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.country}</p>
                     </div>
                   )}
                   {namhatta.address.state && (
-                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                      <div className="flex items-center mb-2">
-                        <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
-                        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">State</p>
+                    <div className="p-2 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                      <div className="flex items-center mb-1">
+                        <MapPin className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">State</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.state}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.state}</p>
                     </div>
                   )}
                   {namhatta.address.district && (
-                    <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                      <div className="flex items-center mb-2">
-                        <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                        <p className="text-sm font-medium text-purple-600 dark:text-purple-400">District</p>
+                    <div className="p-2 bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center mb-1">
+                        <Activity className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                        <p className="text-xs font-medium text-purple-600 dark:text-purple-400">District</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.district}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.district}</p>
                     </div>
                   )}
                   {namhatta.address.subDistrict && (
-                    <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                      <div className="flex items-center mb-2">
-                        <TrendingUp className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
-                        <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Sub-District</p>
+                    <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center mb-1">
+                        <TrendingUp className="h-3 w-3 text-orange-600 dark:text-orange-400 mr-1" />
+                        <p className="text-xs font-medium text-orange-600 dark:text-orange-400">Sub-District</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.subDistrict}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.subDistrict}</p>
                     </div>
                   )}
                   {namhatta.address.village && (
-                    <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl border border-pink-200 dark:border-pink-800">
-                      <div className="flex items-center mb-2">
-                        <Home className="h-4 w-4 text-pink-600 dark:text-pink-400 mr-2" />
-                        <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Village</p>
+                    <div className="p-2 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                      <div className="flex items-center mb-1">
+                        <Home className="h-3 w-3 text-pink-600 dark:text-pink-400 mr-1" />
+                        <p className="text-xs font-medium text-pink-600 dark:text-pink-400">Village</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.village}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.village}</p>
                     </div>
                   )}
                   {namhatta.address.postalCode && (
-                    <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-xl border border-cyan-200 dark:border-cyan-800">
-                      <div className="flex items-center mb-2">
-                        <MapPin className="h-4 w-4 text-cyan-600 dark:text-cyan-400 mr-2" />
-                        <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400">Pincode</p>
+                    <div className="p-2 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-cyan-900/20 dark:to-blue-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                      <div className="flex items-center mb-1">
+                        <MapPin className="h-3 w-3 text-cyan-600 dark:text-cyan-400 mr-1" />
+                        <p className="text-xs font-medium text-cyan-600 dark:text-cyan-400">Pincode</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.postalCode}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.postalCode}</p>
                     </div>
                   )}
                   {namhatta.address.landmark && (
-                    <div className="md:col-span-2 lg:col-span-3 p-4 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl border border-gray-200 dark:border-gray-800">
-                      <div className="flex items-center mb-2">
-                        <MapPin className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-2" />
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Landmark</p>
+                    <div className="md:col-span-2 lg:col-span-3 p-2 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                      <div className="flex items-center mb-1">
+                        <MapPin className="h-3 w-3 text-gray-600 dark:text-gray-400 mr-1" />
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Landmark</p>
                       </div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{namhatta.address.landmark}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm">{namhatta.address.landmark}</p>
                     </div>
                   )}
                 </div>

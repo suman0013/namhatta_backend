@@ -510,85 +510,75 @@ export default function DevoteeDetail() {
 
           {/* Spiritual Information */}
           <Card className="glass-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center mr-3">
-                  <Heart className="h-5 w-5 text-white float-animation" />
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center text-base">
+                <div className="w-6 h-6 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center mr-2">
+                  <Heart className="h-3 w-3 text-white" />
                 </div>
                 Spiritual Information
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
-                  <div className="flex items-center mb-2">
-                    <Award className="h-4 w-4 text-purple-600 dark:text-purple-400 mr-2" />
-                    <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Devotional Status</p>
+            <CardContent className="pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <div className="p-2 bg-gradient-to-br from-purple-50 to-indigo-100 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                  <div className="flex items-center mb-1">
+                    <Award className="h-3 w-3 text-purple-600 dark:text-purple-400 mr-1" />
+                    <p className="text-xs font-medium text-purple-600 dark:text-purple-400">Devotional Status</p>
                   </div>
                   <Badge className={getStatusColor(devotee.devotionalStatusId)}>
                     {getStatusName(devotee.devotionalStatusId)}
                   </Badge>
                 </div>
                 {devotee.harinamInitiationGurudev && (
-                  <div className="p-4 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                    <div className="flex items-center mb-2">
-                      <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
-                      <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Harinam Initiation Gurudev</p>
+                  <div className="p-2 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center mb-1">
+                      <User className="h-3 w-3 text-emerald-600 dark:text-emerald-400 mr-1" />
+                      <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Harinam Initiation Gurudev</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{devotee.harinamInitiationGurudev}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.harinamInitiationGurudev}</p>
                   </div>
                 )}
                 {devotee.harinamDate && (
-                  <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl border border-orange-200 dark:border-orange-800">
-                    <div className="flex items-center mb-2">
-                      <Calendar className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
-                      <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Harinama Initiation Date</p>
+                  <div className="p-2 bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center mb-1">
+                      <Calendar className="h-3 w-3 text-orange-600 dark:text-orange-400 mr-1" />
+                      <p className="text-xs font-medium text-orange-600 dark:text-orange-400">Harinama Initiation Date</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">
                       {new Date(devotee.harinamDate).toLocaleDateString()}
                     </p>
                   </div>
                 )}
                 {devotee.initiatedName && (
-                  <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-center mb-2">
-                      <User className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Initiated Name</p>
+                  <div className="p-2 bg-gradient-to-br from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center mb-1">
+                      <User className="h-3 w-3 text-blue-600 dark:text-blue-400 mr-1" />
+                      <p className="text-xs font-medium text-blue-600 dark:text-blue-400">Initiated Name</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{devotee.initiatedName}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.initiatedName}</p>
                   </div>
                 )}
                 {devotee.pancharatrikInitiationGurudev && (
-                  <div className="p-4 bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl border border-teal-200 dark:border-teal-800">
-                    <div className="flex items-center mb-2">
-                      <User className="h-4 w-4 text-teal-600 dark:text-teal-400 mr-2" />
-                      <p className="text-sm font-medium text-teal-600 dark:text-teal-400">Pancharatrik Initiation Gurudev</p>
+                  <div className="p-2 bg-gradient-to-br from-teal-50 to-cyan-100 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-lg border border-teal-200 dark:border-teal-800">
+                    <div className="flex items-center mb-1">
+                      <User className="h-3 w-3 text-teal-600 dark:text-teal-400 mr-1" />
+                      <p className="text-xs font-medium text-teal-600 dark:text-teal-400">Pancharatrik Initiation Gurudev</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">{devotee.pancharatrikInitiationGurudev}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{devotee.pancharatrikInitiationGurudev}</p>
                   </div>
                 )}
                 {devotee.pancharatrikDate && (
-                  <div className="p-4 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl border border-pink-200 dark:border-pink-800">
-                    <div className="flex items-center mb-2">
-                      <Calendar className="h-4 w-4 text-pink-600 dark:text-pink-400 mr-2" />
-                      <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Pancharatrik Initiation Date</p>
+                  <div className="p-2 bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/20 dark:to-rose-900/20 rounded-lg border border-pink-200 dark:border-pink-800">
+                    <div className="flex items-center mb-1">
+                      <Calendar className="h-3 w-3 text-pink-600 dark:text-pink-400 mr-1" />
+                      <p className="text-xs font-medium text-pink-600 dark:text-pink-400">Pancharatrik Initiation Date</p>
                     </div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">
                       {new Date(devotee.pancharatrikDate).toLocaleDateString()}
                     </p>
                   </div>
                 )}
               </div>
-
-              {devotee.additionalComments && (
-                <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-xl border border-gray-200 dark:border-gray-800">
-                  <div className="flex items-center mb-2">
-                    <Book className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-2" />
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Additional Comments</p>
-                  </div>
-                  <p className="font-medium text-gray-900 dark:text-white">{devotee.additionalComments}</p>
-                </div>
-              )}
             </CardContent>
           </Card>
 
