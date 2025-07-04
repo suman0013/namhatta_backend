@@ -380,11 +380,11 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   />
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">
-                  <Label htmlFor="landmark">Additional Details</Label>
+                  <Label htmlFor="landmark">Landmark</Label>
                   <Textarea
                     value={address.landmark || ""}
                     onChange={(e) => handleAddressChange("landmark", e.target.value)}
-                    placeholder="Enter additional address details"
+                    placeholder="Enter landmark details"
                   />
                 </div>
               </div>

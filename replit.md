@@ -98,6 +98,8 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 4, 2025: Successfully completed migration from Replit Agent to standard Replit environment - all functionality preserved and working correctly
+- July 4, 2025: Added Landmark field to Namhatta form and detail view - users can now specify landmark information for better location identification
 - July 1, 2025: Removed "View Details" button and edit icon from Namhatta cards - entire card is now clickable to navigate to details for cleaner UI
 - July 1, 2025: Removed "View Profile" button and edit icon from devotee cards - entire card is now clickable to navigate to profile for cleaner UI
 - June 30, 2025: Fixed inconsistent heights in devotee detail Status Management cards by using min-height (min-h-96) instead of fixed height, with scrollable content only when needed to eliminate unnecessary scrollbars
