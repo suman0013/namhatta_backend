@@ -486,7 +486,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto p-6" style={{ transform: 'none' }}>
+        <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</DialogTitle>
             <DialogDescription>
@@ -1047,7 +1047,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
       {/* Add New Shraddhakutir Dialog */}
       <Dialog open={showShraddhakutirForm} onOpenChange={setShowShraddhakutirForm}>
-        <DialogContent className="w-[85vw] max-w-md" style={{ transform: 'none' }}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add New Shraddhakutir</DialogTitle>
             <DialogDescription>

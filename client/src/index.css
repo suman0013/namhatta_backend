@@ -447,14 +447,4 @@
   .form-field.active {
     z-index: 9999;
   }
-  
-  /* Fix dialog stability on mobile devices */
-  [data-radix-dialog-content] {
-    transform: none !important;
-    animation: none !important;
-    transition: none !important;
-    -webkit-transform: none !important;
-    -webkit-animation: none !important;
-    -webkit-transition: none !important;
-  }
 }

@@ -175,7 +175,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-[90vw] max-w-2xl max-h-[90vh] overflow-y-auto" style={{ transform: 'none' }}>
+      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Namhatta" : "Add New Namhatta"}</DialogTitle>
           <DialogDescription>
