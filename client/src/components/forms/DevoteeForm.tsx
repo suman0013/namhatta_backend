@@ -486,7 +486,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   return (
     <>
       <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="w-full max-w-6xl max-h-[95vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{isEditing ? "Edit Devotee" : "Add New Devotee"}</DialogTitle>
             <DialogDescription>
