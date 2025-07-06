@@ -97,8 +97,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const [showValidation, setShowValidation] = useState(false);
   const [showShraddhakutirForm, setShowShraddhakutirForm] = useState(false);
   const [newShraddhakutir, setNewShraddhakutir] = useState({
-    name: "",
-    description: ""
+    name: ""
   });
 
 
@@ -294,12 +293,10 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
       return;
     }
 
-    // Auto-generate code from name
-    const code = newShraddhakutir.name.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+    // Create shraddhakutir data with district code
     const shraddhakutirData = {
-      ...newShraddhakutir,
-      code: code,
-      region: permanentDistrict
+      name: newShraddhakutir.name,
+      districtCode: permanentDistrict
     };
     
     createShraddhakutirMutation.mutate(shraddhakutirData);
@@ -1067,15 +1064,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 placeholder="Enter Shraddhakutir name"
               />
             </div>
-            <div>
-              <Label htmlFor="shraddhakutir-description">Description</Label>
-              <Textarea
-                id="shraddhakutir-description"
-                value={newShraddhakutir.description}
-                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, description: e.target.value })}
-                placeholder="Optional description"
-                rows={3}
-              />
+            <div className="text-sm text-muted-foreground">
+              District: <strong>{permanentAddress.district}</strong>
             </div>
             <div className="flex justify-end space-x-2">
               <Button
@@ -1083,7 +1073,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 variant="outline"
                 onClick={() => {
                   setShowShraddhakutirForm(false);
-                  setNewShraddhakutir({ name: "", description: "" });
+                  setNewShraddhakutir({ name: "" });
                 }}
                 disabled={createShraddhakutirMutation.isPending}
               >
