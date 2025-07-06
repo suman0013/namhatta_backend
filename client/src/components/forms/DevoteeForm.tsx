@@ -284,7 +284,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
     }
 
     // Get the district from permanent address
-    const permanentDistrict = getValues("permanentAddress.district");
+    const permanentDistrict = permanentAddress.district;
     if (!permanentDistrict) {
       toast({
         title: "Error",
@@ -948,16 +948,35 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                         ))}
                       </SelectContent>
                     </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowShraddhakutirForm(true)}
-                      className="shrink-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                    {permanentAddress.district ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowShraddhakutirForm(true)}
+                        className="shrink-0"
+                        title="Add new Shraddhakutir"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled
+                        className="shrink-0"
+                        title="Please fill permanent address district first"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
+                  {!permanentAddress.district && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Fill permanent address district to add new Shraddhakutir
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
