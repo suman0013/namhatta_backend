@@ -98,8 +98,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   const [showShraddhakutirForm, setShowShraddhakutirForm] = useState(false);
   const [newShraddhakutir, setNewShraddhakutir] = useState({
     name: "",
-    code: "",
-    region: "",
     description: ""
   });
 
@@ -276,16 +274,35 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
   };
 
   const handleCreateShraddhakutir = () => {
-    if (!newShraddhakutir.name || !newShraddhakutir.code || !newShraddhakutir.region) {
+    if (!newShraddhakutir.name) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields (Name, Code, Region)",
+        description: "Please enter a name for the Shraddhakutir",
         variant: "destructive",
       });
       return;
     }
 
-    createShraddhakutirMutation.mutate(newShraddhakutir);
+    // Get the district from permanent address
+    const permanentDistrict = getValues("permanentAddress.district");
+    if (!permanentDistrict) {
+      toast({
+        title: "Error",
+        description: "Please select permanent address district first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Auto-generate code from name
+    const code = newShraddhakutir.name.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+    const shraddhakutirData = {
+      ...newShraddhakutir,
+      code: code,
+      region: permanentDistrict
+    };
+    
+    createShraddhakutirMutation.mutate(shraddhakutirData);
   };
 
   const handlePermanentAddressChange = (field: keyof Address, value: string) => {
@@ -1018,7 +1035,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
           <DialogHeader>
             <DialogTitle>Add New Shraddhakutir</DialogTitle>
             <DialogDescription>
-              Create a new Shraddhakutir to assign to this devotee
+              Create a new Shraddhakutir to assign to this devotee. The region will be automatically set based on the permanent address district.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -1029,24 +1046,6 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 value={newShraddhakutir.name}
                 onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, name: e.target.value })}
                 placeholder="Enter Shraddhakutir name"
-              />
-            </div>
-            <div>
-              <Label htmlFor="shraddhakutir-code">Code *</Label>
-              <Input
-                id="shraddhakutir-code"
-                value={newShraddhakutir.code}
-                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, code: e.target.value })}
-                placeholder="Enter unique code (e.g., SRK001)"
-              />
-            </div>
-            <div>
-              <Label htmlFor="shraddhakutir-region">Region *</Label>
-              <Input
-                id="shraddhakutir-region"
-                value={newShraddhakutir.region}
-                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, region: e.target.value })}
-                placeholder="Enter region (e.g., West Bengal, Maharashtra)"
               />
             </div>
             <div>
@@ -1065,7 +1064,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
                 variant="outline"
                 onClick={() => {
                   setShowShraddhakutirForm(false);
-                  setNewShraddhakutir({ name: "", code: "", region: "", description: "" });
+                  setNewShraddhakutir({ name: "", description: "" });
                 }}
                 disabled={createShraddhakutirMutation.isPending}
               >
