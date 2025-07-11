@@ -3,6 +3,7 @@ import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdate
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
+import { seedDatabase } from "./seed-data";
 
 export class DatabaseStorage implements IStorage {
   constructor() {
@@ -56,6 +57,9 @@ export class DatabaseStorage implements IStorage {
       for (const shraddhakutir of shraddhakutirData) {
         await db.insert(shraddhakutirs).values(shraddhakutir);
       }
+
+      // Seed the database with sample data
+      await seedDatabase();
     }
   }
 
@@ -310,7 +314,7 @@ export class DatabaseStorage implements IStorage {
         namhattaId: update.namhattaId,
         namhattaName: namhatta[0]?.name || "Unknown",
         programType: update.programType,
-        date: update.date.toISOString().split('T')[0],
+        date: typeof update.date === 'string' ? update.date : update.date.toISOString().split('T')[0],
         attendance: update.attendance
       });
     }
