@@ -1,6 +1,4 @@
-import { db } from "./db";
-import { addresses } from "@shared/schema";
-import { sql } from "drizzle-orm";
+import { DatabaseStorage } from "./storage-db";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "../shared/schema";
 
 export interface IStorage {
@@ -1031,4 +1029,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
