@@ -86,6 +86,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(summary);
   });
 
+  app.get("/api/status-distribution", async (req, res) => {
+    const distribution = await storage.getStatusDistribution();
+    res.json(distribution);
+  });
+
   // Hierarchy
   app.get("/api/hierarchy", async (req, res) => {
     const hierarchy = await storage.getTopLevelHierarchy();

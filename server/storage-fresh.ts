@@ -56,6 +56,11 @@ export interface IStorage {
       attendance: number;
     }>;
   }>;
+  getStatusDistribution(): Promise<Array<{
+    statusName: string;
+    count: number;
+    percentage: number;
+  }>>;
 
   // Geography - Database-based methods
   getCountries(): Promise<string[]>;
@@ -759,6 +764,33 @@ export class MemStorage implements IStorage {
 
   async getLeadersByLevel(level: string): Promise<Leader[]> {
     return Array.from(this.leaders.values()).filter(l => l.role === level);
+  }
+
+  async getStatusDistribution(): Promise<Array<{
+    statusName: string;
+    count: number;
+    percentage: number;
+  }>> {
+    const statusCounts = new Map<number, number>();
+    const totalDevotees = this.devotees.size;
+    
+    // Count devotees by status
+    for (const devotee of this.devotees.values()) {
+      const count = statusCounts.get(devotee.devotionalStatusId) || 0;
+      statusCounts.set(devotee.devotionalStatusId, count + 1);
+    }
+    
+    // Create distribution array
+    const distribution = Array.from(statusCounts.entries()).map(([statusId, count]) => {
+      const status = this.devotionalStatuses.get(statusId);
+      return {
+        statusName: status?.name || "Unknown",
+        count,
+        percentage: Math.round((count / totalDevotees) * 100)
+      };
+    });
+    
+    return distribution.sort((a, b) => b.count - a.count);
   }
 
   async getDashboardSummary(): Promise<{

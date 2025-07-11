@@ -62,11 +62,15 @@ export default function Dashboard() {
     queryKey: ["/api/dashboard"],
   });
 
+  const { data: statusDistribution, isLoading: statusLoading } = useQuery({
+    queryKey: ["/api/status-distribution"],
+  });
+
   const { data: hierarchy, isLoading: hierarchyLoading } = useQuery({
     queryKey: ["/api/hierarchy"],
   });
 
-  if (dashboardLoading || hierarchyLoading) {
+  if (dashboardLoading || hierarchyLoading || statusLoading) {
     return <DashboardSkeleton />;
   }
 
@@ -271,13 +275,33 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
-              <StatusProgressBar label="Shraddhavan" count={156} percentage={35} color="from-blue-400 to-blue-600" />
-              <StatusProgressBar label="Sadhusangi" count={98} percentage={22} color="from-emerald-400 to-emerald-600" />
-              <StatusProgressBar label="Gour/Krishna Sevak" count={89} percentage={20} color="from-purple-400 to-purple-600" />
-              <StatusProgressBar label="Gour/Krishna Sadhak" count={67} percentage={15} color="from-orange-400 to-orange-600" />
-              <StatusProgressBar label="Sri Guru Charan Asraya" count={23} percentage={5} color="from-pink-400 to-pink-600" />
-              <StatusProgressBar label="Harinam Diksha" count={9} percentage={2} color="from-indigo-400 to-indigo-600" />
-              <StatusProgressBar label="Pancharatrik Diksha" count={4} percentage={1} color="from-cyan-400 to-cyan-600" />
+              {statusDistribution && statusDistribution.length > 0 ? (
+                statusDistribution.map((status, index) => {
+                  const colors = [
+                    "from-blue-400 to-blue-600",
+                    "from-emerald-400 to-emerald-600",
+                    "from-purple-400 to-purple-600",
+                    "from-orange-400 to-orange-600",
+                    "from-pink-400 to-pink-600",
+                    "from-indigo-400 to-indigo-600",
+                    "from-cyan-400 to-cyan-600"
+                  ];
+                  const color = colors[index % colors.length];
+                  return (
+                    <StatusProgressBar 
+                      key={status.statusName}
+                      label={status.statusName} 
+                      count={status.count} 
+                      percentage={status.percentage} 
+                      color={color} 
+                    />
+                  );
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 dark:text-gray-400">No status data available</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

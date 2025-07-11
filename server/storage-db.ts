@@ -290,6 +290,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Dashboard
+  async getStatusDistribution(): Promise<Array<{
+    statusName: string;
+    count: number;
+    percentage: number;
+  }>> {
+    const [statusCounts, totalDevotees] = await Promise.all([
+      db.select({
+        statusId: devotees.devotionalStatusId,
+        count: count()
+      }).from(devotees).groupBy(devotees.devotionalStatusId),
+      db.select({ count: count() }).from(devotees)
+    ]);
+
+    const total = totalDevotees[0].count;
+    const statuses = await db.select().from(devotionalStatuses);
+    
+    const distribution = statusCounts.map(item => {
+      const status = statuses.find(s => s.id === item.statusId);
+      return {
+        statusName: status?.name || "Unknown",
+        count: item.count,
+        percentage: Math.round((item.count / total) * 100)
+      };
+    });
+
+    return distribution.sort((a, b) => b.count - a.count);
+  }
+
   async getDashboardSummary(): Promise<{
     totalDevotees: number;
     totalNamhattas: number;
