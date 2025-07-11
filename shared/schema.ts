@@ -1,10 +1,10 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Devotees table
-export const devotees = pgTable("devotees", {
-  id: serial("id").primaryKey(),
+export const devotees = sqliteTable("devotees", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   legalName: text("legal_name").notNull(),
   name: text("name"), // Initiated/spiritual name
   dob: text("dob"), // Store as text to match OpenAPI format
@@ -16,7 +16,7 @@ export const devotees = pgTable("devotees", {
   gender: text("gender"), // MALE, FEMALE, OTHER
   bloodGroup: text("blood_group"),
   maritalStatus: text("marital_status"), // MARRIED, UNMARRIED, WIDOWED
-  presentAddress: json("present_address").$type<{
+  presentAddress: text("present_address", { mode: 'json' }).$type<{
     country?: string;
     state?: string;
     district?: string;
@@ -25,7 +25,7 @@ export const devotees = pgTable("devotees", {
     postalCode?: string;
     landmark?: string;
   }>(),
-  permanentAddress: json("permanent_address").$type<{
+  permanentAddress: text("permanent_address", { mode: 'json' }).$type<{
     country?: string;
     state?: string;
     district?: string;
@@ -44,25 +44,25 @@ export const devotees = pgTable("devotees", {
   pancharatrikDate: text("pancharatrik_date"), // Store as text to match OpenAPI format
   education: text("education"),
   occupation: text("occupation"),
-  devotionalCourses: json("devotional_courses").$type<Array<{
+  devotionalCourses: text("devotional_courses", { mode: 'json' }).$type<Array<{
     name: string;
     date: string;
     institute: string;
   }>>(),
   additionalComments: text("additional_comments"),
   shraddhakutirId: integer("shraddhakutir_id"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
 });
 
 // Namhattas table
-export const namhattas = pgTable("namhattas", {
-  id: serial("id").primaryKey(),
+export const namhattas = sqliteTable("namhattas", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   meetingDay: text("meeting_day"),
   meetingTime: text("meeting_time"),
-  address: json("address").$type<{
+  address: text("address", { mode: 'json' }).$type<{
     country?: string;
     state?: string;
     district?: string;
@@ -77,67 +77,67 @@ export const namhattas = pgTable("namhattas", {
   upaChakraSenapoti: text("upa_chakra_senapoti"),
   secretary: text("secretary"),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
 });
 
 // Devotional Statuses table
-export const devotionalStatuses = pgTable("devotional_statuses", {
-  id: serial("id").primaryKey(),
+export const devotionalStatuses = sqliteTable("devotional_statuses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull().unique(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
 // Shraddhakutirs table
-export const shraddhakutirs = pgTable("shraddhakutirs", {
-  id: serial("id").primaryKey(),
+export const shraddhakutirs = sqliteTable("shraddhakutirs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   districtCode: text("district_code").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
 // Status History table
-export const statusHistory = pgTable("status_history", {
-  id: serial("id").primaryKey(),
+export const statusHistory = sqliteTable("status_history", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   devoteeId: integer("devotee_id").notNull(),
   previousStatus: text("previous_status"),
   newStatus: text("new_status").notNull(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
   comment: text("comment"),
 });
 
 // Namhatta Updates table
-export const namhattaUpdates = pgTable("namhatta_updates", {
-  id: serial("id").primaryKey(),
+export const namhattaUpdates = sqliteTable("namhatta_updates", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   namhattaId: integer("namhatta_id").notNull(),
   programType: text("program_type").notNull(),
-  date: timestamp("date").notNull(),
+  date: text("date").notNull(),
   attendance: integer("attendance").notNull(),
   prasadDistribution: integer("prasad_distribution"),
-  nagarKirtan: boolean("nagar_kirtan").default(false),
-  bookDistribution: boolean("book_distribution").default(false),
-  chanting: boolean("chanting").default(false),
-  arati: boolean("arati").default(false),
-  bhagwatPath: boolean("bhagwat_path").default(false),
-  imageUrls: json("image_urls").$type<string[]>(),
+  nagarKirtan: integer("nagar_kirtan", { mode: 'boolean' }).default(false),
+  bookDistribution: integer("book_distribution", { mode: 'boolean' }).default(false),
+  chanting: integer("chanting", { mode: 'boolean' }).default(false),
+  arati: integer("arati", { mode: 'boolean' }).default(false),
+  bhagwatPath: integer("bhagwat_path", { mode: 'boolean' }).default(false),
+  imageUrls: text("image_urls", { mode: 'json' }).$type<string[]>(),
   facebookLink: text("facebook_link"),
   youtubeLink: text("youtube_link"),
   specialAttraction: text("special_attraction"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
 // Leaders/Hierarchy table
-export const leaders = pgTable("leaders", {
-  id: serial("id").primaryKey(),
+export const leaders = sqliteTable("leaders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   role: text("role").notNull(), // GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR, etc.
   reportingTo: integer("reporting_to"),
-  location: json("location").$type<{
+  location: text("location", { mode: 'json' }).$type<{
     country?: string;
     state?: string;
     district?: string;
   }>(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
 // Insert schemas
