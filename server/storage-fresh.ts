@@ -1,4 +1,6 @@
-import { loadGeographicData, getCountries, getStates, getDistricts, getSubDistricts, getVillages, getPincodes } from "./geographic-data";
+import { db } from "./db";
+import { addresses } from "@shared/schema";
+import { sql } from "drizzle-orm";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "../shared/schema";
 
 export interface IStorage {
@@ -57,12 +59,12 @@ export interface IStorage {
     }>;
   }>;
 
-  // Geography
+  // Geography - Database-based methods
   getCountries(): Promise<string[]>;
-  getStates(country: string): Promise<string[]>;
-  getDistricts(state: string): Promise<string[]>;
-  getSubDistricts(district: string): Promise<string[]>;
-  getVillages(subDistrict: string): Promise<string[]>;
+  getStates(country?: string): Promise<string[]>;
+  getDistricts(state?: string): Promise<string[]>;
+  getSubDistricts(district?: string): Promise<string[]>;
+  getVillages(subDistrict?: string): Promise<string[]>;
   getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]>;
 
   // Map data
@@ -99,7 +101,8 @@ export class MemStorage implements IStorage {
   }
 
   private async initializeGeographicData() {
-    await loadGeographicData();
+    // Geographic data is now stored in the database
+    // This method is kept for compatibility but doesn't need to load CSV data
   }
 
   private initializeFreshData() {
@@ -796,27 +799,118 @@ export class MemStorage implements IStorage {
   }
 
   async getCountries(): Promise<string[]> {
-    return getCountries();
+    try {
+      const results = await db
+        .selectDistinct({ country: addresses.country })
+        .from(addresses)
+        .where(sql`${addresses.country} IS NOT NULL`);
+      
+      return results.map(row => row.country).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting countries from database:', error);
+      return ["India"]; // Fallback
+    }
   }
 
-  async getStates(country: string): Promise<string[]> {
-    return getStates(country);
+  async getStates(country?: string): Promise<string[]> {
+    try {
+      let query = db
+        .selectDistinct({ state: addresses.state })
+        .from(addresses)
+        .where(sql`${addresses.state} IS NOT NULL`);
+      
+      if (country) {
+        query = query.where(sql`${addresses.country} = ${country}`);
+      }
+      
+      const results = await query;
+      return results.map(row => row.state).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting states from database:', error);
+      return [];
+    }
   }
 
-  async getDistricts(state: string): Promise<string[]> {
-    return getDistricts(state);
+  async getDistricts(state?: string): Promise<string[]> {
+    try {
+      let query = db
+        .selectDistinct({ district: addresses.district })
+        .from(addresses)
+        .where(sql`${addresses.district} IS NOT NULL`);
+      
+      if (state) {
+        query = query.where(sql`${addresses.state} = ${state}`);
+      }
+      
+      const results = await query;
+      return results.map(row => row.district).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting districts from database:', error);
+      return [];
+    }
   }
 
-  async getSubDistricts(district: string): Promise<string[]> {
-    return getSubDistricts(district);
+  async getSubDistricts(district?: string): Promise<string[]> {
+    try {
+      let query = db
+        .selectDistinct({ subDistrict: addresses.subDistrict })
+        .from(addresses)
+        .where(sql`${addresses.subDistrict} IS NOT NULL`);
+      
+      if (district) {
+        query = query.where(sql`${addresses.district} = ${district}`);
+      }
+      
+      const results = await query;
+      return results.map(row => row.subDistrict).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting sub-districts from database:', error);
+      return [];
+    }
   }
 
-  async getVillages(subDistrict: string): Promise<string[]> {
-    return getVillages(subDistrict);
+  async getVillages(subDistrict?: string): Promise<string[]> {
+    try {
+      let query = db
+        .selectDistinct({ village: addresses.village })
+        .from(addresses)
+        .where(sql`${addresses.village} IS NOT NULL`);
+      
+      if (subDistrict) {
+        query = query.where(sql`${addresses.subDistrict} = ${subDistrict}`);
+      }
+      
+      const results = await query;
+      return results.map(row => row.village).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting villages from database:', error);
+      return [];
+    }
   }
 
   async getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]> {
-    return getPincodes(village, district, subDistrict);
+    try {
+      let query = db
+        .selectDistinct({ postalCode: addresses.postalCode })
+        .from(addresses)
+        .where(sql`${addresses.postalCode} IS NOT NULL`);
+      
+      if (village) {
+        query = query.where(sql`${addresses.village} = ${village}`);
+      }
+      if (district) {
+        query = query.where(sql`${addresses.district} = ${district}`);
+      }
+      if (subDistrict) {
+        query = query.where(sql`${addresses.subDistrict} = ${subDistrict}`);
+      }
+      
+      const results = await query;
+      return results.map(row => row.postalCode).filter(Boolean);
+    } catch (error) {
+      console.error('Error getting postal codes from database:', error);
+      return [];
+    }
   }
 
   async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {

@@ -26,36 +26,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/states", async (req, res) => {
     const { country } = req.query;
-    if (!country) {
-      return res.status(400).json({ message: "Country parameter is required" });
-    }
     const states = await storage.getStates(country as string);
     res.json(states);
   });
 
   app.get("/api/districts", async (req, res) => {
     const { state } = req.query;
-    if (!state) {
-      return res.status(400).json({ message: "State parameter is required" });
-    }
     const districts = await storage.getDistricts(state as string);
     res.json(districts);
   });
 
   app.get("/api/sub-districts", async (req, res) => {
     const { district } = req.query;
-    if (!district) {
-      return res.status(400).json({ message: "District parameter is required" });
-    }
     const subDistricts = await storage.getSubDistricts(district as string);
     res.json(subDistricts);
   });
 
   app.get("/api/villages", async (req, res) => {
     const { subDistrict } = req.query;
-    if (!subDistrict) {
-      return res.status(400).json({ message: "Sub-district parameter is required" });
-    }
     const villages = await storage.getVillages(subDistrict as string);
     res.json(villages);
   });
