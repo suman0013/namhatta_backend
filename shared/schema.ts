@@ -140,6 +140,37 @@ export const leaders = sqliteTable("leaders", {
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
+// Address table for normalized address storage
+export const addresses = sqliteTable("addresses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  country: text("country"),
+  state: text("state"),
+  district: text("district"),
+  subDistrict: text("sub_district"),
+  village: text("village"),
+  postalCode: text("postal_code"),
+  landmark: text("landmark"),
+  addressType: text("address_type"), // 'present', 'permanent', 'namhatta'
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+});
+
+// Junction table for devotee addresses
+export const devoteeAddresses = sqliteTable("devotee_addresses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  devoteeId: integer("devotee_id").notNull(),
+  addressId: integer("address_id").notNull(),
+  addressType: text("address_type").notNull(), // 'present' or 'permanent'
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+});
+
+// Junction table for namhatta addresses
+export const namhattaAddresses = sqliteTable("namhatta_addresses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  namhattaId: integer("namhatta_id").notNull(),
+  addressId: integer("address_id").notNull(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+});
+
 // Insert schemas
 export const insertDevoteeSchema = createInsertSchema(devotees).omit({
   id: true,
@@ -171,6 +202,21 @@ export const insertLeaderSchema = createInsertSchema(leaders).omit({
   createdAt: true,
 });
 
+export const insertAddressSchema = createInsertSchema(addresses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDevoteeAddressSchema = createInsertSchema(devoteeAddresses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNamhattaAddressSchema = createInsertSchema(namhattaAddresses).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Devotee = typeof devotees.$inferSelect;
 export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
@@ -191,3 +237,12 @@ export type Leader = typeof leaders.$inferSelect;
 export type InsertLeader = z.infer<typeof insertLeaderSchema>;
 
 export type StatusHistory = typeof statusHistory.$inferSelect;
+
+export type Address = typeof addresses.$inferSelect;
+export type InsertAddress = z.infer<typeof insertAddressSchema>;
+
+export type DevoteeAddress = typeof devoteeAddresses.$inferSelect;
+export type InsertDevoteeAddress = z.infer<typeof insertDevoteeAddressSchema>;
+
+export type NamhattaAddress = typeof namhattaAddresses.$inferSelect;
+export type InsertNamhattaAddress = z.infer<typeof insertNamhattaAddressSchema>;
