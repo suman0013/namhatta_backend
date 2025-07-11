@@ -64,12 +64,38 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Devotees
-  async getDevotees(page = 1, size = 10): Promise<{ data: Devotee[], total: number }> {
+  async getDevotees(page = 1, size = 10, filters: any = {}): Promise<{ data: Devotee[], total: number }> {
     const offset = (page - 1) * size;
     
+    let whereConditions = [];
+    
+    if (filters.search) {
+      whereConditions.push(
+        or(
+          like(devotees.legalName, `%${filters.search}%`),
+          like(devotees.name, `%${filters.search}%`),
+          like(devotees.email, `%${filters.search}%`)
+        )
+      );
+    }
+    
+    if (filters.statusId) {
+      whereConditions.push(eq(devotees.devotionalStatusId, parseInt(filters.statusId)));
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+    
+    // Handle sorting
+    let orderBy = asc(devotees.legalName);
+    if (filters.sortBy === 'createdAt') {
+      orderBy = filters.sortOrder === 'desc' ? desc(devotees.createdAt) : asc(devotees.createdAt);
+    } else if (filters.sortBy === 'name') {
+      orderBy = filters.sortOrder === 'desc' ? desc(devotees.legalName) : asc(devotees.legalName);
+    }
+
     const [data, totalResult] = await Promise.all([
-      db.select().from(devotees).limit(size).offset(offset),
-      db.select({ count: count() }).from(devotees)
+      db.select().from(devotees).where(whereClause).limit(size).offset(offset).orderBy(orderBy),
+      db.select({ count: count() }).from(devotees).where(whereClause)
     ]);
 
     return {

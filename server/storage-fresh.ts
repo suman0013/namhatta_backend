@@ -3,7 +3,7 @@ import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, Ins
 
 export interface IStorage {
   // Devotees
-  getDevotees(page?: number, size?: number): Promise<{ data: Devotee[], total: number }>;
+  getDevotees(page?: number, size?: number, filters?: any): Promise<{ data: Devotee[], total: number }>;
   getDevotee(id: number): Promise<Devotee | undefined>;
   createDevotee(devotee: InsertDevotee): Promise<Devotee>;
   createDevoteeForNamhatta(devotee: InsertDevotee, namhattaId: number): Promise<Devotee>;
