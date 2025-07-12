@@ -1,6 +1,67 @@
 import { db } from "./db";
-import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
+// Import schemas based on database type
+const databaseUrl = process.env.DATABASE_URL;
+const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
+const usePostgreSQL = databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://');
+
+let devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses;
+let Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory;
+
+if (useMySQL) {
+  const mysqlSchema = await import("@shared/schema-mysql");
+  devotees = mysqlSchema.devotees;
+  namhattas = mysqlSchema.namhattas;
+  devotionalStatuses = mysqlSchema.devotionalStatuses;
+  shraddhakutirs = mysqlSchema.shraddhakutirs;
+  namhattaUpdates = mysqlSchema.namhattaUpdates;
+  leaders = mysqlSchema.leaders;
+  statusHistory = mysqlSchema.statusHistory;
+  addresses = mysqlSchema.addresses;
+  devoteeAddresses = mysqlSchema.devoteeAddresses;
+  namhattaAddresses = mysqlSchema.namhattaAddresses;
+  
+  Devotee = mysqlSchema.Devotee;
+  InsertDevotee = mysqlSchema.NewDevotee;
+  Namhatta = mysqlSchema.Namhatta;
+  InsertNamhatta = mysqlSchema.NewNamhatta;
+  DevotionalStatus = mysqlSchema.DevotionalStatus;
+  InsertDevotionalStatus = mysqlSchema.NewDevotionalStatus;
+  Shraddhakutir = mysqlSchema.Shraddhakutir;
+  InsertShraddhakutir = mysqlSchema.NewShraddhakutir;
+  NamhattaUpdate = mysqlSchema.NamhattaUpdate;
+  InsertNamhattaUpdate = mysqlSchema.NewNamhattaUpdate;
+  Leader = mysqlSchema.Leader;
+  InsertLeader = mysqlSchema.NewLeader;
+  StatusHistory = mysqlSchema.StatusHistory;
+} else if (usePostgreSQL) {
+  const postgresSchema = await import("@shared/schema-postgres");
+  devotees = postgresSchema.devotees;
+  namhattas = postgresSchema.namhattas;
+  devotionalStatuses = postgresSchema.devotionalStatuses;
+  shraddhakutirs = postgresSchema.shraddhakutirs;
+  namhattaUpdates = postgresSchema.namhattaUpdates;
+  leaders = postgresSchema.leaders;
+  statusHistory = postgresSchema.statusHistory;
+  addresses = postgresSchema.addresses;
+  devoteeAddresses = postgresSchema.devoteeAddresses;
+  namhattaAddresses = postgresSchema.namhattaAddresses;
+  
+  Devotee = postgresSchema.Devotee;
+  InsertDevotee = postgresSchema.NewDevotee;
+  Namhatta = postgresSchema.Namhatta;
+  InsertNamhatta = postgresSchema.NewNamhatta;
+  DevotionalStatus = postgresSchema.DevotionalStatus;
+  InsertDevotionalStatus = postgresSchema.NewDevotionalStatus;
+  Shraddhakutir = postgresSchema.Shraddhakutir;
+  InsertShraddhakutir = postgresSchema.NewShraddhakutir;
+  NamhattaUpdate = postgresSchema.NamhattaUpdate;
+  InsertNamhattaUpdate = postgresSchema.NewNamhattaUpdate;
+  Leader = postgresSchema.Leader;
+  InsertLeader = postgresSchema.NewLeader;
+  StatusHistory = postgresSchema.StatusHistory;
+} else {
+  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
+}
 import { sql, eq, desc, asc, and, or, like, count, inArray } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";

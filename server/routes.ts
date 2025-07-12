@@ -1,7 +1,30 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage-fresh";
-import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema } from "@shared/schema";
+// Import schemas based on database type
+const databaseUrl = process.env.DATABASE_URL;
+const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
+const usePostgreSQL = databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://');
+
+let insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema;
+
+if (useMySQL) {
+  const mysqlSchema = await import("@shared/schema-mysql");
+  insertDevoteeSchema = mysqlSchema.insertDevoteeSchema;
+  insertNamhattaSchema = mysqlSchema.insertNamhattaSchema;
+  insertDevotionalStatusSchema = mysqlSchema.insertDevotionalStatusSchema;
+  insertShraddhakutirSchema = mysqlSchema.insertShraddhakutirSchema;
+  insertNamhattaUpdateSchema = mysqlSchema.insertNamhattaUpdateSchema;
+} else if (usePostgreSQL) {
+  const postgresSchema = await import("@shared/schema-postgres");
+  insertDevoteeSchema = postgresSchema.insertDevoteeSchema;
+  insertNamhattaSchema = postgresSchema.insertNamhattaSchema;
+  insertDevotionalStatusSchema = postgresSchema.insertDevotionalStatusSchema;
+  insertShraddhakutirSchema = postgresSchema.insertShraddhakutirSchema;
+  insertNamhattaUpdateSchema = postgresSchema.insertNamhattaUpdateSchema;
+} else {
+  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check

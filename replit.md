@@ -23,10 +23,12 @@ This is a full-stack web application for managing Namhatta religious/spiritual o
 - **API Design**: RESTful API with JSON responses
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL hosted on Neon
+- **Development Database**: MySQL 8.0+ (Windows local environment)
+- **Production Database**: PostgreSQL (Replit environment)
 - **ORM**: Drizzle ORM for type-safe database operations
 - **Migrations**: Drizzle Kit for schema management
-- **Session Storage**: PostgreSQL-based session store
+- **Auto-Detection**: Automatic database type detection based on DATABASE_URL
+- **Session Storage**: Database-based session store
 
 ## Key Components
 
@@ -98,6 +100,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 12, 2025: **MAJOR ARCHITECTURE CHANGE** - Completely removed SQLite support and implemented dual database architecture with MySQL (local Windows development) and PostgreSQL (Replit production). Removed better-sqlite3 dependency, deleted all SQLite files, created comprehensive PostgreSQL schema, updated database connection logic for automatic detection, and provided complete setup guides for both environments. Application now supports MySQL for local development and PostgreSQL for Replit deployment with zero configuration changes.
 - July 12, 2025: Fixed critical database duplication issue - removed duplicate Namhatta entries (101 total entries reduced to 26 unique entries), resolved issue causing multiple identical Namhatta names to appear on the page, cleaned up database to maintain data integrity
 - July 12, 2025: Set default sorting to alphabetical by name for Namhattas page - ensured backend properly handles default name sorting when no sortBy is specified, updated sorting logic to consistently sort by name ascending as default
 - July 12, 2025: Fixed devotee creation issue in Namhatta detail page - updated DevoteeForm to use correct API endpoint (createDevoteeForNamhatta) when adding devotees to specific Namhattas, improved cache invalidation to refresh both global devotees list and specific Namhatta devotees list

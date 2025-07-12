@@ -1,5 +1,32 @@
 import { db } from "./db";
-import { devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
+// Import schemas based on database type
+const databaseUrl = process.env.DATABASE_URL;
+const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
+const usePostgreSQL = databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://');
+
+let devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses;
+
+if (useMySQL) {
+  const mysqlSchema = await import("@shared/schema-mysql");
+  devotees = mysqlSchema.devotees;
+  namhattas = mysqlSchema.namhattas;
+  devotionalStatuses = mysqlSchema.devotionalStatuses;
+  namhattaUpdates = mysqlSchema.namhattaUpdates;
+  addresses = mysqlSchema.addresses;
+  devoteeAddresses = mysqlSchema.devoteeAddresses;
+  namhattaAddresses = mysqlSchema.namhattaAddresses;
+} else if (usePostgreSQL) {
+  const postgresSchema = await import("@shared/schema-postgres");
+  devotees = postgresSchema.devotees;
+  namhattas = postgresSchema.namhattas;
+  devotionalStatuses = postgresSchema.devotionalStatuses;
+  namhattaUpdates = postgresSchema.namhattaUpdates;
+  addresses = postgresSchema.addresses;
+  devoteeAddresses = postgresSchema.devoteeAddresses;
+  namhattaAddresses = postgresSchema.namhattaAddresses;
+} else {
+  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
+}
 
 // Sample data for seeding the database
 export async function seedDatabase() {

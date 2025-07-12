@@ -194,3 +194,46 @@ export type Shraddhakutir = typeof shraddhakutirs.$inferSelect;
 export type NamhattaUpdate = typeof namhattaUpdates.$inferSelect;
 export type Leader = typeof leaders.$inferSelect;
 export type Address = typeof addresses.$inferSelect;
+
+// Devotee Addresses Junction Table
+export const devoteeAddresses = mysqlTable("devotee_addresses", {
+  id: serial("id").primaryKey(),
+  devoteeId: int("devotee_id"),
+  addressId: int("address_id"),
+  type: varchar("type", { length: 50 }).notNull(), // 'present' or 'permanent'
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Namhatta Addresses Junction Table
+export const namhattaAddresses = mysqlTable("namhatta_addresses", {
+  id: serial("id").primaryKey(),
+  namhattaId: int("namhatta_id"),
+  addressId: int("address_id"),
+  type: varchar("type", { length: 50 }).notNull(), // 'primary'
+  createdAt: timestamp("created_at").defaultNow()
+});
+
+// Status History Table
+export const statusHistory = mysqlTable("status_history", {
+  id: serial("id").primaryKey(),
+  devoteeId: int("devotee_id"),
+  oldStatus: int("old_status"),
+  newStatus: int("new_status"),
+  comment: text("comment"),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Additional type exports
+export type NewDevotee = typeof devotees.$inferInsert;
+export type NewNamhatta = typeof namhattas.$inferInsert;
+export type NewDevotionalStatus = typeof devotionalStatuses.$inferInsert;
+export type NewShraddhakutir = typeof shraddhakutirs.$inferInsert;
+export type NewNamhattaUpdate = typeof namhattaUpdates.$inferInsert;
+export type NewAddress = typeof addresses.$inferInsert;
+export type NewLeader = typeof leaders.$inferInsert;
+export type DevoteeAddress = typeof devoteeAddresses.$inferSelect;
+export type NewDevoteeAddress = typeof devoteeAddresses.$inferInsert;
+export type NamhattaAddress = typeof namhattaAddresses.$inferSelect;
+export type NewNamhattaAddress = typeof namhattaAddresses.$inferInsert;
+export type StatusHistory = typeof statusHistory.$inferSelect;
+export type NewStatusHistory = typeof statusHistory.$inferInsert;

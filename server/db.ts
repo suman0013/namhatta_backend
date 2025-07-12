@@ -1,26 +1,34 @@
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+// Database connection with automatic MySQL/PostgreSQL detection
+const databaseUrl = process.env.DATABASE_URL;
 
-// Check if MySQL is configured
-const databaseUrl = process.env.DATABASE_URL || './namhatta.db';
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is required. Please set your database connection string.");
+}
+
 const useMySQL = databaseUrl.startsWith('mysql://') || databaseUrl.startsWith('mysql2://');
+const usePostgreSQL = databaseUrl.startsWith('postgresql://') || databaseUrl.startsWith('postgres://');
 
-let db: ReturnType<typeof drizzle>;
+let db: any;
 
 if (useMySQL) {
-  // MySQL setup (both development and production)
+  // MySQL setup (local development)
   const { createConnection } = await import('mysql2/promise');
   const { drizzle: drizzleMySQL } = await import('drizzle-orm/mysql2');
   const mysqlSchema = await import("@shared/schema-mysql");
   const connection = await createConnection(databaseUrl);
   db = drizzleMySQL(connection, { schema: mysqlSchema });
   console.log('🔗 Connected to MySQL database');
+} else if (usePostgreSQL) {
+  // PostgreSQL setup (Replit production)
+  const { Client } = await import('pg');
+  const { drizzle: drizzlePostgreSQL } = await import('drizzle-orm/node-postgres');
+  const postgresSchema = await import("@shared/schema-postgres");
+  const client = new Client({ connectionString: databaseUrl });
+  await client.connect();
+  db = drizzlePostgreSQL(client, { schema: postgresSchema });
+  console.log('🔗 Connected to PostgreSQL database');
 } else {
-  // SQLite setup (fallback)
-  const sqliteSchema = await import("@shared/schema");
-  const sqlite = new Database(databaseUrl);
-  db = drizzle(sqlite, { schema: sqliteSchema });
-  console.log('🔗 Connected to SQLite database');
+  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
 }
 
 export { db };
