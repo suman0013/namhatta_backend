@@ -1,4 +1,8 @@
 import { db } from "./db";
+import { sql, eq, desc, asc, and, or, like, count, inArray } from "drizzle-orm";
+import { IStorage } from "./storage-fresh";
+import { seedDatabase } from "./seed-data";
+
 // Import schemas based on database type
 const databaseUrl = process.env.DATABASE_URL;
 const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
@@ -62,9 +66,6 @@ if (useMySQL) {
 } else {
   throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
 }
-import { sql, eq, desc, asc, and, or, like, count, inArray } from "drizzle-orm";
-import { IStorage } from "./storage-fresh";
-import { seedDatabase } from "./seed-data";
 
 export class DatabaseStorage implements IStorage {
   constructor() {
@@ -134,7 +135,7 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(
         or(
           like(devotees.legalName, `%${filters.search}%`),
-          like(devotees.name, `%${filters.search}%`),
+          like(devotees.initiatedName, `%${filters.search}%`),
           like(devotees.email, `%${filters.search}%`)
         )
       );
@@ -245,9 +246,7 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(like(namhattas.name, `%${filters.search}%`));
     }
     
-    if (filters.status) {
-      whereConditions.push(eq(namhattas.status, filters.status));
-    }
+    // Note: Status filtering removed as not available in PostgreSQL schema
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
     
@@ -265,17 +264,15 @@ export class DatabaseStorage implements IStorage {
     const [data, totalResult] = await Promise.all([
       db.select({
         id: namhattas.id,
-        code: namhattas.code,
         name: namhattas.name,
-        meetingDay: namhattas.meetingDay,
-        meetingTime: namhattas.meetingTime,
-        address: namhattas.address,
+        description: namhattas.description,
+        establishedDate: namhattas.establishedDate,
+        shraddhakutirId: namhattas.shraddhakutirId,
         malaSenapoti: namhattas.malaSenapoti,
         mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
         chakraSenapoti: namhattas.chakraSenapoti,
         upaChakraSenapoti: namhattas.upaChakraSenapoti,
         secretary: namhattas.secretary,
-        status: namhattas.status,
         createdAt: namhattas.createdAt,
         updatedAt: namhattas.updatedAt,
         devoteeCount: count(devotees.id)
@@ -395,24 +392,24 @@ export class DatabaseStorage implements IStorage {
     const result = await db.select({
       id: namhattaUpdates.id,
       namhattaId: namhattaUpdates.namhattaId,
+      title: namhattaUpdates.title,
+      description: namhattaUpdates.description,
+      eventDate: namhattaUpdates.eventDate,
       programType: namhattaUpdates.programType,
-      date: namhattaUpdates.date,
-      attendance: namhattaUpdates.attendance,
-      prasadDistribution: namhattaUpdates.prasadDistribution,
-      nagarKirtan: namhattaUpdates.nagarKirtan,
-      bookDistribution: namhattaUpdates.bookDistribution,
-      chanting: namhattaUpdates.chanting,
-      arati: namhattaUpdates.arati,
-      bhagwatPath: namhattaUpdates.bhagwatPath,
-      imageUrls: namhattaUpdates.imageUrls,
-      facebookLink: namhattaUpdates.facebookLink,
-      youtubeLink: namhattaUpdates.youtubeLink,
       specialAttraction: namhattaUpdates.specialAttraction,
+      prasadamDetails: namhattaUpdates.prasadamDetails,
+      kirtanDetails: namhattaUpdates.kirtanDetails,
+      bookDistribution: namhattaUpdates.bookDistribution,
+      chantingRounds: namhattaUpdates.chantingRounds,
+      aratiPerformed: namhattaUpdates.aratiPerformed,
+      bhagwatPathPerformed: namhattaUpdates.bhagwatPathPerformed,
+      attendance: namhattaUpdates.attendance,
+      imageUrl: namhattaUpdates.imageUrl,
       createdAt: namhattaUpdates.createdAt,
       namhattaName: namhattas.name
     }).from(namhattaUpdates)
       .innerJoin(namhattas, eq(namhattaUpdates.namhattaId, namhattas.id))
-      .orderBy(desc(namhattaUpdates.date));
+      .orderBy(desc(namhattaUpdates.eventDate));
     
     return result;
   }
@@ -427,19 +424,19 @@ export class DatabaseStorage implements IStorage {
     malaSenapotis: Leader[];
   }> {
     const [founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis] = await Promise.all([
-      db.select().from(leaders).where(eq(leaders.role, "FOUNDER_ACHARYA")),
-      db.select().from(leaders).where(eq(leaders.role, "GBC")),
-      db.select().from(leaders).where(eq(leaders.role, "REGIONAL_DIRECTOR")),
-      db.select().from(leaders).where(eq(leaders.role, "CO_REGIONAL_DIRECTOR")),
-      db.select().from(leaders).where(eq(leaders.role, "DISTRICT_SUPERVISOR")),
-      db.select().from(leaders).where(eq(leaders.role, "MALA_SENAPOTI"))
+      db.select().from(leaders).where(eq(leaders.level, "founder")),
+      db.select().from(leaders).where(eq(leaders.level, "acharya")),
+      db.select().from(leaders).where(eq(leaders.level, "regional")),
+      db.select().from(leaders).where(eq(leaders.level, "regional")),
+      db.select().from(leaders).where(eq(leaders.level, "district")),
+      db.select().from(leaders).where(eq(leaders.level, "mala"))
     ]);
 
     return { founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis };
   }
 
   async getLeadersByLevel(level: string): Promise<Leader[]> {
-    return await db.select().from(leaders).where(eq(leaders.role, level));
+    return await db.select().from(leaders).where(eq(leaders.level, level));
   }
 
   // Dashboard
@@ -485,7 +482,7 @@ export class DatabaseStorage implements IStorage {
     const [devoteeCount, namhattaCount, updates] = await Promise.all([
       db.select({ count: count() }).from(devotees),
       db.select({ count: count() }).from(namhattas),
-      db.select().from(namhattaUpdates).orderBy(desc(namhattaUpdates.date)).limit(5)
+      db.select().from(namhattaUpdates).orderBy(desc(namhattaUpdates.eventDate)).limit(5)
     ]);
 
     const recentUpdates = [];
@@ -495,7 +492,7 @@ export class DatabaseStorage implements IStorage {
         namhattaId: update.namhattaId,
         namhattaName: namhatta[0]?.name || "Unknown",
         programType: update.programType,
-        date: typeof update.date === 'string' ? update.date : update.date.toISOString().split('T')[0],
+        date: typeof update.eventDate === 'string' ? update.eventDate : update.eventDate?.toISOString().split('T')[0] || '',
         attendance: update.attendance
       });
     }
@@ -625,146 +622,119 @@ export class DatabaseStorage implements IStorage {
 
   // Map data methods
   async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
+    // Since PostgreSQL schema doesn't have address field in namhattas table,
+    // we'll use the junction table approach with addresses table
     const results = await db.select({
-      country: namhattas.address,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
+    }).from(namhattas)
+      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .groupBy(addresses.country);
 
-    // Parse JSON address and group by country
-    const countryCounts: Record<string, number> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.country === 'string' ? JSON.parse(result.country) : result.country;
-        if (address?.country) {
-          countryCounts[address.country] = (countryCounts[address.country] || 0) + result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
-    }
-
-    return Object.entries(countryCounts).map(([country, count]) => ({ country, count }));
+    return results.map(result => ({
+      country: result.country || 'Unknown',
+      count: result.count
+    }));
   }
 
   async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
+    }).from(namhattas)
+      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .groupBy(addresses.state, addresses.country);
 
-    const stateCounts: Record<string, { country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.state && address?.country && (!country || address.country === country)) {
-          const key = `${address.state}-${address.country}`;
-          if (!stateCounts[key]) {
-            stateCounts[key] = { country: address.country, count: 0 };
-          }
-          stateCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    if (country) {
+      query = query.where(eq(addresses.country, country));
     }
 
-    return Object.entries(stateCounts).map(([key, data]) => ({
-      state: key.split('-')[0],
-      country: data.country,
-      count: data.count
+    const results = await query;
+    return results.map(result => ({
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      district: addresses.district,
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
+    }).from(namhattas)
+      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .groupBy(addresses.district, addresses.state, addresses.country);
 
-    const districtCounts: Record<string, { state: string; country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.district && address?.state && address?.country && (!state || address.state === state)) {
-          const key = `${address.district}-${address.state}-${address.country}`;
-          if (!districtCounts[key]) {
-            districtCounts[key] = { state: address.state, country: address.country, count: 0 };
-          }
-          districtCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    if (state) {
+      query = query.where(eq(addresses.state, state));
     }
 
-    return Object.entries(districtCounts).map(([key, data]) => ({
-      district: key.split('-')[0],
-      state: data.state,
-      country: data.country,
-      count: data.count
+    const results = await query;
+    return results.map(result => ({
+      district: result.district || 'Unknown',
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      subDistrict: addresses.subDistrict,
+      district: addresses.district,
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
+    }).from(namhattas)
+      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .groupBy(addresses.subDistrict, addresses.district, addresses.state, addresses.country);
 
-    const subDistrictCounts: Record<string, { district: string; state: string; country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.subDistrict && address?.district && address?.state && address?.country && (!district || address.district === district)) {
-          const key = `${address.subDistrict}-${address.district}-${address.state}-${address.country}`;
-          if (!subDistrictCounts[key]) {
-            subDistrictCounts[key] = { district: address.district, state: address.state, country: address.country, count: 0 };
-          }
-          subDistrictCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    if (district) {
+      query = query.where(eq(addresses.district, district));
     }
 
-    return Object.entries(subDistrictCounts).map(([key, data]) => ({
-      subDistrict: key.split('-')[0],
-      district: data.district,
-      state: data.state,
-      country: data.country,
-      count: data.count
+    const results = await query;
+    return results.map(result => ({
+      subDistrict: result.subDistrict || 'Unknown',
+      district: result.district || 'Unknown',
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      village: addresses.village,
+      subDistrict: addresses.subDistrict,
+      district: addresses.district,
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
+    }).from(namhattas)
+      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .groupBy(addresses.village, addresses.subDistrict, addresses.district, addresses.state, addresses.country);
 
-    const villageCounts: Record<string, { subDistrict: string; district: string; state: string; country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.village && address?.subDistrict && address?.district && address?.state && address?.country && (!subDistrict || address.subDistrict === subDistrict)) {
-          const key = `${address.village}-${address.subDistrict}-${address.district}-${address.state}-${address.country}`;
-          if (!villageCounts[key]) {
-            villageCounts[key] = { subDistrict: address.subDistrict, district: address.district, state: address.state, country: address.country, count: 0 };
-          }
-          villageCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    if (subDistrict) {
+      query = query.where(eq(addresses.subDistrict, subDistrict));
     }
 
-    return Object.entries(villageCounts).map(([key, data]) => ({
-      village: key.split('-')[0],
-      subDistrict: data.subDistrict,
-      district: data.district,
-      state: data.state,
-      country: data.country,
-      count: data.count
+    const results = await query;
+    return results.map(result => ({
+      village: result.village || 'Unknown',
+      subDistrict: result.subDistrict || 'Unknown',
+      district: result.district || 'Unknown',
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 }
