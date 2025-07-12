@@ -35,6 +35,9 @@ Before running the application locally, ensure you have the following installed:
 - **npm** or **yarn** - Package manager (comes with Node.js)
 - **Git** - Version control system
 
+### Windows Users
+If you're on Windows, see the [Windows Setup Guide](WINDOWS_SETUP.md) for platform-specific instructions.
+
 ## Local Development Setup
 
 ### Step 1: Clone the Repository
@@ -113,6 +116,17 @@ node seed-script.ts
 
 ### Step 5: Start the Development Server
 
+**For Linux/Mac:**
+```bash
+npm run dev
+```
+
+**For Windows (PowerShell):**
+```powershell
+$env:NODE_ENV="development"; npm run dev
+```
+
+**For Windows (with .env file):**
 ```bash
 npm run dev
 ```
