@@ -35,6 +35,7 @@ export const devotees = sqliteTable("devotees", {
     landmark?: string;
   }>(),
   devotionalStatusId: integer("devotional_status_id"),
+  namhattaId: integer("namhatta_id"),
   gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
   gurudevPancharatrik: integer("gurudev_pancharatrik"), // Reference to leader ID
   harinamInitiationGurudev: text("harinam_initiation_gurudev"), // Spiritual name of harinam guru
