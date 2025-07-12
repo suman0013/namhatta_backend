@@ -190,11 +190,14 @@ export class DatabaseStorage implements IStorage {
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
     
-    // Handle sorting
+    // Handle sorting - default to name ascending
     let orderBy = asc(namhattas.name);
     if (filters.sortBy === 'createdAt') {
       orderBy = filters.sortOrder === 'desc' ? desc(namhattas.createdAt) : asc(namhattas.createdAt);
-    } else if (filters.sortBy === 'name') {
+    } else if (filters.sortBy === 'updatedAt') {
+      orderBy = filters.sortOrder === 'desc' ? desc(namhattas.updatedAt) : asc(namhattas.updatedAt);
+    } else if (filters.sortBy === 'name' || !filters.sortBy) {
+      // Default to name sorting if no sortBy provided or explicitly name
       orderBy = filters.sortOrder === 'desc' ? desc(namhattas.name) : asc(namhattas.name);
     }
 

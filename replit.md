@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 12, 2025: Set default sorting to alphabetical by name for Namhattas page - ensured backend properly handles default name sorting when no sortBy is specified, updated sorting logic to consistently sort by name ascending as default
 - July 12, 2025: Fixed devotee creation issue in Namhatta detail page - updated DevoteeForm to use correct API endpoint (createDevoteeForNamhatta) when adding devotees to specific Namhattas, improved cache invalidation to refresh both global devotees list and specific Namhatta devotees list
 - July 12, 2025: Optimized Updates page performance by replacing N+1 queries with single database query - created getAllUpdates endpoint with JOIN operation, reduced 100+ API calls to 1 request, significantly improved page load speed
 - July 12, 2025: Removed Mala Senapotis section from Leadership Hierarchy page as requested by user, cleaned up unused import statements
