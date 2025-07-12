@@ -119,18 +119,14 @@ export async function seedDatabase() {
     const secretary = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     
     namhattaData.push({
-      code: `NAM${String(i).padStart(3, '0')}`,
       name: `${location.village} Namhatta`,
-      address: location,
-      president,
-      vicePresident,
-      secretary,
+      description: `Namhatta center located in ${location.village}, ${location.district}`,
+      establishedDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
       malaSenapoti: Math.random() > 0.7 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       mahaChakraSenapoti: Math.random() > 0.8 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       chakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       upaChakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
-      status: Math.random() > 0.1 ? "APPROVED" : "PENDING_APPROVAL",
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+      secretary: secretary
     });
   }
 
@@ -157,21 +153,19 @@ export async function seedDatabase() {
     devoteeData.push({
       legalName,
       initiatedName,
-      dob: new Date(1950 + Math.random() * 50, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-      gender: isMale ? "MALE" : "FEMALE",
+      dateOfBirth: new Date(1950 + Math.random() * 50, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+      gender: isMale ? "Male" : "Female",
       bloodGroup: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"][Math.floor(Math.random() * 8)],
-      phone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+      phoneNumber: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       email: `${legalName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
       occupation: ["Teacher", "Engineer", "Doctor", "Farmer", "Business", "Student", "Retired", "Housewife", "Government Service"][Math.floor(Math.random() * 9)],
       fatherName: maleNames[Math.floor(Math.random() * maleNames.length)],
       motherName: femaleNames[Math.floor(Math.random() * femaleNames.length)],
-      husbandName: Math.random() > 0.5 ? (isMale ? femaleNames[Math.floor(Math.random() * femaleNames.length)] : maleNames[Math.floor(Math.random() * maleNames.length)]) : null,
-      presentAddress: location,
-      permanentAddress: Math.random() > 0.7 ? locations[Math.floor(Math.random() * locations.length)] : location,
+      spouseName: Math.random() > 0.5 ? (isMale ? femaleNames[Math.floor(Math.random() * femaleNames.length)] : maleNames[Math.floor(Math.random() * maleNames.length)]) : null,
+      namhattaId: namhattaId,
       devotionalStatusId: statusId,
-      harinamDate: isInitiated ? new Date(2000 + Math.random() * 24, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0] : null,
-      devotionalCourses: Math.random() > 0.6 ? [{ name: `Course ${Math.floor(Math.random() * 10) + 1}`, date: new Date().toISOString().split('T')[0], institute: "ISKCON" }] : [],
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+      harinamInitiationDate: isInitiated ? new Date(2000 + Math.random() * 24, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1) : null,
+      courses: Math.random() > 0.6 ? [{ name: `Course ${Math.floor(Math.random() * 10) + 1}`, date: new Date().toISOString().split('T')[0], institute: "ISKCON" }] : null
     });
   }
 

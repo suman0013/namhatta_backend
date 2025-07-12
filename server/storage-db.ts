@@ -78,13 +78,13 @@ export class DatabaseStorage implements IStorage {
     if (existingStatuses.length === 0) {
       // Initialize devotional statuses
       const statusData = [
-        { name: "Shraddhavan" },
-        { name: "Sadhusangi" },
-        { name: "Gour/Krishna Sevak" },
-        { name: "Gour/Krishna Sadhak" },
-        { name: "Sri Guru Charan Asraya" },
-        { name: "Harinam Diksha" },
-        { name: "Pancharatrik Diksha" }
+        { name: "Shraddhavan", level: 1 },
+        { name: "Sadhusangi", level: 2 },
+        { name: "Gour/Krishna Sevak", level: 3 },
+        { name: "Gour/Krishna Sadhak", level: 4 },
+        { name: "Sri Guru Charan Asraya", level: 5 },
+        { name: "Harinam Diksha", level: 6 },
+        { name: "Pancharatrik Diksha", level: 7 }
       ];
 
       for (const status of statusData) {
@@ -93,13 +93,13 @@ export class DatabaseStorage implements IStorage {
 
       // Initialize leaders
       const leadersData = [
-        { name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", role: "FOUNDER_ACHARYA", reportingTo: null, location: { country: "India" } },
-        { name: "His Holiness Jayapataka Swami", role: "GBC", reportingTo: 1, location: { country: "India" } },
-        { name: "HH Gauranga Prem Swami", role: "REGIONAL_DIRECTOR", reportingTo: 2, location: { country: "India", state: "West Bengal" } },
-        { name: "HH Bhaktivilasa Gaurachandra Swami", role: "CO_REGIONAL_DIRECTOR", reportingTo: 3, location: { country: "India", state: "West Bengal" } },
-        { name: "HG Padmanetra Das", role: "CO_REGIONAL_DIRECTOR", reportingTo: 3, location: { country: "India", state: "West Bengal" } },
-        { name: "District Supervisor - Nadia", role: "DISTRICT_SUPERVISOR", reportingTo: 4, location: { country: "India", state: "West Bengal", district: "Nadia" } },
-        { name: "Mala Senapoti - Mayapur", role: "MALA_SENAPOTI", reportingTo: 6, location: { country: "India", state: "West Bengal", district: "Nadia" } }
+        { name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", position: "Founder Acharya", level: "founder" },
+        { name: "His Holiness Jayapataka Swami", position: "GBC", level: "acharya" },
+        { name: "HH Gauranga Prem Swami", position: "Regional Director", level: "regional", region: "West Bengal" },
+        { name: "HH Bhaktivilasa Gaurachandra Swami", position: "Co-Regional Director", level: "regional", region: "West Bengal" },
+        { name: "HG Padmanetra Das", position: "Co-Regional Director", level: "regional", region: "West Bengal" },
+        { name: "District Supervisor - Nadia", position: "District Supervisor", level: "district", region: "West Bengal", district: "Nadia" },
+        { name: "Mala Senapoti - Mayapur", position: "Mala Senapoti", level: "mala", region: "West Bengal", district: "Nadia" }
       ];
 
       for (const leader of leadersData) {
@@ -108,11 +108,11 @@ export class DatabaseStorage implements IStorage {
 
       // Initialize shraddhakutirs
       const shraddhakutirData = [
-        { name: "Mayapur Shraddhakutir", region: "West Bengal", address: { country: "India", state: "West Bengal", district: "Nadia" } },
-        { name: "Kolkata Shraddhakutir", region: "West Bengal", address: { country: "India", state: "West Bengal", district: "Kolkata" } },
-        { name: "Bhubaneswar Shraddhakutir", region: "Odisha", address: { country: "India", state: "Odisha", district: "Khordha" } },
-        { name: "Patna Shraddhakutir", region: "Bihar", address: { country: "India", state: "Bihar", district: "Patna" } },
-        { name: "Ranchi Shraddhakutir", region: "Jharkhand", address: { country: "India", state: "Jharkhand", district: "Ranchi" } }
+        { name: "Mayapur Shraddhakutir", description: "Primary Shraddhakutir in West Bengal" },
+        { name: "Kolkata Shraddhakutir", description: "Metropolitan Shraddhakutir in Kolkata" },
+        { name: "Bhubaneswar Shraddhakutir", description: "Regional Shraddhakutir in Odisha" },
+        { name: "Patna Shraddhakutir", description: "Regional Shraddhakutir in Bihar" },
+        { name: "Ranchi Shraddhakutir", description: "Regional Shraddhakutir in Jharkhand" }
       ];
 
       for (const shraddhakutir of shraddhakutirData) {
