@@ -26,7 +26,8 @@ import {
   Heart,
   Star,
   Gift,
-  Utensils
+  Utensils,
+  MapPin
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -148,6 +149,32 @@ export default function Dashboard() {
                   <div>
                     <h5 className="font-medium text-sm text-gray-900 dark:text-white">{coDirector.name}</h5>
                     <p className="text-xs text-emerald-700 dark:text-emerald-300">Co-Regional Director</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* District Supervisors */}
+              {(hierarchy as any)?.districtSupervisors?.map((supervisor: any) => (
+                <div key={supervisor.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                    <MapPin className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-sm text-gray-900 dark:text-white">{supervisor.name}</h5>
+                    <p className="text-xs text-orange-700 dark:text-orange-300">District Supervisor</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Mala Senapotis */}
+              {(hierarchy as any)?.malaSenapotis?.map((senapoti: any) => (
+                <div key={senapoti.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
+                  <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center">
+                    <Heart className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h5 className="font-medium text-sm text-gray-900 dark:text-white">{senapoti.name}</h5>
+                    <p className="text-xs text-pink-700 dark:text-pink-300">Mala Senapoti</p>
                   </div>
                 </div>
               ))}

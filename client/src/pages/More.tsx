@@ -9,11 +9,19 @@ import {
   Heart, 
   BarChart3, 
   Info,
-  Activity
+  Activity,
+  Crown
 } from "lucide-react";
 
 export default function More() {
   const menuItems = [
+    {
+      title: "Leadership Hierarchy",
+      description: "View organizational structure and roles",
+      icon: Crown,
+      href: "/hierarchy",
+      color: "from-amber-500 to-orange-600"
+    },
     {
       title: "Approvals",
       description: "Review pending namhatta applications",

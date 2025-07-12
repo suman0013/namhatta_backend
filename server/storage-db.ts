@@ -311,15 +311,19 @@ export class DatabaseStorage implements IStorage {
     gbc: Leader[];
     regionalDirectors: Leader[];
     coRegionalDirectors: Leader[];
+    districtSupervisors: Leader[];
+    malaSenapotis: Leader[];
   }> {
-    const [founder, gbc, regionalDirectors, coRegionalDirectors] = await Promise.all([
+    const [founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis] = await Promise.all([
       db.select().from(leaders).where(eq(leaders.role, "FOUNDER_ACHARYA")),
       db.select().from(leaders).where(eq(leaders.role, "GBC")),
       db.select().from(leaders).where(eq(leaders.role, "REGIONAL_DIRECTOR")),
-      db.select().from(leaders).where(eq(leaders.role, "CO_REGIONAL_DIRECTOR"))
+      db.select().from(leaders).where(eq(leaders.role, "CO_REGIONAL_DIRECTOR")),
+      db.select().from(leaders).where(eq(leaders.role, "DISTRICT_SUPERVISOR")),
+      db.select().from(leaders).where(eq(leaders.role, "MALA_SENAPOTI"))
     ]);
 
-    return { founder, gbc, regionalDirectors, coRegionalDirectors };
+    return { founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis };
   }
 
   async getLeadersByLevel(level: string): Promise<Leader[]> {

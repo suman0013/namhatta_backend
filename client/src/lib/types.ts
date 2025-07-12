@@ -17,6 +17,8 @@ export interface HierarchyResponse {
   gbc: Leader[];
   regionalDirectors: Leader[];
   coRegionalDirectors: Leader[];
+  districtSupervisors: Leader[];
+  malaSenapotis: Leader[];
 }
 
 export interface Leader {
