@@ -327,6 +327,32 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
 
+  async getAllUpdates(): Promise<Array<NamhattaUpdate & { namhattaName: string }>> {
+    const result = await db.select({
+      id: namhattaUpdates.id,
+      namhattaId: namhattaUpdates.namhattaId,
+      programType: namhattaUpdates.programType,
+      date: namhattaUpdates.date,
+      attendance: namhattaUpdates.attendance,
+      prasadDistribution: namhattaUpdates.prasadDistribution,
+      nagarKirtan: namhattaUpdates.nagarKirtan,
+      bookDistribution: namhattaUpdates.bookDistribution,
+      chanting: namhattaUpdates.chanting,
+      arati: namhattaUpdates.arati,
+      bhagwatPath: namhattaUpdates.bhagwatPath,
+      imageUrls: namhattaUpdates.imageUrls,
+      facebookLink: namhattaUpdates.facebookLink,
+      youtubeLink: namhattaUpdates.youtubeLink,
+      specialAttraction: namhattaUpdates.specialAttraction,
+      createdAt: namhattaUpdates.createdAt,
+      namhattaName: namhattas.name
+    }).from(namhattaUpdates)
+      .innerJoin(namhattas, eq(namhattaUpdates.namhattaId, namhattas.id))
+      .orderBy(desc(namhattaUpdates.date));
+    
+    return result;
+  }
+
   // Hierarchy
   async getTopLevelHierarchy(): Promise<{
     founder: Leader[];

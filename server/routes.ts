@@ -295,6 +295,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(updates);
   });
 
+  // Get all updates from all namhattas (optimized endpoint)
+  app.get("/api/updates/all", async (req, res) => {
+    const updates = await storage.getAllUpdates();
+    res.json(updates);
+  });
+
   app.get("/api/namhattas/:id/devotee-status-count", async (req, res) => {
     const id = parseInt(req.params.id);
     const counts = await storage.getNamhattaDevoteeStatusCount(id);

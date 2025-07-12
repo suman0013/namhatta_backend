@@ -15,30 +15,10 @@ export default function Updates() {
   const [selectedProgramType, setSelectedProgramType] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
 
-  const { data: namhattas } = useQuery({
-    queryKey: ["/api/namhattas"],
-    queryFn: () => api.getNamhattas(1, 100),
-  });
-
-  // Get all updates from all namhattas
+  // Get all updates from all namhattas - optimized single API call
   const { data: allUpdates, isLoading } = useQuery({
     queryKey: ["/api/updates/all"],
-    queryFn: async () => {
-      if (!namhattas?.data) return [];
-      
-      // Fetch updates from all namhattas
-      const updatePromises = namhattas.data.map(async (namhatta: any) => {
-        const updates = await api.getNamhattaUpdates(namhatta.id);
-        return updates.map((update: any) => ({
-          ...update,
-          namhattaName: namhatta.name
-        }));
-      });
-      
-      const allUpdatesArrays = await Promise.all(updatePromises);
-      return allUpdatesArrays.flat();
-    },
-    enabled: !!namhattas?.data,
+    queryFn: () => api.getAllUpdates(),
   });
 
   const programTypes = [
@@ -138,7 +118,7 @@ export default function Updates() {
               <div className="flex flex-col justify-center min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap leading-tight">Active Namhattas</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1 leading-none">
-                  {namhattas?.data?.length || 0}
+                  {allUpdates ? new Set(allUpdates.map((update: any) => update.namhattaId)).size : 0}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0 ml-4">

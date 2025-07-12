@@ -34,6 +34,7 @@ export interface IStorage {
 
   // Updates
   createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate>;
+  getAllUpdates(): Promise<Array<NamhattaUpdate & { namhattaName: string }>>;
 
   // Hierarchy
   getTopLevelHierarchy(): Promise<{

@@ -176,6 +176,11 @@ export const api = {
     return res.json();
   },
 
+  getAllUpdates: async () => {
+    const res = await apiRequest("GET", "/api/updates/all");
+    return res.json();
+  },
+
   // Health & About
   getHealth: async () => {
     const res = await apiRequest("GET", "/api/health");
