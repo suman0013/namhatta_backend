@@ -425,9 +425,9 @@ export class DatabaseStorage implements IStorage {
   }> {
     const [founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis] = await Promise.all([
       db.select().from(leaders).where(eq(leaders.level, "founder")),
-      db.select().from(leaders).where(eq(leaders.level, "acharya")),
+      db.select().from(leaders).where(eq(leaders.level, "gbc")),
       db.select().from(leaders).where(eq(leaders.level, "regional")),
-      db.select().from(leaders).where(eq(leaders.level, "regional")),
+      db.select().from(leaders).where(eq(leaders.level, "co-regional")),
       db.select().from(leaders).where(eq(leaders.level, "district")),
       db.select().from(leaders).where(eq(leaders.level, "mala"))
     ]);

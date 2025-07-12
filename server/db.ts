@@ -28,9 +28,14 @@ if (useMySQL) {
   // Use connection pooling instead of single client
   const pool = new Pool({ 
     connectionString: databaseUrl,
-    max: 10, // Maximum number of connections
+    max: 20, // Maximum number of connections
     idleTimeoutMillis: 30000, // 30 seconds
-    connectionTimeoutMillis: 2000, // 2 seconds
+    connectionTimeoutMillis: 10000, // 10 seconds
+    acquireTimeoutMillis: 60000, // 60 seconds
+    createTimeoutMillis: 30000, // 30 seconds
+    destroyTimeoutMillis: 5000, // 5 seconds
+    reapIntervalMillis: 1000, // 1 second
+    createRetryIntervalMillis: 200, // 200ms
   });
   
   // Handle pool events
