@@ -156,12 +156,13 @@ export class DatabaseStorage implements IStorage {
       // Update devotee status
       await db.update(devotees).set({ devotionalStatusId: newStatusId }).where(eq(devotees.id, id));
       
-      // Record status history - use default timestamp from database
+      // Record status history - use actual timestamp
       await db.insert(statusHistory).values({
         devoteeId: id,
         previousStatus: currentStatus?.toString(),
         newStatus: newStatusId.toString(),
-        comment: notes
+        comment: notes,
+        updatedAt: new Date().toISOString()
       });
     } catch (error) {
       console.error("Error in upgradeDevoteeStatus:", error);

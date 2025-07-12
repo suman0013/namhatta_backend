@@ -762,11 +762,11 @@ export default function DevoteeDetail() {
                           <div className="w-3 h-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full mt-1 shadow-sm" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                              Changed to {getStatusName(entry.newStatusId)}
+                              Changed to {getStatusName(parseInt(entry.newStatus))}
                             </p>
                             <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400 mb-1">
                               <Calendar className="h-3 w-3 mr-1" />
-                              {new Date(entry.changedAt).toLocaleDateString()}
+                              {entry.updatedAt && entry.updatedAt !== 'CURRENT_TIMESTAMP' ? new Date(entry.updatedAt).toLocaleDateString() : 'Recently'}
                             </div>
                             {entry.reason && (
                               <div className="mt-2 p-2 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
