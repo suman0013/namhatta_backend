@@ -9,7 +9,6 @@ import {
   UserCheck, 
   Users,
   MapPin,
-  Heart,
   ChevronDown,
   ChevronRight
 } from "lucide-react";
@@ -218,36 +217,7 @@ export default function Hierarchy() {
         </Collapsible>
       )}
 
-      {/* Mala Senapotis Grid */}
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
 
-        {/* Mala Senapotis */}
-        {(hierarchy as any)?.malaSenapotis && (hierarchy as any).malaSenapotis.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-sm">
-                <Heart className="mr-2 h-4 w-4 text-pink-500" />
-                Mala Senapotis
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {(hierarchy as any).malaSenapotis.map((senapoti: any) => (
-                  <div key={senapoti.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
-                    <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center">
-                      <Heart className="h-3 w-3 text-white" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate">{senapoti.name}</h3>
-                      <p className="text-xs text-pink-700 dark:text-pink-300">Mala Senapoti</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
     </div>
   );
 }
