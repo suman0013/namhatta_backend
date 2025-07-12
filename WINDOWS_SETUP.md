@@ -134,4 +134,32 @@ Make sure Node.js is installed and added to your PATH.
    npm run dev
    ```
 
+## Running Scripts on Windows
+
+For TypeScript files, you need to use `npx tsx` instead of `node`:
+
+**Seed Script:**
+```bash
+# Option 1: Use the runner script
+node run-seed.js
+
+# Option 2: Use the batch file
+seed.bat
+
+# Option 3: Use npx directly
+npx tsx seed-script.ts
+```
+
+**Development Server:**
+```bash
+# Option 1: Use the runner script
+node run-dev.js
+
+# Option 2: Use the batch file
+start-dev.bat
+
+# Option 3: Use PowerShell
+$env:NODE_ENV="development"; npm run dev
+```
+
 The application should now start successfully on Windows!

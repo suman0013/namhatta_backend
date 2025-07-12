@@ -102,7 +102,7 @@ If you need to reset the database or create a fresh one:
 npm run db:push
 
 # Optional: Run custom seed script if available
-node seed-script.ts
+npx tsx seed-script.ts
 ```
 
 **For MySQL:**
@@ -111,7 +111,7 @@ node seed-script.ts
 npx drizzle-kit push --config=drizzle.config.mysql.ts
 
 # Optional: Run custom seed script if available
-node seed-script.ts
+npx tsx seed-script.ts
 ```
 
 ### Step 5: Start the Development Server
