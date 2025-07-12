@@ -352,7 +352,7 @@ function NamhattaCard({ namhatta }: { namhatta: Namhatta }) {
               <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
                 <div className="flex items-center">
                   <Users className="mr-2 h-3 w-3" />
-                  <span>{namhatta.devoteeCount || 0} members</span>
+                  <span>{namhatta.devoteeCount || 0} devotees</span>
                 </div>
                 {namhatta.secretary && (
                   <div className="flex items-center">

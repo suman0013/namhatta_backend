@@ -199,7 +199,29 @@ export class DatabaseStorage implements IStorage {
     }
 
     const [data, totalResult] = await Promise.all([
-      db.select().from(namhattas).where(whereClause).limit(size).offset(offset).orderBy(orderBy),
+      db.select({
+        id: namhattas.id,
+        code: namhattas.code,
+        name: namhattas.name,
+        meetingDay: namhattas.meetingDay,
+        meetingTime: namhattas.meetingTime,
+        address: namhattas.address,
+        malaSenapoti: namhattas.malaSenapoti,
+        mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
+        chakraSenapoti: namhattas.chakraSenapoti,
+        upaChakraSenapoti: namhattas.upaChakraSenapoti,
+        secretary: namhattas.secretary,
+        status: namhattas.status,
+        createdAt: namhattas.createdAt,
+        updatedAt: namhattas.updatedAt,
+        devoteeCount: count(devotees.id)
+      }).from(namhattas)
+        .leftJoin(devotees, eq(namhattas.id, devotees.namhattaId))
+        .where(whereClause)
+        .groupBy(namhattas.id)
+        .limit(size)
+        .offset(offset)
+        .orderBy(orderBy),
       db.select({ count: count() }).from(namhattas).where(whereClause)
     ]);
 

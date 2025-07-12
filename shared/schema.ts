@@ -222,7 +222,9 @@ export const insertNamhattaAddressSchema = createInsertSchema(namhattaAddresses)
 export type Devotee = typeof devotees.$inferSelect;
 export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
 
-export type Namhatta = typeof namhattas.$inferSelect;
+export type Namhatta = typeof namhattas.$inferSelect & {
+  devoteeCount?: number;
+};
 export type InsertNamhatta = z.infer<typeof insertNamhattaSchema>;
 
 export type DevotionalStatus = typeof devotionalStatuses.$inferSelect;
