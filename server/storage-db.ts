@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
-import { sql, eq, desc, asc, and, or, like, count } from "drizzle-orm";
+import { sql, eq, desc, asc, and, or, like, count, inArray } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
 
@@ -254,8 +254,8 @@ export class DatabaseStorage implements IStorage {
     }
 
     const [data, totalResult] = await Promise.all([
-      db.select().from(statusHistory).where(sql`${statusHistory.devoteeId} IN (${devoteeIds.join(',')})`).limit(size).offset(offset).orderBy(desc(statusHistory.changedAt)),
-      db.select({ count: count() }).from(statusHistory).where(sql`${statusHistory.devoteeId} IN (${devoteeIds.join(',')})`)
+      db.select().from(statusHistory).where(inArray(statusHistory.devoteeId, devoteeIds)).limit(size).offset(offset).orderBy(desc(statusHistory.updatedAt)),
+      db.select({ count: count() }).from(statusHistory).where(inArray(statusHistory.devoteeId, devoteeIds))
     ]);
 
     return {
