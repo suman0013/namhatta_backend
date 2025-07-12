@@ -360,15 +360,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Updates
   app.post("/api/updates", async (req, res) => {
     try {
-      // Convert date string to Date object for validation
-      const requestData = {
-        ...req.body,
-        date: new Date(req.body.date)
-      };
-      const updateData = insertNamhattaUpdateSchema.parse(requestData);
+      console.log("Received update data:", JSON.stringify(req.body, null, 2));
+      console.log("Date field type:", typeof req.body.date, "Value:", req.body.date);
+      const updateData = insertNamhattaUpdateSchema.parse(req.body);
       const update = await storage.createNamhattaUpdate(updateData);
       res.status(201).json(update);
     } catch (error) {
+      console.error("Validation error:", error);
       res.status(400).json({ message: "Invalid update data", error });
     }
   });
