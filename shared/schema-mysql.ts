@@ -1,10 +1,10 @@
-import { mysqlTable, text, int, json, timestamp, boolean } from "drizzle-orm/mysql-core";
+import { mysqlTable, text, int, json, timestamp, boolean, serial } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Devotees table for MySQL
 export const devotees = mysqlTable("devotees", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   legalName: text("legal_name").notNull(),
   name: text("name"), // Initiated/spiritual name
   dob: text("dob"), // Store as text to match OpenAPI format
@@ -58,7 +58,7 @@ export const devotees = mysqlTable("devotees", {
 
 // Namhattas table for MySQL
 export const namhattas = mysqlTable("namhattas", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   meetingDay: text("meeting_day"),
@@ -84,14 +84,14 @@ export const namhattas = mysqlTable("namhattas", {
 
 // Devotional Statuses table for MySQL
 export const devotionalStatuses = mysqlTable("devotional_statuses", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Shraddhakutirs table for MySQL
 export const shraddhakutirs = mysqlTable("shraddhakutirs", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   districtCode: text("district_code").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -99,7 +99,7 @@ export const shraddhakutirs = mysqlTable("shraddhakutirs", {
 
 // Status History table for MySQL
 export const statusHistory = mysqlTable("status_history", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   devoteeId: int("devotee_id").notNull(),
   previousStatus: text("previous_status"),
   newStatus: text("new_status").notNull(),
@@ -109,7 +109,7 @@ export const statusHistory = mysqlTable("status_history", {
 
 // Namhatta Updates table for MySQL
 export const namhattaUpdates = mysqlTable("namhatta_updates", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   namhattaId: int("namhatta_id").notNull(),
   programType: text("program_type").notNull(),
   date: text("date").notNull(),
@@ -130,7 +130,7 @@ export const namhattaUpdates = mysqlTable("namhatta_updates", {
 
 // Leaders table for MySQL
 export const leaders = mysqlTable("leaders", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   role: text("role").notNull(),
   level: int("level").notNull(),
@@ -140,7 +140,7 @@ export const leaders = mysqlTable("leaders", {
 
 // Addresses table for MySQL
 export const addresses = mysqlTable("addresses", {
-  id: int("id").primaryKey().autoIncrement(),
+  id: serial("id").primaryKey(),
   country: text("country").notNull(),
   state: text("state").notNull(),
   district: text("district").notNull(),
