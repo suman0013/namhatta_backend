@@ -20,6 +20,7 @@ interface DevoteeFormProps {
   devotee?: Devotee;
   onClose: () => void;
   onSuccess?: () => void;
+  namhattaId?: number;
 }
 
 interface FormData {
@@ -54,7 +55,7 @@ interface FormData {
   shraddhakutirId: number | undefined;
 }
 
-export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeFormProps) {
+export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }: DevoteeFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = !!devotee;
@@ -181,12 +182,22 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: (data: Partial<Devotee>) => api.createDevotee(data),
+    mutationFn: (data: Partial<Devotee>) => {
+      if (namhattaId) {
+        return api.createDevoteeForNamhatta(data, namhattaId);
+      }
+      return api.createDevotee(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/devotees"] });
+      // If adding to a specific namhatta, also invalidate that namhatta's devotees
+      if (namhattaId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/namhattas", namhattaId.toString(), "devotees"] });
+      }
       toast({
         title: "Success",
         description: "Devotee created successfully",
+        duration: 3000,
       });
       onSuccess?.();
       onClose();
@@ -196,6 +207,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess }: DevoteeForm
         title: "Error",
         description: "Failed to create devotee",
         variant: "destructive",
+        duration: 3000,
       });
     },
   });

@@ -98,6 +98,8 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 12, 2025: Fixed devotee creation issue in Namhatta detail page - updated DevoteeForm to use correct API endpoint (createDevoteeForNamhatta) when adding devotees to specific Namhattas, improved cache invalidation to refresh both global devotees list and specific Namhatta devotees list
+- July 12, 2025: Optimized Updates page performance by replacing N+1 queries with single database query - created getAllUpdates endpoint with JOIN operation, reduced 100+ API calls to 1 request, significantly improved page load speed
 - July 12, 2025: Removed Mala Senapotis section from Leadership Hierarchy page as requested by user, cleaned up unused import statements
 - July 12, 2025: Fixed dashboard "0 members" issue by updating database queries to include devotee count for each Namhatta, changed all "members" references to "devotees" throughout the application for consistent terminology
 - July 12, 2025: Enhanced Leadership Hierarchy display in Dashboard to show only up to Co-Regional Directors (removed District Supervisors and Mala Senapotis sections), made "Leadership Hierarchy" title clickable to navigate to hierarchy page, and enhanced Hierarchy page with collapsible District Supervisors section utilizing full screen width with responsive grid layout and compact cards

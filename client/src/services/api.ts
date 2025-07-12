@@ -82,6 +82,11 @@ export const api = {
     return res.json();
   },
 
+  createDevoteeForNamhatta: async (devotee: Partial<Devotee>, namhattaId: number): Promise<Devotee> => {
+    const res = await apiRequest("POST", `/api/devotees/${namhattaId}`, devotee);
+    return res.json();
+  },
+
   updateDevotee: async (id: number, devotee: Partial<Devotee>): Promise<Devotee> => {
     const res = await apiRequest("PUT", `/api/devotees/${id}`, devotee);
     return res.json();
