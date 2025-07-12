@@ -77,14 +77,29 @@ If you want to use MySQL on Windows:
 1. **Install MySQL** on Windows (if not already installed)
 2. **Create the database**:
    ```sql
-   CREATE DATABASE namhatta_management;
+   -- Connect to MySQL as root
+   mysql -u root -p
+   
+   -- Run the setup script
+   SOURCE setup-mysql.sql;
+   ```
+   
+   Or manually:
+   ```sql
+   CREATE DATABASE IF NOT EXISTS namhatta_management;
    ```
 3. **Update your `.env` file**:
    ```env
    NODE_ENV=development
-   DATABASE_URL=mysql://username:password@localhost:3306/namhatta_management
+   DATABASE_URL=mysql://root:@localhost:3306/namhatta_management
    VITE_API_BASE_URL=http://localhost:5000
    ```
+   
+   Replace `root:@` with your MySQL username and password. For example:
+   - No password: `mysql://root:@localhost:3306/namhatta_management`
+   - With password: `mysql://root:mypassword@localhost:3306/namhatta_management`
+   - Custom user: `mysql://namhatta_user:namhatta_password@localhost:3306/namhatta_management`
+
 4. **Push the schema**:
    ```bash
    npx drizzle-kit push --config=drizzle.config.mysql.ts
