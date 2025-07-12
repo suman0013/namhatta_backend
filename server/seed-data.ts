@@ -154,6 +154,27 @@ export async function seedDatabase() {
     await db.insert(devotees).values(devotee);
   }
 
+  // Add District Supervisors to leaders table
+  console.log("Adding District Supervisors...");
+  const districtSupervisors = [
+    { name: "District Supervisor - Nadia", role: "DISTRICT_SUPERVISOR", location: { state: "West Bengal", district: "Nadia" } },
+    { name: "District Supervisor - Kolkata", role: "DISTRICT_SUPERVISOR", location: { state: "West Bengal", district: "Kolkata" } },
+    { name: "District Supervisor - Khordha", role: "DISTRICT_SUPERVISOR", location: { state: "Odisha", district: "Khordha" } },
+    { name: "District Supervisor - Cuttack", role: "DISTRICT_SUPERVISOR", location: { state: "Odisha", district: "Cuttack" } },
+    { name: "District Supervisor - Puri", role: "DISTRICT_SUPERVISOR", location: { state: "Odisha", district: "Puri" } },
+    { name: "District Supervisor - Patna", role: "DISTRICT_SUPERVISOR", location: { state: "Bihar", district: "Patna" } },
+    { name: "District Supervisor - Gaya", role: "DISTRICT_SUPERVISOR", location: { state: "Bihar", district: "Gaya" } },
+    { name: "District Supervisor - Ranchi", role: "DISTRICT_SUPERVISOR", location: { state: "Jharkhand", district: "Ranchi" } },
+    { name: "District Supervisor - Dhanbad", role: "DISTRICT_SUPERVISOR", location: { state: "Jharkhand", district: "Dhanbad" } },
+    { name: "District Supervisor - Bokaro", role: "DISTRICT_SUPERVISOR", location: { state: "Jharkhand", district: "Bokaro" } },
+    { name: "District Supervisor - Darjeeling", role: "DISTRICT_SUPERVISOR", location: { state: "West Bengal", district: "Darjeeling" } },
+    { name: "District Supervisor - Howrah", role: "DISTRICT_SUPERVISOR", location: { state: "West Bengal", district: "Howrah" } },
+  ];
+
+  for (const supervisor of districtSupervisors) {
+    await db.insert(leaders).values(supervisor);
+  }
+
   // Generate 50 updates
   const updateData = [];
   const programTypes = ["Satsang", "Kirtan", "Bhagavad Gita Class", "Srimad Bhagavatam Class", "Harinam Sankirtan", "Prasadam Distribution", "Book Distribution", "Mangal Arati"];
