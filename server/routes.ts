@@ -179,10 +179,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      // Check if devotee exists first
+      const devotee = await storage.getDevotee(id);
+      if (!devotee) {
+        return res.status(404).json({ message: "Devotee not found" });
+      }
+      
       await storage.upgradeDevoteeStatus(id, newStatusId, notes);
       res.json({ message: "Status updated successfully" });
     } catch (error) {
-      res.status(404).json({ message: "Devotee not found" });
+      console.error("Error upgrading devotee status:", error);
+      res.status(500).json({ message: "Failed to upgrade status", error: error.message });
     }
   });
 

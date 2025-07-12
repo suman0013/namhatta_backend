@@ -145,23 +145,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upgradeDevoteeStatus(id: number, newStatusId: number, notes?: string): Promise<void> {
-    await db.transaction(async (tx) => {
+    try {
       // Get current devotee status
-      const devotee = await tx.select().from(devotees).where(eq(devotees.id, id)).limit(1);
+      const devotee = await db.select().from(devotees).where(eq(devotees.id, id)).limit(1);
+      if (!devotee[0]) {
+        throw new Error(`Devotee with ID ${id} not found`);
+      }
       const currentStatus = devotee[0]?.devotionalStatusId;
       
       // Update devotee status
-      await tx.update(devotees).set({ devotionalStatusId: newStatusId }).where(eq(devotees.id, id));
+      await db.update(devotees).set({ devotionalStatusId: newStatusId }).where(eq(devotees.id, id));
       
-      // Record status history
-      await tx.insert(statusHistory).values({
+      // Record status history - use default timestamp from database
+      await db.insert(statusHistory).values({
         devoteeId: id,
         previousStatus: currentStatus?.toString(),
         newStatus: newStatusId.toString(),
-        comment: notes,
-        updatedAt: new Date().toISOString()
+        comment: notes
       });
-    });
+    } catch (error) {
+      console.error("Error in upgradeDevoteeStatus:", error);
+      throw error;
+    }
   }
 
   async getDevoteeStatusHistory(id: number): Promise<StatusHistory[]> {
