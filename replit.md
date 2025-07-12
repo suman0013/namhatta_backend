@@ -98,6 +98,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Changelog
+- July 12, 2025: Fixed critical database duplication issue - removed duplicate Namhatta entries (101 total entries reduced to 26 unique entries), resolved issue causing multiple identical Namhatta names to appear on the page, cleaned up database to maintain data integrity
 - July 12, 2025: Set default sorting to alphabetical by name for Namhattas page - ensured backend properly handles default name sorting when no sortBy is specified, updated sorting logic to consistently sort by name ascending as default
 - July 12, 2025: Fixed devotee creation issue in Namhatta detail page - updated DevoteeForm to use correct API endpoint (createDevoteeForNamhatta) when adding devotees to specific Namhattas, improved cache invalidation to refresh both global devotees list and specific Namhatta devotees list
 - July 12, 2025: Optimized Updates page performance by replacing N+1 queries with single database query - created getAllUpdates endpoint with JOIN operation, reduced 100+ API calls to 1 request, significantly improved page load speed
