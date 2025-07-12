@@ -57,8 +57,9 @@ This will install all required packages including:
 
 ### Step 3: Environment Configuration
 
-Create a `.env` file in the root directory (optional for local development):
+Create a `.env` file in the root directory:
 
+#### For SQLite (Default)
 ```env
 # Database Configuration
 NODE_ENV=development
@@ -68,7 +69,19 @@ DATABASE_URL=./namhatta.db
 VITE_API_BASE_URL=http://localhost:5000
 ```
 
-**Note**: The application uses SQLite by default for development, so no additional database setup is required.
+#### For MySQL (Local Database)
+```env
+# MySQL Database Configuration
+DATABASE_URL=mysql://username:password@localhost:3306/namhatta_management
+
+# API Configuration (optional)
+VITE_API_BASE_URL=http://localhost:5000
+```
+
+**Note**: 
+- The application uses SQLite by default for development
+- To use MySQL, see the detailed [MySQL Setup Guide](MYSQL_SETUP.md)
+- Replace `username`, `password`, and database name with your actual MySQL credentials
 
 ### Step 4: Database Setup
 
@@ -80,9 +93,19 @@ The application comes with a pre-populated SQLite database (`namhatta.db`) conta
 
 If you need to reset the database or create a fresh one:
 
+**For SQLite:**
 ```bash
 # Push database schema (creates tables)
 npm run db:push
+
+# Optional: Run custom seed script if available
+node seed-script.ts
+```
+
+**For MySQL:**
+```bash
+# Push database schema to MySQL (creates tables)
+npx drizzle-kit push --config=drizzle.config.mysql.ts
 
 # Optional: Run custom seed script if available
 node seed-script.ts
@@ -128,7 +151,8 @@ npm run start        # Start production server
 
 ### Database
 ```bash
-npm run db:push      # Push database schema changes
+npm run db:push      # Push database schema changes (SQLite)
+npx drizzle-kit push --config=drizzle.config.mysql.ts    # Push schema to MySQL
 ```
 
 ## Project Structure

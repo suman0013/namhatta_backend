@@ -1,23 +1,26 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import * as schema from "@shared/schema";
 
-// Use SQLite for development, MySQL for production
-const dbPath = process.env.DATABASE_URL || './namhatta.db';
-const isProduction = process.env.NODE_ENV === 'production';
+// Check if MySQL is configured
+const databaseUrl = process.env.DATABASE_URL || './namhatta.db';
+const useMySQL = databaseUrl.startsWith('mysql://') || databaseUrl.startsWith('mysql2://');
 
 let db: ReturnType<typeof drizzle>;
 
-if (isProduction && process.env.DATABASE_URL?.startsWith('mysql://')) {
-  // Production MySQL setup
+if (useMySQL) {
+  // MySQL setup (both development and production)
   const { createConnection } = await import('mysql2/promise');
   const { drizzle: drizzleMySQL } = await import('drizzle-orm/mysql2');
-  const connection = await createConnection(process.env.DATABASE_URL);
-  db = drizzleMySQL(connection, { schema });
+  const mysqlSchema = await import("@shared/schema-mysql");
+  const connection = await createConnection(databaseUrl);
+  db = drizzleMySQL(connection, { schema: mysqlSchema });
+  console.log('🔗 Connected to MySQL database');
 } else {
-  // Development SQLite setup
-  const sqlite = new Database(dbPath);
-  db = drizzle(sqlite, { schema });
+  // SQLite setup (fallback)
+  const sqliteSchema = await import("@shared/schema");
+  const sqlite = new Database(databaseUrl);
+  db = drizzle(sqlite, { schema: sqliteSchema });
+  console.log('🔗 Connected to SQLite database');
 }
 
 export { db };
