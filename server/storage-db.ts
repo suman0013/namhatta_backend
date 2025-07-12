@@ -316,7 +316,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]> {
-    return await db.select().from(namhattaUpdates).where(eq(namhattaUpdates.namhattaId, id)).orderBy(desc(namhattaUpdates.date));
+    return await db.select().from(namhattaUpdates).where(eq(namhattaUpdates.namhattaId, id)).orderBy(desc(namhattaUpdates.eventDate));
   }
 
   async getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>> {
