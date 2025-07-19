@@ -1,0 +1,16 @@
+id,country,state,district,sub_district,village,postal_code,created_at
+1,India,"West Bengal",Nadia,Mayapur,Mayapur,741313,CURRENT_TIMESTAMP
+2,India,"West Bengal",Kolkata,Central,"Park Street",700016,CURRENT_TIMESTAMP
+3,India,Odisha,Puri,Puri,Puri,752001,CURRENT_TIMESTAMP
+4,India,"West Bengal",Nadia,Mayapur,Mayapur,741313,CURRENT_TIMESTAMP
+5,India,"West Bengal",Kolkata,Central,"Park Street",700016,CURRENT_TIMESTAMP
+6,India,"West Bengal",Howrah,Howrah,Howrah,711101,CURRENT_TIMESTAMP
+7,India,"West Bengal",Darjeeling,Siliguri,Siliguri,734001,CURRENT_TIMESTAMP
+8,India,"West Bengal","Paschim Bardhaman",Durgapur,Durgapur,713201,CURRENT_TIMESTAMP
+9,India,Odisha,Khordha,Bhubaneswar,Bhubaneswar,751001,CURRENT_TIMESTAMP
+10,India,Odisha,Puri,Puri,Puri,752001,CURRENT_TIMESTAMP
+11,India,Odisha,Cuttack,Cuttack,Cuttack,753001,CURRENT_TIMESTAMP
+12,India,Bihar,Patna,Patna,Patna,800001,CURRENT_TIMESTAMP
+13,India,Bihar,Gaya,Gaya,Gaya,823001,CURRENT_TIMESTAMP
+14,India,Jharkhand,Ranchi,Ranchi,Ranchi,834001,CURRENT_TIMESTAMP
+15,India,Jharkhand,"East Singhbhum",Jamshedpur,Jamshedpur,831001,CURRENT_TIMESTAMP

@@ -27,11 +27,12 @@ This is a full-stack web application for managing Namhatta religious/spiritual o
 - **ORM**: Drizzle ORM for type-safe database operations
 - **Migrations**: Drizzle Kit for schema management
 - **Session Storage**: PostgreSQL-based session store
+- **Connection**: Neon serverless PostgreSQL with connection pooling
 
 ## Key Components
 
 ### Database Schema
-The application uses a SQLite database with the following main entities:
+The application uses a PostgreSQL database with the following main entities:
 
 1. **Devotees**: Personal information, spiritual status, and courses (addresses stored in normalized tables)
 2. **Namhattas**: Spiritual centers with organizational details (addresses stored in normalized tables)
@@ -99,6 +100,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Recent Changes
+- July 19, 2025: Successfully migrated from SQLite to PostgreSQL using Neon database - updated schema to use PostgreSQL syntax (serial, timestamp, jsonb), configured Neon serverless connection, migrated all data (253 devotees, 101 namhattas, 125 devotee addresses, 34 namhatta addresses, 53 updates, 13 leaders, 7 statuses), verified all API endpoints working correctly with PostgreSQL backend
 - July 19, 2025: Successfully restructured address system for better normalization - separated main address data (country, state, district, sub_district, village, postal_code) from location-specific landmarks, updated database schema to store landmarks in junction tables (devotee_addresses and namhatta_addresses), migrated 125 devotee addresses and 34 namhatta addresses to new structure, updated all storage methods and API endpoints to use normalized address tables, verified all geographic filtering and mapping functionality working correctly
 - July 19, 2025: Successfully completed migration from Replit Agent to standard Replit environment - verified all checklist items completed, created comprehensive ER diagram showing 9 database entities with proper relationships (Devotees, Namhattas, Devotional Statuses, Shraddhakutirs, etc.), confirmed 252 devotees and 101 namhattas in SQLite database, all API endpoints functioning correctly
 

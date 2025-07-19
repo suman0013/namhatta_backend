@@ -1,23 +1,11 @@
-import Database from 'better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
 import * as schema from "@shared/schema";
 
-// Use SQLite for development, MySQL for production
-const dbPath = process.env.DATABASE_URL || './namhatta.db';
-const isProduction = process.env.NODE_ENV === 'production';
+// Use the provided Neon PostgreSQL connection string
+const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_5MIwCD4YhSdP@ep-calm-silence-a15zko7l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
 
-let db: ReturnType<typeof drizzle>;
-
-if (isProduction && process.env.DATABASE_URL?.startsWith('mysql://')) {
-  // Production MySQL setup
-  const { createConnection } = await import('mysql2/promise');
-  const { drizzle: drizzleMySQL } = await import('drizzle-orm/mysql2');
-  const connection = await createConnection(process.env.DATABASE_URL);
-  db = drizzleMySQL(connection, { schema });
-} else {
-  // Development SQLite setup
-  const sqlite = new Database(dbPath);
-  db = drizzle(sqlite, { schema });
-}
+const sql = neon(connectionString);
+const db = drizzle(sql, { schema });
 
 export { db };

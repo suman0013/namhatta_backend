@@ -1,10 +1,10 @@
-import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
+import { pgTable, text, integer, serial, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Devotees table
-export const devotees = sqliteTable("devotees", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const devotees = pgTable("devotees", {
+  id: serial("id").primaryKey(),
   legalName: text("legal_name").notNull(),
   name: text("name"), // Initiated/spiritual name
   dob: text("dob"), // Store as text to match OpenAPI format
@@ -28,20 +28,20 @@ export const devotees = sqliteTable("devotees", {
   pancharatrikDate: text("pancharatrik_date"), // Store as text to match OpenAPI format
   education: text("education"),
   occupation: text("occupation"),
-  devotionalCourses: text("devotional_courses", { mode: 'json' }).$type<Array<{
+  devotionalCourses: jsonb("devotional_courses").$type<Array<{
     name: string;
     date: string;
     institute: string;
   }>>(),
   additionalComments: text("additional_comments"),
   shraddhakutirId: integer("shraddhakutir_id"),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Namhattas table
-export const namhattas = sqliteTable("namhattas", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const namhattas = pgTable("namhattas", {
+  id: serial("id").primaryKey(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
   meetingDay: text("meeting_day"),
@@ -53,98 +53,98 @@ export const namhattas = sqliteTable("namhattas", {
   upaChakraSenapoti: text("upa_chakra_senapoti"),
   secretary: text("secretary"),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Devotional Statuses table
-export const devotionalStatuses = sqliteTable("devotional_statuses", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const devotionalStatuses = pgTable("devotional_statuses", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull().unique(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Shraddhakutirs table
-export const shraddhakutirs = sqliteTable("shraddhakutirs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const shraddhakutirs = pgTable("shraddhakutirs", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   districtCode: text("district_code").notNull(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Status History table
-export const statusHistory = sqliteTable("status_history", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const statusHistory = pgTable("status_history", {
+  id: serial("id").primaryKey(),
   devoteeId: integer("devotee_id").notNull(),
   previousStatus: text("previous_status"),
   newStatus: text("new_status").notNull(),
-  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: timestamp("updated_at").defaultNow(),
   comment: text("comment"),
 });
 
 // Namhatta Updates table
-export const namhattaUpdates = sqliteTable("namhatta_updates", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const namhattaUpdates = pgTable("namhatta_updates", {
+  id: serial("id").primaryKey(),
   namhattaId: integer("namhatta_id").notNull(),
   programType: text("program_type").notNull(),
   date: text("date").notNull(),
   attendance: integer("attendance").notNull(),
   prasadDistribution: integer("prasad_distribution"),
-  nagarKirtan: integer("nagar_kirtan", { mode: 'boolean' }).default(false),
-  bookDistribution: integer("book_distribution", { mode: 'boolean' }).default(false),
-  chanting: integer("chanting", { mode: 'boolean' }).default(false),
-  arati: integer("arati", { mode: 'boolean' }).default(false),
-  bhagwatPath: integer("bhagwat_path", { mode: 'boolean' }).default(false),
-  imageUrls: text("image_urls", { mode: 'json' }).$type<string[]>(),
+  nagarKirtan: integer("nagar_kirtan").default(0),
+  bookDistribution: integer("book_distribution").default(0),
+  chanting: integer("chanting").default(0),
+  arati: integer("arati").default(0),
+  bhagwatPath: integer("bhagwat_path").default(0),
+  imageUrls: jsonb("image_urls").$type<string[]>(),
   facebookLink: text("facebook_link"),
   youtubeLink: text("youtube_link"),
   specialAttraction: text("special_attraction"),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Leaders/Hierarchy table
-export const leaders = sqliteTable("leaders", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const leaders = pgTable("leaders", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   role: text("role").notNull(), // GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR, etc.
   reportingTo: integer("reporting_to"),
-  location: text("location", { mode: 'json' }).$type<{
+  location: jsonb("location").$type<{
     country?: string;
     state?: string;
     district?: string;
   }>(),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Main Address table - stores core address data without landmarks
-export const addresses = sqliteTable("addresses", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const addresses = pgTable("addresses", {
+  id: serial("id").primaryKey(),
   country: text("country"),
   state: text("state"),
   district: text("district"),
   subDistrict: text("sub_district"),
   village: text("village"),
   postalCode: text("postal_code"),
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Junction table for devotee addresses with landmark
-export const devoteeAddresses = sqliteTable("devotee_addresses", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const devoteeAddresses = pgTable("devotee_addresses", {
+  id: serial("id").primaryKey(),
   devoteeId: integer("devotee_id").notNull(),
   addressId: integer("address_id").notNull(),
   addressType: text("address_type").notNull(), // 'present' or 'permanent'
   landmark: text("landmark"), // Specific landmark for this devotee at this address
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Junction table for namhatta addresses with landmark
-export const namhattaAddresses = sqliteTable("namhatta_addresses", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const namhattaAddresses = pgTable("namhatta_addresses", {
+  id: serial("id").primaryKey(),
   namhattaId: integer("namhatta_id").notNull(),
   addressId: integer("address_id").notNull(),
   landmark: text("landmark"), // Specific landmark for this namhatta at this address
-  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Insert schemas

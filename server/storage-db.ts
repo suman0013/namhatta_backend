@@ -47,11 +47,11 @@ export class DatabaseStorage implements IStorage {
 
       // Initialize shraddhakutirs
       const shraddhakutirData = [
-        { name: "Mayapur Shraddhakutir", region: "West Bengal", address: { country: "India", state: "West Bengal", district: "Nadia" } },
-        { name: "Kolkata Shraddhakutir", region: "West Bengal", address: { country: "India", state: "West Bengal", district: "Kolkata" } },
-        { name: "Bhubaneswar Shraddhakutir", region: "Odisha", address: { country: "India", state: "Odisha", district: "Khordha" } },
-        { name: "Patna Shraddhakutir", region: "Bihar", address: { country: "India", state: "Bihar", district: "Patna" } },
-        { name: "Ranchi Shraddhakutir", region: "Jharkhand", address: { country: "India", state: "Jharkhand", district: "Ranchi" } }
+        { name: "Mayapur Shraddhakutir", districtCode: "NADIA" },
+        { name: "Kolkata Shraddhakutir", districtCode: "KOLKATA" },
+        { name: "Bhubaneswar Shraddhakutir", districtCode: "KHORDHA" },
+        { name: "Patna Shraddhakutir", districtCode: "PATNA" },
+        { name: "Ranchi Shraddhakutir", districtCode: "RANCHI" }
       ];
 
       for (const shraddhakutir of shraddhakutirData) {
