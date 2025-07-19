@@ -21,7 +21,7 @@ interface NamhattaUpdate {
   id: number;
   namhattaId: number;
   programType: string;
-  eventDate: string;
+  date: string;
   attendance: number;
   prasadDistribution?: number;
   nagarKirtan: boolean;
@@ -67,15 +67,7 @@ export default function NamhattaUpdateCard({
 
   // Determine event status based on date
   const getEventStatus = () => {
-    if (!update.eventDate) {
-      return { label: "No Date", variant: "secondary" as const, className: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" };
-    }
-
-    const eventDate = new Date(update.eventDate);
-    if (isNaN(eventDate.getTime())) {
-      return { label: "Invalid Date", variant: "secondary" as const, className: "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300" };
-    }
-
+    const eventDate = new Date(update.date);
     const today = new Date();
     const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const eventStart = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
@@ -106,9 +98,7 @@ export default function NamhattaUpdateCard({
                 )}
                 <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                   <Calendar className="mr-1 h-4 w-4" />
-                  {update.eventDate && !isNaN(new Date(update.eventDate).getTime()) 
-                    ? format(new Date(update.eventDate), "PPP") 
-                    : "No date set"}
+                  {format(new Date(update.date), "PPP")}
                 </div>
               </div>
               <Badge variant={eventStatus.variant} className={eventStatus.className}>

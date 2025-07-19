@@ -1,225 +1,251 @@
-import { pgTable, text, serial, timestamp, integer, varchar, boolean, jsonb, pgEnum } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { z } from 'zod';
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
-// Devotional Status enum
-export const devotionalStatusEnum = pgEnum('devotional_status', [
-  'Shraddhavan',
-  'Sadhusangi', 
-  'Gour/Krishna Sevak',
-  'Gour/Krishna Sadhak',
-  'Sri Guru Charan Asraya',
-  'Harinam Diksha',
-  'Pancharatrik Diksha'
-]);
-
-// Devotional Statuses Table
-export const devotionalStatuses = pgTable('devotional_statuses', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull(),
-  description: text('description'),
-  level: integer('level').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Devotees table
+export const devotees = sqliteTable("devotees", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  legalName: text("legal_name").notNull(),
+  name: text("name"), // Initiated/spiritual name
+  dob: text("dob"), // Store as text to match OpenAPI format
+  email: text("email"),
+  phone: text("phone"),
+  fatherName: text("father_name"),
+  motherName: text("mother_name"),
+  husbandName: text("husband_name"),
+  gender: text("gender"), // MALE, FEMALE, OTHER
+  bloodGroup: text("blood_group"),
+  maritalStatus: text("marital_status"), // MARRIED, UNMARRIED, WIDOWED
+  presentAddress: text("present_address", { mode: 'json' }).$type<{
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+    landmark?: string;
+  }>(),
+  permanentAddress: text("permanent_address", { mode: 'json' }).$type<{
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+    landmark?: string;
+  }>(),
+  devotionalStatusId: integer("devotional_status_id"),
+  namhattaId: integer("namhatta_id"),
+  gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
+  gurudevPancharatrik: integer("gurudev_pancharatrik"), // Reference to leader ID
+  harinamInitiationGurudev: text("harinam_initiation_gurudev"), // Spiritual name of harinam guru
+  pancharatrikInitiationGurudev: text("pancharatrik_initiation_gurudev"), // Spiritual name of pancharatrik guru
+  initiatedName: text("initiated_name"),
+  harinamDate: text("harinam_date"), // Store as text to match OpenAPI format
+  pancharatrikDate: text("pancharatrik_date"), // Store as text to match OpenAPI format
+  education: text("education"),
+  occupation: text("occupation"),
+  devotionalCourses: text("devotional_courses", { mode: 'json' }).$type<Array<{
+    name: string;
+    date: string;
+    institute: string;
+  }>>(),
+  additionalComments: text("additional_comments"),
+  shraddhakutirId: integer("shraddhakutir_id"),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Addresses Table
-export const addresses = pgTable('addresses', {
-  id: serial('id').primaryKey(),
-  country: varchar('country', { length: 100 }).notNull(),
-  state: varchar('state', { length: 100 }).notNull(),
-  district: varchar('district', { length: 100 }).notNull(),
-  subDistrict: varchar('sub_district', { length: 100 }),
-  village: varchar('village', { length: 100 }),
-  postalCode: varchar('postal_code', { length: 20 }),
-  landmark: varchar('landmark', { length: 255 }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Namhattas table
+export const namhattas = sqliteTable("namhattas", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  meetingDay: text("meeting_day"),
+  meetingTime: text("meeting_time"),
+  address: text("address", { mode: 'json' }).$type<{
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+    landmark?: string;
+  }>(),
+  malaSenapoti: text("mala_senapoti"),
+  mahaChakraSenapoti: text("maha_chakra_senapoti"),
+  chakraSenapoti: text("chakra_senapoti"),
+  upaChakraSenapoti: text("upa_chakra_senapoti"),
+  secretary: text("secretary"),
+  status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Shraddhakutirs Table
-export const shraddhakutirs = pgTable('shraddhakutirs', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 200 }).notNull(),
-  description: text('description'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Devotional Statuses table
+export const devotionalStatuses = sqliteTable("devotional_statuses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull().unique(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Namhattas Table
-export const namhattas = pgTable('namhattas', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 200 }).notNull(),
-  description: text('description'),
-  establishedDate: timestamp('established_date'),
-  shraddhakutirId: integer('shraddhakutir_id').references(() => shraddhakutirs.id),
-  malaSenapoti: varchar('mala_senapoti', { length: 100 }),
-  mahaChakraSenapoti: varchar('maha_chakra_senapoti', { length: 100 }),
-  chakraSenapoti: varchar('chakra_senapoti', { length: 100 }),
-  upaChakraSenapoti: varchar('upa_chakra_senapoti', { length: 100 }),
-  secretary: varchar('secretary', { length: 100 }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Shraddhakutirs table
+export const shraddhakutirs = sqliteTable("shraddhakutirs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  districtCode: text("district_code").notNull(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Devotees Table
-export const devotees = pgTable('devotees', {
-  id: serial('id').primaryKey(),
-  legalName: varchar('legal_name', { length: 200 }).notNull(),
-  initiatedName: varchar('initiated_name', { length: 200 }),
-  dateOfBirth: timestamp('date_of_birth'),
-  gender: varchar('gender', { length: 10 }),
-  bloodGroup: varchar('blood_group', { length: 5 }),
-  occupation: varchar('occupation', { length: 100 }),
-  phoneNumber: varchar('phone_number', { length: 20 }),
-  email: varchar('email', { length: 255 }),
-  fatherName: varchar('father_name', { length: 200 }),
-  motherName: varchar('mother_name', { length: 200 }),
-  spouseName: varchar('spouse_name', { length: 200 }),
-  emergencyContact: varchar('emergency_contact', { length: 200 }),
-  emergencyPhone: varchar('emergency_phone', { length: 20 }),
-  harinamInitiationDate: timestamp('harinam_initiation_date'),
-  pancharatrikInitiationDate: timestamp('pancharatrik_initiation_date'),
-  spiritualMaster: varchar('spiritual_master', { length: 200 }),
-  courses: jsonb('courses'),
-  namhattaId: integer('namhatta_id').references(() => namhattas.id),
-  devotionalStatusId: integer('devotional_status_id').references(() => devotionalStatuses.id),
-  addressId: integer('address_id').references(() => addresses.id),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Status History table
+export const statusHistory = sqliteTable("status_history", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  devoteeId: integer("devotee_id").notNull(),
+  previousStatus: text("previous_status"),
+  newStatus: text("new_status").notNull(),
+  updatedAt: text("updated_at").default("CURRENT_TIMESTAMP"),
+  comment: text("comment"),
 });
 
-// Status History Table
-export const statusHistory = pgTable('status_history', {
-  id: serial('id').primaryKey(),
-  devoteeId: integer('devotee_id').references(() => devotees.id),
-  oldStatus: integer('old_status').references(() => devotionalStatuses.id),
-  newStatus: integer('new_status').references(() => devotionalStatuses.id),
-  comment: text('comment'),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Namhatta Updates table
+export const namhattaUpdates = sqliteTable("namhatta_updates", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  namhattaId: integer("namhatta_id").notNull(),
+  programType: text("program_type").notNull(),
+  date: text("date").notNull(),
+  attendance: integer("attendance").notNull(),
+  prasadDistribution: integer("prasad_distribution"),
+  nagarKirtan: integer("nagar_kirtan", { mode: 'boolean' }).default(false),
+  bookDistribution: integer("book_distribution", { mode: 'boolean' }).default(false),
+  chanting: integer("chanting", { mode: 'boolean' }).default(false),
+  arati: integer("arati", { mode: 'boolean' }).default(false),
+  bhagwatPath: integer("bhagwat_path", { mode: 'boolean' }).default(false),
+  imageUrls: text("image_urls", { mode: 'json' }).$type<string[]>(),
+  facebookLink: text("facebook_link"),
+  youtubeLink: text("youtube_link"),
+  specialAttraction: text("special_attraction"),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Namhatta Updates Table
-export const namhattaUpdates = pgTable('namhatta_updates', {
-  id: serial('id').primaryKey(),
-  namhattaId: integer('namhatta_id').references(() => namhattas.id),
-  title: varchar('title', { length: 200 }).notNull(),
-  description: text('description'),
-  eventDate: timestamp('event_date'),
-  programType: varchar('program_type', { length: 100 }),
-  specialAttraction: text('special_attraction'),
-  prasadamDetails: text('prasadam_details'),
-  kirtanDetails: text('kirtan_details'),
-  bookDistribution: integer('book_distribution'),
-  chantingRounds: integer('chanting_rounds'),
-  aratiPerformed: boolean('arati_performed'),
-  bhagwatPathPerformed: boolean('bhagwat_path_performed'),
-  attendance: integer('attendance'),
-  imageUrl: varchar('image_url', { length: 500 }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Leaders/Hierarchy table
+export const leaders = sqliteTable("leaders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  role: text("role").notNull(), // GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR, etc.
+  reportingTo: integer("reporting_to"),
+  location: text("location", { mode: 'json' }).$type<{
+    country?: string;
+    state?: string;
+    district?: string;
+  }>(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Leaders Table
-export const leaders = pgTable('leaders', {
-  id: serial('id').primaryKey(),
-  name: varchar('name', { length: 200 }).notNull(),
-  position: varchar('position', { length: 100 }).notNull(),
-  level: varchar('level', { length: 50 }).notNull(),
-  region: varchar('region', { length: 100 }),
-  district: varchar('district', { length: 100 }),
-  description: text('description'),
-  imageUrl: varchar('image_url', { length: 500 }),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
+// Address table for normalized address storage
+export const addresses = sqliteTable("addresses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  country: text("country"),
+  state: text("state"),
+  district: text("district"),
+  subDistrict: text("sub_district"),
+  village: text("village"),
+  postalCode: text("postal_code"),
+  landmark: text("landmark"),
+  addressType: text("address_type"), // 'present', 'permanent', 'namhatta'
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Relations
-export const devotionalStatusesRelations = relations(devotionalStatuses, ({ many }) => ({
-  devotees: many(devotees),
-  statusHistory: many(statusHistory),
-}));
+// Junction table for devotee addresses
+export const devoteeAddresses = sqliteTable("devotee_addresses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  devoteeId: integer("devotee_id").notNull(),
+  addressId: integer("address_id").notNull(),
+  addressType: text("address_type").notNull(), // 'present' or 'permanent'
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+});
 
-export const namhattasRelations = relations(namhattas, ({ one, many }) => ({
-  shraddhakutir: one(shraddhakutirs, {
-    fields: [namhattas.shraddhakutirId],
-    references: [shraddhakutirs.id],
-  }),
-  devotees: many(devotees),
-  updates: many(namhattaUpdates),
-}));
+// Junction table for namhatta addresses
+export const namhattaAddresses = sqliteTable("namhatta_addresses", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  namhattaId: integer("namhatta_id").notNull(),
+  addressId: integer("address_id").notNull(),
+  createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
+});
 
-export const devoteesRelations = relations(devotees, ({ one, many }) => ({
-  namhatta: one(namhattas, {
-    fields: [devotees.namhattaId],
-    references: [namhattas.id],
-  }),
-  devotionalStatus: one(devotionalStatuses, {
-    fields: [devotees.devotionalStatusId],
-    references: [devotionalStatuses.id],
-  }),
-  address: one(addresses, {
-    fields: [devotees.addressId],
-    references: [addresses.id],
-  }),
-  statusHistory: many(statusHistory),
-}));
+// Insert schemas
+export const insertDevoteeSchema = createInsertSchema(devotees).omit({
+  id: true,
+  createdAt: true,
+});
 
-export const shraddhakutirsRelations = relations(shraddhakutirs, ({ many }) => ({
-  namhattas: many(namhattas),
-}));
+export const insertNamhattaSchema = createInsertSchema(namhattas).omit({
+  id: true,
+  createdAt: true,
+});
 
-export const addressesRelations = relations(addresses, ({ many }) => ({
-  devotees: many(devotees),
-}));
+export const insertDevotionalStatusSchema = createInsertSchema(devotionalStatuses).omit({
+  id: true,
+  createdAt: true,
+});
 
-export const statusHistoryRelations = relations(statusHistory, ({ one }) => ({
-  devotee: one(devotees, {
-    fields: [statusHistory.devoteeId],
-    references: [devotees.id],
-  }),
-  oldStatusRef: one(devotionalStatuses, {
-    fields: [statusHistory.oldStatus],
-    references: [devotionalStatuses.id],
-  }),
-  newStatusRef: one(devotionalStatuses, {
-    fields: [statusHistory.newStatus],
-    references: [devotionalStatuses.id],
-  }),
-}));
+export const insertShraddhakutirSchema = createInsertSchema(shraddhakutirs).omit({
+  id: true,
+  createdAt: true,
+});
 
-export const namhattaUpdatesRelations = relations(namhattaUpdates, ({ one }) => ({
-  namhatta: one(namhattas, {
-    fields: [namhattaUpdates.namhattaId],
-    references: [namhattas.id],
-  }),
-}));
+export const insertNamhattaUpdateSchema = createInsertSchema(namhattaUpdates).omit({
+  id: true,
+  createdAt: true,
+});
 
-// Type exports
+export const insertLeaderSchema = createInsertSchema(leaders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAddressSchema = createInsertSchema(addresses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDevoteeAddressSchema = createInsertSchema(devoteeAddresses).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNamhattaAddressSchema = createInsertSchema(namhattaAddresses).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types
 export type Devotee = typeof devotees.$inferSelect;
-export type InsertDevotee = typeof devotees.$inferInsert;
-export type Namhatta = typeof namhattas.$inferSelect;
-export type InsertNamhatta = typeof namhattas.$inferInsert;
-export type Address = typeof addresses.$inferSelect;
-export type InsertAddress = typeof addresses.$inferInsert;
-export type DevotionalStatus = typeof devotionalStatuses.$inferSelect;
-export type InsertDevotionalStatus = typeof devotionalStatuses.$inferInsert;
-export type Shraddhakutir = typeof shraddhakutirs.$inferSelect;
-export type InsertShraddhakutir = typeof shraddhakutirs.$inferInsert;
-export type StatusHistory = typeof statusHistory.$inferSelect;
-export type InsertStatusHistory = typeof statusHistory.$inferInsert;
-export type NamhattaUpdate = typeof namhattaUpdates.$inferSelect;
-export type InsertNamhattaUpdate = typeof namhattaUpdates.$inferInsert;
-export type Leader = typeof leaders.$inferSelect;
-export type InsertLeader = typeof leaders.$inferInsert;
+export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
 
-// Zod schemas for validation
-export const insertDevoteeSchema = createInsertSchema(devotees);
-export const insertNamhattaSchema = createInsertSchema(namhattas);
-export const insertAddressSchema = createInsertSchema(addresses);
-export const insertDevotionalStatusSchema = createInsertSchema(devotionalStatuses);
-export const insertShraddhakutirSchema = createInsertSchema(shraddhakutirs);
-export const insertStatusHistorySchema = createInsertSchema(statusHistory);
-export const insertNamhattaUpdateSchema = createInsertSchema(namhattaUpdates);
-export const insertLeaderSchema = createInsertSchema(leaders);
+export type Namhatta = typeof namhattas.$inferSelect & {
+  devoteeCount?: number;
+};
+export type InsertNamhatta = z.infer<typeof insertNamhattaSchema>;
+
+export type DevotionalStatus = typeof devotionalStatuses.$inferSelect;
+export type InsertDevotionalStatus = z.infer<typeof insertDevotionalStatusSchema>;
+
+export type Shraddhakutir = typeof shraddhakutirs.$inferSelect;
+export type InsertShraddhakutir = z.infer<typeof insertShraddhakutirSchema>;
+
+export type NamhattaUpdate = typeof namhattaUpdates.$inferSelect;
+export type InsertNamhattaUpdate = z.infer<typeof insertNamhattaUpdateSchema>;
+
+export type Leader = typeof leaders.$inferSelect;
+export type InsertLeader = z.infer<typeof insertLeaderSchema>;
+
+export type StatusHistory = typeof statusHistory.$inferSelect;
+
+export type Address = typeof addresses.$inferSelect;
+export type InsertAddress = z.infer<typeof insertAddressSchema>;
+
+export type DevoteeAddress = typeof devoteeAddresses.$inferSelect;
+export type InsertDevoteeAddress = z.infer<typeof insertDevoteeAddressSchema>;
+
+export type NamhattaAddress = typeof namhattaAddresses.$inferSelect;
+export type InsertNamhattaAddress = z.infer<typeof insertNamhattaAddressSchema>;
