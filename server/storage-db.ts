@@ -638,36 +638,45 @@ export class DatabaseStorage implements IStorage {
     village?: string;
     postalCode?: string;
   }): Promise<number> {
-    // Build condition array only for non-empty values
-    const conditions = [];
+    // Normalize null/undefined values to null for proper comparison
+    const normalizedData = {
+      country: addressData.country || 'India',
+      state: addressData.state || null,
+      district: addressData.district || null,
+      subDistrict: addressData.subDistrict || null,
+      village: addressData.village || null,
+      postalCode: addressData.postalCode || null
+    };
     
-    if (addressData.country) conditions.push(eq(addresses.country, addressData.country));
-    if (addressData.state) conditions.push(eq(addresses.stateNameEnglish, addressData.state));
-    if (addressData.district) conditions.push(eq(addresses.districtNameEnglish, addressData.district));
-    if (addressData.subDistrict) conditions.push(eq(addresses.subdistrictNameEnglish, addressData.subDistrict));
-    if (addressData.village) conditions.push(eq(addresses.villageNameEnglish, addressData.village));
-    if (addressData.postalCode) conditions.push(eq(addresses.pincode, addressData.postalCode));
+    // Build exact matching conditions including null values
+    const conditions = [
+      eq(addresses.country, normalizedData.country),
+      normalizedData.state ? eq(addresses.stateNameEnglish, normalizedData.state) : sql`${addresses.stateNameEnglish} IS NULL`,
+      normalizedData.district ? eq(addresses.districtNameEnglish, normalizedData.district) : sql`${addresses.districtNameEnglish} IS NULL`,
+      normalizedData.subDistrict ? eq(addresses.subdistrictNameEnglish, normalizedData.subDistrict) : sql`${addresses.subdistrictNameEnglish} IS NULL`,
+      normalizedData.village ? eq(addresses.villageNameEnglish, normalizedData.village) : sql`${addresses.villageNameEnglish} IS NULL`,
+      normalizedData.postalCode ? eq(addresses.pincode, normalizedData.postalCode) : sql`${addresses.pincode} IS NULL`
+    ];
     
-    // Try to find existing address first - only if we have some criteria
-    if (conditions.length > 0) {
-      const existingAddress = await db.select().from(addresses).where(
-        conditions.length === 1 ? conditions[0] : and(...conditions)
-      ).limit(1);
+    // Try to find existing address with exact match (including nulls)
+    const existingAddress = await db.select().from(addresses).where(and(...conditions)).limit(1);
 
-      if (existingAddress[0]) {
-        return existingAddress[0].id;
-      }
+    if (existingAddress[0]) {
+      console.log(`Found existing address with ID: ${existingAddress[0].id}`);
+      return existingAddress[0].id;
     }
 
     // Create new address only if no exact match found
+    console.log('Creating new address record:', normalizedData);
     const result = await db.insert(addresses).values({
-      country: addressData.country || 'India',
-      stateNameEnglish: addressData.state || null,
-      districtNameEnglish: addressData.district || null,
-      subdistrictNameEnglish: addressData.subDistrict || null,
-      villageNameEnglish: addressData.village || null,
-      pincode: addressData.postalCode || null
+      country: normalizedData.country,
+      stateNameEnglish: normalizedData.state,
+      districtNameEnglish: normalizedData.district,
+      subdistrictNameEnglish: normalizedData.subDistrict,
+      villageNameEnglish: normalizedData.village,
+      pincode: normalizedData.postalCode
     }).returning();
+    console.log(`Created new address with ID: ${result[0].id}`);
     return result[0].id;
   }
 
