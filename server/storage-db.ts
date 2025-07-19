@@ -245,11 +245,11 @@ export class DatabaseStorage implements IStorage {
       addressId: namhattaAddresses.addressId,
       landmark: namhattaAddresses.landmark,
       country: addresses.country,
-      state: addresses.state,
-      district: addresses.district,
-      subDistrict: addresses.subDistrict,
-      village: addresses.village,
-      postalCode: addresses.postalCode
+      state: addresses.stateNameEnglish,
+      district: addresses.districtNameEnglish,
+      subDistrict: addresses.subdistrictNameEnglish,
+      village: addresses.villageNameEnglish,
+      postalCode: addresses.pincode
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .where(eq(namhattaAddresses.namhattaId, id))
@@ -285,11 +285,11 @@ export class DatabaseStorage implements IStorage {
       // Create or find existing address record
       const addressResult = await db.insert(addresses).values({
         country: address.country,
-        state: address.state,
-        district: address.district,
-        subDistrict: address.subDistrict,
-        village: address.village,
-        postalCode: address.postalCode
+        stateNameEnglish: address.state,
+        districtNameEnglish: address.district,
+        subdistrictNameEnglish: address.subDistrict,
+        villageNameEnglish: address.village,
+        pincode: address.postalCode
       }).returning();
       
       const addressId = addressResult[0].id;
@@ -636,11 +636,11 @@ export class DatabaseStorage implements IStorage {
     const existingAddress = await db.select().from(addresses).where(
       and(
         eq(addresses.country, addressData.country || ''),
-        eq(addresses.state, addressData.state || ''),
-        eq(addresses.district, addressData.district || ''),
-        eq(addresses.subDistrict, addressData.subDistrict || ''),
-        eq(addresses.village, addressData.village || ''),
-        eq(addresses.postalCode, addressData.postalCode || '')
+        eq(addresses.stateNameEnglish, addressData.state || ''),
+        eq(addresses.districtNameEnglish, addressData.district || ''),
+        eq(addresses.subdistrictNameEnglish, addressData.subDistrict || ''),
+        eq(addresses.villageNameEnglish, addressData.village || ''),
+        eq(addresses.pincode, addressData.postalCode || '')
       )
     ).limit(1);
 
@@ -649,7 +649,14 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Create new address
-    const result = await db.insert(addresses).values(addressData).returning();
+    const result = await db.insert(addresses).values({
+      country: addressData.country,
+      stateNameEnglish: addressData.state,
+      districtNameEnglish: addressData.district,
+      subdistrictNameEnglish: addressData.subDistrict,
+      villageNameEnglish: addressData.village,
+      pincode: addressData.postalCode
+    }).returning();
     return result[0].id;
   }
 
@@ -686,11 +693,11 @@ export class DatabaseStorage implements IStorage {
       addressType: devoteeAddresses.addressType,
       landmark: devoteeAddresses.landmark,
       country: addresses.country,
-      state: addresses.state,
-      district: addresses.district,
-      subDistrict: addresses.subDistrict,
-      village: addresses.village,
-      postalCode: addresses.postalCode
+      state: addresses.stateNameEnglish,
+      district: addresses.districtNameEnglish,
+      subDistrict: addresses.subdistrictNameEnglish,
+      village: addresses.villageNameEnglish,
+      postalCode: addresses.pincode
     }).from(devoteeAddresses)
       .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
       .where(eq(devoteeAddresses.devoteeId, devoteeId));
@@ -712,11 +719,11 @@ export class DatabaseStorage implements IStorage {
       id: namhattaAddresses.id,
       landmark: namhattaAddresses.landmark,
       country: addresses.country,
-      state: addresses.state,
-      district: addresses.district,
-      subDistrict: addresses.subDistrict,
-      village: addresses.village,
-      postalCode: addresses.postalCode
+      state: addresses.stateNameEnglish,
+      district: addresses.districtNameEnglish,
+      subDistrict: addresses.subdistrictNameEnglish,
+      village: addresses.villageNameEnglish,
+      postalCode: addresses.pincode
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .where(eq(namhattaAddresses.namhattaId, namhattaId))
@@ -743,18 +750,18 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
     let query = db.select({
-      state: addresses.state,
+      state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.state} IS NOT NULL`);
+      .where(sql`${addresses.stateNameEnglish} IS NOT NULL`);
     
     if (country) {
       query = query.where(eq(addresses.country, country));
     }
     
-    const results = await query.groupBy(addresses.state, addresses.country);
+    const results = await query.groupBy(addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       state: result.state || 'Unknown',
@@ -765,19 +772,19 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
     let query = db.select({
-      district: addresses.district,
-      state: addresses.state,
+      district: addresses.districtNameEnglish,
+      state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.district} IS NOT NULL`);
+      .where(sql`${addresses.districtNameEnglish} IS NOT NULL`);
     
     if (state) {
-      query = query.where(eq(addresses.state, state));
+      query = query.where(eq(addresses.stateNameEnglish, state));
     }
     
-    const results = await query.groupBy(addresses.district, addresses.state, addresses.country);
+    const results = await query.groupBy(addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       district: result.district || 'Unknown',
@@ -789,20 +796,20 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
     let query = db.select({
-      subDistrict: addresses.subDistrict,
-      district: addresses.district,
-      state: addresses.state,
+      subDistrict: addresses.subdistrictNameEnglish,
+      district: addresses.districtNameEnglish,
+      state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.subDistrict} IS NOT NULL`);
+      .where(sql`${addresses.subdistrictNameEnglish} IS NOT NULL`);
     
     if (district) {
-      query = query.where(eq(addresses.district, district));
+      query = query.where(eq(addresses.districtNameEnglish, district));
     }
     
-    const results = await query.groupBy(addresses.subDistrict, addresses.district, addresses.state, addresses.country);
+    const results = await query.groupBy(addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       subDistrict: result.subDistrict || 'Unknown',
@@ -815,21 +822,21 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
     let query = db.select({
-      village: addresses.village,
-      subDistrict: addresses.subDistrict,
-      district: addresses.district,
-      state: addresses.state,
+      village: addresses.villageNameEnglish,
+      subDistrict: addresses.subdistrictNameEnglish,
+      district: addresses.districtNameEnglish,
+      state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.village} IS NOT NULL`);
+      .where(sql`${addresses.villageNameEnglish} IS NOT NULL`);
     
     if (subDistrict) {
-      query = query.where(eq(addresses.subDistrict, subDistrict));
+      query = query.where(eq(addresses.subdistrictNameEnglish, subDistrict));
     }
     
-    const results = await query.groupBy(addresses.village, addresses.subDistrict, addresses.district, addresses.state, addresses.country);
+    const results = await query.groupBy(addresses.villageNameEnglish, addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       village: result.village || 'Unknown',
