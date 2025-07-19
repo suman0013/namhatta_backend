@@ -1,30 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage-fresh";
-// Import schemas based on database type
-const databaseUrl = process.env.DATABASE_URL;
-const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
-const usePostgreSQL = databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://');
-
-let insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema;
-
-if (useMySQL) {
-  const mysqlSchema = await import("@shared/schema-mysql");
-  insertDevoteeSchema = mysqlSchema.insertDevoteeSchema;
-  insertNamhattaSchema = mysqlSchema.insertNamhattaSchema;
-  insertDevotionalStatusSchema = mysqlSchema.insertDevotionalStatusSchema;
-  insertShraddhakutirSchema = mysqlSchema.insertShraddhakutirSchema;
-  insertNamhattaUpdateSchema = mysqlSchema.insertNamhattaUpdateSchema;
-} else if (usePostgreSQL) {
-  const postgresSchema = await import("@shared/schema-postgres");
-  insertDevoteeSchema = postgresSchema.insertDevoteeSchema;
-  insertNamhattaSchema = postgresSchema.insertNamhattaSchema;
-  insertDevotionalStatusSchema = postgresSchema.insertDevotionalStatusSchema;
-  insertShraddhakutirSchema = postgresSchema.insertShraddhakutirSchema;
-  insertNamhattaUpdateSchema = postgresSchema.insertNamhattaUpdateSchema;
-} else {
-  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
-}
+import { storage } from "./storage";
+import { 
+  insertDevoteeSchema, 
+  insertNamhattaSchema, 
+  insertDevotionalStatusSchema, 
+  insertShraddhakutirSchema, 
+  insertNamhattaUpdateSchema,
+  insertLeaderSchema,
+  insertAddressSchema
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check
@@ -41,365 +26,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Geography endpoints
-  app.get("/api/countries", async (req, res) => {
-    const countries = await storage.getCountries();
-    res.json(countries);
-  });
-
-  app.get("/api/states", async (req, res) => {
-    const { country } = req.query;
-    const states = await storage.getStates(country as string);
-    res.json(states);
-  });
-
-  app.get("/api/districts", async (req, res) => {
-    const { state } = req.query;
-    const districts = await storage.getDistricts(state as string);
-    res.json(districts);
-  });
-
-  app.get("/api/sub-districts", async (req, res) => {
-    const { district } = req.query;
-    const subDistricts = await storage.getSubDistricts(district as string);
-    res.json(subDistricts);
-  });
-
-  app.get("/api/villages", async (req, res) => {
-    const { subDistrict } = req.query;
-    const villages = await storage.getVillages(subDistrict as string);
-    res.json(villages);
-  });
-
-  app.get("/api/pincodes", async (req, res) => {
-    const { village, district, subDistrict } = req.query;
-    const pincodes = await storage.getPincodes(village as string, district as string, subDistrict as string);
-    res.json(pincodes);
-  });
-
-  // Map data endpoints
-  app.get("/api/map/countries", async (req, res) => {
-    const data = await storage.getNamhattaCountsByCountry();
-    res.json(data);
-  });
-
-  app.get("/api/map/states", async (req, res) => {
-    const data = await storage.getNamhattaCountsByState(); // Get all states
-    res.json(data);
-  });
-
-  app.get("/api/map/districts", async (req, res) => {
-    const data = await storage.getNamhattaCountsByDistrict(); // Get all districts
-    res.json(data);
-  });
-
-  app.get("/api/map/sub-districts", async (req, res) => {
-    const data = await storage.getNamhattaCountsBySubDistrict(); // Get all sub-districts
-    res.json(data);
-  });
-
-  app.get("/api/map/villages", async (req, res) => {
-    const data = await storage.getNamhattaCountsByVillage(); // Get all villages
-    res.json(data);
-  });
-
-  // Dashboard
-  app.get("/api/dashboard", async (req, res) => {
-    const summary = await storage.getDashboardSummary();
-    res.json(summary);
-  });
-
-  app.get("/api/status-distribution", async (req, res) => {
-    const distribution = await storage.getStatusDistribution();
-    res.json(distribution);
-  });
-
-  // Hierarchy
-  app.get("/api/hierarchy", async (req, res) => {
-    const hierarchy = await storage.getTopLevelHierarchy();
-    res.json(hierarchy);
-  });
-
-  app.get("/api/hierarchy/:level", async (req, res) => {
-    const { level } = req.params;
-    const validLevels = ["DISTRICT_SUPERVISOR", "MALA_SENAPOTI", "MAHA_CHAKRA_SENAPOTI", "CHAKRA_SENAPOTI", "UPA_CHAKRA_SENAPOTI"];
-    
-    if (!validLevels.includes(level)) {
-      return res.status(400).json({ message: "Invalid hierarchy level" });
-    }
-    
-    const leaders = await storage.getLeadersByLevel(level);
-    res.json(leaders);
-  });
-
   // Devotees
   app.get("/api/devotees", async (req, res) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const size = parseInt(req.query.size as string) || 10;
-    const sortBy = (req.query.sortBy as string) || "name";
-    const sortOrder = (req.query.sortOrder as string) || "asc";
-    const filters = {
-      search: req.query.search as string,
-      country: req.query.country as string,
-      state: req.query.state as string,
-      district: req.query.district as string,
-      statusId: req.query.statusId as string,
-      sortBy,
-      sortOrder,
-    };
-    const result = await storage.getDevotees(page, size, filters);
-    res.json(result);
+    try {
+      const devotees = await storage.getDevotees();
+      res.json(devotees);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch devotees" });
+    }
   });
 
   app.get("/api/devotees/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const devotee = await storage.getDevotee(id);
-    if (!devotee) {
-      return res.status(404).json({ message: "Devotee not found" });
+    try {
+      const devotee = await storage.getDevotee(parseInt(req.params.id));
+      if (!devotee) {
+        return res.status(404).json({ error: "Devotee not found" });
+      }
+      res.json(devotee);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch devotee" });
     }
-    res.json(devotee);
   });
 
   app.post("/api/devotees", async (req, res) => {
     try {
-      const devoteeData = insertDevoteeSchema.parse(req.body);
-      const devotee = await storage.createDevotee(devoteeData);
-      res.status(201).json(devotee);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error });
-    }
-  });
-
-  // Add devotee to specific Namhatta
-  app.post("/api/devotees/:namhattaId", async (req, res) => {
-    const namhattaId = parseInt(req.params.namhattaId);
-    try {
-      const devoteeData = insertDevoteeSchema.parse(req.body);
-      const devotee = await storage.createDevoteeForNamhatta(devoteeData, namhattaId);
-      res.status(201).json(devotee);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error });
-    }
-  });
-
-  app.put("/api/devotees/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    try {
-      const devoteeData = insertDevoteeSchema.partial().parse(req.body);
-      const devotee = await storage.updateDevotee(id, devoteeData);
-      res.json(devotee);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error });
-    }
-  });
-
-  app.post("/api/devotees/:id/upgrade-status", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const { newStatusId, notes } = req.body;
-    
-    if (!newStatusId) {
-      return res.status(400).json({ message: "newStatusId is required" });
-    }
-    
-    try {
-      // Check if devotee exists first
-      const devotee = await storage.getDevotee(id);
-      if (!devotee) {
-        return res.status(404).json({ message: "Devotee not found" });
+      const result = insertDevoteeSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error.errors });
       }
-      
-      await storage.upgradeDevoteeStatus(id, newStatusId, notes);
-      res.json({ message: "Status updated successfully" });
+      const devotee = await storage.createDevotee(result.data);
+      res.status(201).json(devotee);
     } catch (error) {
-      console.error("Error upgrading devotee status:", error);
-      res.status(500).json({ message: "Failed to upgrade status", error: error.message });
+      res.status(500).json({ error: "Failed to create devotee" });
     }
-  });
-
-  app.get("/api/devotees/:id/status-history", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const history = await storage.getDevoteeStatusHistory(id);
-    res.json(history);
   });
 
   // Namhattas
   app.get("/api/namhattas", async (req, res) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const size = parseInt(req.query.size as string) || 10;
-    const sortBy = req.query.sortBy as string;
-    const sortOrder = req.query.sortOrder as string;
-    
-    const filters = {
-      search: req.query.search as string,
-      country: req.query.country as string,
-      state: req.query.state as string,
-      district: req.query.district as string,
-      subDistrict: req.query.subDistrict as string,
-      village: req.query.village as string,
-      status: req.query.status as string,
-      sortBy,
-      sortOrder,
-    };
-    const result = await storage.getNamhattas(page, size, filters);
-    res.json(result);
-  });
-
-  app.get("/api/namhattas/pending", async (req, res) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const size = parseInt(req.query.size as string) || 10;
-    const result = await storage.getNamhattas(page, size, { status: "PENDING_APPROVAL" });
-    res.json(result.data);
+    try {
+      const namhattas = await storage.getNamhattas();
+      res.json(namhattas);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch namhattas" });
+    }
   });
 
   app.get("/api/namhattas/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const namhatta = await storage.getNamhatta(id);
-    if (!namhatta) {
-      return res.status(404).json({ message: "Namhatta not found" });
+    try {
+      const namhatta = await storage.getNamhatta(parseInt(req.params.id));
+      if (!namhatta) {
+        return res.status(404).json({ error: "Namhatta not found" });
+      }
+      res.json(namhatta);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch namhatta" });
     }
-    res.json(namhatta);
   });
 
   app.post("/api/namhattas", async (req, res) => {
     try {
-      const namhattaData = insertNamhattaSchema.parse(req.body);
-      const namhatta = await storage.createNamhatta(namhattaData);
+      const result = insertNamhattaSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error.errors });
+      }
+      const namhatta = await storage.createNamhatta(result.data);
       res.status(201).json(namhatta);
     } catch (error) {
-      res.status(400).json({ message: "Invalid namhatta data", error });
+      res.status(500).json({ error: "Failed to create namhatta" });
     }
   });
 
-  app.put("/api/namhattas/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
+  // Devotional Statuses
+  app.get("/api/devotional-statuses", async (req, res) => {
     try {
-      const namhattaData = insertNamhattaSchema.partial().parse(req.body);
-      const namhatta = await storage.updateNamhatta(id, namhattaData);
-      res.json(namhatta);
+      const statuses = await storage.getDevotionalStatuses();
+      res.json(statuses);
     } catch (error) {
-      res.status(400).json({ message: "Invalid namhatta data", error });
-    }
-  });
-
-  app.get("/api/namhattas/:id/devotees", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const page = parseInt(req.query.page as string) || 1;
-    const size = parseInt(req.query.size as string) || 10;
-    const statusId = req.query.statusId ? parseInt(req.query.statusId as string) : undefined;
-    
-    const result = await storage.getDevoteesByNamhatta(id, page, size, statusId);
-    res.json(result);
-  });
-
-  app.post("/api/namhattas/:id/approve", async (req, res) => {
-    const id = parseInt(req.params.id);
-    try {
-      await storage.approveNamhatta(id);
-      res.json({ message: "Namhatta approved successfully" });
-    } catch (error) {
-      res.status(404).json({ message: "Namhatta not found" });
-    }
-  });
-
-  app.post("/api/namhattas/:id/reject", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const { reason } = req.body;
-    try {
-      await storage.rejectNamhatta(id, reason);
-      res.json({ message: "Namhatta rejected successfully" });
-    } catch (error) {
-      res.status(404).json({ message: "Namhatta not found" });
-    }
-  });
-
-  app.get("/api/namhattas/:id/updates", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const updates = await storage.getNamhattaUpdates(id);
-    res.json(updates);
-  });
-
-  // Get all updates from all namhattas (optimized endpoint)
-  app.get("/api/updates/all", async (req, res) => {
-    const updates = await storage.getAllUpdates();
-    res.json(updates);
-  });
-
-  app.get("/api/namhattas/:id/devotee-status-count", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const counts = await storage.getNamhattaDevoteeStatusCount(id);
-    res.json(counts);
-  });
-
-  app.get("/api/namhattas/:id/status-history", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const page = parseInt(req.query.page as string) || 1;
-    const size = parseInt(req.query.size as string) || 10;
-    const result = await storage.getNamhattaStatusHistory(id, page, size);
-    res.json(result);
-  });
-
-  // Statuses
-  app.get("/api/statuses", async (req, res) => {
-    const statuses = await storage.getDevotionalStatuses();
-    res.json(statuses);
-  });
-
-  app.post("/api/statuses", async (req, res) => {
-    try {
-      const statusData = insertDevotionalStatusSchema.parse(req.body);
-      const status = await storage.createDevotionalStatus(statusData);
-      res.status(201).json(status);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid status data", error });
-    }
-  });
-
-  app.post("/api/statuses/:id/rename", async (req, res) => {
-    const id = parseInt(req.params.id);
-    const { newName } = req.body;
-    
-    if (!newName) {
-      return res.status(400).json({ message: "newName is required" });
-    }
-    
-    try {
-      await storage.renameDevotionalStatus(id, newName);
-      res.json({ message: "Status renamed successfully" });
-    } catch (error) {
-      res.status(404).json({ message: "Status not found" });
+      res.status(500).json({ error: "Failed to fetch devotional statuses" });
     }
   });
 
   // Shraddhakutirs
   app.get("/api/shraddhakutirs", async (req, res) => {
-    const shraddhakutirs = await storage.getShraddhakutirs();
-    res.json(shraddhakutirs);
-  });
-
-  app.post("/api/shraddhakutirs", async (req, res) => {
     try {
-      const shraddhakutirData = insertShraddhakutirSchema.parse(req.body);
-      const shraddhakutir = await storage.createShraddhakutir(shraddhakutirData);
-      res.status(201).json(shraddhakutir);
+      const shraddhakutirs = await storage.getShraddhakutirs();
+      res.json(shraddhakutirs);
     } catch (error) {
-      res.status(400).json({ message: "Invalid shraddhakutir data", error });
+      res.status(500).json({ error: "Failed to fetch shraddhakutirs" });
     }
   });
 
-  // Updates
-  app.post("/api/updates", async (req, res) => {
+  // Leaders
+  app.get("/api/leaders", async (req, res) => {
     try {
-      console.log("Received update data:", JSON.stringify(req.body, null, 2));
-      console.log("Date field type:", typeof req.body.date, "Value:", req.body.date);
-      const updateData = insertNamhattaUpdateSchema.parse(req.body);
-      const update = await storage.createNamhattaUpdate(updateData);
+      const leaders = await storage.getLeaders();
+      res.json(leaders);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch leaders" });
+    }
+  });
+
+  // Addresses
+  app.get("/api/addresses", async (req, res) => {
+    try {
+      const addresses = await storage.getAddresses();
+      res.json(addresses);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch addresses" });
+    }
+  });
+
+  // Status History
+  app.get("/api/status-history", async (req, res) => {
+    try {
+      const devoteeId = req.query.devoteeId ? parseInt(req.query.devoteeId as string) : undefined;
+      const history = await storage.getStatusHistory(devoteeId);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch status history" });
+    }
+  });
+
+  // Namhatta Updates
+  app.get("/api/namhatta-updates", async (req, res) => {
+    try {
+      const namhattaId = req.query.namhattaId ? parseInt(req.query.namhattaId as string) : undefined;
+      const updates = await storage.getNamhattaUpdates(namhattaId);
+      res.json(updates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch namhatta updates" });
+    }
+  });
+
+  app.post("/api/namhatta-updates", async (req, res) => {
+    try {
+      const result = insertNamhattaUpdateSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: result.error.errors });
+      }
+      const update = await storage.createNamhattaUpdate(result.data);
       res.status(201).json(update);
     } catch (error) {
-      console.error("Validation error:", error);
-      res.status(400).json({ message: "Invalid update data", error });
+      res.status(500).json({ error: "Failed to create namhatta update" });
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  const server = createServer(app);
+  return server;
 }
