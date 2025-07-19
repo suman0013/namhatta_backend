@@ -27,11 +27,13 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const isAuthEnabled = import.meta.env.VITE_AUTHENTICATION_ENABLED === 'true';
+
   const [state, setState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
     isLoading: true,
-    isAuthEnabled: import.meta.env.VITE_AUTHENTICATION_ENABLED === 'true'
+    isAuthEnabled
   });
 
   const checkAuth = async () => {
