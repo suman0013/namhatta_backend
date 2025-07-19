@@ -7,6 +7,10 @@ import { setupVite, serveStatic, log } from "./vite";
 dotenv.config();
 
 const app = express();
+
+// Trust proxy for Replit environment to fix rate limiting
+app.set('trust proxy', true);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

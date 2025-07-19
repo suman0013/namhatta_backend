@@ -18,13 +18,17 @@ declare global {
   }
 }
 
-// Rate limiting for login attempts
+// Rate limiting for login attempts  
 export const loginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 attempts per window
   message: { error: 'Too many login attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: {
+    trustProxy: false, // Disable proxy validation for Replit
+    xForwardedForHeader: false, // Disable X-Forwarded-For header validation
+  },
 });
 
 // Authentication middleware with development bypass

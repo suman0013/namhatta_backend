@@ -27,6 +27,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Dev endpoint to check users (development only)
+  app.get("/api/dev/users", async (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(404).json({ message: "Not found" });
+    }
+    try {
+      const { getUserByUsername } = await import('./storage-auth');
+      const admin = await getUserByUsername('admin');
+      const office1 = await getUserByUsername('office1');
+      const supervisor1 = await getUserByUsername('supervisor1');
+      
+      res.json({
+        admin: admin ? { id: admin.id, username: admin.username, role: admin.role, isActive: admin.isActive, passwordHashLength: admin.passwordHash.length } : null,
+        office1: office1 ? { id: office1.id, username: office1.username, role: office1.role, isActive: office1.isActive, passwordHashLength: office1.passwordHash.length } : null,
+        supervisor1: supervisor1 ? { id: supervisor1.id, username: supervisor1.username, role: supervisor1.role, isActive: supervisor1.isActive, passwordHashLength: supervisor1.passwordHash.length } : null,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Geography endpoints
   app.get("/api/countries", async (req, res) => {
     const countries = await storage.getCountries();
