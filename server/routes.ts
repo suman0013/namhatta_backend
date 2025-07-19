@@ -1,10 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import cookieParser from "cookie-parser";
 import { storage } from "./storage-fresh";
 import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema } from "@shared/schema";
+import { authRoutes } from "./auth/routes";
+import { authenticateJWT, authorize, validateDistrictAccess } from "./auth/middleware";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check
+  // Add cookie parser middleware
+  app.use(cookieParser());
+
+  // Authentication routes (no auth required)
+  app.use("/api/auth", authRoutes);
+
+  // Health check (no auth required)
   app.get("/api/health", async (req, res) => {
     res.json({ status: "OK" });
   });
@@ -80,19 +89,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(data);
   });
 
-  // Dashboard
-  app.get("/api/dashboard", async (req, res) => {
+  // Dashboard (requires authentication)
+  app.get("/api/dashboard", authenticateJWT, async (req, res) => {
     const summary = await storage.getDashboardSummary();
     res.json(summary);
   });
 
-  app.get("/api/status-distribution", async (req, res) => {
+  app.get("/api/status-distribution", authenticateJWT, async (req, res) => {
     const distribution = await storage.getStatusDistribution();
     res.json(distribution);
   });
 
-  // Hierarchy
-  app.get("/api/hierarchy", async (req, res) => {
+  // Hierarchy (requires authentication)
+  app.get("/api/hierarchy", authenticateJWT, async (req, res) => {
     const hierarchy = await storage.getTopLevelHierarchy();
     res.json(hierarchy);
   });
@@ -109,8 +118,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(leaders);
   });
 
-  // Devotees
-  app.get("/api/devotees", async (req, res) => {
+  // Devotees (requires authentication, district filtering for supervisors)
+  app.get("/api/devotees", authenticateJWT, validateDistrictAccess, async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const size = parseInt(req.query.size as string) || 10;
     const sortBy = (req.query.sortBy as string) || "name";
@@ -128,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
-  app.get("/api/devotees/:id", async (req, res) => {
+  app.get("/api/devotees/:id", authenticateJWT, async (req, res) => {
     const id = parseInt(req.params.id);
     const devotee = await storage.getDevotee(id);
     if (!devotee) {
@@ -137,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(devotee);
   });
 
-  app.post("/api/devotees", async (req, res) => {
+  app.post("/api/devotees", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     try {
       // Extract address and other fields separately (similar to namhatta creation)
       const { presentAddress, permanentAddress, ...devoteeFields } = req.body;
@@ -160,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add devotee to specific Namhatta
-  app.post("/api/devotees/:namhattaId", async (req, res) => {
+  app.post("/api/devotees/:namhattaId", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const namhattaId = parseInt(req.params.namhattaId);
     try {
       // Extract address and other fields separately
@@ -183,7 +192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/devotees/:id", async (req, res) => {
+  app.put("/api/devotees/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
       const devoteeData = insertDevoteeSchema.partial().parse(req.body);
@@ -194,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/devotees/:id/upgrade-status", async (req, res) => {
+  app.post("/api/devotees/:id/upgrade-status", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     const { newStatusId, notes } = req.body;
     
@@ -217,21 +226,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/devotees/:id/status-history", async (req, res) => {
+  app.get("/api/devotees/:id/status-history", authenticateJWT, async (req, res) => {
     const id = parseInt(req.params.id);
     const history = await storage.getDevoteeStatusHistory(id);
     res.json(history);
   });
 
   // Get devotee addresses
-  app.get("/api/devotees/:id/addresses", async (req, res) => {
+  app.get("/api/devotees/:id/addresses", authenticateJWT, async (req, res) => {
     const id = parseInt(req.params.id);
     const addresses = await storage.getDevoteeAddresses(id);
     res.json(addresses);
   });
 
-  // Namhattas
-  app.get("/api/namhattas", async (req, res) => {
+  // Namhattas (requires authentication, district filtering for supervisors)
+  app.get("/api/namhattas", authenticateJWT, validateDistrictAccess, async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const size = parseInt(req.query.size as string) || 10;
     const sortBy = req.query.sortBy as string;
@@ -252,14 +261,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
-  app.get("/api/namhattas/pending", async (req, res) => {
+  app.get("/api/namhattas/pending", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const page = parseInt(req.query.page as string) || 1;
     const size = parseInt(req.query.size as string) || 10;
     const result = await storage.getNamhattas(page, size, { status: "PENDING_APPROVAL" });
     res.json(result.data);
   });
 
-  app.get("/api/namhattas/:id", async (req, res) => {
+  app.get("/api/namhattas/:id", authenticateJWT, async (req, res) => {
     const id = parseInt(req.params.id);
     const namhatta = await storage.getNamhatta(id);
     if (!namhatta) {
@@ -268,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(namhatta);
   });
 
-  app.post("/api/namhattas", async (req, res) => {
+  app.post("/api/namhattas", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     try {
       // Extract address and other fields separately
       const { address, ...namhattaFields } = req.body;
@@ -289,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/namhattas/:id", async (req, res) => {
+  app.put("/api/namhattas/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
       const namhattaData = insertNamhattaSchema.partial().parse(req.body);

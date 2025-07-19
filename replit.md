@@ -19,7 +19,10 @@ This is a full-stack web application for managing Namhatta religious/spiritual o
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM
 - **Database Provider**: Neon serverless PostgreSQL
-- **Session Management**: PostgreSQL-based sessions with connect-pg-simple
+- **Authentication**: JWT tokens with HTTP-only cookies, bcrypt password hashing
+- **Session Management**: PostgreSQL-based sessions with single login enforcement
+- **Authorization**: Role-based access control (ADMIN, OFFICE, DISTRICT_SUPERVISOR)
+- **Security**: Rate limiting, token blacklisting, district-based data filtering
 - **API Design**: RESTful API with JSON responses
 
 ### Data Storage Solutions
@@ -41,6 +44,10 @@ The application uses a PostgreSQL database with the following main entities:
 5. **Leaders**: Hierarchical leadership structure
 6. **Addresses**: Normalized address data (country, state, district, sub_district, village, postal_code)
 7. **Devotee_Addresses & Namhatta_Addresses**: Junction tables linking entities to addresses with landmarks
+8. **Users**: Authentication users with username, password hash, role, and active status
+9. **User_Districts**: Many-to-many mapping between users and districts for access control
+10. **User_Sessions**: Single login enforcement with session tokens and expiry
+11. **JWT_Blacklist**: Token invalidation for secure logout
 
 ### Frontend Components
 - **Layout System**: Responsive app layout with navigation
@@ -51,11 +58,13 @@ The application uses a PostgreSQL database with the following main entities:
 
 ### API Structure
 RESTful endpoints organized by resource:
-- `/api/devotees` - Devotee management
-- `/api/namhattas` - Namhatta center management
+- `/api/auth` - Authentication (login, logout, verify, dev tools)
+- `/api/devotees` - Devotee management (protected, role-based access)
+- `/api/namhattas` - Namhatta center management (protected, role-based access)
 - `/api/statuses` - Devotional status management
-- `/api/hierarchy` - Leadership hierarchy
-- `/api/geography` - Location data (countries, states, districts)
+- `/api/hierarchy` - Leadership hierarchy (protected)
+- `/api/geography` - Location data (public access)
+- `/api/dashboard` - Summary statistics (protected)
 
 ## Data Flow
 
@@ -100,6 +109,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Recent Changes
+- January 19, 2025: COMPLETED - JWT-based authentication system with role-based access control - implemented complete backend authentication including user management tables (users, user_districts, user_sessions, jwt_blacklist), password hashing with bcrypt, JWT token management with HTTP-only cookies, single login enforcement, three user roles (ADMIN, OFFICE, DISTRICT_SUPERVISOR) with district-based data filtering, authentication middleware with development bypass functionality, comprehensive API endpoints (/api/auth/login, logout, verify), route protection for all data endpoints, rate limiting for login attempts, and test user creation with proper password policies
 - July 19, 2025: COMPLETED - Full devotee address management system - implemented complete address handling for devotees including present and permanent addresses, fixed address creation and retrieval for both individual devotees and devotees assigned to specific namhattas, verified proper foreign key relationships and address reuse functionality, tested complete workflow including address normalization, landmark storage, and proper JSON response formatting with all address details
 - July 19, 2025: COMPLETED - Critical address management fixes - resolved duplicate address creation bug in Namhatta forms by implementing proper findOrCreateAddress logic using foreign key references instead of direct insertions, enhanced postal code filtering to use hierarchical location codes for more precise results (limited to 50 results), improved address matching algorithm to find existing records before creating new ones, fixed address table relationship issues that were causing database bloat, verified all address-related API endpoints working correctly with proper normalization
 - July 19, 2025: COMPLETED - Migration from Replit Agent to standard Replit environment with custom PostgreSQL database - configured specific Neon database (postgresql://neondb_owner:npg_5MIwCD4YhSdP@ep-calm-silence-a15zko7l-pooler.ap-southeast-1.aws.neon.tech/neondb) as default for consistent access across environments, updated database configuration with fallback to ensure automatic connection, imported existing CSV data (101 namhattas, 253 devotees, 7 devotional statuses), verified application startup and API connectivity, created .env configuration and documentation for future imports

@@ -1,4 +1,4 @@
-import { pgTable, text, integer, serial, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, serial, timestamp, jsonb, boolean, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -151,6 +151,46 @@ export const namhattaAddresses = pgTable("namhatta_addresses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Authentication Tables
+
+// Users table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull(), // 'ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+});
+
+// User-District mapping (many-to-many)
+export const userDistricts = pgTable("user_districts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  districtCode: text("district_code").notNull(), // References district from addresses table
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueUserDistrict: unique().on(table.userId, table.districtCode),
+}));
+
+// Active sessions (single login enforcement)
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(), // Only one active session per user
+  sessionToken: text("session_token").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// JWT blacklist (for logout)
+export const jwtBlacklist = pgTable("jwt_blacklist", {
+  id: serial("id").primaryKey(),
+  tokenHash: text("token_hash").notNull(),
+  expiredAt: timestamp("expired_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertDevoteeSchema = createInsertSchema(devotees).omit({
   id: true,
@@ -197,6 +237,27 @@ export const insertNamhattaAddressSchema = createInsertSchema(namhattaAddresses)
   createdAt: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserDistrictSchema = createInsertSchema(userDistricts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertJwtBlacklistSchema = createInsertSchema(jwtBlacklist).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Devotee = typeof devotees.$inferSelect;
 export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
@@ -228,3 +289,15 @@ export type InsertDevoteeAddress = z.infer<typeof insertDevoteeAddressSchema>;
 
 export type NamhattaAddress = typeof namhattaAddresses.$inferSelect;
 export type InsertNamhattaAddress = z.infer<typeof insertNamhattaAddressSchema>;
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type UserDistrict = typeof userDistricts.$inferSelect;
+export type InsertUserDistrict = z.infer<typeof insertUserDistrictSchema>;
+
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+
+export type JwtBlacklist = typeof jwtBlacklist.$inferSelect;
+export type InsertJwtBlacklist = z.infer<typeof insertJwtBlacklistSchema>;
