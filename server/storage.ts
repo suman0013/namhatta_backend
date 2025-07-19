@@ -56,11 +56,24 @@ export const storage = {
     return result.map(r => r.village).filter(Boolean);
   },
 
-  async getPincodes(village?: string) {
+  async getPincodes(village?: string, district?: string, subDistrict?: string) {
     let query = db.selectDistinct({ postalCode: addresses.postalCode }).from(addresses);
+    const conditions = [];
+    
     if (village) {
-      query = query.where(eq(addresses.village, village));
+      conditions.push(eq(addresses.village, village));
     }
+    if (district) {
+      conditions.push(eq(addresses.district, district));
+    }
+    if (subDistrict) {
+      conditions.push(eq(addresses.subDistrict, subDistrict));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
     const result = await query;
     return result.map(r => r.postalCode).filter(Boolean);
   },
@@ -248,6 +261,27 @@ export const storage = {
     return result[0];
   },
 
+  async renameDevotionalStatus(id: number, newName: string) {
+    const result = await db.update(devotionalStatuses)
+      .set({ name: newName })
+      .where(eq(devotionalStatuses.id, id))
+      .returning();
+    if (result.length === 0) {
+      throw new Error('Status not found');
+    }
+    return result[0];
+  },
+
+  // Shraddhakutirs
+  async getShraddhakutirs() {
+    return await db.select().from(shraddhakutirs).orderBy(asc(shraddhakutirs.name));
+  },
+
+  async createShraddhakutir(data: any) {
+    const result = await db.insert(shraddhakutirs).values(data).returning();
+    return result[0];
+  },
+
   // Updates
   async getAllUpdates() {
     const result = await db
@@ -275,6 +309,11 @@ export const storage = {
   },
 
   async createUpdate(data: any) {
+    const result = await db.insert(namhattaUpdates).values(data).returning();
+    return result[0];
+  },
+
+  async createNamhattaUpdate(data: any) {
     const result = await db.insert(namhattaUpdates).values(data).returning();
     return result[0];
   },
@@ -307,5 +346,62 @@ export const storage = {
 
   async getLeadersByLevel(level: string) {
     return await db.select().from(leaders).where(eq(leaders.role, level));
+  },
+
+  // Namhatta specific methods
+  async rejectNamhatta(id: number, reason: string) {
+    const result = await db.update(namhattas)
+      .set({ status: 'REJECTED' })
+      .where(eq(namhattas.id, id))
+      .returning();
+    if (result.length === 0) {
+      throw new Error('Namhatta not found');
+    }
+    return result[0];
+  },
+
+  async getNamhattaUpdates(namhattaId: number) {
+    return await db.select()
+      .from(namhattaUpdates)
+      .where(eq(namhattaUpdates.namhattaId, namhattaId))
+      .orderBy(desc(namhattaUpdates.createdAt));
+  },
+
+  async getNamhattaDevoteeStatusCount(namhattaId: number) {
+    const result = await db
+      .select({
+        statusName: devotionalStatuses.name,
+        count: sql`count(*)`,
+      })
+      .from(devotees)
+      .leftJoin(devotionalStatuses, eq(devotees.devotionalStatusId, devotionalStatuses.id))
+      .where(eq(devotees.namhattaId, namhattaId))
+      .groupBy(devotionalStatuses.name);
+
+    return result;
+  },
+
+  async getNamhattaStatusHistory(namhattaId: number, page: number = 1, size: number = 10) {
+    const offset = (page - 1) * size;
+    
+    const data = await db.select()
+      .from(statusHistory)
+      .leftJoin(devotees, eq(statusHistory.devoteeId, devotees.id))
+      .where(eq(devotees.namhattaId, namhattaId))
+      .orderBy(desc(statusHistory.updatedAt))
+      .limit(size)
+      .offset(offset);
+
+    const total = await db.select({ count: sql`count(*)` })
+      .from(statusHistory)
+      .leftJoin(devotees, eq(statusHistory.devoteeId, devotees.id))
+      .where(eq(devotees.namhattaId, namhattaId));
+
+    return {
+      data,
+      total: Number(total[0].count),
+      page,
+      size
+    };
   }
 };
