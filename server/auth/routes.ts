@@ -4,8 +4,9 @@ import { z } from 'zod';
 import { getUserByUsername, getUserWithDistricts } from '../storage-auth';
 import { createSession, removeSession } from './session';
 import { verifyPassword } from './password';
-import { generateToken, blacklistToken } from './jwt';
+import { generateToken, blacklistToken, verifyToken, isTokenBlacklisted } from './jwt';
 import { loginRateLimit } from './middleware';
+import { validateSession } from './session';
 
 const router = Router();
 
@@ -88,7 +89,7 @@ router.post('/logout', async (req, res) => {
       await blacklistToken(token);
       
       // Remove session if user is identified
-      const decoded = require('./jwt').verifyToken(token);
+      const decoded = verifyToken(token);
       if (decoded) {
         await removeSession(decoded.userId);
       }
@@ -112,9 +113,6 @@ router.get('/verify', async (req, res) => {
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
     }
-
-    const { verifyToken, isTokenBlacklisted } = require('./jwt');
-    const { validateSession } = require('./session');
 
     // Check if token is blacklisted
     if (await isTokenBlacklisted(token)) {
