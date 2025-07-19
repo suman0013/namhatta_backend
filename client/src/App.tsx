@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import NotFound from "@/pages/not-found";
 import AppLayout from "@/components/layout/AppLayout";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -26,27 +28,24 @@ import Hierarchy from "@/pages/Hierarchy";
 
 function Router() {
   return (
-    <AppLayout>
-      <ScrollToTop />
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/namhattas" component={Namhattas} />
-        <Route path="/namhattas/:id" component={NamhattaDetail} />
-        <Route path="/devotees" component={Devotees} />
-        <Route path="/devotees/:id" component={DevoteeDetail} />
-        <Route path="/approvals" component={NamhattaApprovals} />
-        <Route path="/statuses" component={Statuses} />
-        <Route path="/shraddhakutirs" component={Shraddhakutirs} />
-        <Route path="/updates" component={Updates} />
-        <Route path="/map" component={Map} />
-        <Route path="/hierarchy" component={Hierarchy} />
-        <Route path="/more" component={More} />
-        <Route path="/health" component={Health} />
-        <Route path="/about" component={About} />
-        <Route component={NotFound} />
-      </Switch>
-    </AppLayout>
+    <Switch>
+      <Route path="/" component={Dashboard} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/namhattas" component={Namhattas} />
+      <Route path="/namhattas/:id" component={NamhattaDetail} />
+      <Route path="/devotees" component={Devotees} />
+      <Route path="/devotees/:id" component={DevoteeDetail} />
+      <Route path="/approvals" component={NamhattaApprovals} />
+      <Route path="/statuses" component={Statuses} />
+      <Route path="/shraddhakutirs" component={Shraddhakutirs} />
+      <Route path="/updates" component={Updates} />
+      <Route path="/map" component={Map} />
+      <Route path="/hierarchy" component={Hierarchy} />
+      <Route path="/more" component={More} />
+      <Route path="/health" component={Health} />
+      <Route path="/about" component={About} />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
@@ -57,10 +56,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="namhatta-ui-theme">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <ProtectedRoute>
+              <AppLayout>
+                <ScrollToTop />
+                <Router />
+              </AppLayout>
+            </ProtectedRoute>
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
