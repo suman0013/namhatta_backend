@@ -139,11 +139,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/devotees", async (req, res) => {
     try {
-      const devoteeData = insertDevoteeSchema.parse(req.body);
-      const devotee = await storage.createDevotee(devoteeData);
+      // Extract address and other fields separately (similar to namhatta creation)
+      const { presentAddress, permanentAddress, ...devoteeFields } = req.body;
+      
+      // Validate only the devotee fields against schema
+      const validatedDevoteeData = insertDevoteeSchema.parse(devoteeFields);
+      
+      // Add addresses back to the data
+      const devoteeDataWithAddresses = {
+        ...validatedDevoteeData,
+        presentAddress: presentAddress,
+        permanentAddress: permanentAddress
+      };
+      
+      const devotee = await storage.createDevotee(devoteeDataWithAddresses);
       res.status(201).json(devotee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error });
+      res.status(400).json({ message: "Invalid devotee data", error: error.message });
     }
   });
 
@@ -151,11 +163,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/devotees/:namhattaId", async (req, res) => {
     const namhattaId = parseInt(req.params.namhattaId);
     try {
-      const devoteeData = insertDevoteeSchema.parse(req.body);
-      const devotee = await storage.createDevoteeForNamhatta(devoteeData, namhattaId);
+      // Extract address and other fields separately
+      const { presentAddress, permanentAddress, ...devoteeFields } = req.body;
+      
+      // Validate only the devotee fields against schema
+      const validatedDevoteeData = insertDevoteeSchema.parse(devoteeFields);
+      
+      // Add addresses back to the data
+      const devoteeDataWithAddresses = {
+        ...validatedDevoteeData,
+        presentAddress: presentAddress,
+        permanentAddress: permanentAddress
+      };
+      
+      const devotee = await storage.createDevoteeForNamhatta(devoteeDataWithAddresses, namhattaId);
       res.status(201).json(devotee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error });
+      res.status(400).json({ message: "Invalid devotee data", error: error.message });
     }
   });
 
@@ -197,6 +221,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const id = parseInt(req.params.id);
     const history = await storage.getDevoteeStatusHistory(id);
     res.json(history);
+  });
+
+  // Get devotee addresses
+  app.get("/api/devotees/:id/addresses", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const addresses = await storage.getDevoteeAddresses(id);
+    res.json(addresses);
   });
 
   // Namhattas

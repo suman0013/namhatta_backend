@@ -106,18 +106,65 @@ export class DatabaseStorage implements IStorage {
 
   async getDevotee(id: number): Promise<Devotee | undefined> {
     const result = await db.select().from(devotees).where(eq(devotees.id, id)).limit(1);
-    return result[0];
+    const devotee = result[0];
+    
+    if (!devotee) return undefined;
+    
+    // Get address information for this devotee
+    const addresses = await this.getDevoteeAddresses(id);
+    
+    // Add address information to devotee object (similar to how namhatta addresses work)
+    return {
+      ...devotee,
+      addresses: addresses
+    };
   }
 
-  async createDevotee(devotee: InsertDevotee): Promise<Devotee> {
-    const result = await db.insert(devotees).values(devotee).returning();
-    return result[0];
+  async createDevotee(devoteeData: any): Promise<Devotee> {
+    // Extract address information from the request data
+    const { presentAddress, permanentAddress, ...devoteeDetails } = devoteeData;
+    
+    // Create the devotee record first
+    const result = await db.insert(devotees).values(devoteeDetails).returning();
+    const devotee = result[0];
+    
+    // Handle present address if provided
+    if (presentAddress && (presentAddress.country || presentAddress.state || presentAddress.district || presentAddress.subDistrict || presentAddress.village || presentAddress.postalCode)) {
+      const addressId = await this.findOrCreateAddress({
+        country: presentAddress.country,
+        state: presentAddress.state,
+        district: presentAddress.district,
+        subDistrict: presentAddress.subDistrict,
+        village: presentAddress.village,
+        postalCode: presentAddress.postalCode
+      });
+      
+      // Link devotee to present address
+      await this.createDevoteeAddress(devotee.id, addressId, 'present', presentAddress.landmark);
+    }
+    
+    // Handle permanent address if provided and different from present address
+    if (permanentAddress && (permanentAddress.country || permanentAddress.state || permanentAddress.district || permanentAddress.subDistrict || permanentAddress.village || permanentAddress.postalCode)) {
+      const addressId = await this.findOrCreateAddress({
+        country: permanentAddress.country,
+        state: permanentAddress.state,
+        district: permanentAddress.district,
+        subDistrict: permanentAddress.subDistrict,
+        village: permanentAddress.village,
+        postalCode: permanentAddress.postalCode
+      });
+      
+      // Link devotee to permanent address
+      await this.createDevoteeAddress(devotee.id, addressId, 'permanent', permanentAddress.landmark);
+    }
+    
+    return devotee;
   }
 
-  async createDevoteeForNamhatta(devotee: InsertDevotee, namhattaId: number): Promise<Devotee> {
-    const devoteeData = { ...devotee, namhattaId };
-    const result = await db.insert(devotees).values(devoteeData).returning();
-    return result[0];
+  async createDevoteeForNamhatta(devoteeData: any, namhattaId: number): Promise<Devotee> {
+    // Add namhattaId to the devotee data and use the enhanced createDevotee method
+    const devoteeWithNamhatta = { ...devoteeData, namhattaId };
+    return await this.createDevotee(devoteeWithNamhatta);
   }
 
   async updateDevotee(id: number, devotee: Partial<InsertDevotee>): Promise<Devotee> {
