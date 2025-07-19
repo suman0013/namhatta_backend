@@ -484,6 +484,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
       shraddhakutirId: data.shraddhakutirId,
       gender: data.gender as "MALE" | "FEMALE" | "OTHER" | undefined,
       maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED" | undefined,
+      education: data.education,
+      occupation: data.occupation,
+      additionalComments: data.additionalComments,
     };
 
     if (isEditing) {
