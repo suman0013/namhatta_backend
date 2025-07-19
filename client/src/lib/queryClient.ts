@@ -3,6 +3,12 @@ import { buildApiUrl, API_CONFIG } from "./api-config";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
+    // If we get a 401, it means we need to authenticate
+    if (res.status === 401) {
+      // Force a page reload to trigger authentication check
+      window.location.reload();
+      return;
+    }
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
@@ -47,6 +53,13 @@ export const getQueryFn: <T>(options: {
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      return null;
+    }
+
+    // Handle 401 responses by forcing auth check
+    if (res.status === 401) {
+      // Force a page reload to trigger authentication check
+      window.location.reload();
       return null;
     }
 
