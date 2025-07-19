@@ -236,12 +236,73 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhatta(id: number): Promise<Namhatta | undefined> {
     const result = await db.select().from(namhattas).where(eq(namhattas.id, id)).limit(1);
-    return result[0];
+    if (!result[0]) return undefined;
+    
+    // Fetch address information from normalized tables
+    const namhattaAddresses = await db.select({
+      id: namhattaAddresses.id,
+      namhattaId: namhattaAddresses.namhattaId,
+      addressId: namhattaAddresses.addressId,
+      landmark: namhattaAddresses.landmark,
+      country: addresses.country,
+      state: addresses.state,
+      district: addresses.district,
+      subDistrict: addresses.subDistrict,
+      village: addresses.village,
+      postalCode: addresses.postalCode
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(eq(namhattaAddresses.namhattaId, id))
+      .limit(1);
+    
+    // Add address information to the namhatta object
+    const namhatta = result[0] as any;
+    if (namhattaAddresses[0]) {
+      namhatta.address = {
+        country: namhattaAddresses[0].country,
+        state: namhattaAddresses[0].state,
+        district: namhattaAddresses[0].district,
+        subDistrict: namhattaAddresses[0].subDistrict,
+        village: namhattaAddresses[0].village,
+        postalCode: namhattaAddresses[0].postalCode,
+        landmark: namhattaAddresses[0].landmark
+      };
+    }
+    
+    return namhatta;
   }
 
-  async createNamhatta(namhatta: InsertNamhatta): Promise<Namhatta> {
-    const result = await db.insert(namhattas).values(namhatta).returning();
-    return result[0];
+  async createNamhatta(namhattaData: any): Promise<Namhatta> {
+    // Extract address information from the request data
+    const { address, landmark, ...namhattaDetails } = namhattaData;
+    
+    // Create the namhatta record first
+    const result = await db.insert(namhattas).values(namhattaDetails).returning();
+    const namhatta = result[0];
+    
+    // If address information is provided, store it in normalized tables
+    if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
+      // Create or find existing address record
+      const addressResult = await db.insert(addresses).values({
+        country: address.country,
+        state: address.state,
+        district: address.district,
+        subDistrict: address.subDistrict,
+        village: address.village,
+        postalCode: address.postalCode
+      }).returning();
+      
+      const addressId = addressResult[0].id;
+      
+      // Link namhatta to address with landmark
+      await db.insert(namhattaAddresses).values({
+        namhattaId: namhatta.id,
+        addressId: addressId,
+        landmark: landmark || address.landmark
+      });
+    }
+    
+    return namhatta;
   }
 
   async updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta> {
