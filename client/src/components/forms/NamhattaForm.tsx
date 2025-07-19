@@ -80,9 +80,9 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   });
 
   const { data: villages } = useQuery({
-    queryKey: ["/api/villages", address.district],
-    queryFn: () => api.getVillages(address.district!),
-    enabled: !!address.district,
+    queryKey: ["/api/villages", address.subDistrict],
+    queryFn: () => api.getVillages(address.subDistrict!),
+    enabled: !!address.subDistrict,
   });
 
   const { data: pincodes } = useQuery({
