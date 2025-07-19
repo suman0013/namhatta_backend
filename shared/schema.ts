@@ -16,24 +16,7 @@ export const devotees = sqliteTable("devotees", {
   gender: text("gender"), // MALE, FEMALE, OTHER
   bloodGroup: text("blood_group"),
   maritalStatus: text("marital_status"), // MARRIED, UNMARRIED, WIDOWED
-  presentAddress: text("present_address", { mode: 'json' }).$type<{
-    country?: string;
-    state?: string;
-    district?: string;
-    subDistrict?: string;
-    village?: string;
-    postalCode?: string;
-    landmark?: string;
-  }>(),
-  permanentAddress: text("permanent_address", { mode: 'json' }).$type<{
-    country?: string;
-    state?: string;
-    district?: string;
-    subDistrict?: string;
-    village?: string;
-    postalCode?: string;
-    landmark?: string;
-  }>(),
+  // Remove inline address JSON fields - use normalized address tables instead
   devotionalStatusId: integer("devotional_status_id"),
   namhattaId: integer("namhatta_id"),
   gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
@@ -63,15 +46,7 @@ export const namhattas = sqliteTable("namhattas", {
   name: text("name").notNull(),
   meetingDay: text("meeting_day"),
   meetingTime: text("meeting_time"),
-  address: text("address", { mode: 'json' }).$type<{
-    country?: string;
-    state?: string;
-    district?: string;
-    subDistrict?: string;
-    village?: string;
-    postalCode?: string;
-    landmark?: string;
-  }>(),
+  // Remove inline address JSON field - use normalized address tables instead
   malaSenapoti: text("mala_senapoti"),
   mahaChakraSenapoti: text("maha_chakra_senapoti"),
   chakraSenapoti: text("chakra_senapoti"),
@@ -141,7 +116,7 @@ export const leaders = sqliteTable("leaders", {
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Address table for normalized address storage
+// Main Address table - stores core address data without landmarks
 export const addresses = sqliteTable("addresses", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   country: text("country"),
@@ -150,25 +125,25 @@ export const addresses = sqliteTable("addresses", {
   subDistrict: text("sub_district"),
   village: text("village"),
   postalCode: text("postal_code"),
-  landmark: text("landmark"),
-  addressType: text("address_type"), // 'present', 'permanent', 'namhatta'
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Junction table for devotee addresses
+// Junction table for devotee addresses with landmark
 export const devoteeAddresses = sqliteTable("devotee_addresses", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   devoteeId: integer("devotee_id").notNull(),
   addressId: integer("address_id").notNull(),
   addressType: text("address_type").notNull(), // 'present' or 'permanent'
+  landmark: text("landmark"), // Specific landmark for this devotee at this address
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 
-// Junction table for namhatta addresses
+// Junction table for namhatta addresses with landmark
 export const namhattaAddresses = sqliteTable("namhatta_addresses", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   namhattaId: integer("namhatta_id").notNull(),
   addressId: integer("address_id").notNull(),
+  landmark: text("landmark"), // Specific landmark for this namhatta at this address
   createdAt: text("created_at").default("CURRENT_TIMESTAMP"),
 });
 

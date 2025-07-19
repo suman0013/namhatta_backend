@@ -169,9 +169,9 @@
     <text class="entity-text" x="15" y="140">comment</text>
   </g>
 
-  <!-- ADDRESSES Entity -->
+  <!-- ADDRESSES Entity - Updated for normalized structure -->
   <g transform="translate(750, 220)">
-    <rect class="entity" width="200" height="200" rx="5"/>
+    <rect class="entity" width="200" height="180" rx="5"/>
     <rect class="entity-header" width="200" height="30" rx="5"/>
     <text class="entity-title" x="100" y="20" text-anchor="middle">ADDRESSES</text>
     
@@ -179,21 +179,19 @@
     <circle class="pk" cx="15" cy="45" r="5"/>
     <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
     
-    <!-- Fields -->
+    <!-- Fields - Core address data only -->
     <text class="entity-text" x="15" y="70">country</text>
     <text class="entity-text" x="15" y="85">state</text>
     <text class="entity-text" x="15" y="100">district</text>
     <text class="entity-text" x="15" y="115">sub_district</text>
     <text class="entity-text" x="15" y="130">village</text>
     <text class="entity-text" x="15" y="145">postal_code</text>
-    <text class="entity-text" x="15" y="160">landmark</text>
-    <text class="entity-text" x="15" y="175">address_type</text>
-    <text class="entity-text" x="15" y="190">created_at</text>
+    <text class="entity-text" x="15" y="160">created_at</text>
   </g>
 
-  <!-- DEVOTEE_ADDRESSES Junction Table -->
+  <!-- DEVOTEE_ADDRESSES Junction Table - Updated with landmark -->
   <g transform="translate(750, 450)">
-    <rect class="entity" width="200" height="120" rx="5"/>
+    <rect class="entity" width="200" height="140" rx="5"/>
     <rect class="entity-header" width="200" height="30" rx="5"/>
     <text class="entity-title" x="100" y="20" text-anchor="middle">DEVOTEE_ADDRESSES</text>
     
@@ -208,12 +206,13 @@
     <text class="entity-text" x="25" y="95">address_id (FK)</text>
     
     <text class="entity-text" x="15" y="115">address_type</text>
-    <text class="entity-text" x="15" y="130">created_at</text>
+    <text class="entity-text" x="15" y="130">landmark</text>
+    <text class="entity-text" x="15" y="145">created_at</text>
   </g>
 
-  <!-- NAMHATTA_ADDRESSES Junction Table -->
+  <!-- NAMHATTA_ADDRESSES Junction Table - Updated with landmark -->
   <g transform="translate(1000, 350)">
-    <rect class="entity" width="200" height="100" rx="5"/>
+    <rect class="entity" width="200" height="120" rx="5"/>
     <rect class="entity-header" width="200" height="30" rx="5"/>
     <text class="entity-title" x="100" y="20" text-anchor="middle">NAMHATTA_ADDRESSES</text>
     
@@ -227,7 +226,8 @@
     <circle class="fk" cx="15" cy="90" r="5"/>
     <text class="entity-text" x="25" y="95">address_id (FK)</text>
     
-    <text class="entity-text" x="15" y="115">created_at</text>
+    <text class="entity-text" x="15" y="115">landmark</text>
+    <text class="entity-text" x="15" y="135">created_at</text>
   </g>
 
   <!-- LEADERS Entity -->

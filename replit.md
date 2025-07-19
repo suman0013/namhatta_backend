@@ -31,14 +31,15 @@ This is a full-stack web application for managing Namhatta religious/spiritual o
 ## Key Components
 
 ### Database Schema
-The application uses a PostgreSQL database with the following main entities:
+The application uses a SQLite database with the following main entities:
 
-1. **Devotees**: Personal information, addresses, spiritual status, and courses
-2. **Namhattas**: Spiritual centers with location and organizational details
+1. **Devotees**: Personal information, spiritual status, and courses (addresses stored in normalized tables)
+2. **Namhattas**: Spiritual centers with organizational details (addresses stored in normalized tables)
 3. **Devotional Statuses**: Hierarchical spiritual levels (Bhakta, Initiated, etc.)
 4. **Shraddhakutirs**: Regional spiritual administrative units
 5. **Leaders**: Hierarchical leadership structure
-6. **Geography**: Country, state, district, and village data
+6. **Addresses**: Normalized address data (country, state, district, sub_district, village, postal_code)
+7. **Devotee_Addresses & Namhatta_Addresses**: Junction tables linking entities to addresses with landmarks
 
 ### Frontend Components
 - **Layout System**: Responsive app layout with navigation
@@ -98,6 +99,7 @@ RESTful endpoints organized by resource:
 - **Sessions**: PostgreSQL-backed session management
 
 ## Recent Changes
+- July 19, 2025: Successfully restructured address system for better normalization - separated main address data (country, state, district, sub_district, village, postal_code) from location-specific landmarks, updated database schema to store landmarks in junction tables (devotee_addresses and namhatta_addresses), migrated 125 devotee addresses and 34 namhatta addresses to new structure, updated all storage methods and API endpoints to use normalized address tables, verified all geographic filtering and mapping functionality working correctly
 - July 19, 2025: Successfully completed migration from Replit Agent to standard Replit environment - verified all checklist items completed, created comprehensive ER diagram showing 9 database entities with proper relationships (Devotees, Namhattas, Devotional Statuses, Shraddhakutirs, etc.), confirmed 252 devotees and 101 namhattas in SQLite database, all API endpoints functioning correctly
 
 ## Changelog

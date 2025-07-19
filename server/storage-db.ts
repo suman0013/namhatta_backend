@@ -208,7 +208,7 @@ export class DatabaseStorage implements IStorage {
         name: namhattas.name,
         meetingDay: namhattas.meetingDay,
         meetingTime: namhattas.meetingTime,
-        address: namhattas.address,
+        // address will be fetched separately from normalized tables
         malaSenapoti: namhattas.malaSenapoti,
         mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
         chakraSenapoti: namhattas.chakraSenapoti,
@@ -562,148 +562,221 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Map data methods
-  async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
-    const results = await db.select({
-      country: namhattas.address,
-      count: count()
-    }).from(namhattas).groupBy(namhattas.address);
+  // Address Management Methods
+  async findOrCreateAddress(addressData: {
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+  }): Promise<number> {
+    // Try to find existing address first
+    const existingAddress = await db.select().from(addresses).where(
+      and(
+        eq(addresses.country, addressData.country || ''),
+        eq(addresses.state, addressData.state || ''),
+        eq(addresses.district, addressData.district || ''),
+        eq(addresses.subDistrict, addressData.subDistrict || ''),
+        eq(addresses.village, addressData.village || ''),
+        eq(addresses.postalCode, addressData.postalCode || '')
+      )
+    ).limit(1);
 
-    // Parse JSON address and group by country
-    const countryCounts: Record<string, number> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.country === 'string' ? JSON.parse(result.country) : result.country;
-        if (address?.country) {
-          countryCounts[address.country] = (countryCounts[address.country] || 0) + result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    if (existingAddress[0]) {
+      return existingAddress[0].id;
     }
 
-    return Object.entries(countryCounts).map(([country, count]) => ({ country, count }));
+    // Create new address
+    const result = await db.insert(addresses).values(addressData).returning();
+    return result[0].id;
+  }
+
+  async createDevoteeAddress(devoteeId: number, addressId: number, addressType: string, landmark?: string): Promise<void> {
+    await db.insert(devoteeAddresses).values({
+      devoteeId,
+      addressId,
+      addressType,
+      landmark
+    });
+  }
+
+  async createNamhattaAddress(namhattaId: number, addressId: number, landmark?: string): Promise<void> {
+    await db.insert(namhattaAddresses).values({
+      namhattaId,
+      addressId,
+      landmark
+    });
+  }
+
+  async getDevoteeAddresses(devoteeId: number): Promise<Array<{
+    id: number;
+    addressType: string;
+    landmark?: string;
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+  }>> {
+    const result = await db.select({
+      id: devoteeAddresses.id,
+      addressType: devoteeAddresses.addressType,
+      landmark: devoteeAddresses.landmark,
+      country: addresses.country,
+      state: addresses.state,
+      district: addresses.district,
+      subDistrict: addresses.subDistrict,
+      village: addresses.village,
+      postalCode: addresses.postalCode
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .where(eq(devoteeAddresses.devoteeId, devoteeId));
+
+    return result;
+  }
+
+  async getNamhattaAddress(namhattaId: number): Promise<{
+    id: number;
+    landmark?: string;
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+  } | undefined> {
+    const result = await db.select({
+      id: namhattaAddresses.id,
+      landmark: namhattaAddresses.landmark,
+      country: addresses.country,
+      state: addresses.state,
+      district: addresses.district,
+      subDistrict: addresses.subDistrict,
+      village: addresses.village,
+      postalCode: addresses.postalCode
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(eq(namhattaAddresses.namhattaId, namhattaId))
+      .limit(1);
+
+    return result[0];
+  }
+
+  // Map data methods - Updated to use normalized address tables
+  async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
+    const results = await db.select({
+      country: addresses.country,
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(sql`${addresses.country} IS NOT NULL`)
+      .groupBy(addresses.country);
+
+    return results.map(result => ({
+      country: result.country || 'Unknown',
+      count: result.count
+    }));
   }
 
   async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
-
-    const stateCounts: Record<string, { country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.state && address?.country && (!country || address.country === country)) {
-          const key = `${address.state}-${address.country}`;
-          if (!stateCounts[key]) {
-            stateCounts[key] = { country: address.country, count: 0 };
-          }
-          stateCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(sql`${addresses.state} IS NOT NULL`);
+    
+    if (country) {
+      query = query.where(eq(addresses.country, country));
     }
+    
+    const results = await query.groupBy(addresses.state, addresses.country);
 
-    return Object.entries(stateCounts).map(([key, data]) => ({
-      state: key.split('-')[0],
-      country: data.country,
-      count: data.count
+    return results.map(result => ({
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      district: addresses.district,
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
-
-    const districtCounts: Record<string, { state: string; country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.district && address?.state && address?.country && (!state || address.state === state)) {
-          const key = `${address.district}-${address.state}-${address.country}`;
-          if (!districtCounts[key]) {
-            districtCounts[key] = { state: address.state, country: address.country, count: 0 };
-          }
-          districtCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(sql`${addresses.district} IS NOT NULL`);
+    
+    if (state) {
+      query = query.where(eq(addresses.state, state));
     }
+    
+    const results = await query.groupBy(addresses.district, addresses.state, addresses.country);
 
-    return Object.entries(districtCounts).map(([key, data]) => ({
-      district: key.split('-')[0],
-      state: data.state,
-      country: data.country,
-      count: data.count
+    return results.map(result => ({
+      district: result.district || 'Unknown',
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      subDistrict: addresses.subDistrict,
+      district: addresses.district,
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
-
-    const subDistrictCounts: Record<string, { district: string; state: string; country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.subDistrict && address?.district && address?.state && address?.country && (!district || address.district === district)) {
-          const key = `${address.subDistrict}-${address.district}-${address.state}-${address.country}`;
-          if (!subDistrictCounts[key]) {
-            subDistrictCounts[key] = { district: address.district, state: address.state, country: address.country, count: 0 };
-          }
-          subDistrictCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(sql`${addresses.subDistrict} IS NOT NULL`);
+    
+    if (district) {
+      query = query.where(eq(addresses.district, district));
     }
+    
+    const results = await query.groupBy(addresses.subDistrict, addresses.district, addresses.state, addresses.country);
 
-    return Object.entries(subDistrictCounts).map(([key, data]) => ({
-      subDistrict: key.split('-')[0],
-      district: data.district,
-      state: data.state,
-      country: data.country,
-      count: data.count
+    return results.map(result => ({
+      subDistrict: result.subDistrict || 'Unknown',
+      district: result.district || 'Unknown',
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    const results = await db.select({
-      address: namhattas.address,
+    let query = db.select({
+      village: addresses.village,
+      subDistrict: addresses.subDistrict,
+      district: addresses.district,
+      state: addresses.state,
+      country: addresses.country,
       count: count()
-    }).from(namhattas).groupBy(namhattas.address);
-
-    const villageCounts: Record<string, { subDistrict: string; district: string; state: string; country: string; count: number }> = {};
-    for (const result of results) {
-      try {
-        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
-        if (address?.village && address?.subDistrict && address?.district && address?.state && address?.country && (!subDistrict || address.subDistrict === subDistrict)) {
-          const key = `${address.village}-${address.subDistrict}-${address.district}-${address.state}-${address.country}`;
-          if (!villageCounts[key]) {
-            villageCounts[key] = { subDistrict: address.subDistrict, district: address.district, state: address.state, country: address.country, count: 0 };
-          }
-          villageCounts[key].count += result.count;
-        }
-      } catch (e) {
-        // Skip invalid JSON
-      }
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .where(sql`${addresses.village} IS NOT NULL`);
+    
+    if (subDistrict) {
+      query = query.where(eq(addresses.subDistrict, subDistrict));
     }
+    
+    const results = await query.groupBy(addresses.village, addresses.subDistrict, addresses.district, addresses.state, addresses.country);
 
-    return Object.entries(villageCounts).map(([key, data]) => ({
-      village: key.split('-')[0],
-      subDistrict: data.subDistrict,
-      district: data.district,
-      state: data.state,
-      country: data.country,
-      count: data.count
+    return results.map(result => ({
+      village: result.village || 'Unknown',
+      subDistrict: result.subDistrict || 'Unknown',
+      district: result.district || 'Unknown',
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
     }));
   }
 }
