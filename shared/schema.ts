@@ -116,15 +116,19 @@ export const leaders = pgTable("leaders", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Main Address table - stores core address data without landmarks
+// Main Address table - matches CSV structure with all columns
 export const addresses = pgTable("addresses", {
   id: serial("id").primaryKey(),
-  country: text("country"),
-  state: text("state"),
-  district: text("district"),
-  subDistrict: text("sub_district"),
-  village: text("village"),
-  postalCode: text("postal_code"),
+  country: text("country").notNull().default("India"), // Added country column with India default
+  stateCode: text("state_code"),
+  stateNameEnglish: text("state_name_english"),
+  districtCode: text("district_code"),
+  districtNameEnglish: text("district_name_english"),
+  subdistrictCode: text("subdistrict_code"),
+  subdistrictNameEnglish: text("subdistrict_name_english"),
+  villageCode: text("village_code"),
+  villageNameEnglish: text("village_name_english"),
+  pincode: text("pincode"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

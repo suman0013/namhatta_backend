@@ -525,9 +525,9 @@ export class DatabaseStorage implements IStorage {
   async getStates(country?: string): Promise<string[]> {
     try {
       let query = db
-        .selectDistinct({ state: addresses.state })
+        .selectDistinct({ state: addresses.stateNameEnglish })
         .from(addresses)
-        .where(sql`${addresses.state} IS NOT NULL`);
+        .where(sql`${addresses.stateNameEnglish} IS NOT NULL`);
       
       if (country) {
         query = query.where(eq(addresses.country, country));
@@ -544,12 +544,12 @@ export class DatabaseStorage implements IStorage {
   async getDistricts(state?: string): Promise<string[]> {
     try {
       let query = db
-        .selectDistinct({ district: addresses.district })
+        .selectDistinct({ district: addresses.districtNameEnglish })
         .from(addresses)
-        .where(sql`${addresses.district} IS NOT NULL`);
+        .where(sql`${addresses.districtNameEnglish} IS NOT NULL`);
       
       if (state) {
-        query = query.where(eq(addresses.state, state));
+        query = query.where(eq(addresses.stateNameEnglish, state));
       }
       
       const results = await query;
@@ -563,12 +563,12 @@ export class DatabaseStorage implements IStorage {
   async getSubDistricts(district?: string): Promise<string[]> {
     try {
       let query = db
-        .selectDistinct({ subDistrict: addresses.subDistrict })
+        .selectDistinct({ subDistrict: addresses.subdistrictNameEnglish })
         .from(addresses)
-        .where(sql`${addresses.subDistrict} IS NOT NULL`);
+        .where(sql`${addresses.subdistrictNameEnglish} IS NOT NULL`);
       
       if (district) {
-        query = query.where(eq(addresses.district, district));
+        query = query.where(eq(addresses.districtNameEnglish, district));
       }
       
       const results = await query;
@@ -582,12 +582,12 @@ export class DatabaseStorage implements IStorage {
   async getVillages(subDistrict?: string): Promise<string[]> {
     try {
       let query = db
-        .selectDistinct({ village: addresses.village })
+        .selectDistinct({ village: addresses.villageNameEnglish })
         .from(addresses)
-        .where(sql`${addresses.village} IS NOT NULL`);
+        .where(sql`${addresses.villageNameEnglish} IS NOT NULL`);
       
       if (subDistrict) {
-        query = query.where(eq(addresses.subDistrict, subDistrict));
+        query = query.where(eq(addresses.subdistrictNameEnglish, subDistrict));
       }
       
       const results = await query;
@@ -601,18 +601,18 @@ export class DatabaseStorage implements IStorage {
   async getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]> {
     try {
       let query = db
-        .selectDistinct({ postalCode: addresses.postalCode })
+        .selectDistinct({ postalCode: addresses.pincode })
         .from(addresses)
-        .where(sql`${addresses.postalCode} IS NOT NULL`);
+        .where(sql`${addresses.pincode} IS NOT NULL`);
       
       if (village) {
-        query = query.where(eq(addresses.village, village));
+        query = query.where(eq(addresses.villageNameEnglish, village));
       }
       if (district) {
-        query = query.where(eq(addresses.district, district));
+        query = query.where(eq(addresses.districtNameEnglish, district));
       }
       if (subDistrict) {
-        query = query.where(eq(addresses.subDistrict, subDistrict));
+        query = query.where(eq(addresses.subdistrictNameEnglish, subDistrict));
       }
       
       const results = await query;
