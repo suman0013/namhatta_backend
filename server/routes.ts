@@ -239,11 +239,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/namhattas", async (req, res) => {
     try {
-      const namhattaData = insertNamhattaSchema.parse(req.body);
-      const namhatta = await storage.createNamhatta(namhattaData);
+      // Extract address and other fields separately
+      const { address, ...namhattaFields } = req.body;
+      
+      // Validate only the namhatta fields against schema
+      const validatedNamhattaData = insertNamhattaSchema.parse(namhattaFields);
+      
+      // Add address back to the data
+      const namhattaDataWithAddress = {
+        ...validatedNamhattaData,
+        address: address
+      };
+      
+      const namhatta = await storage.createNamhatta(namhattaDataWithAddress);
       res.status(201).json(namhatta);
     } catch (error) {
-      res.status(400).json({ message: "Invalid namhatta data", error });
+      res.status(400).json({ message: "Invalid namhatta data", error: error.message });
     }
   });
 

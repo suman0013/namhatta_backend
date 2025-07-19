@@ -239,7 +239,7 @@ export class DatabaseStorage implements IStorage {
     if (!result[0]) return undefined;
     
     // Fetch address information from normalized tables
-    const namhattaAddresses = await db.select({
+    const addressResults = await db.select({
       id: namhattaAddresses.id,
       namhattaId: namhattaAddresses.namhattaId,
       addressId: namhattaAddresses.addressId,
@@ -257,15 +257,15 @@ export class DatabaseStorage implements IStorage {
     
     // Add address information to the namhatta object
     const namhatta = result[0] as any;
-    if (namhattaAddresses[0]) {
+    if (addressResults[0]) {
       namhatta.address = {
-        country: namhattaAddresses[0].country,
-        state: namhattaAddresses[0].state,
-        district: namhattaAddresses[0].district,
-        subDistrict: namhattaAddresses[0].subDistrict,
-        village: namhattaAddresses[0].village,
-        postalCode: namhattaAddresses[0].postalCode,
-        landmark: namhattaAddresses[0].landmark
+        country: addressResults[0].country,
+        state: addressResults[0].state,
+        district: addressResults[0].district,
+        subDistrict: addressResults[0].subDistrict,
+        village: addressResults[0].village,
+        postalCode: addressResults[0].postalCode,
+        landmark: addressResults[0].landmark
       };
     }
     
