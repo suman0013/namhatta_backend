@@ -1,0 +1,315 @@
+<svg width="1400" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .entity { fill: #e3f2fd; stroke: #1976d2; stroke-width: 2; }
+      .entity-header { fill: #1976d2; }
+      .entity-text { font-family: Arial, sans-serif; font-size: 12px; }
+      .entity-title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; fill: white; }
+      .relationship { stroke: #333; stroke-width: 2; marker-end: url(#arrowhead); }
+      .fk { fill: #ffeb3b; stroke: #f57f17; stroke-width: 1; }
+      .pk { fill: #4caf50; stroke: #2e7d32; stroke-width: 1; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1976d2">
+    Namhatta Management System - Entity Relationship Diagram
+  </text>
+
+  <!-- DEVOTEES Entity -->
+  <g transform="translate(50, 80)">
+    <rect class="entity" width="280" height="360" rx="5"/>
+    <rect class="entity-header" width="280" height="30" rx="5"/>
+    <text class="entity-title" x="140" y="20" text-anchor="middle">DEVOTEES</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="70">legal_name</text>
+    <text class="entity-text" x="15" y="85">name</text>
+    <text class="entity-text" x="15" y="100">dob</text>
+    <text class="entity-text" x="15" y="115">email</text>
+    <text class="entity-text" x="15" y="130">phone</text>
+    <text class="entity-text" x="15" y="145">father_name</text>
+    <text class="entity-text" x="15" y="160">mother_name</text>
+    <text class="entity-text" x="15" y="175">husband_name</text>
+    <text class="entity-text" x="15" y="190">gender</text>
+    <text class="entity-text" x="15" y="205">blood_group</text>
+    <text class="entity-text" x="15" y="220">marital_status</text>
+    <text class="entity-text" x="15" y="235">present_address</text>
+    <text class="entity-text" x="15" y="250">permanent_address</text>
+    
+    <!-- FKs -->
+    <circle class="fk" cx="15" cy="270" r="5"/>
+    <text class="entity-text" x="25" y="275">devotional_status_id (FK)</text>
+    <circle class="fk" cx="15" cy="290" r="5"/>
+    <text class="entity-text" x="25" y="295">shraddhakutir_id (FK)</text>
+    <circle class="fk" cx="15" cy="310" r="5"/>
+    <text class="entity-text" x="25" y="315">namhatta_id (FK)</text>
+    
+    <text class="entity-text" x="15" y="330">education</text>
+    <text class="entity-text" x="15" y="345">occupation</text>
+    <text class="entity-text" x="15" y="360">devotional_courses</text>
+    <text class="entity-text" x="15" y="375">additional_comments</text>
+    <text class="entity-text" x="15" y="390">created_at</text>
+    <text class="entity-text" x="15" y="405">updated_at</text>
+  </g>
+
+  <!-- NAMHATTAS Entity -->
+  <g transform="translate(400, 80)">
+    <rect class="entity" width="280" height="220" rx="5"/>
+    <rect class="entity-header" width="280" height="30" rx="5"/>
+    <text class="entity-title" x="140" y="20" text-anchor="middle">NAMHATTAS</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="70">code (UNIQUE)</text>
+    <text class="entity-text" x="15" y="85">name</text>
+    <text class="entity-text" x="15" y="100">meeting_day</text>
+    <text class="entity-text" x="15" y="115">meeting_time</text>
+    <text class="entity-text" x="15" y="130">address</text>
+    <text class="entity-text" x="15" y="145">mala_senapoti</text>
+    <text class="entity-text" x="15" y="160">maha_chakra_senapoti</text>
+    <text class="entity-text" x="15" y="175">chakra_senapoti</text>
+    <text class="entity-text" x="15" y="190">upa_chakra_senapoti</text>
+    <text class="entity-text" x="15" y="205">secretary</text>
+    <text class="entity-text" x="15" y="220">status</text>
+    <text class="entity-text" x="15" y="235">created_at</text>
+    <text class="entity-text" x="15" y="250">updated_at</text>
+  </g>
+
+  <!-- DEVOTIONAL_STATUSES Entity -->
+  <g transform="translate(750, 80)">
+    <rect class="entity" width="200" height="100" rx="5"/>
+    <rect class="entity-header" width="200" height="30" rx="5"/>
+    <text class="entity-title" x="100" y="20" text-anchor="middle">DEVOTIONAL_STATUSES</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="70">name (UNIQUE)</text>
+    <text class="entity-text" x="15" y="85">created_at</text>
+  </g>
+
+  <!-- SHRADDHAKUTIRS Entity -->
+  <g transform="translate(1000, 80)">
+    <rect class="entity" width="200" height="120" rx="5"/>
+    <rect class="entity-header" width="200" height="30" rx="5"/>
+    <text class="entity-title" x="100" y="20" text-anchor="middle">SHRADDHAKUTIRS</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="70">name</text>
+    <text class="entity-text" x="15" y="85">district_code</text>
+    <text class="entity-text" x="15" y="100">created_at</text>
+  </g>
+
+  <!-- NAMHATTA_UPDATES Entity -->
+  <g transform="translate(400, 350)">
+    <rect class="entity" width="280" height="280" rx="5"/>
+    <rect class="entity-header" width="280" height="30" rx="5"/>
+    <text class="entity-title" x="140" y="20" text-anchor="middle">NAMHATTA_UPDATES</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- FK -->
+    <circle class="fk" cx="15" cy="70" r="5"/>
+    <text class="entity-text" x="25" y="75">namhatta_id (FK)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="95">program_type</text>
+    <text class="entity-text" x="15" y="110">date</text>
+    <text class="entity-text" x="15" y="125">attendance</text>
+    <text class="entity-text" x="15" y="140">prasad_distribution</text>
+    <text class="entity-text" x="15" y="155">nagar_kirtan</text>
+    <text class="entity-text" x="15" y="170">book_distribution</text>
+    <text class="entity-text" x="15" y="185">chanting</text>
+    <text class="entity-text" x="15" y="200">arati</text>
+    <text class="entity-text" x="15" y="215">bhagwat_path</text>
+    <text class="entity-text" x="15" y="230">image_urls</text>
+    <text class="entity-text" x="15" y="245">facebook_link</text>
+    <text class="entity-text" x="15" y="260">youtube_link</text>
+    <text class="entity-text" x="15" y="275">special_attraction</text>
+    <text class="entity-text" x="15" y="290">created_at</text>
+  </g>
+
+  <!-- STATUS_HISTORY Entity -->
+  <g transform="translate(50, 490)">
+    <rect class="entity" width="250" height="140" rx="5"/>
+    <rect class="entity-header" width="250" height="30" rx="5"/>
+    <text class="entity-title" x="125" y="20" text-anchor="middle">STATUS_HISTORY</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- FK -->
+    <circle class="fk" cx="15" cy="70" r="5"/>
+    <text class="entity-text" x="25" y="75">devotee_id (FK)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="95">previous_status</text>
+    <text class="entity-text" x="15" y="110">new_status</text>
+    <text class="entity-text" x="15" y="125">updated_at</text>
+    <text class="entity-text" x="15" y="140">comment</text>
+  </g>
+
+  <!-- ADDRESSES Entity -->
+  <g transform="translate(750, 220)">
+    <rect class="entity" width="200" height="200" rx="5"/>
+    <rect class="entity-header" width="200" height="30" rx="5"/>
+    <text class="entity-title" x="100" y="20" text-anchor="middle">ADDRESSES</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="70">country</text>
+    <text class="entity-text" x="15" y="85">state</text>
+    <text class="entity-text" x="15" y="100">district</text>
+    <text class="entity-text" x="15" y="115">sub_district</text>
+    <text class="entity-text" x="15" y="130">village</text>
+    <text class="entity-text" x="15" y="145">postal_code</text>
+    <text class="entity-text" x="15" y="160">landmark</text>
+    <text class="entity-text" x="15" y="175">address_type</text>
+    <text class="entity-text" x="15" y="190">created_at</text>
+  </g>
+
+  <!-- DEVOTEE_ADDRESSES Junction Table -->
+  <g transform="translate(750, 450)">
+    <rect class="entity" width="200" height="120" rx="5"/>
+    <rect class="entity-header" width="200" height="30" rx="5"/>
+    <text class="entity-title" x="100" y="20" text-anchor="middle">DEVOTEE_ADDRESSES</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- FKs -->
+    <circle class="fk" cx="15" cy="70" r="5"/>
+    <text class="entity-text" x="25" y="75">devotee_id (FK)</text>
+    <circle class="fk" cx="15" cy="90" r="5"/>
+    <text class="entity-text" x="25" y="95">address_id (FK)</text>
+    
+    <text class="entity-text" x="15" y="115">address_type</text>
+    <text class="entity-text" x="15" y="130">created_at</text>
+  </g>
+
+  <!-- NAMHATTA_ADDRESSES Junction Table -->
+  <g transform="translate(1000, 350)">
+    <rect class="entity" width="200" height="100" rx="5"/>
+    <rect class="entity-header" width="200" height="30" rx="5"/>
+    <text class="entity-title" x="100" y="20" text-anchor="middle">NAMHATTA_ADDRESSES</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- FKs -->
+    <circle class="fk" cx="15" cy="70" r="5"/>
+    <text class="entity-text" x="25" y="75">namhatta_id (FK)</text>
+    <circle class="fk" cx="15" cy="90" r="5"/>
+    <text class="entity-text" x="25" y="95">address_id (FK)</text>
+    
+    <text class="entity-text" x="15" y="115">created_at</text>
+  </g>
+
+  <!-- LEADERS Entity -->
+  <g transform="translate(50, 670)">
+    <rect class="entity" width="200" height="140" rx="5"/>
+    <rect class="entity-header" width="200" height="30" rx="5"/>
+    <text class="entity-title" x="100" y="20" text-anchor="middle">LEADERS</text>
+    
+    <!-- PK -->
+    <circle class="pk" cx="15" cy="45" r="5"/>
+    <text class="entity-text" x="25" y="50">id (PK, AUTO_INCREMENT)</text>
+    
+    <!-- Fields -->
+    <text class="entity-text" x="15" y="70">name</text>
+    <text class="entity-text" x="15" y="85">role</text>
+    
+    <!-- FK (Self-referencing) -->
+    <circle class="fk" cx="15" cy="105" r="5"/>
+    <text class="entity-text" x="25" y="110">reporting_to (FK)</text>
+    
+    <text class="entity-text" x="15" y="130">location</text>
+    <text class="entity-text" x="15" y="145">created_at</text>
+  </g>
+
+  <!-- Relationships -->
+  
+  <!-- Devotees -> Devotional_Statuses -->
+  <line class="relationship" x1="330" y1="345" x2="750" y2="130"/>
+  <text x="540" y="220" font-family="Arial, sans-serif" font-size="10" fill="#666">belongs to</text>
+  
+  <!-- Devotees -> Shraddhakutirs -->
+  <line class="relationship" x1="330" y1="365" x2="1000" y2="140"/>
+  <text x="665" y="250" font-family="Arial, sans-serif" font-size="10" fill="#666">belongs to</text>
+  
+  <!-- Devotees -> Namhattas -->
+  <line class="relationship" x1="330" y1="385" x2="400" y2="190"/>
+  <text x="350" y="280" font-family="Arial, sans-serif" font-size="10" fill="#666">belongs to</text>
+  
+  <!-- Namhattas -> Namhatta_Updates -->
+  <line class="relationship" x1="540" y1="300" x2="540" y2="350"/>
+  <text x="545" y="330" font-family="Arial, sans-serif" font-size="10" fill="#666">has many</text>
+  
+  <!-- Devotees -> Status_History -->
+  <line class="relationship" x1="190" y1="440" x2="175" y2="490"/>
+  <text x="120" y="470" font-family="Arial, sans-serif" font-size="10" fill="#666">has many</text>
+  
+  <!-- Devotees -> Devotee_Addresses -->
+  <line class="relationship" x1="330" y1="260" x2="750" y2="510"/>
+  <text x="540" y="380" font-family="Arial, sans-serif" font-size="10" fill="#666">has many</text>
+  
+  <!-- Addresses -> Devotee_Addresses -->
+  <line class="relationship" x1="850" y1="420" x2="850" y2="450"/>
+  <text x="855" y="440" font-family="Arial, sans-serif" font-size="10" fill="#666">referenced by</text>
+  
+  <!-- Namhattas -> Namhatta_Addresses -->
+  <line class="relationship" x1="680" y1="190" x2="1000" y2="400"/>
+  <text x="840" y="300" font-family="Arial, sans-serif" font-size="10" fill="#666">has many</text>
+  
+  <!-- Addresses -> Namhatta_Addresses -->
+  <line class="relationship" x1="950" y1="320" x2="1000" y2="405"/>
+  <text x="970" y="360" font-family="Arial, sans-serif" font-size="10" fill="#666">referenced by</text>
+  
+  <!-- Leaders -> Leaders (Self-referencing) -->
+  <path class="relationship" d="M 250 750 Q 300 750 300 790 Q 300 830 250 830 Q 200 830 150 830 Q 100 830 100 790 Q 100 750 50 750" fill="none"/>
+  <text x="175" y="850" font-family="Arial, sans-serif" font-size="10" fill="#666">reports to</text>
+
+  <!-- Legend -->
+  <g transform="translate(400, 720)">
+    <rect fill="white" stroke="#ccc" width="300" height="120" rx="5"/>
+    <text x="150" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Legend</text>
+    
+    <circle class="pk" cx="20" cy="40" r="5"/>
+    <text x="35" y="45" font-family="Arial, sans-serif" font-size="12">Primary Key (PK)</text>
+    
+    <circle class="fk" cx="20" cy="60" r="5"/>
+    <text x="35" y="65" font-family="Arial, sans-serif" font-size="12">Foreign Key (FK)</text>
+    
+    <line class="relationship" x1="20" y1="80" x2="50" y2="80"/>
+    <text x="60" y="85" font-family="Arial, sans-serif" font-size="12">Relationship</text>
+    
+    <text x="20" y="105" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      • One-to-Many relationships between entities
+    </text>
+  </g>
+</svg>
