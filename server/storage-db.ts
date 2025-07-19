@@ -282,17 +282,15 @@ export class DatabaseStorage implements IStorage {
     
     // If address information is provided, store it in normalized tables
     if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
-      // Create or find existing address record
-      const addressResult = await db.insert(addresses).values({
+      // Use findOrCreateAddress method instead of directly creating
+      const addressId = await this.findOrCreateAddress({
         country: address.country,
-        stateNameEnglish: address.state,
-        districtNameEnglish: address.district,
-        subdistrictNameEnglish: address.subDistrict,
-        villageNameEnglish: address.village,
-        pincode: address.postalCode
-      }).returning();
-      
-      const addressId = addressResult[0].id;
+        state: address.state,
+        district: address.district,
+        subDistrict: address.subDistrict,
+        village: address.village,
+        postalCode: address.postalCode
+      });
       
       // Link namhatta to address with landmark
       await db.insert(namhattaAddresses).values({
@@ -605,17 +603,25 @@ export class DatabaseStorage implements IStorage {
         .from(addresses)
         .where(sql`${addresses.pincode} IS NOT NULL`);
       
+      // Apply hierarchical filtering - be more specific to reduce too many postal codes
+      const conditions = [];
+      
       if (village) {
-        query = query.where(eq(addresses.villageNameEnglish, village));
-      }
-      if (district) {
-        query = query.where(eq(addresses.districtNameEnglish, district));
+        conditions.push(eq(addresses.villageNameEnglish, village));
       }
       if (subDistrict) {
-        query = query.where(eq(addresses.subdistrictNameEnglish, subDistrict));
+        conditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
+      }
+      if (district) {
+        conditions.push(eq(addresses.districtNameEnglish, district));
       }
       
-      const results = await query;
+      // Apply all conditions together for more precise filtering
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      const results = await query.limit(50); // Limit to prevent too many results
       return results.map(row => row.postalCode).filter(Boolean);
     } catch (error) {
       console.error('Error getting postal codes from database:', error);
@@ -632,30 +638,35 @@ export class DatabaseStorage implements IStorage {
     village?: string;
     postalCode?: string;
   }): Promise<number> {
-    // Try to find existing address first
-    const existingAddress = await db.select().from(addresses).where(
-      and(
-        eq(addresses.country, addressData.country || ''),
-        eq(addresses.stateNameEnglish, addressData.state || ''),
-        eq(addresses.districtNameEnglish, addressData.district || ''),
-        eq(addresses.subdistrictNameEnglish, addressData.subDistrict || ''),
-        eq(addresses.villageNameEnglish, addressData.village || ''),
-        eq(addresses.pincode, addressData.postalCode || '')
-      )
-    ).limit(1);
+    // Build condition array only for non-empty values
+    const conditions = [];
+    
+    if (addressData.country) conditions.push(eq(addresses.country, addressData.country));
+    if (addressData.state) conditions.push(eq(addresses.stateNameEnglish, addressData.state));
+    if (addressData.district) conditions.push(eq(addresses.districtNameEnglish, addressData.district));
+    if (addressData.subDistrict) conditions.push(eq(addresses.subdistrictNameEnglish, addressData.subDistrict));
+    if (addressData.village) conditions.push(eq(addresses.villageNameEnglish, addressData.village));
+    if (addressData.postalCode) conditions.push(eq(addresses.pincode, addressData.postalCode));
+    
+    // Try to find existing address first - only if we have some criteria
+    if (conditions.length > 0) {
+      const existingAddress = await db.select().from(addresses).where(
+        conditions.length === 1 ? conditions[0] : and(...conditions)
+      ).limit(1);
 
-    if (existingAddress[0]) {
-      return existingAddress[0].id;
+      if (existingAddress[0]) {
+        return existingAddress[0].id;
+      }
     }
 
-    // Create new address
+    // Create new address only if no exact match found
     const result = await db.insert(addresses).values({
-      country: addressData.country,
-      stateNameEnglish: addressData.state,
-      districtNameEnglish: addressData.district,
-      subdistrictNameEnglish: addressData.subDistrict,
-      villageNameEnglish: addressData.village,
-      pincode: addressData.postalCode
+      country: addressData.country || 'India',
+      stateNameEnglish: addressData.state || null,
+      districtNameEnglish: addressData.district || null,
+      subdistrictNameEnglish: addressData.subDistrict || null,
+      villageNameEnglish: addressData.village || null,
+      pincode: addressData.postalCode || null
     }).returning();
     return result[0].id;
   }
