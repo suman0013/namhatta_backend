@@ -1,71 +1,9 @@
 import { db } from "./db";
+import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count, inArray } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
-
-// Import schemas based on database type
-const databaseUrl = process.env.DATABASE_URL;
-const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
-const usePostgreSQL = databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://');
-
-let devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses;
-let Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory;
-
-if (useMySQL) {
-  const mysqlSchema = await import("@shared/schema-mysql");
-  devotees = mysqlSchema.devotees;
-  namhattas = mysqlSchema.namhattas;
-  devotionalStatuses = mysqlSchema.devotionalStatuses;
-  shraddhakutirs = mysqlSchema.shraddhakutirs;
-  namhattaUpdates = mysqlSchema.namhattaUpdates;
-  leaders = mysqlSchema.leaders;
-  statusHistory = mysqlSchema.statusHistory;
-  addresses = mysqlSchema.addresses;
-  devoteeAddresses = mysqlSchema.devoteeAddresses;
-  namhattaAddresses = mysqlSchema.namhattaAddresses;
-  
-  Devotee = mysqlSchema.Devotee;
-  InsertDevotee = mysqlSchema.NewDevotee;
-  Namhatta = mysqlSchema.Namhatta;
-  InsertNamhatta = mysqlSchema.NewNamhatta;
-  DevotionalStatus = mysqlSchema.DevotionalStatus;
-  InsertDevotionalStatus = mysqlSchema.NewDevotionalStatus;
-  Shraddhakutir = mysqlSchema.Shraddhakutir;
-  InsertShraddhakutir = mysqlSchema.NewShraddhakutir;
-  NamhattaUpdate = mysqlSchema.NamhattaUpdate;
-  InsertNamhattaUpdate = mysqlSchema.NewNamhattaUpdate;
-  Leader = mysqlSchema.Leader;
-  InsertLeader = mysqlSchema.NewLeader;
-  StatusHistory = mysqlSchema.StatusHistory;
-} else if (usePostgreSQL) {
-  const postgresSchema = await import("@shared/schema-postgres");
-  devotees = postgresSchema.devotees;
-  namhattas = postgresSchema.namhattas;
-  devotionalStatuses = postgresSchema.devotionalStatuses;
-  shraddhakutirs = postgresSchema.shraddhakutirs;
-  namhattaUpdates = postgresSchema.namhattaUpdates;
-  leaders = postgresSchema.leaders;
-  statusHistory = postgresSchema.statusHistory;
-  addresses = postgresSchema.addresses;
-  devoteeAddresses = postgresSchema.devoteeAddresses;
-  namhattaAddresses = postgresSchema.namhattaAddresses;
-  
-  Devotee = postgresSchema.Devotee;
-  InsertDevotee = postgresSchema.NewDevotee;
-  Namhatta = postgresSchema.Namhatta;
-  InsertNamhatta = postgresSchema.NewNamhatta;
-  DevotionalStatus = postgresSchema.DevotionalStatus;
-  InsertDevotionalStatus = postgresSchema.NewDevotionalStatus;
-  Shraddhakutir = postgresSchema.Shraddhakutir;
-  InsertShraddhakutir = postgresSchema.NewShraddhakutir;
-  NamhattaUpdate = postgresSchema.NamhattaUpdate;
-  InsertNamhattaUpdate = postgresSchema.NewNamhattaUpdate;
-  Leader = postgresSchema.Leader;
-  InsertLeader = postgresSchema.NewLeader;
-  StatusHistory = postgresSchema.StatusHistory;
-} else {
-  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
-}
 
 export class DatabaseStorage implements IStorage {
   constructor() {
@@ -79,13 +17,13 @@ export class DatabaseStorage implements IStorage {
     if (existingStatuses.length === 0) {
       // Initialize devotional statuses
       const statusData = [
-        { name: "Shraddhavan", level: 1 },
-        { name: "Sadhusangi", level: 2 },
-        { name: "Gour/Krishna Sevak", level: 3 },
-        { name: "Gour/Krishna Sadhak", level: 4 },
-        { name: "Sri Guru Charan Asraya", level: 5 },
-        { name: "Harinam Diksha", level: 6 },
-        { name: "Pancharatrik Diksha", level: 7 }
+        { name: "Shraddhavan" },
+        { name: "Sadhusangi" },
+        { name: "Gour/Krishna Sevak" },
+        { name: "Gour/Krishna Sadhak" },
+        { name: "Sri Guru Charan Asraya" },
+        { name: "Harinam Diksha" },
+        { name: "Pancharatrik Diksha" }
       ];
 
       for (const status of statusData) {
@@ -94,13 +32,13 @@ export class DatabaseStorage implements IStorage {
 
       // Initialize leaders
       const leadersData = [
-        { name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", position: "Founder Acharya", level: "founder" },
-        { name: "His Holiness Jayapataka Swami", position: "GBC", level: "acharya" },
-        { name: "HH Gauranga Prem Swami", position: "Regional Director", level: "regional", region: "West Bengal" },
-        { name: "HH Bhaktivilasa Gaurachandra Swami", position: "Co-Regional Director", level: "regional", region: "West Bengal" },
-        { name: "HG Padmanetra Das", position: "Co-Regional Director", level: "regional", region: "West Bengal" },
-        { name: "District Supervisor - Nadia", position: "District Supervisor", level: "district", region: "West Bengal", district: "Nadia" },
-        { name: "Mala Senapoti - Mayapur", position: "Mala Senapoti", level: "mala", region: "West Bengal", district: "Nadia" }
+        { name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", role: "FOUNDER_ACHARYA", reportingTo: null, location: { country: "India" } },
+        { name: "His Holiness Jayapataka Swami", role: "GBC", reportingTo: 1, location: { country: "India" } },
+        { name: "HH Gauranga Prem Swami", role: "REGIONAL_DIRECTOR", reportingTo: 2, location: { country: "India", state: "West Bengal" } },
+        { name: "HH Bhaktivilasa Gaurachandra Swami", role: "CO_REGIONAL_DIRECTOR", reportingTo: 3, location: { country: "India", state: "West Bengal" } },
+        { name: "HG Padmanetra Das", role: "CO_REGIONAL_DIRECTOR", reportingTo: 3, location: { country: "India", state: "West Bengal" } },
+        { name: "District Supervisor - Nadia", role: "DISTRICT_SUPERVISOR", reportingTo: 4, location: { country: "India", state: "West Bengal", district: "Nadia" } },
+        { name: "Mala Senapoti - Mayapur", role: "MALA_SENAPOTI", reportingTo: 6, location: { country: "India", state: "West Bengal", district: "Nadia" } }
       ];
 
       for (const leader of leadersData) {
@@ -109,11 +47,11 @@ export class DatabaseStorage implements IStorage {
 
       // Initialize shraddhakutirs
       const shraddhakutirData = [
-        { name: "Mayapur Shraddhakutir", description: "Primary Shraddhakutir in West Bengal" },
-        { name: "Kolkata Shraddhakutir", description: "Metropolitan Shraddhakutir in Kolkata" },
-        { name: "Bhubaneswar Shraddhakutir", description: "Regional Shraddhakutir in Odisha" },
-        { name: "Patna Shraddhakutir", description: "Regional Shraddhakutir in Bihar" },
-        { name: "Ranchi Shraddhakutir", description: "Regional Shraddhakutir in Jharkhand" }
+        { name: "Mayapur Shraddhakutir", region: "West Bengal", address: { country: "India", state: "West Bengal", district: "Nadia" } },
+        { name: "Kolkata Shraddhakutir", region: "West Bengal", address: { country: "India", state: "West Bengal", district: "Kolkata" } },
+        { name: "Bhubaneswar Shraddhakutir", region: "Odisha", address: { country: "India", state: "Odisha", district: "Khordha" } },
+        { name: "Patna Shraddhakutir", region: "Bihar", address: { country: "India", state: "Bihar", district: "Patna" } },
+        { name: "Ranchi Shraddhakutir", region: "Jharkhand", address: { country: "India", state: "Jharkhand", district: "Ranchi" } }
       ];
 
       for (const shraddhakutir of shraddhakutirData) {
@@ -135,7 +73,7 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(
         or(
           like(devotees.legalName, `%${filters.search}%`),
-          like(devotees.initiatedName, `%${filters.search}%`),
+          like(devotees.name, `%${filters.search}%`),
           like(devotees.email, `%${filters.search}%`)
         )
       );
@@ -246,7 +184,9 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(like(namhattas.name, `%${filters.search}%`));
     }
     
-    // Note: Status filtering removed as not available in PostgreSQL schema
+    if (filters.status) {
+      whereConditions.push(eq(namhattas.status, filters.status));
+    }
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
     
@@ -264,15 +204,17 @@ export class DatabaseStorage implements IStorage {
     const [data, totalResult] = await Promise.all([
       db.select({
         id: namhattas.id,
+        code: namhattas.code,
         name: namhattas.name,
-        description: namhattas.description,
-        establishedDate: namhattas.establishedDate,
-        shraddhakutirId: namhattas.shraddhakutirId,
+        meetingDay: namhattas.meetingDay,
+        meetingTime: namhattas.meetingTime,
+        address: namhattas.address,
         malaSenapoti: namhattas.malaSenapoti,
         mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
         chakraSenapoti: namhattas.chakraSenapoti,
         upaChakraSenapoti: namhattas.upaChakraSenapoti,
         secretary: namhattas.secretary,
+        status: namhattas.status,
         createdAt: namhattas.createdAt,
         updatedAt: namhattas.updatedAt,
         devoteeCount: count(devotees.id)
@@ -316,7 +258,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]> {
-    return await db.select().from(namhattaUpdates).where(eq(namhattaUpdates.namhattaId, id)).orderBy(desc(namhattaUpdates.eventDate));
+    return await db.select().from(namhattaUpdates).where(eq(namhattaUpdates.namhattaId, id)).orderBy(desc(namhattaUpdates.date));
   }
 
   async getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>> {
@@ -392,24 +334,24 @@ export class DatabaseStorage implements IStorage {
     const result = await db.select({
       id: namhattaUpdates.id,
       namhattaId: namhattaUpdates.namhattaId,
-      title: namhattaUpdates.title,
-      description: namhattaUpdates.description,
-      eventDate: namhattaUpdates.eventDate,
       programType: namhattaUpdates.programType,
-      specialAttraction: namhattaUpdates.specialAttraction,
-      prasadamDetails: namhattaUpdates.prasadamDetails,
-      kirtanDetails: namhattaUpdates.kirtanDetails,
-      bookDistribution: namhattaUpdates.bookDistribution,
-      chantingRounds: namhattaUpdates.chantingRounds,
-      aratiPerformed: namhattaUpdates.aratiPerformed,
-      bhagwatPathPerformed: namhattaUpdates.bhagwatPathPerformed,
+      date: namhattaUpdates.date,
       attendance: namhattaUpdates.attendance,
-      imageUrl: namhattaUpdates.imageUrl,
+      prasadDistribution: namhattaUpdates.prasadDistribution,
+      nagarKirtan: namhattaUpdates.nagarKirtan,
+      bookDistribution: namhattaUpdates.bookDistribution,
+      chanting: namhattaUpdates.chanting,
+      arati: namhattaUpdates.arati,
+      bhagwatPath: namhattaUpdates.bhagwatPath,
+      imageUrls: namhattaUpdates.imageUrls,
+      facebookLink: namhattaUpdates.facebookLink,
+      youtubeLink: namhattaUpdates.youtubeLink,
+      specialAttraction: namhattaUpdates.specialAttraction,
       createdAt: namhattaUpdates.createdAt,
       namhattaName: namhattas.name
     }).from(namhattaUpdates)
       .innerJoin(namhattas, eq(namhattaUpdates.namhattaId, namhattas.id))
-      .orderBy(desc(namhattaUpdates.eventDate));
+      .orderBy(desc(namhattaUpdates.date));
     
     return result;
   }
@@ -424,19 +366,19 @@ export class DatabaseStorage implements IStorage {
     malaSenapotis: Leader[];
   }> {
     const [founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis] = await Promise.all([
-      db.select().from(leaders).where(eq(leaders.level, "founder")),
-      db.select().from(leaders).where(eq(leaders.level, "gbc")),
-      db.select().from(leaders).where(eq(leaders.level, "regional")),
-      db.select().from(leaders).where(eq(leaders.level, "co-regional")),
-      db.select().from(leaders).where(eq(leaders.level, "district")),
-      db.select().from(leaders).where(eq(leaders.level, "mala"))
+      db.select().from(leaders).where(eq(leaders.role, "FOUNDER_ACHARYA")),
+      db.select().from(leaders).where(eq(leaders.role, "GBC")),
+      db.select().from(leaders).where(eq(leaders.role, "REGIONAL_DIRECTOR")),
+      db.select().from(leaders).where(eq(leaders.role, "CO_REGIONAL_DIRECTOR")),
+      db.select().from(leaders).where(eq(leaders.role, "DISTRICT_SUPERVISOR")),
+      db.select().from(leaders).where(eq(leaders.role, "MALA_SENAPOTI"))
     ]);
 
     return { founder, gbc, regionalDirectors, coRegionalDirectors, districtSupervisors, malaSenapotis };
   }
 
   async getLeadersByLevel(level: string): Promise<Leader[]> {
-    return await db.select().from(leaders).where(eq(leaders.level, level));
+    return await db.select().from(leaders).where(eq(leaders.role, level));
   }
 
   // Dashboard
@@ -482,7 +424,7 @@ export class DatabaseStorage implements IStorage {
     const [devoteeCount, namhattaCount, updates] = await Promise.all([
       db.select({ count: count() }).from(devotees),
       db.select({ count: count() }).from(namhattas),
-      db.select().from(namhattaUpdates).orderBy(desc(namhattaUpdates.eventDate)).limit(5)
+      db.select().from(namhattaUpdates).orderBy(desc(namhattaUpdates.date)).limit(5)
     ]);
 
     const recentUpdates = [];
@@ -492,7 +434,7 @@ export class DatabaseStorage implements IStorage {
         namhattaId: update.namhattaId,
         namhattaName: namhatta[0]?.name || "Unknown",
         programType: update.programType,
-        date: typeof update.eventDate === 'string' ? update.eventDate : update.eventDate?.toISOString().split('T')[0] || '',
+        date: typeof update.date === 'string' ? update.date : update.date.toISOString().split('T')[0],
         attendance: update.attendance
       });
     }
@@ -622,119 +564,146 @@ export class DatabaseStorage implements IStorage {
 
   // Map data methods
   async getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>> {
-    // Since PostgreSQL schema doesn't have address field in namhattas table,
-    // we'll use the junction table approach with addresses table
     const results = await db.select({
-      country: addresses.country,
+      country: namhattas.address,
       count: count()
-    }).from(namhattas)
-      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
-      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .groupBy(addresses.country);
+    }).from(namhattas).groupBy(namhattas.address);
 
-    return results.map(result => ({
-      country: result.country || 'Unknown',
-      count: result.count
-    }));
+    // Parse JSON address and group by country
+    const countryCounts: Record<string, number> = {};
+    for (const result of results) {
+      try {
+        const address = typeof result.country === 'string' ? JSON.parse(result.country) : result.country;
+        if (address?.country) {
+          countryCounts[address.country] = (countryCounts[address.country] || 0) + result.count;
+        }
+      } catch (e) {
+        // Skip invalid JSON
+      }
+    }
+
+    return Object.entries(countryCounts).map(([country, count]) => ({ country, count }));
   }
 
   async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
-    let query = db.select({
-      state: addresses.state,
-      country: addresses.country,
+    const results = await db.select({
+      address: namhattas.address,
       count: count()
-    }).from(namhattas)
-      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
-      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .groupBy(addresses.state, addresses.country);
+    }).from(namhattas).groupBy(namhattas.address);
 
-    if (country) {
-      query = query.where(eq(addresses.country, country));
+    const stateCounts: Record<string, { country: string; count: number }> = {};
+    for (const result of results) {
+      try {
+        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
+        if (address?.state && address?.country && (!country || address.country === country)) {
+          const key = `${address.state}-${address.country}`;
+          if (!stateCounts[key]) {
+            stateCounts[key] = { country: address.country, count: 0 };
+          }
+          stateCounts[key].count += result.count;
+        }
+      } catch (e) {
+        // Skip invalid JSON
+      }
     }
 
-    const results = await query;
-    return results.map(result => ({
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
-      count: result.count
+    return Object.entries(stateCounts).map(([key, data]) => ({
+      state: key.split('-')[0],
+      country: data.country,
+      count: data.count
     }));
   }
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
-    let query = db.select({
-      district: addresses.district,
-      state: addresses.state,
-      country: addresses.country,
+    const results = await db.select({
+      address: namhattas.address,
       count: count()
-    }).from(namhattas)
-      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
-      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .groupBy(addresses.district, addresses.state, addresses.country);
+    }).from(namhattas).groupBy(namhattas.address);
 
-    if (state) {
-      query = query.where(eq(addresses.state, state));
+    const districtCounts: Record<string, { state: string; country: string; count: number }> = {};
+    for (const result of results) {
+      try {
+        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
+        if (address?.district && address?.state && address?.country && (!state || address.state === state)) {
+          const key = `${address.district}-${address.state}-${address.country}`;
+          if (!districtCounts[key]) {
+            districtCounts[key] = { state: address.state, country: address.country, count: 0 };
+          }
+          districtCounts[key].count += result.count;
+        }
+      } catch (e) {
+        // Skip invalid JSON
+      }
     }
 
-    const results = await query;
-    return results.map(result => ({
-      district: result.district || 'Unknown',
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
-      count: result.count
+    return Object.entries(districtCounts).map(([key, data]) => ({
+      district: key.split('-')[0],
+      state: data.state,
+      country: data.country,
+      count: data.count
     }));
   }
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    let query = db.select({
-      subDistrict: addresses.subDistrict,
-      district: addresses.district,
-      state: addresses.state,
-      country: addresses.country,
+    const results = await db.select({
+      address: namhattas.address,
       count: count()
-    }).from(namhattas)
-      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
-      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .groupBy(addresses.subDistrict, addresses.district, addresses.state, addresses.country);
+    }).from(namhattas).groupBy(namhattas.address);
 
-    if (district) {
-      query = query.where(eq(addresses.district, district));
+    const subDistrictCounts: Record<string, { district: string; state: string; country: string; count: number }> = {};
+    for (const result of results) {
+      try {
+        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
+        if (address?.subDistrict && address?.district && address?.state && address?.country && (!district || address.district === district)) {
+          const key = `${address.subDistrict}-${address.district}-${address.state}-${address.country}`;
+          if (!subDistrictCounts[key]) {
+            subDistrictCounts[key] = { district: address.district, state: address.state, country: address.country, count: 0 };
+          }
+          subDistrictCounts[key].count += result.count;
+        }
+      } catch (e) {
+        // Skip invalid JSON
+      }
     }
 
-    const results = await query;
-    return results.map(result => ({
-      subDistrict: result.subDistrict || 'Unknown',
-      district: result.district || 'Unknown',
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
-      count: result.count
+    return Object.entries(subDistrictCounts).map(([key, data]) => ({
+      subDistrict: key.split('-')[0],
+      district: data.district,
+      state: data.state,
+      country: data.country,
+      count: data.count
     }));
   }
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    let query = db.select({
-      village: addresses.village,
-      subDistrict: addresses.subDistrict,
-      district: addresses.district,
-      state: addresses.state,
-      country: addresses.country,
+    const results = await db.select({
+      address: namhattas.address,
       count: count()
-    }).from(namhattas)
-      .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
-      .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .groupBy(addresses.village, addresses.subDistrict, addresses.district, addresses.state, addresses.country);
+    }).from(namhattas).groupBy(namhattas.address);
 
-    if (subDistrict) {
-      query = query.where(eq(addresses.subDistrict, subDistrict));
+    const villageCounts: Record<string, { subDistrict: string; district: string; state: string; country: string; count: number }> = {};
+    for (const result of results) {
+      try {
+        const address = typeof result.address === 'string' ? JSON.parse(result.address) : result.address;
+        if (address?.village && address?.subDistrict && address?.district && address?.state && address?.country && (!subDistrict || address.subDistrict === subDistrict)) {
+          const key = `${address.village}-${address.subDistrict}-${address.district}-${address.state}-${address.country}`;
+          if (!villageCounts[key]) {
+            villageCounts[key] = { subDistrict: address.subDistrict, district: address.district, state: address.state, country: address.country, count: 0 };
+          }
+          villageCounts[key].count += result.count;
+        }
+      } catch (e) {
+        // Skip invalid JSON
+      }
     }
 
-    const results = await query;
-    return results.map(result => ({
-      village: result.village || 'Unknown',
-      subDistrict: result.subDistrict || 'Unknown',
-      district: result.district || 'Unknown',
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
-      count: result.count
+    return Object.entries(villageCounts).map(([key, data]) => ({
+      village: key.split('-')[0],
+      subDistrict: data.subDistrict,
+      district: data.district,
+      state: data.state,
+      country: data.country,
+      count: data.count
     }));
   }
 }

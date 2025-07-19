@@ -1,32 +1,5 @@
 import { db } from "./db";
-// Import schemas based on database type
-const databaseUrl = process.env.DATABASE_URL;
-const useMySQL = databaseUrl?.startsWith('mysql://') || databaseUrl?.startsWith('mysql2://');
-const usePostgreSQL = databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://');
-
-let devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses;
-
-if (useMySQL) {
-  const mysqlSchema = await import("@shared/schema-mysql");
-  devotees = mysqlSchema.devotees;
-  namhattas = mysqlSchema.namhattas;
-  devotionalStatuses = mysqlSchema.devotionalStatuses;
-  namhattaUpdates = mysqlSchema.namhattaUpdates;
-  addresses = mysqlSchema.addresses;
-  devoteeAddresses = mysqlSchema.devoteeAddresses;
-  namhattaAddresses = mysqlSchema.namhattaAddresses;
-} else if (usePostgreSQL) {
-  const postgresSchema = await import("@shared/schema-postgres");
-  devotees = postgresSchema.devotees;
-  namhattas = postgresSchema.namhattas;
-  devotionalStatuses = postgresSchema.devotionalStatuses;
-  namhattaUpdates = postgresSchema.namhattaUpdates;
-  addresses = postgresSchema.addresses;
-  devoteeAddresses = postgresSchema.devoteeAddresses;
-  namhattaAddresses = postgresSchema.namhattaAddresses;
-} else {
-  throw new Error("Unsupported database URL. Please use MySQL or PostgreSQL connection string.");
-}
+import { devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
 
 // Sample data for seeding the database
 export async function seedDatabase() {
@@ -119,14 +92,18 @@ export async function seedDatabase() {
     const secretary = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     
     namhattaData.push({
+      code: `NAM${String(i).padStart(3, '0')}`,
       name: `${location.village} Namhatta`,
-      description: `Namhatta center located in ${location.village}, ${location.district}`,
-      establishedDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
+      address: location,
+      president,
+      vicePresident,
+      secretary,
       malaSenapoti: Math.random() > 0.7 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       mahaChakraSenapoti: Math.random() > 0.8 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       chakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       upaChakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
-      secretary: secretary
+      status: Math.random() > 0.1 ? "APPROVED" : "PENDING_APPROVAL",
+      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
     });
   }
 
@@ -153,19 +130,21 @@ export async function seedDatabase() {
     devoteeData.push({
       legalName,
       initiatedName,
-      dateOfBirth: new Date(1950 + Math.random() * 50, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
-      gender: isMale ? "Male" : "Female",
+      dob: new Date(1950 + Math.random() * 50, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
+      gender: isMale ? "MALE" : "FEMALE",
       bloodGroup: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"][Math.floor(Math.random() * 8)],
-      phoneNumber: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+      phone: `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`,
       email: `${legalName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
       occupation: ["Teacher", "Engineer", "Doctor", "Farmer", "Business", "Student", "Retired", "Housewife", "Government Service"][Math.floor(Math.random() * 9)],
       fatherName: maleNames[Math.floor(Math.random() * maleNames.length)],
       motherName: femaleNames[Math.floor(Math.random() * femaleNames.length)],
-      spouseName: Math.random() > 0.5 ? (isMale ? femaleNames[Math.floor(Math.random() * femaleNames.length)] : maleNames[Math.floor(Math.random() * maleNames.length)]) : null,
-      namhattaId: namhattaId,
+      husbandName: Math.random() > 0.5 ? (isMale ? femaleNames[Math.floor(Math.random() * femaleNames.length)] : maleNames[Math.floor(Math.random() * maleNames.length)]) : null,
+      presentAddress: location,
+      permanentAddress: Math.random() > 0.7 ? locations[Math.floor(Math.random() * locations.length)] : location,
       devotionalStatusId: statusId,
-      harinamInitiationDate: isInitiated ? new Date(2000 + Math.random() * 24, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1) : null,
-      courses: Math.random() > 0.6 ? [{ name: `Course ${Math.floor(Math.random() * 10) + 1}`, date: new Date().toISOString().split('T')[0], institute: "ISKCON" }] : null
+      harinamDate: isInitiated ? new Date(2000 + Math.random() * 24, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0] : null,
+      devotionalCourses: Math.random() > 0.6 ? [{ name: `Course ${Math.floor(Math.random() * 10) + 1}`, date: new Date().toISOString().split('T')[0], institute: "ISKCON" }] : [],
+      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
     });
   }
 

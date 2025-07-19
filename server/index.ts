@@ -2,11 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
-// Set NODE_ENV to development by default if not set
-if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = 'development';
-}
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -65,12 +60,10 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  const host = process.platform === 'win32' ? 'localhost' : '0.0.0.0';
-  
   server.listen({
     port,
-    host,
-    reusePort: process.platform !== 'win32', // Windows doesn't support reusePort
+    host: "0.0.0.0",
+    reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });
