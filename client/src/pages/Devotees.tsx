@@ -46,23 +46,12 @@ export default function Devotees() {
 
   const { data: devotees, isLoading } = useQuery({
     queryKey: ["/api/devotees", page, pageSize, searchTerm, filters, sortBy, sortOrder],
-    queryFn: () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        size: pageSize.toString(),
-        sortBy,
-        sortOrder
-      });
-      
-      // Add search and filters
-      if (searchTerm) params.append('search', searchTerm);
-      if (filters.country) params.append('country', filters.country);
-      if (filters.state) params.append('state', filters.state);
-      if (filters.district) params.append('district', filters.district);
-      if (filters.statusId) params.append('statusId', filters.statusId);
-      
-      return fetch(`/api/devotees?${params}`).then(res => res.json());
-    },
+    queryFn: () => api.getDevotees(page, pageSize, { 
+      ...filters, 
+      search: searchTerm, 
+      sortBy, 
+      sortOrder 
+    }),
   });
 
   const { data: statuses } = useQuery({

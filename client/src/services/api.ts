@@ -67,8 +67,17 @@ export const api = {
   },
 
   // Devotees
-  getDevotees: async (page = 1, size = 10): Promise<PaginatedResponse<Devotee>> => {
-    const res = await apiRequest("GET", `/api/devotees?page=${page}&size=${size}`);
+  getDevotees: async (page = 1, size = 10, filters?: any): Promise<PaginatedResponse<Devotee>> => {
+    const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
+    if (filters) {
+      Object.keys(filters).forEach(key => {
+        // Only add non-empty string values to avoid sending empty parameters
+        if (filters[key] && filters[key] !== '') {
+          params.append(key, filters[key]);
+        }
+      });
+    }
+    const res = await apiRequest("GET", `/api/devotees?${params}`);
     return res.json();
   },
 
@@ -106,7 +115,10 @@ export const api = {
     const params = new URLSearchParams({ page: page.toString(), size: size.toString() });
     if (filters) {
       Object.keys(filters).forEach(key => {
-        if (filters[key]) params.append(key, filters[key]);
+        // Only add non-empty string values to avoid sending empty parameters
+        if (filters[key] && filters[key] !== '') {
+          params.append(key, filters[key]);
+        }
       });
     }
     const res = await apiRequest("GET", `/api/namhattas?${params}`);
