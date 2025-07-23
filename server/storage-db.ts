@@ -1085,7 +1085,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    let query = db.select({
+    let whereConditions = [
+      sql`${addresses.villageNameEnglish} IS NOT NULL`,
+      ne(namhattas.status, 'Rejected')
+    ];
+    
+    if (subDistrict) {
+      whereConditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
+    }
+    
+    const results = await db.select({
       village: addresses.villageNameEnglish,
       subDistrict: addresses.subdistrictNameEnglish,
       district: addresses.districtNameEnglish,
@@ -1094,13 +1103,9 @@ export class DatabaseStorage implements IStorage {
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.villageNameEnglish} IS NOT NULL`);
-    
-    if (subDistrict) {
-      query = query.where(eq(addresses.subdistrictNameEnglish, subDistrict));
-    }
-    
-    const results = await query.groupBy(addresses.villageNameEnglish, addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(...whereConditions))
+      .groupBy(addresses.villageNameEnglish, addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       village: result.village || 'Unknown',

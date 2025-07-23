@@ -183,11 +183,13 @@ export default function Map() {
       'Bongaon': [88.8, 23.0],
       'Barasat - I': [88.5, 22.7],
       'Matigara': [88.4, 26.8],
+      'Simlapal': [86.9, 23.1],
       
       // Villages
       'Agabar Chak': [87.2, 22.3],
       'Akaipur': [88.8, 23.0],
       'Bairatisal (Ct)': [88.4, 26.8],
+      'Bankata': [86.9, 23.1],
       'Ahira': [88.5, 22.7]
     };
 
