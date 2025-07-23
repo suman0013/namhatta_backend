@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
-import { sql, eq, desc, asc, and, or, like, count, inArray, ne } from "drizzle-orm";
+import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
 
@@ -1184,28 +1184,30 @@ export class DatabaseStorage implements IStorage {
     const { country, state, district } = addressData[0];
 
     // Get all unique sub-districts for this pincode
-    const subDistrictData = await db.selectDistinct({
+    const subDistrictData = await db.select({
       subDistrict: addresses.subdistrictNameEnglish,
     })
     .from(addresses)
     .where(
       and(
         eq(addresses.postalCode, pincode),
-        sql`${addresses.subdistrictNameEnglish} IS NOT NULL`
+        isNotNull(addresses.subdistrictNameEnglish)
       )
-    );
+    )
+    .groupBy(addresses.subdistrictNameEnglish);
 
     // Get all unique villages for this pincode
-    const villageData = await db.selectDistinct({
+    const villageData = await db.select({
       village: addresses.villageNameEnglish,
     })
     .from(addresses)
     .where(
       and(
         eq(addresses.postalCode, pincode),
-        sql`${addresses.villageNameEnglish} IS NOT NULL`
+        isNotNull(addresses.villageNameEnglish)
       )
-    );
+    )
+    .groupBy(addresses.villageNameEnglish);
 
     return {
       country: country || 'India',
