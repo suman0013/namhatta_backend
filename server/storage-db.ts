@@ -90,7 +90,7 @@ export class DatabaseStorage implements IStorage {
         .select({ devoteeId: devoteeAddresses.devoteeId })
         .from(devoteeAddresses)
         .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
-        .where(inArray(addresses.district, filters.allowedDistricts));
+        .where(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
       
       whereConditions.push(
         inArray(devotees.id, districtSubquery)
@@ -272,10 +272,11 @@ export class DatabaseStorage implements IStorage {
   async getDevoteesByNamhatta(namhattaId: number, page = 1, size = 10, statusId?: number): Promise<{ data: Devotee[], total: number }> {
     const offset = (page - 1) * size;
     
-    let whereClause = eq(devotees.namhattaId, namhattaId);
+    let whereConditions = [eq(devotees.namhattaId, namhattaId)];
     if (statusId) {
-      whereClause = and(whereClause, eq(devotees.devotionalStatusId, statusId));
+      whereConditions.push(eq(devotees.devotionalStatusId, statusId));
     }
+    const whereClause = and(...whereConditions);
 
     const [data, totalResult] = await Promise.all([
       db.select().from(devotees).where(whereClause).limit(size).offset(offset),
@@ -330,7 +331,7 @@ export class DatabaseStorage implements IStorage {
     // Get devotee's address to check their district
     const devoteeAddressData = await db
       .select({
-        district: addresses.district
+        district: addresses.districtNameEnglish
       })
       .from(devoteeAddresses)
       .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
@@ -349,7 +350,7 @@ export class DatabaseStorage implements IStorage {
     console.log(`Devotee is in district: ${devoteeDistrict}`);
     
     // Check if devotee's district is in supervisor's allowed districts
-    const hasAccess = allowedDistricts.includes(devoteeDistrict);
+    const hasAccess = devoteeDistrict ? allowedDistricts.includes(devoteeDistrict) : false;
     console.log(`Access granted: ${hasAccess}`);
     return hasAccess;
   }
@@ -375,7 +376,7 @@ export class DatabaseStorage implements IStorage {
         .select({ namhattaId: namhattaAddresses.namhattaId })
         .from(namhattaAddresses)
         .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-        .where(inArray(addresses.district, filters.allowedDistricts));
+        .where(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
       
       whereConditions.push(
         inArray(namhattas.id, allowedDistrictSubquery)
