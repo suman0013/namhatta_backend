@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 // Sample data for seeding the database
 export async function seedDatabase() {
@@ -84,33 +85,68 @@ export async function seedDatabase() {
   ];
 
   // Generate 100 Namhattas
-  const namhattaData = [];
+  const namhattasData = [];
   for (let i = 1; i <= 100; i++) {
     const location = locations[Math.floor(Math.random() * locations.length)];
     const president = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     const vicePresident = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     const secretary = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     
-    namhattaData.push({
+    namhattasData.push({
       code: `NAM${String(i).padStart(3, '0')}`,
       name: `${location.village} Namhatta`,
-      address: location,
-      president,
-      vicePresident,
-      secretary,
+      meetingDay: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][Math.floor(Math.random() * 7)],
+      meetingTime: `${Math.floor(Math.random() * 12) + 6}:${Math.random() > 0.5 ? "00" : "30"} ${Math.random() > 0.5 ? "AM" : "PM"}`,
       malaSenapoti: Math.random() > 0.7 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       mahaChakraSenapoti: Math.random() > 0.8 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       chakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       upaChakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
+      secretary: Math.random() > 0.5 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       status: Math.random() > 0.1 ? "APPROVED" : "PENDING_APPROVAL",
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date(),
+      location // Store location separately for address creation
     });
   }
 
   // Insert Namhattas
   console.log("Inserting Namhattas...");
-  for (const namhatta of namhattaData) {
-    await db.insert(namhattas).values(namhatta);
+  for (const namhattaItem of namhattasData) {
+    const { location, ...namhattaFields } = namhattaItem;
+    
+    // Insert the namhatta
+    const [insertedNamhatta] = await db.insert(namhattas).values(namhattaFields).returning();
+    
+    // Create or find address
+    let address = await db.select().from(addresses).where(
+      and(
+        eq(addresses.country, location.country),
+        eq(addresses.stateNameEnglish, location.state),
+        eq(addresses.districtNameEnglish, location.district),
+        eq(addresses.subDistrictNameEnglish, location.subDistrict),
+        eq(addresses.villageNameEnglish, location.village),
+        eq(addresses.postalCode, location.postalCode)
+      )
+    ).limit(1);
+    
+    if (address.length === 0) {
+      // Insert new address
+      [address[0]] = await db.insert(addresses).values({
+        country: location.country,
+        stateNameEnglish: location.state,
+        districtNameEnglish: location.district,
+        subDistrictNameEnglish: location.subDistrict,
+        villageNameEnglish: location.village,
+        postalCode: location.postalCode
+      }).returning();
+    }
+    
+    // Link namhatta to address
+    await db.insert(namhattaAddresses).values({
+      namhattaId: insertedNamhatta.id,
+      addressId: address[0].id,
+      landmark: `Near ${location.village} Center`
+    });
   }
 
   // Get all inserted Namhattas

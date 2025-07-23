@@ -7,7 +7,8 @@ import { seedDatabase } from "./seed-data";
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    this.initializeDefaultData();
+    // Temporarily disable auto-seeding to fix database issues first
+    // this.initializeDefaultData();
   }
 
   private async initializeDefaultData() {
