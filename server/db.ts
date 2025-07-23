@@ -7,7 +7,12 @@ import * as schema from "@shared/schema";
 dotenv.config();
 
 // Get database connection string from environment variable
-const connectionString = process.env.DATABASE_URL;
+let connectionString = process.env.DATABASE_URL;
+
+// Clean up the connection string if it has psql command prefix
+if (connectionString?.startsWith("psql '") && connectionString.endsWith("'")) {
+  connectionString = connectionString.slice(6, -1); // Remove "psql '" prefix and "'" suffix
+}
 
 console.log('Using database connection string:', connectionString?.replace(/:[^:@]*@/, ':***@'));
 
