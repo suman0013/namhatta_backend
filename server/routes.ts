@@ -233,7 +233,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const id = parseInt(req.params.id);
     try {
       // Extract address and other fields separately (similar to create operations)
-      const { presentAddress, permanentAddress, ...devoteeFields } = req.body;
+      const { presentAddress, permanentAddress, allowedDistricts, ...devoteeFields } = req.body;
+      
+      // For DISTRICT_SUPERVISOR, check if they have access to this devotee
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        console.log(`District access check for user ${req.user.username} (districts: ${req.user.districts.join(', ')}) trying to update devotee ${id}`);
+        const hasAccess = await storage.checkDevoteeDistrictAccess(id, allowedDistricts || []);
+        console.log(`Access result: ${hasAccess}`);
+        if (!hasAccess) {
+          return res.status(403).json({ error: "Access denied: Devotee not in your assigned districts" });
+        }
+      }
       
       // Validate only the devotee fields against schema
       const validatedDevoteeData = insertDevoteeSchema.partial().parse(devoteeFields);
@@ -254,7 +264,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/devotees/:id/upgrade-status", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
     const id = parseInt(req.params.id);
-    const { newStatusId, notes } = req.body;
+    const { newStatusId, notes, allowedDistricts } = req.body;
+    
+    // For DISTRICT_SUPERVISOR, check if they have access to this devotee
+    if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+      const hasAccess = await storage.checkDevoteeDistrictAccess(id, allowedDistricts || []);
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied: Devotee not in your assigned districts" });
+      }
+    }
     
     if (!newStatusId) {
       return res.status(400).json({ message: "newStatusId is required" });

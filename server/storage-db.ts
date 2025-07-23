@@ -299,6 +299,42 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(statusHistory).where(eq(statusHistory.devoteeId, id)).orderBy(desc(statusHistory.updatedAt));
   }
 
+  async checkDevoteeDistrictAccess(devoteeId: number, allowedDistricts: string[]): Promise<boolean> {
+    console.log(`Checking district access for devotee ${devoteeId} with allowed districts: ${allowedDistricts.join(', ')}`);
+    
+    // If no districts specified, deny access
+    if (!allowedDistricts || allowedDistricts.length === 0) {
+      console.log('No allowed districts specified, denying access');
+      return false;
+    }
+
+    // Get devotee's address to check their district
+    const devoteeAddressData = await db
+      .select({
+        district: addresses.district
+      })
+      .from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .where(eq(devoteeAddresses.devoteeId, devoteeId))
+      .limit(1);
+
+    console.log(`Found ${devoteeAddressData.length} address records for devotee ${devoteeId}`);
+
+    if (devoteeAddressData.length === 0) {
+      // If devotee has no address, allow access (they might be in process of adding address)
+      console.log('Devotee has no address, allowing access');
+      return true;
+    }
+
+    const devoteeDistrict = devoteeAddressData[0].district;
+    console.log(`Devotee is in district: ${devoteeDistrict}`);
+    
+    // Check if devotee's district is in supervisor's allowed districts
+    const hasAccess = allowedDistricts.includes(devoteeDistrict);
+    console.log(`Access granted: ${hasAccess}`);
+    return hasAccess;
+  }
+
   // Namhattas
   async getNamhattas(page = 1, size = 10, filters: any = {}): Promise<{ data: Namhatta[], total: number }> {
     const offset = (page - 1) * size;
