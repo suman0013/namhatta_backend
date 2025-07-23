@@ -343,17 +343,7 @@ export default function DevoteeDetail() {
                     <p className="font-medium text-gray-900 dark:text-white text-sm">{devotee.additionalComments}</p>
                   </div>
                 )}
-                {devotee.shraddhakutirId && (
-                  <div className="mt-2 p-2 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/20 rounded-lg border border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center mb-1">
-                      <Home className="h-3 w-3 text-slate-600 dark:text-slate-400 mr-1" />
-                      <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Shraddhakutir</p>
-                    </div>
-                    <p className="font-medium text-gray-900 dark:text-white text-sm">
-                      Shraddhakutir ID: {devotee.shraddhakutirId}
-                    </p>
-                  </div>
-                )}
+
               </CardContent>
             </Card>
 
@@ -586,6 +576,17 @@ export default function DevoteeDetail() {
                     </div>
                     <p className="font-semibold text-gray-900 dark:text-white text-sm">
                       {new Date(devotee.pancharatrikDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                {devotee.shraddhakutirId && (
+                  <div className="p-2 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/20 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center mb-1">
+                      <Building className="h-3 w-3 text-slate-600 dark:text-slate-400 mr-1" />
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Shraddhakutir</p>
+                    </div>
+                    <p className="font-medium text-gray-900 dark:text-white text-sm">
+                      Shraddhakutir ID: {devotee.shraddhakutirId}
                     </p>
                   </div>
                 )}
