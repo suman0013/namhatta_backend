@@ -91,58 +91,8 @@ export interface IStorage {
   getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
 }
 
-// Simple storage implementation for migration without database dependency
-class MemStorage implements IStorage {
-  // Basic implementations to make the server start
-  async getDevotees() { return { data: [], total: 0 }; }
-  async getDevotee() { return undefined; }
-  async createDevotee(devotee: any) { return { id: 1, ...devotee, createdAt: new Date(), updatedAt: new Date() }; }
-  async createDevoteeForNamhatta(devotee: any) { return this.createDevotee(devotee); }
-  async updateDevotee() { return { id: 1, legalName: 'Test' } as any; }
-  async getDevoteesByNamhatta() { return { data: [], total: 0 }; }
-  async upgradeDevoteeStatus() { return; }
-  async getDevoteeStatusHistory() { return []; }
-  
-  async getNamhattas() { return { data: [], total: 0 }; }
-  async getNamhatta() { return undefined; }
-  async createNamhatta(namhatta: any) { return { id: 1, ...namhatta, createdAt: new Date(), updatedAt: new Date() }; }
-  async updateNamhatta() { return { id: 1, name: 'Test', code: 'TEST' } as any; }
-  async approveNamhatta() { return; }
-  async rejectNamhatta() { return; }
-  async getNamhattaUpdates() { return []; }
-  async getNamhattaDevoteeStatusCount() { return {}; }
-  async getNamhattaStatusHistory() { return { data: [], total: 0 }; }
-  
-  async getDevotionalStatuses() { return [{ id: 1, name: 'Shraddhavan', createdAt: new Date() }]; }
-  async createDevotionalStatus() { return { id: 1, name: 'Test', createdAt: new Date() }; }
-  async renameDevotionalStatus() { return; }
-  
-  async getShraddhakutirs() { return []; }
-  async createShraddhakutir() { return { id: 1, name: 'Test', districtCode: 'TEST', createdAt: new Date() }; }
-  
-  async createNamhattaUpdate() { return { id: 1, namhattaId: 1, programType: 'Test', date: '2025-01-01', attendance: 0, createdAt: new Date() } as any; }
-  async getAllUpdates() { return []; }
-  
-  async getTopLevelHierarchy() { return { founder: [], gbc: [], regionalDirectors: [], coRegionalDirectors: [] }; }
-  async getLeadersByLevel() { return []; }
-  
-  async getDashboardSummary() { return { totalDevotees: 0, totalNamhattas: 0, recentUpdates: [] }; }
-  async getStatusDistribution() { return []; }
-  
-  async getCountries() { return ['India']; }
-  async getStates() { return ['West Bengal']; }
-  async getDistricts() { return ['Nadia']; }
-  async getSubDistricts() { return []; }
-  async getVillages() { return []; }
-  async getPincodes() { return []; }
-  async searchPincodes() { return { pincodes: [], total: 0, hasMore: false }; }
-  async getAddressByPincode() { return null; }
-  
-  async getNamhattaCountsByCountry() { return []; }
-  async getNamhattaCountsByState() { return []; }
-  async getNamhattaCountsByDistrict() { return []; }
-  async getNamhattaCountsBySubDistrict() { return []; }
-  async getNamhattaCountsByVillage() { return []; }
-}
+// Import database storage implementation
+import { DatabaseStorage } from './storage-db';
 
-export const storage = new MemStorage();
+// Export the database storage instance
+export const storage = new DatabaseStorage();
