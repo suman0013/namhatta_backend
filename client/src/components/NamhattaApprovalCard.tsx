@@ -14,6 +14,7 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Check, X, MapPin, Users, Calendar, Clock, AlertCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { Namhatta } from "@/lib/types";
@@ -28,6 +29,10 @@ export default function NamhattaApprovalCard({ namhatta }: NamhattaApprovalCardP
   const [rejectionReason, setRejectionReason] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  // Only ADMIN and OFFICE users can approve/reject
+  const canApprove = user?.role === 'ADMIN' || user?.role === 'OFFICE';
 
   const approveMutation = useMutation({
     mutationFn: () => apiRequest(`/api/namhattas/${namhatta.id}/approve`, {
@@ -149,8 +154,8 @@ export default function NamhattaApprovalCard({ namhatta }: NamhattaApprovalCardP
             <span>Registered: {new Date(namhatta.createdAt).toLocaleDateString()}</span>
           </div>
 
-          {/* Action Buttons */}
-          {namhatta.status === "PENDING_APPROVAL" && (
+          {/* Action Buttons - Only show for ADMIN and OFFICE users */}
+          {namhatta.status === "PENDING_APPROVAL" && canApprove && (
             <div className="flex space-x-2 pt-4">
               <Button 
                 className="flex-1 bg-green-600 hover:bg-green-700 text-white"
@@ -169,6 +174,16 @@ export default function NamhattaApprovalCard({ namhatta }: NamhattaApprovalCardP
                 <X className="mr-2 h-4 w-4" />
                 Reject
               </Button>
+            </div>
+          )}
+          
+          {/* Message for users who cannot approve */}
+          {namhatta.status === "PENDING_APPROVAL" && !canApprove && (
+            <div className="flex items-center space-x-2 pt-4 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Only administrators and office staff can approve pending Namhattas.
+              </span>
             </div>
           )}
         </CardContent>

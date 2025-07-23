@@ -340,7 +340,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
-  app.post("/api/namhattas/:id/approve", async (req, res) => {
+  // Namhatta approval endpoints - only ADMIN and OFFICE users can approve/reject
+  app.post("/api/namhattas/:id/approve", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
       await storage.approveNamhatta(id);
@@ -350,7 +351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/namhattas/:id/reject", async (req, res) => {
+  app.post("/api/namhattas/:id/reject", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     const { reason } = req.body;
     try {
