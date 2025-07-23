@@ -32,7 +32,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { getUserDistricts } = await import('./storage-auth');
       const districts = await getUserDistricts(req.user.id);
-      res.json({ districts: districts.map(d => d.districtCode) });
+      res.json({ 
+        districts: districts.map(d => ({
+          code: d.districtCode,
+          name: d.districtNameEnglish
+        }))
+      });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

@@ -5,7 +5,7 @@ interface User {
   username: string;
   role: 'ADMIN' | 'OFFICE' | 'DISTRICT_SUPERVISOR';
   isActive: boolean;
-  districts?: string[]; // Available for DISTRICT_SUPERVISOR users
+  districts?: Array<{ code: string; name: string }>; // Available for DISTRICT_SUPERVISOR users
 }
 
 interface AuthState {

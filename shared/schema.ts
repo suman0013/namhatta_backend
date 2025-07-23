@@ -169,6 +169,7 @@ export const userDistricts = pgTable("user_districts", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
   districtCode: text("district_code").notNull(), // References district from addresses table
+  districtNameEnglish: text("district_name_english").notNull(), // Store district name for easy display
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   uniqueUserDistrict: unique().on(table.userId, table.districtCode),

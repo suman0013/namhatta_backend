@@ -66,7 +66,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
                   <div className="space-y-1">
                     {user.districts.map((district, index) => (
                       <div key={index} className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
-                        {district}
+                        {typeof district === 'string' ? district : district.name}
                       </div>
                     ))}
                   </div>

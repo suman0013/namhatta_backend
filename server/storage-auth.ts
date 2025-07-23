@@ -113,9 +113,20 @@ export async function assignDistrictsToUser(userId: number, districtCodes: strin
   
   // Add new district assignments
   if (districtCodes.length > 0) {
-    const assignments = districtCodes.map(districtCode => ({
+    // Get district names from addresses table
+    const { addresses } = await import('@shared/schema');
+    const distinctDistricts = await db
+      .selectDistinct({
+        districtCode: addresses.districtCode,
+        districtNameEnglish: addresses.districtNameEnglish
+      })
+      .from(addresses)
+      .where(inArray(addresses.districtCode, districtCodes));
+    
+    const assignments = distinctDistricts.map(district => ({
       userId,
-      districtCode
+      districtCode: district.districtCode!,
+      districtNameEnglish: district.districtNameEnglish!
     }));
     
     await db.insert(userDistricts).values(assignments);
