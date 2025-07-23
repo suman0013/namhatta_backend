@@ -30,7 +30,7 @@ interface MapData {
 
 export default function Map() {
   const [currentLevel, setCurrentLevel] = useState<MapLevel>('COUNTRY');
-  const [zoomLevel, setZoomLevel] = useState<number>(4);
+  const [zoomLevel, setZoomLevel] = useState<number>(3);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
@@ -276,7 +276,7 @@ export default function Map() {
           dragging: true, // Enable dragging
           boxZoom: true, // Enable box zoom with shift+drag
           attributionControl: false, // Disable attribution control
-        }).setView([20, 77], 4); // Centered on South Asia
+        }).setView([20, 77], 3); // Centered on South Asia at country level
         
         // Listen for zoom changes to update level automatically
         map.on('zoomend', () => {
