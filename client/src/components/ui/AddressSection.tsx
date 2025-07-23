@@ -15,6 +15,7 @@ interface AddressSectionProps {
   title: string;
   address: Address;
   onAddressChange: (field: keyof Address, value: string) => void;
+  onBatchAddressChange?: (newAddress: Partial<Address>) => void;
   required?: boolean;
   showValidation?: boolean;
   disabled?: boolean;
@@ -24,6 +25,7 @@ export default function AddressSection({
   title,
   address = {},
   onAddressChange,
+  onBatchAddressChange,
   required = false,
   showValidation = false,
   disabled = false
@@ -54,10 +56,9 @@ export default function AddressSection({
   });
 
   const handlePincodeChange = async (pincode: string) => {
-    onAddressChange("postalCode", pincode);
-    
     if (!pincode.trim()) {
       // Clear auto-populated fields when pincode is removed
+      onAddressChange("postalCode", "");
       onAddressChange("state", "");
       onAddressChange("district", "");
       onAddressChange("subDistrict", "");
@@ -70,19 +71,29 @@ export default function AddressSection({
       const addressInfo = await api.getAddressByPincode(pincode.trim());
       console.log("Pincode lookup result:", addressInfo);
       if (addressInfo) {
-        // Use setTimeout to ensure the state changes are applied in sequence
-        setTimeout(() => {
-          // Auto-populate state and district
+        // Call a special batch update function that doesn't trigger cascading resets
+        if (onBatchAddressChange) {
+          onBatchAddressChange({
+            postalCode: pincode,
+            state: addressInfo.state,
+            district: addressInfo.district,
+            subDistrict: "",
+            village: ""
+          });
+        } else {
+          // Fallback: update fields individually but with a flag to prevent resets
+          onAddressChange("postalCode", pincode);
           onAddressChange("state", addressInfo.state);
           onAddressChange("district", addressInfo.district);
-          
-          // Clear sub-district and village so user must select them
           onAddressChange("subDistrict", "");
           onAddressChange("village", "");
-        }, 0);
+        }
+      } else {
+        onAddressChange("postalCode", pincode);
       }
     } catch (error) {
       console.error("Error fetching address by pincode:", error);
+      onAddressChange("postalCode", pincode);
     } finally {
       setIsLoadingPincode(false);
     }

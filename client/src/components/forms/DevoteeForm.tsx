@@ -223,6 +223,19 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
     }
   };
 
+  // Handle batch address changes (for pincode auto-population)
+  const handlePresentBatchAddressChange = (newAddressFields: Partial<Address>) => {
+    const newAddress = { ...presentAddress, ...newAddressFields };
+    console.log("Batch address change:", newAddressFields, "New address:", newAddress);
+    setPresentAddress(newAddress);
+    setValue("presentAddress", newAddress);
+    
+    if (sameAsPresentAddress) {
+      setPermanentAddress(newAddress);
+      setValue("permanentAddress", newAddress);
+    }
+  };
+
   const handleCreateShraddhakutir = () => {
     if (!newShraddhakutir.name) {
       toast({
@@ -256,23 +269,33 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
   const handlePermanentAddressChange = (field: keyof Address, value: string) => {
     const newAddress = { ...permanentAddress, [field]: value };
     
-    // Reset dependent fields
+    // Reset dependent fields only for manual changes, not pincode auto-population
     if (field === "country") {
       newAddress.state = "";
       newAddress.district = "";
       newAddress.subDistrict = "";
       newAddress.village = "";
-    } else if (field === "state") {
+    } else if (field === "state" && permanentAddress.postalCode === "") {
+      // Only reset if no pincode is set (manual state change)
       newAddress.district = "";
       newAddress.subDistrict = "";
       newAddress.village = "";
-    } else if (field === "district") {
+    } else if (field === "district" && permanentAddress.postalCode === "") {
+      // Only reset if no pincode is set (manual district change)
       newAddress.subDistrict = "";
       newAddress.village = "";
     } else if (field === "subDistrict") {
       newAddress.village = "";
     }
     
+    setPermanentAddress(newAddress);
+    setValue("permanentAddress", newAddress);
+  };
+
+  // Handle batch address changes for permanent address
+  const handlePermanentBatchAddressChange = (newAddressFields: Partial<Address>) => {
+    const newAddress = { ...permanentAddress, ...newAddressFields };
+    console.log("Permanent batch address change:", newAddressFields, "New address:", newAddress);
     setPermanentAddress(newAddress);
     setValue("permanentAddress", newAddress);
   };
@@ -592,6 +615,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
               title="Present Address"
               address={presentAddress}
               onAddressChange={handlePresentAddressChange}
+              onBatchAddressChange={handlePresentBatchAddressChange}
               required={true}
               showValidation={showValidation}
             />
@@ -617,6 +641,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                   title="Permanent Address"
                   address={permanentAddress}
                   onAddressChange={handlePermanentAddressChange}
+                  onBatchAddressChange={handlePermanentBatchAddressChange}
                   required={true}
                   showValidation={showValidation}
                 />

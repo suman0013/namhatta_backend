@@ -128,6 +128,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     setValue("address", newAddress);
   };
 
+  // Handle batch address changes (for pincode auto-population)
+  const handleBatchAddressChange = (newAddressFields: Partial<Address>) => {
+    const newAddress = { ...address, ...newAddressFields };
+    console.log("Namhatta batch address change:", newAddressFields, "New address:", newAddress);
+    setAddress(newAddress);
+    setValue("address", newAddress);
+  };
+
   const onSubmit = (data: FormData) => {
     const submitData = {
       ...data,
@@ -254,6 +262,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
               title="Address"
               address={address}
               onAddressChange={handleAddressChange}
+              onBatchAddressChange={handleBatchAddressChange}
               required={false}
               showValidation={false}
             />
