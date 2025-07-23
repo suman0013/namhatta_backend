@@ -2,14 +2,25 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
 import { api } from "@/services/api";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import NamhattaForm from "@/components/forms/NamhattaForm";
 import NamhattaUpdateForm from "@/components/forms/NamhattaUpdateForm";
 import DevoteeForm from "@/components/forms/DevoteeForm";
@@ -33,17 +44,26 @@ import {
   Plus,
   User,
   GraduationCap,
-  Briefcase
+  Briefcase,
+  X,
+  AlertCircle
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
 export default function NamhattaDetail() {
   const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [showEditForm, setShowEditForm] = useState(false);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [showDevoteeForm, setShowDevoteeForm] = useState(false);
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false);
+  const [showRejectionDialog, setShowRejectionDialog] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  
+  // Only ADMIN and OFFICE users can approve/reject
+  const canApprove = user?.role === 'ADMIN' || user?.role === 'OFFICE';
 
   const { data: namhatta, isLoading } = useQuery({
     queryKey: ["/api/namhattas", id],
@@ -75,18 +95,41 @@ export default function NamhattaDetail() {
   });
 
   const approveMutation = useMutation({
-    mutationFn: () => api.approveNamhatta(parseInt(id!)),
+    mutationFn: () => apiRequest("POST", `/api/namhattas/${id}/approve`),
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: "Namhatta approved successfully",
+        title: "Namhatta Approved",
+        description: "Namhatta has been successfully approved.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
+      setShowApprovalDialog(false);
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to approve Namhatta",
+        description: "Failed to approve namhatta. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (reason: string) => apiRequest("POST", `/api/namhattas/${id}/reject`, { reason }),
+    onSuccess: () => {
+      toast({
+        title: "Namhatta Rejected",
+        description: "Namhatta has been rejected.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
+      setShowRejectionDialog(false);
+      setRejectionReason("");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to reject namhatta. Please try again.",
         variant: "destructive",
       });
     },
@@ -118,14 +161,20 @@ export default function NamhattaDetail() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case "APPROVED":
+      case "approved":
       case "active":
-        return <Badge className="status-badge-active">Active</Badge>;
+        return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-1 rounded-full text-xs font-medium">Approved</Badge>;
+      case "PENDING_APPROVAL":
       case "pending":
-        return <Badge className="status-badge-pending">Pending</Badge>;
+        return <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full text-xs font-medium">Pending</Badge>;
+      case "REJECTED":
+      case "rejected":
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-2 py-1 rounded-full text-xs font-medium">Rejected</Badge>;
       case "inactive":
-        return <Badge className="status-badge-inactive">Inactive</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium">Inactive</Badge>;
       default:
-        return <Badge className="status-badge-inactive">{status}</Badge>;
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium">{status}</Badge>;
     }
   };
 
@@ -159,21 +208,43 @@ export default function NamhattaDetail() {
           </div>
         </div>
         <div className="flex space-x-3">
-          {namhatta.status === "pending" && (
-            <Button
-              onClick={() => approveMutation.mutate()}
-              disabled={approveMutation.isPending}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white"
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              Approve
-            </Button>
+          {/* Approval buttons - only show for ADMIN and OFFICE users */}
+          {(namhatta.status === "PENDING_APPROVAL" || namhatta.status === "pending") && canApprove && (
+            <>
+              <Button
+                onClick={() => setShowApprovalDialog(true)}
+                disabled={approveMutation.isPending}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Approve
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowRejectionDialog(true)}
+                disabled={rejectMutation.isPending}
+                className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </>
           )}
+          
+          {/* Message for users who cannot approve */}
+          {(namhatta.status === "PENDING_APPROVAL" || namhatta.status === "pending") && !canApprove && (
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Only administrators and office staff can approve pending Namhattas.
+              </span>
+            </div>
+          )}
+          
           <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Details
           </Button>
-          
         </div>
       </div>
 
@@ -525,6 +596,78 @@ export default function NamhattaDetail() {
           namhattaId={parseInt(id!)}
         />
       )}
+
+      {/* Approval Dialog */}
+      <Dialog open={showApprovalDialog} onOpenChange={setShowApprovalDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Approval</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to approve this Namhatta? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowApprovalDialog(false)}
+              disabled={approveMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => approveMutation.mutate()}
+              disabled={approveMutation.isPending}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {approveMutation.isPending ? "Approving..." : "Approve"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rejection Dialog */}
+      <Dialog open={showRejectionDialog} onOpenChange={setShowRejectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Namhatta</DialogTitle>
+            <DialogDescription>
+              Please provide a reason for rejecting this Namhatta registration.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rejectionReason">Reason for Rejection</Label>
+              <Textarea
+                id="rejectionReason"
+                placeholder="Enter the reason for rejection..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="mt-1"
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRejectionDialog(false);
+                setRejectionReason("");
+              }}
+              disabled={rejectMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => rejectMutation.mutate(rejectionReason)}
+              disabled={rejectMutation.isPending || !rejectionReason.trim()}
+              variant="destructive"
+            >
+              {rejectMutation.isPending ? "Rejecting..." : "Reject"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
