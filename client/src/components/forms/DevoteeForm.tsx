@@ -239,7 +239,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
       queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs"] });
       setValue("shraddhakutirId", newShraddhakutir.id);
       setShowShraddhakutirForm(false);
-      setNewShraddhakutir({ name: "", code: "", region: "", description: "" });
+      setNewShraddhakutir({ name: "" });
       toast({
         title: "Success",
         description: "Shraddhakutir created successfully",

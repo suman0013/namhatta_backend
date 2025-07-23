@@ -113,10 +113,30 @@ export class DatabaseStorage implements IStorage {
     // Get address information for this devotee
     const addresses = await this.getDevoteeAddresses(id);
     
-    // Add address information to devotee object (similar to how namhatta addresses work)
+    // Transform addresses array into presentAddress and permanentAddress properties
+    const presentAddr = addresses.find(addr => addr.addressType === 'present');
+    const permanentAddr = addresses.find(addr => addr.addressType === 'permanent');
+    
     return {
       ...devotee,
-      addresses: addresses
+      presentAddress: presentAddr ? {
+        country: presentAddr.country,
+        state: presentAddr.state,
+        district: presentAddr.district,
+        subDistrict: presentAddr.subDistrict,
+        village: presentAddr.village,
+        postalCode: presentAddr.postalCode,
+        landmark: presentAddr.landmark
+      } : undefined,
+      permanentAddress: permanentAddr ? {
+        country: permanentAddr.country,
+        state: permanentAddr.state,
+        district: permanentAddr.district,
+        subDistrict: permanentAddr.subDistrict,
+        village: permanentAddr.village,
+        postalCode: permanentAddr.postalCode,
+        landmark: permanentAddr.landmark
+      } : undefined
     };
   }
 
