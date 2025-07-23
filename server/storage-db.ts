@@ -189,10 +189,15 @@ export class DatabaseStorage implements IStorage {
 
   async updateDevotee(id: number, devoteeData: any): Promise<Devotee> {
     // Extract address information from the request data
-    const { presentAddress, permanentAddress, ...devoteeDetails } = devoteeData;
+    const { presentAddress, permanentAddress, devotionalCourses, ...devoteeDetails } = devoteeData;
+    
+    // Remove any undefined/null values to avoid database errors
+    const cleanDevoteeDetails = Object.fromEntries(
+      Object.entries(devoteeDetails).filter(([_, value]) => value !== undefined && value !== null)
+    );
     
     // Update the main devotee record
-    const result = await db.update(devotees).set(devoteeDetails).where(eq(devotees.id, id)).returning();
+    const result = await db.update(devotees).set(cleanDevoteeDetails).where(eq(devotees.id, id)).returning();
     const updatedDevotee = result[0];
     
     // Handle address updates

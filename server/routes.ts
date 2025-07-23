@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const id = parseInt(req.params.id);
     try {
       // Extract address and other fields separately (similar to create operations)
-      const { presentAddress, permanentAddress, allowedDistricts, ...devoteeFields } = req.body;
+      const { presentAddress, permanentAddress, allowedDistricts, devotionalCourses, ...devoteeFields } = req.body;
       
       // For DISTRICT_SUPERVISOR, check if they have access to this devotee
       if (req.user?.role === 'DISTRICT_SUPERVISOR') {
@@ -248,11 +248,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate only the devotee fields against schema
       const validatedDevoteeData = insertDevoteeSchema.partial().parse(devoteeFields);
       
-      // Add addresses back to the data
+      // Add addresses and other non-schema fields back to the data
       const devoteeDataWithAddresses = {
         ...validatedDevoteeData,
         presentAddress: presentAddress,
-        permanentAddress: permanentAddress
+        permanentAddress: permanentAddress,
+        devotionalCourses: devotionalCourses
       };
       
       const devotee = await storage.updateDevotee(id, devoteeDataWithAddresses);
