@@ -334,11 +334,26 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
               {devotee.presentAddress && (
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <MapPin className="mr-2 h-3 w-3" />
-                  <span>
+                  <span className="font-medium">Present:</span>
+                  <span className="ml-1">
                     {[
                       devotee.presentAddress.village,
                       devotee.presentAddress.district,
                       devotee.presentAddress.state
+                    ].filter(Boolean).join(", ")}
+                  </span>
+                </div>
+              )}
+
+              {devotee.permanentAddress && (
+                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                  <MapPin className="mr-2 h-3 w-3" />
+                  <span className="font-medium">Permanent:</span>
+                  <span className="ml-1">
+                    {[
+                      devotee.permanentAddress.village,
+                      devotee.permanentAddress.district,
+                      devotee.permanentAddress.state
                     ].filter(Boolean).join(", ")}
                   </span>
                 </div>

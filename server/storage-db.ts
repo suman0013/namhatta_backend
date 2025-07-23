@@ -83,14 +83,40 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(eq(devotees.devotionalStatusId, parseInt(filters.statusId)));
     }
 
-    // District filtering for DISTRICT_SUPERVISOR
+    // UI-based geographic filtering (present and permanent addresses)
+    if (filters.country || filters.state || filters.district) {
+      const addressFilterConditions = [];
+      
+      if (filters.country) {
+        addressFilterConditions.push(eq(addresses.country, filters.country));
+      }
+      if (filters.state) {
+        addressFilterConditions.push(eq(addresses.state, filters.state));
+      }
+      if (filters.district) {
+        addressFilterConditions.push(eq(addresses.district, filters.district));
+      }
+      
+      // Get devotees who match the address filters in either present or permanent address
+      const addressSubquery = db
+        .select({ devoteeId: devoteeAddresses.devoteeId })
+        .from(devoteeAddresses)
+        .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+        .where(and(...addressFilterConditions));
+      
+      whereConditions.push(
+        inArray(devotees.id, addressSubquery)
+      );
+    }
+
+    // District filtering for DISTRICT_SUPERVISOR (role-based access control)
     if (filters.allowedDistricts && filters.allowedDistricts.length > 0) {
       // Join with devotee_addresses and addresses to filter by district
       const districtSubquery = db
         .select({ devoteeId: devoteeAddresses.devoteeId })
         .from(devoteeAddresses)
         .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
-        .where(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
+        .where(inArray(addresses.district, filters.allowedDistricts));
       
       whereConditions.push(
         inArray(devotees.id, districtSubquery)
@@ -107,13 +133,27 @@ export class DatabaseStorage implements IStorage {
       orderBy = filters.sortOrder === 'desc' ? desc(devotees.legalName) : asc(devotees.legalName);
     }
 
-    const [data, totalResult] = await Promise.all([
-      db.select().from(devotees).where(whereClause).limit(size).offset(offset).orderBy(orderBy),
-      db.select({ count: count() }).from(devotees).where(whereClause)
-    ]);
+    // Get devotees with addresses
+    const devoteeIds = await db
+      .select({ id: devotees.id })
+      .from(devotees)
+      .where(whereClause)
+      .limit(size)
+      .offset(offset)
+      .orderBy(orderBy);
+
+    // Get full devotee data with addresses
+    const devoteeData = await Promise.all(
+      devoteeIds.map(async ({ id }) => {
+        return await this.getDevotee(id);
+      })
+    );
+
+    // Get total count
+    const totalResult = await db.select({ count: count() }).from(devotees).where(whereClause);
 
     return {
-      data,
+      data: devoteeData.filter(Boolean) as Devotee[],
       total: totalResult[0].count
     };
   }
