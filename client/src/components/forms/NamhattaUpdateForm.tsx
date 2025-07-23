@@ -82,8 +82,13 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
         imageUrls.push(objectUrl);
       }
       
-      // Convert boolean activity fields to integers (0 or 1) to match database schema
-      const activityData = {
+      // Convert fields to proper types to match database schema
+      const processedData = {
+        ...data,
+        // Convert numeric fields from strings to numbers
+        attendance: parseInt(data.attendance.toString()) || 0,
+        prasadDistribution: data.prasadDistribution ? parseInt(data.prasadDistribution.toString()) || 0 : undefined,
+        // Convert boolean activity fields to integers (0 or 1)
         nagarKirtan: data.nagarKirtan ? 1 : 0,
         bookDistribution: data.bookDistribution ? 1 : 0,
         chanting: data.chanting ? 1 : 0,
@@ -93,8 +98,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
       
       return api.createNamhattaUpdate({
         namhattaId,
-        ...data,
-        ...activityData,
+        ...processedData,
         imageUrls
       });
     },
