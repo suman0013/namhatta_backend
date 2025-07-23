@@ -103,8 +103,11 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/namhattas/${namhattaId}/updates`] });
+      // Invalidate queries with the correct query key format used in NamhattaDetail page
+      queryClient.invalidateQueries({ queryKey: ["/api/namhattas", namhattaId.toString(), "updates"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
+      // Also invalidate the general updates list
+      queryClient.invalidateQueries({ queryKey: ["/api/updates"] });
       toast({
         title: "Success",
         description: "Update posted successfully",
