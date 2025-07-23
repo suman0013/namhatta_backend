@@ -360,6 +360,7 @@ export class DatabaseStorage implements IStorage {
     const offset = (page - 1) * size;
     
     let whereConditions = [];
+    let addressFilters = [];
     
     if (filters.search) {
       whereConditions.push(like(namhattas.name, `%${filters.search}%`));
@@ -369,17 +370,46 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(eq(namhattas.status, filters.status));
     }
 
+    // Address-based filtering
+    if (filters.country) {
+      addressFilters.push(eq(addresses.country, filters.country));
+    }
+    
+    if (filters.state) {
+      addressFilters.push(eq(addresses.stateNameEnglish, filters.state));
+    }
+    
+    if (filters.district) {
+      addressFilters.push(eq(addresses.districtNameEnglish, filters.district));
+    }
+    
+    if (filters.subDistrict) {
+      addressFilters.push(eq(addresses.subDistrictNameEnglish, filters.subDistrict));
+    }
+    
+    if (filters.village) {
+      addressFilters.push(eq(addresses.villageNameEnglish, filters.village));
+    }
+    
+    if (filters.postalCode) {
+      addressFilters.push(eq(addresses.postalCode, filters.postalCode));
+    }
+
     // District filtering for DISTRICT_SUPERVISOR
     if (filters.allowedDistricts && filters.allowedDistricts.length > 0) {
-      // Filter by allowed districts using address relationship
-      const allowedDistrictSubquery = db
+      addressFilters.push(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
+    }
+
+    // If we have address filters, create a subquery to filter namhattas by address
+    if (addressFilters.length > 0) {
+      const addressFilterSubquery = db
         .select({ namhattaId: namhattaAddresses.namhattaId })
         .from(namhattaAddresses)
         .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-        .where(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
+        .where(and(...addressFilters));
       
       whereConditions.push(
-        inArray(namhattas.id, allowedDistrictSubquery)
+        inArray(namhattas.id, addressFilterSubquery)
       );
     }
 
@@ -411,47 +441,53 @@ export class DatabaseStorage implements IStorage {
         status: namhattas.status,
         createdAt: namhattas.createdAt,
         updatedAt: namhattas.updatedAt,
-        devoteeCount: count(devotees.id)
+        devoteeCount: count(devotees.id),
+        // Include address information in main query to avoid N+1
+        addressCountry: addresses.country,
+        addressState: addresses.stateNameEnglish,
+        addressDistrict: addresses.districtNameEnglish,
+        addressSubDistrict: addresses.subDistrictNameEnglish,
+        addressVillage: addresses.villageNameEnglish,
+        addressPostalCode: addresses.postalCode,
+        addressLandmark: namhattaAddresses.landmark
       }).from(namhattas)
         .leftJoin(devotees, eq(namhattas.id, devotees.namhattaId))
+        .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+        .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
         .where(whereClause)
-        .groupBy(namhattas.id)
+        .groupBy(namhattas.id, addresses.id, namhattaAddresses.id)
         .limit(size)
         .offset(offset)
         .orderBy(orderBy),
       db.select({ count: count() }).from(namhattas).where(whereClause)
     ]);
 
-    // Fetch address information for each namhatta
-    const namhattasWithAddresses = await Promise.all(
-      data.map(async (namhatta) => {
-        const addressResults = await db.select({
-          country: addresses.country,
-          state: addresses.stateNameEnglish,
-          district: addresses.districtNameEnglish,
-          subDistrict: addresses.subdistrictNameEnglish,
-          village: addresses.villageNameEnglish,
-          postalCode: addresses.pincode,
-          landmark: namhattaAddresses.landmark
-        }).from(namhattaAddresses)
-          .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-          .where(eq(namhattaAddresses.namhattaId, namhatta.id))
-          .limit(1);
-        
-        return {
-          ...namhatta,
-          address: addressResults[0] ? {
-            country: addressResults[0].country,
-            state: addressResults[0].state,
-            district: addressResults[0].district,
-            subDistrict: addressResults[0].subDistrict,
-            village: addressResults[0].village,
-            postalCode: addressResults[0].postalCode,
-            landmark: addressResults[0].landmark
-          } : null
-        };
-      })
-    );
+    // Transform the data to include address as nested object
+    const namhattasWithAddresses = data.map((namhatta) => ({
+      id: namhatta.id,
+      code: namhatta.code,
+      name: namhatta.name,
+      meetingDay: namhatta.meetingDay,
+      meetingTime: namhatta.meetingTime,
+      malaSenapoti: namhatta.malaSenapoti,
+      mahaChakraSenapoti: namhatta.mahaChakraSenapoti,
+      chakraSenapoti: namhatta.chakraSenapoti,
+      upaChakraSenapoti: namhatta.upaChakraSenapoti,
+      secretary: namhatta.secretary,
+      status: namhatta.status,
+      createdAt: namhatta.createdAt,
+      updatedAt: namhatta.updatedAt,
+      devoteeCount: namhatta.devoteeCount,
+      address: namhatta.addressCountry ? {
+        country: namhatta.addressCountry,
+        state: namhatta.addressState,
+        district: namhatta.addressDistrict,
+        subDistrict: namhatta.addressSubDistrict,
+        village: namhatta.addressVillage,
+        postalCode: namhatta.addressPostalCode,
+        landmark: namhatta.addressLandmark
+      } : null
+    }));
 
     return {
       data: namhattasWithAddresses,
