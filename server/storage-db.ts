@@ -783,15 +783,23 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSubDistricts(district?: string): Promise<string[]> {
+  async getSubDistricts(district?: string, pincode?: string): Promise<string[]> {
     try {
       let query = db
         .selectDistinct({ subDistrict: addresses.subdistrictNameEnglish })
         .from(addresses)
         .where(sql`${addresses.subdistrictNameEnglish} IS NOT NULL`);
       
+      const conditions = [];
       if (district) {
-        query = query.where(eq(addresses.districtNameEnglish, district));
+        conditions.push(eq(addresses.districtNameEnglish, district));
+      }
+      if (pincode) {
+        conditions.push(eq(addresses.pincode, pincode));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
       }
       
       const results = await query;
@@ -802,15 +810,23 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getVillages(subDistrict?: string): Promise<string[]> {
+  async getVillages(subDistrict?: string, pincode?: string): Promise<string[]> {
     try {
       let query = db
         .selectDistinct({ village: addresses.villageNameEnglish })
         .from(addresses)
         .where(sql`${addresses.villageNameEnglish} IS NOT NULL`);
       
+      const conditions = [];
       if (subDistrict) {
-        query = query.where(eq(addresses.subdistrictNameEnglish, subDistrict));
+        conditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
+      }
+      if (pincode) {
+        conditions.push(eq(addresses.pincode, pincode));
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
       }
       
       const results = await query;

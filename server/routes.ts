@@ -83,14 +83,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/sub-districts", async (req, res) => {
-    const { district } = req.query;
-    const subDistricts = await storage.getSubDistricts(district as string);
+    const { district, pincode } = req.query;
+    const subDistricts = await storage.getSubDistricts(district as string, pincode as string);
     res.json(subDistricts);
   });
 
   app.get("/api/villages", async (req, res) => {
-    const { subDistrict } = req.query;
-    const villages = await storage.getVillages(subDistrict as string);
+    const { subDistrict, pincode } = req.query;
+    const villages = await storage.getVillages(subDistrict as string, pincode as string);
     res.json(villages);
   });
 
