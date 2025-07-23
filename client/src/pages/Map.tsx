@@ -34,12 +34,12 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Determine level based on zoom - reduced zoom requirements for easier navigation
+  // Determine level based on zoom - further reduced zoom requirements for easier navigation
   const getLevelFromZoom = (zoom: number): MapLevel => {
-    if (zoom >= 10) return 'VILLAGE';
-    if (zoom >= 8) return 'SUB_DISTRICT';
-    if (zoom >= 6) return 'DISTRICT'; // Reduced from 8 to 6 for easier district viewing
-    if (zoom >= 4) return 'STATE';    // Reduced from 5 to 4
+    if (zoom >= 9) return 'VILLAGE';
+    if (zoom >= 7) return 'SUB_DISTRICT';
+    if (zoom >= 5) return 'DISTRICT'; // Further reduced for easier district viewing
+    if (zoom >= 3) return 'STATE';    // Further reduced for easier state viewing
     return 'COUNTRY';
   };
 

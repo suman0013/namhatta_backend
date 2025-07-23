@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
-import { sql, eq, desc, asc, and, or, like, count, inArray } from "drizzle-orm";
+import { sql, eq, desc, asc, and, or, like, count, inArray, ne } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
 
@@ -987,7 +987,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
       .where(and(
         sql`${addresses.country} IS NOT NULL`,
-        inArray(namhattas.status, ['Approved', 'Pending'])
+        ne(namhattas.status, 'Rejected')
       ))
       .groupBy(addresses.country);
 
@@ -1000,7 +1000,7 @@ export class DatabaseStorage implements IStorage {
   async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
     let whereConditions = [
       sql`${addresses.stateNameEnglish} IS NOT NULL`,
-      inArray(namhattas.status, ['Approved', 'Pending'])
+      ne(namhattas.status, 'Rejected')
     ];
     
     if (country) {
@@ -1027,7 +1027,7 @@ export class DatabaseStorage implements IStorage {
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
     let whereConditions = [
       sql`${addresses.districtNameEnglish} IS NOT NULL`,
-      inArray(namhattas.status, ['Approved', 'Pending'])
+      ne(namhattas.status, 'Rejected')
     ];
     
     if (state) {
@@ -1056,7 +1056,7 @@ export class DatabaseStorage implements IStorage {
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
     let whereConditions = [
       sql`${addresses.subdistrictNameEnglish} IS NOT NULL`,
-      inArray(namhattas.status, ['Approved', 'Pending'])
+      ne(namhattas.status, 'Rejected')
     ];
     
     if (district) {
