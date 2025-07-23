@@ -681,70 +681,50 @@ function DevoteeCard({ devotee, statuses, namhattaId }: { devotee: Devotee; stat
   };
 
   return (
-    <div className="h-[280px]">
+    <div className="h-[160px]">
       <Link href={`/devotees/${devotee.id}?from=${namhattaId}`}>
         <Card className="glass-card card-hover-effect group h-full cursor-pointer">
-          <CardContent className="p-6 h-full flex flex-col">
+          <CardContent className="p-3 h-full flex flex-col">
             {/* Header */}
-            <div className="flex items-center space-x-3 mb-4">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
+            <div className="flex items-center space-x-2 mb-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white text-xs">
                   {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 flex items-center">
-                  <User className="mr-2 h-4 w-4" />
-                  {devotee.legalName}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 flex items-center truncate">
+                  <User className="mr-1 h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{devotee.legalName}</span>
                 </h3>
                 {devotee.initiatedName && (
-                  <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center">
-                    <Crown className="mr-2 h-4 w-4" />
-                    {devotee.initiatedName}
-                  </p>
-                )}
-                {devotee.occupation && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    {devotee.occupation}
+                  <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 flex items-center truncate">
+                    <Crown className="mr-1 h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">{devotee.initiatedName}</span>
                   </p>
                 )}
               </div>
             </div>
 
             {/* Status Badge */}
-            <div className="mb-4">
-              <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+            <div className="mb-2">
+              <Badge className={`text-xs ${getStatusColor(devotee.devotionalStatusId)}`}>
                 {getStatusName(devotee.devotionalStatusId)}
               </Badge>
             </div>
 
             {/* Details */}
-            <div className="space-y-2 mb-4 flex-grow">
-              {devotee.presentAddress && (
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <MapPin className="mr-2 h-3 w-3" />
-                  <span>
-                    {[
-                      devotee.presentAddress.village,
-                      devotee.presentAddress.district,
-                      devotee.presentAddress.state
-                    ].filter(Boolean).join(", ")}
-                  </span>
-                </div>
-              )}
-
-              {devotee.education && (
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <GraduationCap className="mr-2 h-3 w-3" />
-                  <span>{devotee.education}</span>
-                </div>
-              )}
-
+            <div className="space-y-1 flex-grow text-xs">
               {devotee.maritalStatus && (
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <Users className="mr-2 h-3 w-3" />
-                  <span>{devotee.maritalStatus}</span>
+                <div className="flex items-center text-gray-600 dark:text-gray-400">
+                  <Users className="mr-1 h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{devotee.maritalStatus}</span>
+                </div>
+              )}
+              {devotee.occupation && (
+                <div className="flex items-center text-gray-600 dark:text-gray-400">
+                  <Briefcase className="mr-1 h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{devotee.occupation}</span>
                 </div>
               )}
             </div>
