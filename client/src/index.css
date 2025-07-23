@@ -124,6 +124,18 @@
   .glass.border-0 {
     border: none !important;
   }
+
+  /* Ensure searchable select dropdowns are always visible */
+  .searchable-select-dropdown {
+    z-index: 9999 !important;
+    position: absolute !important;
+  }
+
+  /* Fix searchable select container positioning */
+  [data-searchable-select-open="true"] {
+    z-index: 100;
+    position: relative;
+  }
   
 
   
