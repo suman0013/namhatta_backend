@@ -1167,54 +1167,59 @@ export class DatabaseStorage implements IStorage {
     subDistricts: string[];
     villages: string[];
   } | null> {
-    // First, find a single address with this pincode to get country, state, district
-    const addressData = await db.select({
-      country: addresses.country,
-      state: addresses.stateNameEnglish,
-      district: addresses.districtNameEnglish,
-    })
-    .from(addresses)
-    .where(eq(addresses.postalCode, pincode))
-    .limit(1);
+    try {
+      // First, find a single address with this pincode to get country, state, district
+      const addressData = await db.select({
+        country: addresses.country,
+        state: addresses.stateNameEnglish,
+        district: addresses.districtNameEnglish,
+      })
+      .from(addresses)
+      .where(eq(addresses.postalCode, pincode))
+      .limit(1);
 
-    if (addressData.length === 0) {
+      if (addressData.length === 0) {
+        return null;
+      }
+
+      const { country, state, district } = addressData[0];
+
+      // Get all unique sub-districts for this pincode using SQL
+      const subDistrictData = await db.select({
+        subDistrict: addresses.subdistrictNameEnglish,
+      })
+      .from(addresses)
+      .where(
+        and(
+          eq(addresses.postalCode, pincode),
+          sql`${addresses.subdistrictNameEnglish} IS NOT NULL`
+        )
+      )
+      .groupBy(addresses.subdistrictNameEnglish);
+
+      // Get all unique villages for this pincode using SQL
+      const villageData = await db.select({
+        village: addresses.villageNameEnglish,
+      })
+      .from(addresses)
+      .where(
+        and(
+          eq(addresses.postalCode, pincode),
+          sql`${addresses.villageNameEnglish} IS NOT NULL`
+        )
+      )
+      .groupBy(addresses.villageNameEnglish);
+
+      return {
+        country: country || 'India',
+        state: state || '',
+        district: district || '',
+        subDistricts: subDistrictData.map(row => row.subDistrict).filter(Boolean),
+        villages: villageData.map(row => row.village).filter(Boolean),
+      };
+    } catch (error) {
+      console.error('Error in getAddressByPincode:', error);
       return null;
     }
-
-    const { country, state, district } = addressData[0];
-
-    // Get all unique sub-districts for this pincode
-    const subDistrictData = await db.select({
-      subDistrict: addresses.subdistrictNameEnglish,
-    })
-    .from(addresses)
-    .where(
-      and(
-        eq(addresses.postalCode, pincode),
-        isNotNull(addresses.subdistrictNameEnglish)
-      )
-    )
-    .groupBy(addresses.subdistrictNameEnglish);
-
-    // Get all unique villages for this pincode
-    const villageData = await db.select({
-      village: addresses.villageNameEnglish,
-    })
-    .from(addresses)
-    .where(
-      and(
-        eq(addresses.postalCode, pincode),
-        isNotNull(addresses.villageNameEnglish)
-      )
-    )
-    .groupBy(addresses.villageNameEnglish);
-
-    return {
-      country: country || 'India',
-      state: state || '',
-      district: district || '',
-      subDistricts: subDistrictData.map(row => row.subDistrict).filter(Boolean),
-      villages: villageData.map(row => row.village).filter(Boolean),
-    };
   }
 }
