@@ -83,6 +83,20 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(eq(devotees.devotionalStatusId, parseInt(filters.statusId)));
     }
 
+    // District filtering for DISTRICT_SUPERVISOR
+    if (filters.allowedDistricts && filters.allowedDistricts.length > 0) {
+      // Join with devotee_addresses and addresses to filter by district
+      const districtSubquery = db
+        .select({ devoteeId: devoteeAddresses.devoteeId })
+        .from(devoteeAddresses)
+        .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+        .where(inArray(addresses.district, filters.allowedDistricts));
+      
+      whereConditions.push(
+        inArray(devotees.id, districtSubquery)
+      );
+    }
+
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
     
     // Handle sorting
@@ -352,6 +366,20 @@ export class DatabaseStorage implements IStorage {
     
     if (filters.status) {
       whereConditions.push(eq(namhattas.status, filters.status));
+    }
+
+    // District filtering for DISTRICT_SUPERVISOR
+    if (filters.allowedDistricts && filters.allowedDistricts.length > 0) {
+      // Filter by allowed districts using address relationship
+      const allowedDistrictSubquery = db
+        .select({ namhattaId: namhattaAddresses.namhattaId })
+        .from(namhattaAddresses)
+        .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+        .where(inArray(addresses.district, filters.allowedDistricts));
+      
+      whereConditions.push(
+        inArray(namhattas.id, allowedDistrictSubquery)
+      );
     }
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;

@@ -169,6 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       statusId: req.query.statusId as string,
       sortBy,
       sortOrder,
+      allowedDistricts: req.user?.role === 'DISTRICT_SUPERVISOR' ? req.user.districts : undefined,
     };
     const result = await storage.getDevotees(page, size, filters);
     res.json(result);
@@ -324,6 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       status: req.query.status as string,
       sortBy,
       sortOrder,
+      allowedDistricts: req.user?.role === 'DISTRICT_SUPERVISOR' ? req.user.districts : undefined,
     };
     const result = await storage.getNamhattas(page, size, filters);
     res.json(result);
