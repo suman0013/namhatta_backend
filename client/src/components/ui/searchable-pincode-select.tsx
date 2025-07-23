@@ -52,7 +52,7 @@ export function SearchablePincodeSelect({
     queryKey: ["/api/pincodes/search", country, debouncedSearchTerm, page],
     queryFn: () => api.searchPincodes(country, debouncedSearchTerm, page),
     enabled: !!country && isOpen,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Disable cache to ensure fresh results
   });
 
   // Reset when search term changes
@@ -66,11 +66,11 @@ export function SearchablePincodeSelect({
     }
   }, [data, page, debouncedSearchTerm, searchTerm]);
 
-  // Reset when search term changes
+  // Reset when search term changes or country changes
   useEffect(() => {
     setPage(1);
     setAllPincodes([]);
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, country]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -104,7 +104,7 @@ export function SearchablePincodeSelect({
   const handleInputFocus = () => {
     if (!country) return;
     setIsOpen(true);
-    setSearchTerm("");
+    // Don't clear search term on focus to preserve user input
   };
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -128,7 +128,7 @@ export function SearchablePincodeSelect({
           onFocus={handleInputFocus}
           placeholder={!country ? "Select country first" : placeholder}
           disabled={disabled || !country}
-          className="pr-8"
+          className="pr-8 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
         />
         <Button
           type="button"
@@ -151,7 +151,7 @@ export function SearchablePincodeSelect({
       {isOpen && !disabled && country && (
         <div 
           ref={dropdownRef}
-          className="searchable-select-dropdown absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-xl max-h-60 overflow-y-auto z-50"
+          className="searchable-select-dropdown absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-2xl max-h-64 overflow-y-auto z-50"
           onScroll={handleScroll}
         >
           {isLoading && page === 1 ? (
@@ -164,7 +164,7 @@ export function SearchablePincodeSelect({
               {displayPincodes.map((pincode, index) => (
                 <div
                   key={`${pincode}-${index}`}
-                  className="flex items-center justify-between px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-left select-none"
+                  className="flex items-center justify-between px-4 py-3 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer text-left select-none transition-colors"
                   onClick={() => handleOptionClick(pincode)}
                 >
                   <span className="text-sm">{pincode}</span>

@@ -865,17 +865,31 @@ export class DatabaseStorage implements IStorage {
       let countQuery = db
         .select({ count: count() })
         .from(addresses)
-        .where(sql`${addresses.pincode} IS NOT NULL AND ${addresses.countryNameEnglish} = ${country}`);
+        .where(and(
+          isNotNull(addresses.pincode),
+          eq(addresses.countryNameEnglish, country)
+        ));
       
       let dataQuery = db
         .selectDistinct({ postalCode: addresses.pincode })
         .from(addresses)
-        .where(sql`${addresses.pincode} IS NOT NULL AND ${addresses.countryNameEnglish} = ${country}`);
+        .where(and(
+          isNotNull(addresses.pincode),
+          eq(addresses.countryNameEnglish, country)
+        ));
       
       if (searchTerm.trim()) {
-        const searchCondition = sql`${addresses.pincode} LIKE ${`%${searchTerm.trim()}%`}`;
-        countQuery = countQuery.where(searchCondition);
-        dataQuery = dataQuery.where(searchCondition);
+        const searchCondition = like(addresses.pincode, `%${searchTerm.trim()}%`);
+        countQuery = countQuery.where(and(
+          isNotNull(addresses.pincode),
+          eq(addresses.countryNameEnglish, country),
+          searchCondition
+        ));
+        dataQuery = dataQuery.where(and(
+          isNotNull(addresses.pincode),
+          eq(addresses.countryNameEnglish, country),
+          searchCondition
+        ));
       }
       
       const [totalResult, dataResult] = await Promise.all([

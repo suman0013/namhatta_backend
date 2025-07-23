@@ -39,6 +39,13 @@ export default function AddressSection({
     queryFn: () => api.getCountries(),
   });
 
+  // Set India as default country when countries are loaded and no country is set
+  useEffect(() => {
+    if (countries && countries.includes("India") && !address.country) {
+      onAddressChange("country", "India");
+    }
+  }, [countries, address.country, onAddressChange]);
+
   // Remove the old pincodes query since we'll use the new searchable component
 
   const { data: subDistricts } = useQuery({
