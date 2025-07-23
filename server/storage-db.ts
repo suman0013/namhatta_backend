@@ -862,34 +862,33 @@ export class DatabaseStorage implements IStorage {
     try {
       const offset = (page - 1) * limit;
       
-      // Build base query for distinct pincodes
-      let baseConditions = [
-        isNotNull(addresses.pincode),
-        eq(addresses.country, country)
-      ];
-      
-      // Add search filter if provided
-      if (searchTerm.trim()) {
-        baseConditions.push(sql`${addresses.pincode} ILIKE ${`%${searchTerm.trim()}%`}`);
-      }
-      
-      // Get all distinct pincodes matching criteria
-      const allResults = await db
+      // Get all distinct pincodes for the country first
+      const allDistinctPincodes = await db
         .selectDistinct({ pincode: addresses.pincode })
         .from(addresses)
-        .where(and(...baseConditions))
+        .where(and(
+          isNotNull(addresses.pincode),
+          eq(addresses.country, country)
+        ))
         .orderBy(addresses.pincode);
       
-      const total = allResults.length;
-      const paginatedResults = allResults.slice(offset, offset + limit);
-      const hasMore = offset + paginatedResults.length < total;
-      
-      const pincodes = paginatedResults
+      // Filter in memory for search term to avoid SQL issues
+      let filteredPincodes = allDistinctPincodes
         .map(row => row.pincode)
         .filter(Boolean);
       
+      if (searchTerm.trim()) {
+        filteredPincodes = filteredPincodes.filter(pincode => 
+          pincode.toLowerCase().includes(searchTerm.trim().toLowerCase())
+        );
+      }
+      
+      const total = filteredPincodes.length;
+      const paginatedResults = filteredPincodes.slice(offset, offset + limit);
+      const hasMore = offset + paginatedResults.length < total;
+      
       return {
-        pincodes,
+        pincodes: paginatedResults,
         total,
         hasMore
       };
