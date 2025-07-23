@@ -984,7 +984,11 @@ export class DatabaseStorage implements IStorage {
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.country} IS NOT NULL`)
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        sql`${addresses.country} IS NOT NULL`,
+        inArray(namhattas.status, ['Approved', 'Pending'])
+      ))
       .groupBy(addresses.country);
 
     return results.map(result => ({
@@ -994,19 +998,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
-    let query = db.select({
+    let whereConditions = [
+      sql`${addresses.stateNameEnglish} IS NOT NULL`,
+      inArray(namhattas.status, ['Approved', 'Pending'])
+    ];
+    
+    if (country) {
+      whereConditions.push(eq(addresses.country, country));
+    }
+    
+    const results = await db.select({
       state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.stateNameEnglish} IS NOT NULL`);
-    
-    if (country) {
-      query = query.where(eq(addresses.country, country));
-    }
-    
-    const results = await query.groupBy(addresses.stateNameEnglish, addresses.country);
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(...whereConditions))
+      .groupBy(addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       state: result.state || 'Unknown',
@@ -1016,20 +1025,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
-    let query = db.select({
+    let whereConditions = [
+      sql`${addresses.districtNameEnglish} IS NOT NULL`,
+      inArray(namhattas.status, ['Approved', 'Pending'])
+    ];
+    
+    if (state) {
+      whereConditions.push(eq(addresses.stateNameEnglish, state));
+    }
+    
+    const results = await db.select({
       district: addresses.districtNameEnglish,
       state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.districtNameEnglish} IS NOT NULL`);
-    
-    if (state) {
-      query = query.where(eq(addresses.stateNameEnglish, state));
-    }
-    
-    const results = await query.groupBy(addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(...whereConditions))
+      .groupBy(addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       district: result.district || 'Unknown',
@@ -1040,7 +1054,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
-    let query = db.select({
+    let whereConditions = [
+      sql`${addresses.subdistrictNameEnglish} IS NOT NULL`,
+      inArray(namhattas.status, ['Approved', 'Pending'])
+    ];
+    
+    if (district) {
+      whereConditions.push(eq(addresses.districtNameEnglish, district));
+    }
+    
+    const results = await db.select({
       subDistrict: addresses.subdistrictNameEnglish,
       district: addresses.districtNameEnglish,
       state: addresses.stateNameEnglish,
@@ -1048,13 +1071,9 @@ export class DatabaseStorage implements IStorage {
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
-      .where(sql`${addresses.subdistrictNameEnglish} IS NOT NULL`);
-    
-    if (district) {
-      query = query.where(eq(addresses.districtNameEnglish, district));
-    }
-    
-    const results = await query.groupBy(addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(...whereConditions))
+      .groupBy(addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
 
     return results.map(result => ({
       subDistrict: result.subDistrict || 'Unknown',

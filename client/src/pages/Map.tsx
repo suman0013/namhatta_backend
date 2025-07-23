@@ -34,12 +34,12 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Determine level based on zoom - complete geographic hierarchy
+  // Determine level based on zoom - reduced zoom requirements for easier navigation
   const getLevelFromZoom = (zoom: number): MapLevel => {
-    if (zoom >= 12) return 'VILLAGE';
-    if (zoom >= 10) return 'SUB_DISTRICT';
-    if (zoom >= 8) return 'DISTRICT';
-    if (zoom >= 5) return 'STATE';
+    if (zoom >= 10) return 'VILLAGE';
+    if (zoom >= 8) return 'SUB_DISTRICT';
+    if (zoom >= 6) return 'DISTRICT'; // Reduced from 8 to 6 for easier district viewing
+    if (zoom >= 4) return 'STATE';    // Reduced from 5 to 4
     return 'COUNTRY';
   };
 
@@ -71,7 +71,13 @@ export default function Map() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const isLoading = countryLoading || stateLoading || districtLoading;
+  const { data: subDistrictData = [], isLoading: subDistrictLoading } = useQuery({
+    queryKey: ["/api/map/sub-districts"], 
+    queryFn: getQueryFn({ on401: "throw" }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading;
 
   // Get current data based on level
   const getCurrentData = (): MapData[] => {
@@ -197,6 +203,15 @@ export default function Map() {
         })).filter((item: any) => item.coordinates) : [];
         console.log(`Showing ${districts.length} districts at zoom ${zoomLevel}`);
         return districts;
+      case 'SUB_DISTRICT':
+        const subDistricts = Array.isArray(subDistrictData) ? subDistrictData.map((item: any) => ({
+          name: item.subDistrict,
+          count: item.count,
+          coordinates: coordinatesMap[item.subDistrict],
+          level: 'SUB_DISTRICT' as MapLevel
+        })).filter((item: any) => item.coordinates) : [];
+        console.log(`Showing ${subDistricts.length} sub-districts at zoom ${zoomLevel}`);
+        return subDistricts;
       default:
         return [];
     }
