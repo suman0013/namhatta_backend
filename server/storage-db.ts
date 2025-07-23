@@ -854,48 +854,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getAddressByPincode(pincode: string): Promise<{
-    country: string;
-    state: string;
-    district: string;
-    subDistricts: string[];
-    villages: string[];
-  } | null> {
-    try {
-      const result = await db
-        .selectDistinct({
-          country: addresses.country,
-          state: addresses.stateNameEnglish,
-          district: addresses.districtNameEnglish,
-          subDistrict: addresses.subdistrictNameEnglish,
-          village: addresses.villageNameEnglish
-        })
-        .from(addresses)
-        .where(eq(addresses.pincode, pincode));
 
-      if (result.length === 0) {
-        return null;
-      }
-
-      // Group the results to get unique values
-      const country = result[0].country;
-      const state = result[0].state;
-      const district = result[0].district;
-      const subDistricts = [...new Set(result.map(r => r.subDistrict).filter(Boolean))];
-      const villages = [...new Set(result.map(r => r.village).filter(Boolean))];
-
-      return {
-        country,
-        state,
-        district,
-        subDistricts,
-        villages
-      };
-    } catch (error) {
-      console.error('Error getting address by pincode from database:', error);
-      return null;
-    }
-  }
 
   // Address Management Methods
   async findOrCreateAddress(addressData: {
@@ -1168,54 +1127,47 @@ export class DatabaseStorage implements IStorage {
     villages: string[];
   } | null> {
     try {
-      // First, find a single address with this pincode to get country, state, district
-      const addressData = await db.select({
-        country: addresses.country,
-        state: addresses.stateNameEnglish,
-        district: addresses.districtNameEnglish,
-      })
-      .from(addresses)
-      .where(eq(addresses.postalCode, pincode))
-      .limit(1);
-
-      if (addressData.length === 0) {
+      // Use raw SQL query with proper Drizzle syntax
+      const result = await db.execute(
+        sql`SELECT 
+          country,
+          state_name_english as state,
+          district_name_english as district,
+          subdistrict_name_english as subdistrict,
+          village_name_english as village
+        FROM addresses 
+        WHERE pincode = ${pincode}`
+      );
+      
+      if (!result.rows || result.rows.length === 0) {
         return null;
       }
 
-      const { country, state, district } = addressData[0];
+      // Get the first row for country, state, district (they should all be the same for a pincode)
+      const firstRow = result.rows[0] as any;
+      const country = firstRow.country;
+      const state = firstRow.state;
+      const district = firstRow.district;
 
-      // Get all unique sub-districts for this pincode using SQL
-      const subDistrictData = await db.select({
-        subDistrict: addresses.subdistrictNameEnglish,
-      })
-      .from(addresses)
-      .where(
-        and(
-          eq(addresses.postalCode, pincode),
-          sql`${addresses.subdistrictNameEnglish} IS NOT NULL`
-        )
-      )
-      .groupBy(addresses.subdistrictNameEnglish);
-
-      // Get all unique villages for this pincode using SQL
-      const villageData = await db.select({
-        village: addresses.villageNameEnglish,
-      })
-      .from(addresses)
-      .where(
-        and(
-          eq(addresses.postalCode, pincode),
-          sql`${addresses.villageNameEnglish} IS NOT NULL`
-        )
-      )
-      .groupBy(addresses.villageNameEnglish);
+      // Extract unique sub-districts and villages
+      const subDistricts = Array.from(new Set(
+        result.rows
+          .map((row: any) => row.subdistrict)
+          .filter(Boolean)
+      ));
+      
+      const villages = Array.from(new Set(
+        result.rows
+          .map((row: any) => row.village)
+          .filter(Boolean)
+      ));
 
       return {
         country: country || 'India',
         state: state || '',
         district: district || '',
-        subDistricts: subDistrictData.map(row => row.subDistrict).filter(Boolean),
-        villages: villageData.map(row => row.village).filter(Boolean),
+        subDistricts,
+        villages,
       };
     } catch (error) {
       console.error('Error in getAddressByPincode:', error);
