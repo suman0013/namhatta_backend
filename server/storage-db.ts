@@ -402,7 +402,6 @@ export class DatabaseStorage implements IStorage {
         name: namhattas.name,
         meetingDay: namhattas.meetingDay,
         meetingTime: namhattas.meetingTime,
-        // address will be fetched separately from normalized tables
         malaSenapoti: namhattas.malaSenapoti,
         mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
         chakraSenapoti: namhattas.chakraSenapoti,
@@ -422,8 +421,39 @@ export class DatabaseStorage implements IStorage {
       db.select({ count: count() }).from(namhattas).where(whereClause)
     ]);
 
+    // Fetch address information for each namhatta
+    const namhattasWithAddresses = await Promise.all(
+      data.map(async (namhatta) => {
+        const addressResults = await db.select({
+          country: addresses.country,
+          state: addresses.stateNameEnglish,
+          district: addresses.districtNameEnglish,
+          subDistrict: addresses.subdistrictNameEnglish,
+          village: addresses.villageNameEnglish,
+          postalCode: addresses.pincode,
+          landmark: namhattaAddresses.landmark
+        }).from(namhattaAddresses)
+          .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+          .where(eq(namhattaAddresses.namhattaId, namhatta.id))
+          .limit(1);
+        
+        return {
+          ...namhatta,
+          address: addressResults[0] ? {
+            country: addressResults[0].country,
+            state: addressResults[0].state,
+            district: addressResults[0].district,
+            subDistrict: addressResults[0].subDistrict,
+            village: addressResults[0].village,
+            postalCode: addressResults[0].postalCode,
+            landmark: addressResults[0].landmark
+          } : null
+        };
+      })
+    );
+
     return {
-      data,
+      data: namhattasWithAddresses,
       total: totalResult[0].count
     };
   }
