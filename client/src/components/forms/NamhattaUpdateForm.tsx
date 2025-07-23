@@ -82,9 +82,19 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
         imageUrls.push(objectUrl);
       }
       
+      // Convert boolean activity fields to integers (0 or 1) to match database schema
+      const activityData = {
+        nagarKirtan: data.nagarKirtan ? 1 : 0,
+        bookDistribution: data.bookDistribution ? 1 : 0,
+        chanting: data.chanting ? 1 : 0,
+        arati: data.arati ? 1 : 0,
+        bhagwatPath: data.bhagwatPath ? 1 : 0,
+      };
+      
       return api.createNamhattaUpdate({
         namhattaId,
         ...data,
+        ...activityData,
         imageUrls
       });
     },
