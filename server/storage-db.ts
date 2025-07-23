@@ -384,7 +384,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (filters.subDistrict) {
-      addressFilters.push(eq(addresses.subDistrictNameEnglish, filters.subDistrict));
+      addressFilters.push(eq(addresses.subdistrictNameEnglish, filters.subDistrict));
     }
     
     if (filters.village) {
@@ -392,7 +392,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (filters.postalCode) {
-      addressFilters.push(eq(addresses.postalCode, filters.postalCode));
+      addressFilters.push(eq(addresses.pincode, filters.postalCode));
     }
 
     // District filtering for DISTRICT_SUPERVISOR
@@ -446,9 +446,9 @@ export class DatabaseStorage implements IStorage {
         addressCountry: addresses.country,
         addressState: addresses.stateNameEnglish,
         addressDistrict: addresses.districtNameEnglish,
-        addressSubDistrict: addresses.subDistrictNameEnglish,
+        addressSubDistrict: addresses.subdistrictNameEnglish,
         addressVillage: addresses.villageNameEnglish,
-        addressPostalCode: addresses.postalCode,
+        addressPostalCode: addresses.pincode,
         addressLandmark: namhattaAddresses.landmark
       }).from(namhattas)
         .leftJoin(devotees, eq(namhattas.id, devotees.namhattaId))
@@ -785,15 +785,17 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db
         .selectDistinct({ state: addresses.stateNameEnglish })
-        .from(addresses)
-        .where(sql`${addresses.stateNameEnglish} IS NOT NULL`);
+        .from(addresses);
       
+      const conditions = [sql`${addresses.stateNameEnglish} IS NOT NULL`];
       if (country) {
-        query = query.where(eq(addresses.country, country));
+        conditions.push(eq(addresses.country, country));
       }
       
+      query = query.where(and(...conditions));
+      
       const results = await query;
-      return results.map(row => row.state).filter(Boolean);
+      return results.map(row => row.state).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting states from database:', error);
       return [];
@@ -804,15 +806,17 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db
         .selectDistinct({ district: addresses.districtNameEnglish })
-        .from(addresses)
-        .where(sql`${addresses.districtNameEnglish} IS NOT NULL`);
+        .from(addresses);
       
+      const conditions = [sql`${addresses.districtNameEnglish} IS NOT NULL`];
       if (state) {
-        query = query.where(eq(addresses.stateNameEnglish, state));
+        conditions.push(eq(addresses.stateNameEnglish, state));
       }
       
+      query = query.where(and(...conditions));
+      
       const results = await query;
-      return results.map(row => row.district).filter(Boolean);
+      return results.map(row => row.district).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting districts from database:', error);
       return [];
@@ -823,19 +827,22 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db
         .selectDistinct({ subDistrict: addresses.subdistrictNameEnglish })
-        .from(addresses)
-        .where(sql`${addresses.subdistrictNameEnglish} IS NOT NULL`);
+        .from(addresses);
+      
+      const conditions = [sql`${addresses.subdistrictNameEnglish} IS NOT NULL`];
       
       // If pincode is provided, filter by pincode only (ignore district parameter)
       if (pincode) {
-        query = query.where(eq(addresses.pincode, pincode));
+        conditions.push(eq(addresses.pincode, pincode));
       } else if (district) {
         // Only use district filter if no pincode is provided
-        query = query.where(eq(addresses.districtNameEnglish, district));
+        conditions.push(eq(addresses.districtNameEnglish, district));
       }
       
+      query = query.where(and(...conditions));
+      
       const results = await query;
-      return results.map(row => row.subDistrict).filter(Boolean);
+      return results.map(row => row.subDistrict).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting sub-districts from database:', error);
       return [];
@@ -846,10 +853,9 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db
         .selectDistinct({ village: addresses.villageNameEnglish })
-        .from(addresses)
-        .where(sql`${addresses.villageNameEnglish} IS NOT NULL`);
+        .from(addresses);
       
-      const conditions = [];
+      const conditions = [sql`${addresses.villageNameEnglish} IS NOT NULL`];
       // For villages, we need both sub-district and pincode if both are provided
       if (subDistrict) {
         conditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
@@ -858,12 +864,10 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(addresses.pincode, pincode));
       }
       
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
+      query = query.where(and(...conditions));
       
       const results = await query;
-      return results.map(row => row.village).filter(Boolean);
+      return results.map(row => row.village).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting villages from database:', error);
       return [];
@@ -896,7 +900,7 @@ export class DatabaseStorage implements IStorage {
       }
       
       const results = await query.limit(50); // Limit to prevent too many results
-      return results.map(row => row.postalCode).filter(Boolean);
+      return results.map(row => row.postalCode).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting postal codes from database:', error);
       return [];

@@ -103,7 +103,7 @@ export async function seedDatabase() {
       upaChakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       secretary: Math.random() > 0.5 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       status: Math.random() > 0.1 ? "APPROVED" : "PENDING_APPROVAL",
-      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(),
       updatedAt: new Date(),
       location // Store location separately for address creation
     });
@@ -123,9 +123,9 @@ export async function seedDatabase() {
         eq(addresses.country, location.country),
         eq(addresses.stateNameEnglish, location.state),
         eq(addresses.districtNameEnglish, location.district),
-        eq(addresses.subDistrictNameEnglish, location.subDistrict),
+        eq(addresses.subdistrictNameEnglish, location.subDistrict),
         eq(addresses.villageNameEnglish, location.village),
-        eq(addresses.postalCode, location.postalCode)
+        eq(addresses.pincode, location.postalCode)
       )
     ).limit(1);
     
@@ -135,9 +135,9 @@ export async function seedDatabase() {
         country: location.country,
         stateNameEnglish: location.state,
         districtNameEnglish: location.district,
-        subDistrictNameEnglish: location.subDistrict,
+        subdistrictNameEnglish: location.subDistrict,
         villageNameEnglish: location.village,
-        postalCode: location.postalCode
+        pincode: location.postalCode
       }).returning();
     }
     
