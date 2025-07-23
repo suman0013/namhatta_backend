@@ -44,13 +44,25 @@ export const api = {
     return res.json();
   },
 
-  getSubDistricts: async (district: string): Promise<string[]> => {
-    const res = await apiRequest("GET", `/api/sub-districts?district=${encodeURIComponent(district)}`);
+  getSubDistricts: async (district?: string, pincode?: string): Promise<string[]> => {
+    let url = "/api/sub-districts";
+    const params = new URLSearchParams();
+    if (district) params.append("district", district);
+    if (pincode) params.append("pincode", pincode);
+    if (params.toString()) url += `?${params.toString()}`;
+    
+    const res = await apiRequest("GET", url);
     return res.json();
   },
 
-  getVillages: async (subDistrict: string): Promise<string[]> => {
-    const res = await apiRequest("GET", `/api/villages?subDistrict=${encodeURIComponent(subDistrict)}`);
+  getVillages: async (subDistrict?: string, pincode?: string): Promise<string[]> => {
+    let url = "/api/villages";
+    const params = new URLSearchParams();
+    if (subDistrict) params.append("subDistrict", subDistrict);
+    if (pincode) params.append("pincode", pincode);
+    if (params.toString()) url += `?${params.toString()}`;
+    
+    const res = await apiRequest("GET", url);
     return res.json();
   },
 

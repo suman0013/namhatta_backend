@@ -49,15 +49,15 @@ export default function AddressSection({
   // Remove the old pincodes query since we'll use the new searchable component
 
   const { data: subDistricts } = useQuery({
-    queryKey: ["/api/sub-districts", address.district],
-    queryFn: () => api.getSubDistricts(address.district!),
-    enabled: !!address.district,
+    queryKey: ["/api/sub-districts", address.district, address.postalCode],
+    queryFn: () => api.getSubDistricts(address.district, address.postalCode),
+    enabled: !!address.postalCode, // Enable when pincode is available
   });
 
   const { data: villages } = useQuery({
-    queryKey: ["/api/villages", address.subDistrict],
-    queryFn: () => api.getVillages(address.subDistrict!),
-    enabled: !!address.subDistrict,
+    queryKey: ["/api/villages", address.subDistrict, address.postalCode],
+    queryFn: () => api.getVillages(address.subDistrict, address.postalCode),
+    enabled: !!address.subDistrict && !!address.postalCode, // Enable when both subDistrict and pincode are available
   });
 
   const handlePincodeChange = async (pincode: string) => {
