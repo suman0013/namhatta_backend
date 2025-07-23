@@ -56,6 +56,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
               <div className="text-xs text-slate-500 dark:text-slate-400 capitalize">
                 {user.role.toLowerCase().replace('_', ' ')}
               </div>
+              
+              {/* Show districts for District Supervisors */}
+              {user.role === 'DISTRICT_SUPERVISOR' && user.districts && user.districts.length > 0 && (
+                <div className="mt-2 pt-2 border-t border-white/20">
+                  <div className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">
+                    Assigned Districts:
+                  </div>
+                  <div className="space-y-1">
+                    {user.districts.map((district, index) => (
+                      <div key={index} className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
+                        {district}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <DropdownMenuSeparator className="bg-white/20" />
             <DropdownMenuItem 

@@ -27,6 +27,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Get user districts (authenticated endpoint)
+  app.get("/api/auth/user-districts", authenticateJWT, async (req, res) => {
+    try {
+      const { getUserDistricts } = await import('./storage-auth');
+      const districts = await getUserDistricts(req.user.id);
+      res.json({ districts: districts.map(d => d.districtCode) });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Dev endpoint to check users (development only)
   app.get("/api/dev/users", async (req, res) => {
     if (process.env.NODE_ENV !== 'development') {

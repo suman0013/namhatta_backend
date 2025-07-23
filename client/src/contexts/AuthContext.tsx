@@ -5,6 +5,7 @@ interface User {
   username: string;
   role: 'ADMIN' | 'OFFICE' | 'DISTRICT_SUPERVISOR';
   isActive: boolean;
+  districts?: string[]; // Available for DISTRICT_SUPERVISOR users
 }
 
 interface AuthState {
@@ -59,9 +60,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (response.ok) {
         const userData = await response.json();
+        
+        // Fetch user districts if the user is a district supervisor
+        let userWithDistricts = userData.user;
+        if (userData.user.role === 'DISTRICT_SUPERVISOR') {
+          try {
+            const districtsResponse = await fetch('/api/auth/user-districts', {
+              method: 'GET',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (districtsResponse.ok) {
+              const districtsData = await districtsResponse.json();
+              userWithDistricts = { ...userData.user, districts: districtsData.districts };
+            }
+          } catch (error) {
+            console.error('Failed to fetch user districts:', error);
+          }
+        }
+        
         setState(prev => ({
           ...prev,
-          user: userData.user,
+          user: userWithDistricts,
           isAuthenticated: true,
           isLoading: false
         }));
@@ -98,9 +121,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const data = await response.json();
 
       if (response.ok) {
+        // Fetch user districts if the user is a district supervisor
+        let userWithDistricts = data.user;
+        if (data.user.role === 'DISTRICT_SUPERVISOR') {
+          try {
+            const districtsResponse = await fetch('/api/auth/user-districts', {
+              method: 'GET',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (districtsResponse.ok) {
+              const districtsData = await districtsResponse.json();
+              userWithDistricts = { ...data.user, districts: districtsData.districts };
+            }
+          } catch (error) {
+            console.error('Failed to fetch user districts:', error);
+          }
+        }
+        
         setState(prev => ({
           ...prev,
-          user: data.user,
+          user: userWithDistricts,
           isAuthenticated: true
         }));
         return { success: true };
