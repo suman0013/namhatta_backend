@@ -229,18 +229,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/devotees/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+  app.put("/api/devotees/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
     const id = parseInt(req.params.id);
     try {
-      const devoteeData = insertDevoteeSchema.partial().parse(req.body);
-      const devotee = await storage.updateDevotee(id, devoteeData);
+      // Extract address and other fields separately (similar to create operations)
+      const { presentAddress, permanentAddress, ...devoteeFields } = req.body;
+      
+      // Validate only the devotee fields against schema
+      const validatedDevoteeData = insertDevoteeSchema.partial().parse(devoteeFields);
+      
+      // Add addresses back to the data
+      const devoteeDataWithAddresses = {
+        ...validatedDevoteeData,
+        presentAddress: presentAddress,
+        permanentAddress: permanentAddress
+      };
+      
+      const devotee = await storage.updateDevotee(id, devoteeDataWithAddresses);
       res.json(devotee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error });
+      res.status(400).json({ message: "Invalid devotee data", error: error.message });
     }
   });
 
-  app.post("/api/devotees/:id/upgrade-status", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+  app.post("/api/devotees/:id/upgrade-status", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
     const id = parseInt(req.params.id);
     const { newStatusId, notes } = req.body;
     

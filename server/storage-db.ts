@@ -187,9 +187,67 @@ export class DatabaseStorage implements IStorage {
     return await this.createDevotee(devoteeWithNamhatta);
   }
 
-  async updateDevotee(id: number, devotee: Partial<InsertDevotee>): Promise<Devotee> {
-    const result = await db.update(devotees).set(devotee).where(eq(devotees.id, id)).returning();
-    return result[0];
+  async updateDevotee(id: number, devoteeData: any): Promise<Devotee> {
+    // Extract address information from the request data
+    const { presentAddress, permanentAddress, ...devoteeDetails } = devoteeData;
+    
+    // Update the main devotee record
+    const result = await db.update(devotees).set(devoteeDetails).where(eq(devotees.id, id)).returning();
+    const updatedDevotee = result[0];
+    
+    // Handle address updates
+    if (presentAddress) {
+      // Remove existing present address
+      await db.delete(devoteeAddresses).where(
+        and(
+          eq(devoteeAddresses.devoteeId, id),
+          eq(devoteeAddresses.addressType, 'present')
+        )
+      );
+      
+      // Add new present address if provided
+      if (presentAddress.country || presentAddress.state || presentAddress.district || presentAddress.subDistrict || presentAddress.village || presentAddress.postalCode) {
+        const addressId = await this.findOrCreateAddress({
+          country: presentAddress.country,
+          state: presentAddress.state,
+          district: presentAddress.district,
+          subDistrict: presentAddress.subDistrict,
+          village: presentAddress.village,
+          postalCode: presentAddress.postalCode
+        });
+        
+        // Link devotee to present address
+        await this.createDevoteeAddress(id, addressId, 'present', presentAddress.landmark);
+      }
+    }
+    
+    // Handle permanent address updates
+    if (permanentAddress) {
+      // Remove existing permanent address
+      await db.delete(devoteeAddresses).where(
+        and(
+          eq(devoteeAddresses.devoteeId, id),
+          eq(devoteeAddresses.addressType, 'permanent')
+        )
+      );
+      
+      // Add new permanent address if provided
+      if (permanentAddress.country || permanentAddress.state || permanentAddress.district || permanentAddress.subDistrict || permanentAddress.village || permanentAddress.postalCode) {
+        const addressId = await this.findOrCreateAddress({
+          country: permanentAddress.country,
+          state: permanentAddress.state,
+          district: permanentAddress.district,
+          subDistrict: permanentAddress.subDistrict,
+          village: permanentAddress.village,
+          postalCode: permanentAddress.postalCode
+        });
+        
+        // Link devotee to permanent address
+        await this.createDevoteeAddress(id, addressId, 'permanent', permanentAddress.landmark);
+      }
+    }
+    
+    return updatedDevotee;
   }
 
   async getDevoteesByNamhatta(namhattaId: number, page = 1, size = 10, statusId?: number): Promise<{ data: Devotee[], total: number }> {
