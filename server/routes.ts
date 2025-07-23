@@ -100,6 +100,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(pincodes);
   });
 
+  app.get("/api/pincodes/search", async (req, res) => {
+    const { country, search, page = "1", limit = "25" } = req.query;
+    
+    if (!country) {
+      return res.status(400).json({ error: "Country is required" });
+    }
+    
+    const pageNum = parseInt(page as string, 10);
+    const limitNum = parseInt(limit as string, 10);
+    
+    const result = await storage.searchPincodes(
+      country as string, 
+      search as string || "", 
+      pageNum, 
+      limitNum
+    );
+    res.json(result);
+  });
+
   app.get("/api/address-by-pincode", async (req, res) => {
     const { pincode } = req.query;
     if (!pincode) {

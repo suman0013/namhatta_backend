@@ -70,6 +70,11 @@ export interface IStorage {
   getSubDistricts(district?: string): Promise<string[]>;
   getVillages(subDistrict?: string): Promise<string[]>;
   getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]>;
+  searchPincodes(country: string, searchTerm: string, page: number, limit: number): Promise<{
+    pincodes: string[];
+    total: number;
+    hasMore: boolean;
+  }>;
   getAddressByPincode(pincode: string): Promise<{
     country: string;
     state: string;

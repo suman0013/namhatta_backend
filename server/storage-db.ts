@@ -854,6 +854,54 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async searchPincodes(country: string, searchTerm: string, page: number, limit: number): Promise<{
+    pincodes: string[];
+    total: number;
+    hasMore: boolean;
+  }> {
+    try {
+      const offset = (page - 1) * limit;
+      
+      let countQuery = db
+        .select({ count: count() })
+        .from(addresses)
+        .where(sql`${addresses.pincode} IS NOT NULL AND ${addresses.countryNameEnglish} = ${country}`);
+      
+      let dataQuery = db
+        .selectDistinct({ postalCode: addresses.pincode })
+        .from(addresses)
+        .where(sql`${addresses.pincode} IS NOT NULL AND ${addresses.countryNameEnglish} = ${country}`);
+      
+      if (searchTerm.trim()) {
+        const searchCondition = sql`${addresses.pincode} LIKE ${`%${searchTerm.trim()}%`}`;
+        countQuery = countQuery.where(searchCondition);
+        dataQuery = dataQuery.where(searchCondition);
+      }
+      
+      const [totalResult, dataResult] = await Promise.all([
+        countQuery,
+        dataQuery.orderBy(addresses.pincode).limit(limit).offset(offset)
+      ]);
+      
+      const total = totalResult[0]?.count || 0;
+      const pincodes = dataResult.map(row => row.postalCode).filter(Boolean);
+      const hasMore = offset + pincodes.length < total;
+      
+      return {
+        pincodes,
+        total,
+        hasMore
+      };
+    } catch (error) {
+      console.error('Error searching postal codes from database:', error);
+      return {
+        pincodes: [],
+        total: 0,
+        hasMore: false
+      };
+    }
+  }
+
 
 
   // Address Management Methods

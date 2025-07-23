@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { SearchablePincodeSelect } from "@/components/ui/searchable-pincode-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,10 +39,7 @@ export default function AddressSection({
     queryFn: () => api.getCountries(),
   });
 
-  const { data: pincodes } = useQuery({
-    queryKey: ["/api/pincodes"],
-    queryFn: () => api.getPincodes(),
-  });
+  // Remove the old pincodes query since we'll use the new searchable component
 
   const { data: subDistricts } = useQuery({
     queryKey: ["/api/sub-districts", address.district],
@@ -133,13 +131,16 @@ export default function AddressSection({
           {/* Pincode - searchable */}
           <div>
             <Label htmlFor="postalCode">Postal Code {required && "*"}</Label>
-            <SearchableSelect
+            <SearchablePincodeSelect
               value={address.postalCode || ""}
               onValueChange={handlePincodeChange}
-              options={pincodes || []}
-              placeholder="Select or type postal code"
-              disabled={!address.country || disabled}
+              country={address.country || ""}
+              placeholder="Search postal code"
+              disabled={disabled || isLoadingPincode}
             />
+            {isLoadingPincode && (
+              <p className="text-sm text-gray-500 mt-1">Loading address...</p>
+            )}
             {hasRequiredError("postalCode") && (
               <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
             )}

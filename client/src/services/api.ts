@@ -66,6 +66,22 @@ export const api = {
     return res.json();
   },
 
+  searchPincodes: async (country: string, searchTerm: string = "", page: number = 1, limit: number = 25): Promise<{
+    pincodes: string[];
+    total: number;
+    hasMore: boolean;
+  }> => {
+    const params = new URLSearchParams({
+      country: country,
+      search: searchTerm,
+      page: page.toString(),
+      limit: limit.toString()
+    });
+    
+    const res = await apiRequest("GET", `/api/pincodes/search?${params.toString()}`);
+    return res.json();
+  },
+
   getAddressByPincode: async (pincode: string): Promise<{
     country: string;
     state: string;
