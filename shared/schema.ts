@@ -260,7 +260,26 @@ export const insertJwtBlacklistSchema = createInsertSchema(jwtBlacklist).omit({
 });
 
 // Types
-export type Devotee = typeof devotees.$inferSelect;
+export type Devotee = typeof devotees.$inferSelect & {
+  presentAddress?: {
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+    landmark?: string;
+  };
+  permanentAddress?: {
+    country?: string;
+    state?: string;
+    district?: string;
+    subDistrict?: string;
+    village?: string;
+    postalCode?: string;
+    landmark?: string;
+  };
+};
 export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
 
 export type Namhatta = typeof namhattas.$inferSelect & {

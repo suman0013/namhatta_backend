@@ -302,12 +302,12 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
   };
 
   return (
-    <div className="h-[280px]">
+    <div className="h-[200px]">
       <Link href={`/devotees/${devotee.id}`}>
         <Card className="glass-card card-hover-effect group h-full cursor-pointer">
-          <CardContent className="p-6 h-full flex flex-col">
+          <CardContent className="p-4 h-full flex flex-col">
             {/* Header */}
-            <div className="flex items-center space-x-3 mb-4">
+            <div className="flex items-center space-x-3 mb-3">
               <Avatar className="h-12 w-12">
                 <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
                   {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
@@ -334,14 +334,14 @@ function DevoteeCard({ devotee, statuses }: { devotee: Devotee; statuses: any[] 
             </div>
 
             {/* Status Badge */}
-            <div className="mb-4">
+            <div className="mb-2">
               <Badge className={getStatusColor(devotee.devotionalStatusId)}>
                 {getStatusName(devotee.devotionalStatusId)}
               </Badge>
             </div>
 
             {/* Details */}
-            <div className="space-y-2 mb-4 flex-grow">
+            <div className="space-y-1 flex-grow">
               {devotee.presentAddress && (
                 <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                   <MapPin className="mr-2 h-3 w-3" />
