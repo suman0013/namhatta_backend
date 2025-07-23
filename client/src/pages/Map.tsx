@@ -34,12 +34,12 @@ export default function Map() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
-  // Determine level based on zoom - higher zoom requirements for more detailed navigation
+  // Determine level based on zoom - custom zoom requirements as requested
   const getLevelFromZoom = (zoom: number): MapLevel => {
-    if (zoom >= 14) return 'VILLAGE';
-    if (zoom >= 12) return 'SUB_DISTRICT';
-    if (zoom >= 10) return 'DISTRICT'; // Higher zoom required for district viewing
-    if (zoom >= 7) return 'STATE';     // Higher zoom required for state viewing
+    if (zoom >= 12) return 'VILLAGE';
+    if (zoom >= 10) return 'SUB_DISTRICT';
+    if (zoom >= 8) return 'DISTRICT';
+    if (zoom >= 5) return 'STATE';
     return 'COUNTRY';
   };
 
@@ -77,7 +77,13 @@ export default function Map() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading;
+  const { data: villageData = [], isLoading: villageLoading } = useQuery({
+    queryKey: ["/api/map/villages"], 
+    queryFn: getQueryFn({ on401: "throw" }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isLoading = countryLoading || stateLoading || districtLoading || subDistrictLoading || villageLoading;
 
   // Get current data based on level
   const getCurrentData = (): MapData[] => {
@@ -172,7 +178,17 @@ export default function Map() {
       'North': [88.37, 22.62],
       'Dhanmondi': [90.37, 23.75],
       'Port Area': [91.8, 22.3],
-      'Colombo Central': [79.8, 6.9]
+      'Colombo Central': [79.8, 6.9],
+      'Dantan - II': [87.2, 22.3],
+      'Bongaon': [88.8, 23.0],
+      'Barasat - I': [88.5, 22.7],
+      'Matigara': [88.4, 26.8],
+      
+      // Villages
+      'Agabar Chak': [87.2, 22.3],
+      'Akaipur': [88.8, 23.0],
+      'Bairatisal (Ct)': [88.4, 26.8],
+      'Ahira': [88.5, 22.7]
     };
 
     switch (currentLevel) {
@@ -211,7 +227,20 @@ export default function Map() {
           level: 'SUB_DISTRICT' as MapLevel
         })).filter((item: any) => item.coordinates) : [];
         console.log(`Showing ${subDistricts.length} sub-districts at zoom ${zoomLevel}`);
+        console.log('Sub-district data:', subDistrictData);
+        console.log('Filtered sub-districts:', subDistricts);
         return subDistricts;
+      case 'VILLAGE':
+        const villages = Array.isArray(villageData) ? villageData.map((item: any) => ({
+          name: item.village,
+          count: item.count,
+          coordinates: coordinatesMap[item.village],
+          level: 'VILLAGE' as MapLevel
+        })).filter((item: any) => item.coordinates) : [];
+        console.log(`Showing ${villages.length} villages at zoom ${zoomLevel}`);
+        console.log('Village data:', villageData);
+        console.log('Filtered villages:', villages);
+        return villages;
       default:
         return [];
     }
