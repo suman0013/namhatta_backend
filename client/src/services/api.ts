@@ -216,8 +216,12 @@ export const api = {
   },
 
   // Shraddhakutirs
-  getShraddhakutirs: async (): Promise<Shraddhakutir[]> => {
-    const res = await apiRequest("GET", "/api/shraddhakutirs");
+  getShraddhakutirs: async (district?: string): Promise<Shraddhakutir[]> => {
+    let url = "/api/shraddhakutirs";
+    if (district) {
+      url += `?district=${encodeURIComponent(district)}`;
+    }
+    const res = await apiRequest("GET", url);
     return res.json();
   },
 

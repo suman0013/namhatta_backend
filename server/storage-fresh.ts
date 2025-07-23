@@ -29,7 +29,7 @@ export interface IStorage {
   renameDevotionalStatus(id: number, newName: string): Promise<void>;
 
   // Shraddhakutirs
-  getShraddhakutirs(): Promise<Shraddhakutir[]>;
+  getShraddhakutirs(district?: string): Promise<Shraddhakutir[]>;
   createShraddhakutir(shraddhakutir: InsertShraddhakutir): Promise<Shraddhakutir>;
 
   // Updates

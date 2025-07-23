@@ -675,7 +675,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Shraddhakutirs
-  async getShraddhakutirs(): Promise<Shraddhakutir[]> {
+  async getShraddhakutirs(district?: string): Promise<Shraddhakutir[]> {
+    if (district) {
+      // Since district can be either district name or district code, we need to handle both
+      // First, get the district code from addresses table if district is a name
+      const addressQuery = db
+        .selectDistinct({ districtCode: addresses.districtCode })
+        .from(addresses)
+        .where(eq(addresses.districtNameEnglish, district));
+      
+      const addressResults = await addressQuery;
+      
+      if (addressResults.length > 0) {
+        // If we found a matching district code, use it for filtering
+        const districtCode = addressResults[0].districtCode;
+        return await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
+      } else {
+        // If no match by name, try by exact district code match
+        let results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, district.toUpperCase()));
+        
+        // If no results with exact match, try partial matching on district code
+        if (results.length === 0) {
+          results = await db.select().from(shraddhakutirs).where(like(shraddhakutirs.districtCode, `%${district.toUpperCase()}%`));
+        }
+        
+        return results;
+      }
+    }
     return await db.select().from(shraddhakutirs);
   }
 

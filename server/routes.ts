@@ -499,7 +499,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Shraddhakutirs
   app.get("/api/shraddhakutirs", async (req, res) => {
-    const shraddhakutirs = await storage.getShraddhakutirs();
+    const { district } = req.query;
+    const shraddhakutirs = await storage.getShraddhakutirs(district as string);
     res.json(shraddhakutirs);
   });
 

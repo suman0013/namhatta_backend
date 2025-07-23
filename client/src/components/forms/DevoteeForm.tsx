@@ -112,8 +112,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
   });
 
   const { data: shraddhakutirs } = useQuery({
-    queryKey: ["/api/shraddhakutirs"],
-    queryFn: () => api.getShraddhakutirs(),
+    queryKey: ["/api/shraddhakutirs", permanentAddress.district],
+    queryFn: () => api.getShraddhakutirs(permanentAddress.district),
+    enabled: !!permanentAddress.district, // Only fetch when district is available
   });
 
   // Mutations
