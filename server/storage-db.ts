@@ -790,16 +790,12 @@ export class DatabaseStorage implements IStorage {
         .from(addresses)
         .where(sql`${addresses.subdistrictNameEnglish} IS NOT NULL`);
       
-      const conditions = [];
-      if (district) {
-        conditions.push(eq(addresses.districtNameEnglish, district));
-      }
+      // If pincode is provided, filter by pincode only (ignore district parameter)
       if (pincode) {
-        conditions.push(eq(addresses.pincode, pincode));
-      }
-      
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
+        query = query.where(eq(addresses.pincode, pincode));
+      } else if (district) {
+        // Only use district filter if no pincode is provided
+        query = query.where(eq(addresses.districtNameEnglish, district));
       }
       
       const results = await query;
@@ -818,6 +814,7 @@ export class DatabaseStorage implements IStorage {
         .where(sql`${addresses.villageNameEnglish} IS NOT NULL`);
       
       const conditions = [];
+      // For villages, we need both sub-district and pincode if both are provided
       if (subDistrict) {
         conditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
       }
