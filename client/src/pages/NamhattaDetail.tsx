@@ -231,16 +231,6 @@ export default function NamhattaDetail() {
             </>
           )}
           
-          {/* Message for users who cannot approve */}
-          {(namhatta.status === "PENDING_APPROVAL" || namhatta.status === "pending") && !canApprove && (
-            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Only administrators and office staff can approve pending Namhattas.
-              </span>
-            </div>
-          )}
-          
           <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Details
