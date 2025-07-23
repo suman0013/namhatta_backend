@@ -100,6 +100,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(pincodes);
   });
 
+  app.get("/api/address-by-pincode", async (req, res) => {
+    const { pincode } = req.query;
+    if (!pincode) {
+      return res.status(400).json({ error: "Pincode is required" });
+    }
+    const addressInfo = await storage.getAddressByPincode(pincode as string);
+    res.json(addressInfo);
+  });
+
   // Map data endpoints
   app.get("/api/map/countries", async (req, res) => {
     const data = await storage.getNamhattaCountsByCountry();

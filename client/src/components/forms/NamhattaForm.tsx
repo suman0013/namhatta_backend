@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Separator } from "@/components/ui/separator";
 import { Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AddressSection from "@/components/ui/AddressSection";
 import type { Namhatta, Address } from "@/lib/types";
 
 interface NamhattaFormProps {
@@ -55,41 +56,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
 
   const [address, setAddress] = useState<Address>(namhatta?.address || {});
 
-  // Geography queries
-  const { data: countries } = useQuery({
-    queryKey: ["/api/countries"],
-    queryFn: () => api.getCountries(),
-  });
 
-  const { data: states } = useQuery({
-    queryKey: ["/api/states", address.country],
-    queryFn: () => api.getStates(address.country!),
-    enabled: !!address.country,
-  });
-
-  const { data: districts } = useQuery({
-    queryKey: ["/api/districts", address.state],
-    queryFn: () => api.getDistricts(address.state!),
-    enabled: !!address.state,
-  });
-
-  const { data: subDistricts } = useQuery({
-    queryKey: ["/api/sub-districts", address.district],
-    queryFn: () => api.getSubDistricts(address.district!),
-    enabled: !!address.district,
-  });
-
-  const { data: villages } = useQuery({
-    queryKey: ["/api/villages", address.subDistrict],
-    queryFn: () => api.getVillages(address.subDistrict!),
-    enabled: !!address.subDistrict,
-  });
-
-  const { data: pincodes } = useQuery({
-    queryKey: ["/api/pincodes", address.village, address.district, address.subDistrict],
-    queryFn: () => api.getPincodes(address.village, address.district, address.subDistrict),
-    enabled: !!address.subDistrict,
-  });
 
   // Mutations
   const createMutation = useMutation({
@@ -280,78 +247,13 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
             <Separator />
 
             {/* Address */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Address</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="country">Country</Label>
-                  <SearchableSelect
-                    value={address.country || ""}
-                    onValueChange={(value) => handleAddressChange("country", value)}
-                    options={countries || []}
-                    placeholder="Select or type country"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="state">State</Label>
-                  <SearchableSelect
-                    value={address.state || ""}
-                    onValueChange={(value) => handleAddressChange("state", value)}
-                    options={states || []}
-                    placeholder="Select or type state"
-                    disabled={!address.country}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="district">District</Label>
-                  <SearchableSelect
-                    value={address.district || ""}
-                    onValueChange={(value) => handleAddressChange("district", value)}
-                    options={districts || []}
-                    placeholder="Select or type district"
-                    disabled={!address.state}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="subDistrict">Sub-District</Label>
-                  <SearchableSelect
-                    value={address.subDistrict || ""}
-                    onValueChange={(value) => handleAddressChange("subDistrict", value)}
-                    options={subDistricts || []}
-                    placeholder="Select or type sub-district"
-                    disabled={!address.district}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="village">Village</Label>
-                  <SearchableSelect
-                    value={address.village || ""}
-                    onValueChange={(value) => handleAddressChange("village", value)}
-                    options={villages || []}
-                    placeholder="Select or type village"
-                    disabled={!address.district}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="postalCode">ZIP Code</Label>
-                  <SearchableSelect
-                    value={address.postalCode || ""}
-                    onValueChange={(value) => handleAddressChange("postalCode", value)}
-                    options={pincodes || []}
-                    placeholder="Select or type ZIP code"
-                    disabled={!address.subDistrict}
-                  />
-                </div>
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <Label htmlFor="landmark">Landmark</Label>
-                  <Textarea
-                    value={address.landmark || ""}
-                    onChange={(e) => handleAddressChange("landmark", e.target.value)}
-                    placeholder="Enter landmark details"
-                  />
-                </div>
-              </div>
-            </div>
+            <AddressSection
+              title="Address"
+              address={address}
+              onAddressChange={handleAddressChange}
+              required={false}
+              showValidation={false}
+            />
 
             <Separator />
 

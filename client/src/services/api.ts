@@ -66,6 +66,17 @@ export const api = {
     return res.json();
   },
 
+  getAddressByPincode: async (pincode: string): Promise<{
+    country: string;
+    state: string;
+    district: string;
+    subDistricts: string[];
+    villages: string[];
+  } | null> => {
+    const res = await apiRequest("GET", `/api/address-by-pincode?pincode=${encodeURIComponent(pincode)}`);
+    return res.json();
+  },
+
   // Devotees
   getDevotees: async (page = 1, size = 10, filters?: any): Promise<PaginatedResponse<Devotee>> => {
     const params = new URLSearchParams({ page: page.toString(), size: size.toString() });

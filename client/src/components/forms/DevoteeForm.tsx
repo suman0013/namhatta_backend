@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AddressSection from "@/components/ui/AddressSection";
 import type { Devotee, Address } from "@/lib/types";
 
 interface DevoteeFormProps {
@@ -102,72 +103,7 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
   });
 
 
-  // Geography queries for present address
-  const { data: countries } = useQuery({
-    queryKey: ["/api/countries"],
-    queryFn: () => api.getCountries(),
-  });
 
-  const { data: presentStates } = useQuery({
-    queryKey: ["/api/states", presentAddress.country],
-    queryFn: () => api.getStates(presentAddress.country!),
-    enabled: !!presentAddress.country,
-  });
-
-  const { data: presentDistricts } = useQuery({
-    queryKey: ["/api/districts", presentAddress.state],
-    queryFn: () => api.getDistricts(presentAddress.state!),
-    enabled: !!presentAddress.state,
-  });
-
-  const { data: presentSubDistricts } = useQuery({
-    queryKey: ["/api/sub-districts", presentAddress.district],
-    queryFn: () => api.getSubDistricts(presentAddress.district!),
-    enabled: !!presentAddress.district,
-  });
-
-  const { data: presentVillages } = useQuery({
-    queryKey: ["/api/villages", presentAddress.subDistrict],
-    queryFn: () => api.getVillages(presentAddress.subDistrict!),
-    enabled: !!presentAddress.subDistrict,
-  });
-
-  const { data: presentPincodes } = useQuery({
-    queryKey: ["/api/pincodes", presentAddress.village, presentAddress.district, presentAddress.subDistrict],
-    queryFn: () => api.getPincodes(presentAddress.village, presentAddress.district, presentAddress.subDistrict),
-    enabled: !!presentAddress.subDistrict,
-  });
-
-  // Geography queries for permanent address
-  const { data: permanentStates } = useQuery({
-    queryKey: ["/api/states", permanentAddress.country],
-    queryFn: () => api.getStates(permanentAddress.country!),
-    enabled: !!permanentAddress.country && !sameAsPresentAddress,
-  });
-
-  const { data: permanentDistricts } = useQuery({
-    queryKey: ["/api/districts", permanentAddress.state],
-    queryFn: () => api.getDistricts(permanentAddress.state!),
-    enabled: !!permanentAddress.state && !sameAsPresentAddress,
-  });
-
-  const { data: permanentSubDistricts } = useQuery({
-    queryKey: ["/api/sub-districts", permanentAddress.district],
-    queryFn: () => api.getSubDistricts(permanentAddress.district!),
-    enabled: !!permanentAddress.district && !sameAsPresentAddress,
-  });
-
-  const { data: permanentVillages } = useQuery({
-    queryKey: ["/api/villages", permanentAddress.subDistrict],
-    queryFn: () => api.getVillages(permanentAddress.subDistrict!),
-    enabled: !!permanentAddress.subDistrict && !sameAsPresentAddress,
-  });
-
-  const { data: permanentPincodes } = useQuery({
-    queryKey: ["/api/pincodes", permanentAddress.village, permanentAddress.district, permanentAddress.subDistrict],
-    queryFn: () => api.getPincodes(permanentAddress.village, permanentAddress.district, permanentAddress.subDistrict),
-    enabled: !!permanentAddress.subDistrict && !sameAsPresentAddress,
-  });
 
   // Other data queries
   const { data: statuses } = useQuery({
@@ -649,246 +585,38 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
             <Separator />
 
             {/* Present Address */}
-            <div className="space-y-3">
-              <h3 className="form-section-header">Present Address *</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                <div>
-                  <Label htmlFor="presentCountry">Country *</Label>
-                  <SearchableSelect
-                    value={presentAddress.country || ""}
-                    onValueChange={(value) => {
-                      handlePresentAddressChange("country", value);
-                      clearErrors("presentAddress.country");
-                    }}
-                    options={countries || []}
-                    placeholder="Select or type country"
-                  />
-                  {showValidation && !presentAddress.country && (
-                    <p className="text-sm text-red-500 mt-1">Country is required</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="presentState">State *</Label>
-                  <SearchableSelect
-                    value={presentAddress.state || ""}
-                    onValueChange={(value) => {
-                      handlePresentAddressChange("state", value);
-                      clearErrors("presentAddress.state");
-                    }}
-                    options={presentStates || []}
-                    placeholder="Select or type state"
-                    disabled={!presentAddress.country}
-                  />
-                  {showValidation && !presentAddress.state && (
-                    <p className="text-sm text-red-500 mt-1">State is required</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="presentDistrict">District *</Label>
-                  <SearchableSelect
-                    value={presentAddress.district || ""}
-                    onValueChange={(value) => {
-                      handlePresentAddressChange("district", value);
-                      clearErrors("presentAddress.district");
-                    }}
-                    options={presentDistricts || []}
-                    placeholder="Select or type district"
-                    disabled={!presentAddress.state}
-                  />
-                  {showValidation && !presentAddress.district && (
-                    <p className="text-sm text-red-500 mt-1">District is required</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="presentSubDistrict">Sub-District *</Label>
-                  <SearchableSelect
-                    value={presentAddress.subDistrict || ""}
-                    onValueChange={(value) => {
-                      handlePresentAddressChange("subDistrict", value);
-                      clearErrors("presentAddress.subDistrict");
-                    }}
-                    options={presentSubDistricts || []}
-                    placeholder="Select or type sub-district"
-                    disabled={!presentAddress.district}
-                  />
-                  {showValidation && !presentAddress.subDistrict && (
-                    <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="presentVillage">Village *</Label>
-                  <SearchableSelect
-                    value={presentAddress.village || ""}
-                    onValueChange={(value) => {
-                      handlePresentAddressChange("village", value);
-                      clearErrors("presentAddress.village");
-                    }}
-                    options={presentVillages || []}
-                    placeholder="Select or type village"
-                    disabled={!presentAddress.subDistrict}
-                  />
-                  {showValidation && !presentAddress.village && (
-                    <p className="text-sm text-red-500 mt-1">Village is required</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="presentPostalCode">Postal Code *</Label>
-                  <SearchableSelect
-                    value={presentAddress.postalCode || ""}
-                    onValueChange={(value) => {
-                      handlePresentAddressChange("postalCode", value);
-                      clearErrors("presentAddress.postalCode");
-                    }}
-                    options={presentPincodes || []}
-                    placeholder="Select or type postal code"
-                    disabled={!presentAddress.subDistrict}
-                  />
-                  {showValidation && !presentAddress.postalCode && (
-                    <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
-                  )}
-                </div>
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <Label htmlFor="presentLandmark">Landmark</Label>
-                  <Textarea
-                    value={presentAddress.landmark || ""}
-                    onChange={(e) => handlePresentAddressChange("landmark", e.target.value)}
-                    placeholder="Enter landmark or additional details"
-                  />
-                </div>
-              </div>
-              {errors.presentAddress && (
-                <p className="text-sm text-red-500 mt-2">{errors.presentAddress.message}</p>
-              )}
-            </div>
+            <AddressSection
+              title="Present Address"
+              address={presentAddress}
+              onAddressChange={handlePresentAddressChange}
+              required={true}
+              showValidation={showValidation}
+            />
 
             <Separator />
 
             {/* Permanent Address */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="form-section-header">Permanent Address *</h3>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="sameAsPresent"
-                    checked={sameAsPresentAddress}
-                    onChange={(e) => setSameAsPresentAddress(e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="sameAsPresent" className="text-sm">
-                    Same as present address
-                  </Label>
-                </div>
+              <div className="flex items-center space-x-2 mb-3">
+                <input
+                  type="checkbox"
+                  id="sameAsPresent"
+                  checked={sameAsPresentAddress}
+                  onChange={(e) => setSameAsPresentAddress(e.target.checked)}
+                  className="rounded"
+                />
+                <Label htmlFor="sameAsPresent" className="text-sm">
+                  Same as present address
+                </Label>
               </div>
               {!sameAsPresentAddress && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                  <div>
-                    <Label htmlFor="permanentCountry">Country *</Label>
-                    <SearchableSelect
-                      value={permanentAddress.country || ""}
-                      onValueChange={(value) => {
-                        handlePermanentAddressChange("country", value);
-                        clearErrors("permanentAddress.country");
-                      }}
-                      options={countries || []}
-                      placeholder="Select or type country"
-                    />
-                    {showValidation && !sameAsPresentAddress && !permanentAddress.country && (
-                      <p className="text-sm text-red-500 mt-1">Country is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="permanentState">State *</Label>
-                    <SearchableSelect
-                      value={permanentAddress.state || ""}
-                      onValueChange={(value) => {
-                        handlePermanentAddressChange("state", value);
-                        clearErrors("permanentAddress.state");
-                      }}
-                      options={permanentStates || []}
-                      placeholder="Select or type state"
-                      disabled={!permanentAddress.country}
-                    />
-                    {showValidation && !sameAsPresentAddress && !permanentAddress.state && (
-                      <p className="text-sm text-red-500 mt-1">State is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="permanentDistrict">District *</Label>
-                    <SearchableSelect
-                      value={permanentAddress.district || ""}
-                      onValueChange={(value) => {
-                        handlePermanentAddressChange("district", value);
-                        clearErrors("permanentAddress.district");
-                      }}
-                      options={permanentDistricts || []}
-                      placeholder="Select or type district"
-                      disabled={!permanentAddress.state}
-                    />
-                    {showValidation && !sameAsPresentAddress && !permanentAddress.district && (
-                      <p className="text-sm text-red-500 mt-1">District is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="permanentSubDistrict">Sub-District *</Label>
-                    <SearchableSelect
-                      value={permanentAddress.subDistrict || ""}
-                      onValueChange={(value) => {
-                        handlePermanentAddressChange("subDistrict", value);
-                        clearErrors("permanentAddress.subDistrict");
-                      }}
-                      options={permanentSubDistricts || []}
-                      placeholder="Select or type sub-district"
-                      disabled={!permanentAddress.district}
-                    />
-                    {showValidation && !sameAsPresentAddress && !permanentAddress.subDistrict && (
-                      <p className="text-sm text-red-500 mt-1">Sub-District is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="permanentVillage">Village *</Label>
-                    <SearchableSelect
-                      value={permanentAddress.village || ""}
-                      onValueChange={(value) => {
-                        handlePermanentAddressChange("village", value);
-                        clearErrors("permanentAddress.village");
-                      }}
-                      options={permanentVillages || []}
-                      placeholder="Select or type village"
-                      disabled={!permanentAddress.subDistrict}
-                    />
-                    {showValidation && !sameAsPresentAddress && !permanentAddress.village && (
-                      <p className="text-sm text-red-500 mt-1">Village is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="permanentPostalCode">Postal Code *</Label>
-                    <SearchableSelect
-                      value={permanentAddress.postalCode || ""}
-                      onValueChange={(value) => {
-                        handlePermanentAddressChange("postalCode", value);
-                        clearErrors("permanentAddress.postalCode");
-                      }}
-                      options={permanentPincodes || []}
-                      placeholder="Select or type postal code"
-                      disabled={!permanentAddress.subDistrict}
-                    />
-                    {showValidation && !sameAsPresentAddress && !permanentAddress.postalCode && (
-                      <p className="text-sm text-red-500 mt-1">Postal Code is required</p>
-                    )}
-                  </div>
-                  <div className="sm:col-span-2 lg:col-span-3">
-                    <Label htmlFor="permanentLandmark">Landmark</Label>
-                    <Textarea
-                      value={permanentAddress.landmark || ""}
-                      onChange={(e) => handlePermanentAddressChange("landmark", e.target.value)}
-                      placeholder="Enter landmark or additional details"
-                    />
-                  </div>
-                </div>
-              )}
-              {errors.permanentAddress && (
-                <p className="text-sm text-red-500 mt-2">{errors.permanentAddress.message}</p>
+                <AddressSection
+                  title="Permanent Address"
+                  address={permanentAddress}
+                  onAddressChange={handlePermanentAddressChange}
+                  required={true}
+                  showValidation={showValidation}
+                />
               )}
             </div>
 

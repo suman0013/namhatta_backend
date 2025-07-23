@@ -70,6 +70,13 @@ export interface IStorage {
   getSubDistricts(district?: string): Promise<string[]>;
   getVillages(subDistrict?: string): Promise<string[]>;
   getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]>;
+  getAddressByPincode(pincode: string): Promise<{
+    country: string;
+    state: string;
+    district: string;
+    subDistricts: string[];
+    villages: string[];
+  } | null>;
 
   // Map data
   getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>>;
