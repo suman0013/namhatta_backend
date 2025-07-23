@@ -104,23 +104,26 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   const handleAddressChange = (field: keyof Address, value: string) => {
     const newAddress = { ...address, [field]: value };
     
-    // Reset dependent fields
+    // Reset dependent fields only for manual changes, not pincode auto-population
     if (field === "country") {
       newAddress.state = "";
       newAddress.district = "";
       newAddress.subDistrict = "";
       newAddress.village = "";
-    } else if (field === "state") {
+    } else if (field === "state" && address.postalCode === "") {
+      // Only reset if no pincode is set (manual state change)
       newAddress.district = "";
       newAddress.subDistrict = "";
       newAddress.village = "";
-    } else if (field === "district") {
+    } else if (field === "district" && address.postalCode === "") {
+      // Only reset if no pincode is set (manual district change)
       newAddress.subDistrict = "";
       newAddress.village = "";
     } else if (field === "subDistrict") {
       newAddress.village = "";
     }
     
+    console.log("Namhatta address change:", field, "->", value, "New address:", newAddress);
     setAddress(newAddress);
     setValue("address", newAddress);
   };

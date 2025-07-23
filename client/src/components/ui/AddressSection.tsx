@@ -68,14 +68,18 @@ export default function AddressSection({
     setIsLoadingPincode(true);
     try {
       const addressInfo = await api.getAddressByPincode(pincode.trim());
+      console.log("Pincode lookup result:", addressInfo);
       if (addressInfo) {
-        // Auto-populate state and district
-        onAddressChange("state", addressInfo.state);
-        onAddressChange("district", addressInfo.district);
-        
-        // Clear sub-district and village so user must select them
-        onAddressChange("subDistrict", "");
-        onAddressChange("village", "");
+        // Use setTimeout to ensure the state changes are applied in sequence
+        setTimeout(() => {
+          // Auto-populate state and district
+          onAddressChange("state", addressInfo.state);
+          onAddressChange("district", addressInfo.district);
+          
+          // Clear sub-district and village so user must select them
+          onAddressChange("subDistrict", "");
+          onAddressChange("village", "");
+        }, 0);
       }
     } catch (error) {
       console.error("Error fetching address by pincode:", error);

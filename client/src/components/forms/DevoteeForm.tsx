@@ -194,23 +194,26 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
   const handlePresentAddressChange = (field: keyof Address, value: string) => {
     const newAddress = { ...presentAddress, [field]: value };
     
-    // Reset dependent fields
+    // Reset dependent fields only for manual changes, not pincode auto-population
     if (field === "country") {
       newAddress.state = "";
       newAddress.district = "";
       newAddress.subDistrict = "";
       newAddress.village = "";
-    } else if (field === "state") {
+    } else if (field === "state" && presentAddress.postalCode === "") {
+      // Only reset if no pincode is set (manual state change)
       newAddress.district = "";
       newAddress.subDistrict = "";
       newAddress.village = "";
-    } else if (field === "district") {
+    } else if (field === "district" && presentAddress.postalCode === "") {
+      // Only reset if no pincode is set (manual district change)
       newAddress.subDistrict = "";
       newAddress.village = "";
     } else if (field === "subDistrict") {
       newAddress.village = "";
     }
     
+    console.log("Address change:", field, "->", value, "New address:", newAddress);
     setPresentAddress(newAddress);
     setValue("presentAddress", newAddress);
     
