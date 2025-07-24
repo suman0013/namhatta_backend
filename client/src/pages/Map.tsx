@@ -47,8 +47,8 @@ export default function Map() {
   useEffect(() => {
     const newLevel = getLevelFromZoom(zoomLevel);
     if (newLevel !== currentLevel) {
+      console.log(`Zoom level ${zoomLevel} -> switching from ${currentLevel} to ${newLevel} view`);
       setCurrentLevel(newLevel);
-      console.log(`Zoom level ${zoomLevel} -> switching to ${newLevel} view`);
     }
   }, [zoomLevel, currentLevel]);
 
@@ -171,7 +171,7 @@ export default function Map() {
       'Colombo': [79.8, 6.9],
       'Kathmandu': [85.3, 27.7],
       
-      // Sub-districts
+      // Sub-districts - expanded coverage
       'Mayapur': [88.4, 23.4],
       'Central': [88.35, 22.57],
       'Krishnanagar': [88.5, 23.4],
@@ -184,13 +184,44 @@ export default function Map() {
       'Barasat - I': [88.5, 22.7],
       'Matigara': [88.4, 26.8],
       'Simlapal': [86.9, 23.1],
+      'Rajarhat': [88.5, 22.7],
+      'Sarenga': [87.3, 22.7],
+      'Kolkata Sadar': [88.36, 22.57],
+      'Salt Lake': [88.4, 22.6],
+      'Dum Dum': [88.4, 22.6],
+      'Barrackpore': [88.4, 22.8],
+      'Basirhat': [89.0, 22.7],
+      'Deganga': [88.7, 22.8],
+      'Habra': [88.6, 22.8],
+      'Haroa': [88.9, 22.6],
+      'Minakhan': [88.9, 22.5],
+      'Sandeshkhali': [88.9, 22.5],
+      'Swarupnagar': [88.9, 22.9],
+      'Bankura - II': [87.1, 23.2],
+      'Khatra': [86.9, 23.1],
+      'Onda': [87.2, 23.1],
+      'Raipur': [87.0, 23.0],
       
-      // Villages
+      // Villages - comprehensive mapping
       'Agabar Chak': [87.2, 22.3],
       'Akaipur': [88.8, 23.0],
       'Bairatisal (Ct)': [88.4, 26.8],
       'Bankata': [86.9, 23.1],
-      'Ahira': [88.5, 22.7]
+      'Ahira': [88.5, 22.7],
+      'Thakdari': [88.5, 22.7],
+      'Andharia': [87.1, 23.2],
+      'Bankhola': [87.1, 23.1],
+      'Baradhara': [87.0, 23.2],
+      'Baranimdi': [87.2, 23.1],
+      'Saltlake City': [88.4, 22.6],
+      'New Town': [88.5, 22.6],
+      'Action Area': [88.5, 22.6],
+      'Sector V': [88.4, 22.6],
+      'Park Street': [88.35, 22.56],
+      'Chowringhee': [88.35, 22.55],
+      'Esplanade': [88.35, 22.57],
+      'Sealdah': [88.37, 22.58],
+      'Shyambazar': [88.37, 22.59]
     };
 
     switch (currentLevel) {
@@ -222,26 +253,66 @@ export default function Map() {
         console.log(`Showing ${districts.length} districts at zoom ${zoomLevel}`);
         return districts;
       case 'SUB_DISTRICT':
-        const subDistricts = Array.isArray(subDistrictData) ? subDistrictData.map((item: any) => ({
-          name: item.subDistrict,
-          count: item.count,
-          coordinates: coordinatesMap[item.subDistrict],
-          level: 'SUB_DISTRICT' as MapLevel
-        })).filter((item: any) => item.coordinates) : [];
+        const subDistricts = Array.isArray(subDistrictData) ? subDistrictData.map((item: any) => {
+          let coordinates = coordinatesMap[item.subDistrict];
+          
+          // Fallback coordinate generation for missing sub-districts
+          if (!coordinates && item.district) {
+            const districtCoords = coordinatesMap[item.district];
+            if (districtCoords) {
+              // Generate approximate coordinates near the district center
+              const [lng, lat] = districtCoords;
+              coordinates = [
+                lng + (Math.random() - 0.5) * 0.1, // ±0.05 degree variation
+                lat + (Math.random() - 0.5) * 0.1
+              ];
+              console.log(`Generated fallback coordinates for ${item.subDistrict}: [${coordinates[1]}, ${coordinates[0]}]`);
+            }
+          }
+          
+          return {
+            name: item.subDistrict,
+            count: item.count,
+            coordinates: coordinates,
+            level: 'SUB_DISTRICT' as MapLevel
+          };
+        }).filter((item: any) => item.coordinates) : [];
+        
         console.log(`Showing ${subDistricts.length} sub-districts at zoom ${zoomLevel}`);
-        console.log('Sub-district data:', subDistrictData);
-        console.log('Filtered sub-districts:', subDistricts);
+        if (subDistricts.length === 0) {
+          console.log('No sub-districts found with coordinates from:', subDistrictData);
+        }
         return subDistricts;
       case 'VILLAGE':
-        const villages = Array.isArray(villageData) ? villageData.map((item: any) => ({
-          name: item.village,
-          count: item.count,
-          coordinates: coordinatesMap[item.village],
-          level: 'VILLAGE' as MapLevel
-        })).filter((item: any) => item.coordinates) : [];
+        const villages = Array.isArray(villageData) ? villageData.map((item: any) => {
+          let coordinates = coordinatesMap[item.village];
+          
+          // Fallback coordinate generation for missing villages
+          if (!coordinates) {
+            // Try to use sub-district coordinates as fallback
+            const subDistrictCoords = coordinatesMap[item.subDistrict];
+            if (subDistrictCoords) {
+              const [lng, lat] = subDistrictCoords;
+              coordinates = [
+                lng + (Math.random() - 0.5) * 0.05, // ±0.025 degree variation
+                lat + (Math.random() - 0.5) * 0.05
+              ];
+              console.log(`Generated fallback coordinates for ${item.village}: [${coordinates[1]}, ${coordinates[0]}]`);
+            }
+          }
+          
+          return {
+            name: item.village,
+            count: item.count,
+            coordinates: coordinates,
+            level: 'VILLAGE' as MapLevel
+          };
+        }).filter((item: any) => item.coordinates) : [];
+        
         console.log(`Showing ${villages.length} villages at zoom ${zoomLevel}`);
-        console.log('Village data:', villageData);
-        console.log('Filtered villages:', villages);
+        if (villages.length === 0) {
+          console.log('No villages found with coordinates from:', villageData);
+        }
         return villages;
       default:
         return [];
@@ -437,16 +508,29 @@ export default function Map() {
   const handleMarkerClick = (data: MapData) => {
     console.log('Marker clicked:', data.name, 'Level:', data.level);
     
-    // Simply zoom to the location and let the zoom level determine what data to show
     if (mapRef.current && data.coordinates) {
       const [lng, lat] = data.coordinates;
       
-      // Determine appropriate zoom level for the next detail level
-      let targetZoom = mapRef.current.getZoom() + 3;
-      if (data.level === 'COUNTRY') targetZoom = 7;
-      else if (data.level === 'STATE') targetZoom = 11;
+      // Determine appropriate zoom level for drilling down to next level
+      let targetZoom: number;
+      switch (data.level) {
+        case 'COUNTRY':
+          targetZoom = 6; // Zoom to state level
+          break;
+        case 'STATE':
+          targetZoom = 9; // Zoom to district level
+          break;
+        case 'DISTRICT':
+          targetZoom = 11; // Zoom to sub-district level
+          break;
+        case 'SUB_DISTRICT':
+          targetZoom = 13; // Zoom to village level
+          break;
+        default:
+          targetZoom = Math.min(mapRef.current.getZoom() + 2, 15);
+      }
       
-      console.log(`Zooming to [${lat}, ${lng}] at zoom ${targetZoom}`);
+      console.log(`Zooming to [${lat}, ${lng}] at zoom ${targetZoom} for ${data.level} -> next level`);
       mapRef.current.setView([lat, lng], targetZoom);
     }
   };
