@@ -118,6 +118,7 @@ export default function Map() {
       'Bankura': [87.1, 23.2],
       'Purulia': [86.4, 23.3],
       'Paschim Medinipur': [87.3, 22.4],
+      'North 24 Parganas': [88.6, 22.8],
       
       // Districts - Odisha
       'Khordha': [85.8, 20.2],
