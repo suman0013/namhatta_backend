@@ -1244,7 +1244,7 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
     let whereConditions = [
-      sql`${addresses.districtNameEnglish} IS NOT NULL`,
+      sql`${addresses.stateNameEnglish} IS NOT NULL`, // Changed to include all namhattas with state info
       ne(namhattas.status, 'Rejected')
     ];
     
@@ -1253,7 +1253,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     const results = await db.select({
-      district: addresses.districtNameEnglish,
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
       state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
@@ -1261,10 +1261,14 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
       .where(and(...whereConditions))
-      .groupBy(addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
+      .groupBy(
+        sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
+        addresses.stateNameEnglish, 
+        addresses.country
+      );
 
     return results.map(result => ({
-      district: result.district || 'Unknown',
+      district: result.district || 'Unknown District', // Handle missing district data
       state: result.state || 'Unknown',
       country: result.country || 'Unknown',
       count: result.count
@@ -1273,7 +1277,7 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
     let whereConditions = [
-      sql`${addresses.subdistrictNameEnglish} IS NOT NULL`,
+      sql`${addresses.districtNameEnglish} IS NOT NULL`, // Changed to include all namhattas with district info
       ne(namhattas.status, 'Rejected')
     ];
     
@@ -1282,7 +1286,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     const results = await db.select({
-      subDistrict: addresses.subdistrictNameEnglish,
+      subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
       district: addresses.districtNameEnglish,
       state: addresses.stateNameEnglish,
       country: addresses.country,
@@ -1291,10 +1295,15 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
       .where(and(...whereConditions))
-      .groupBy(addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
+      .groupBy(
+        sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`,
+        addresses.districtNameEnglish, 
+        addresses.stateNameEnglish, 
+        addresses.country
+      );
 
     return results.map(result => ({
-      subDistrict: result.subDistrict || 'Unknown',
+      subDistrict: result.subDistrict || 'Unknown Sub-District',
       district: result.district || 'Unknown',
       state: result.state || 'Unknown',
       country: result.country || 'Unknown',
@@ -1304,7 +1313,7 @@ export class DatabaseStorage implements IStorage {
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
     let whereConditions = [
-      sql`${addresses.villageNameEnglish} IS NOT NULL`,
+      sql`${addresses.subdistrictNameEnglish} IS NOT NULL`, // Changed to include all namhattas with sub-district info
       ne(namhattas.status, 'Rejected')
     ];
     
@@ -1313,7 +1322,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     const results = await db.select({
-      village: addresses.villageNameEnglish,
+      village: sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`.as('village'),
       subDistrict: addresses.subdistrictNameEnglish,
       district: addresses.districtNameEnglish,
       state: addresses.stateNameEnglish,
@@ -1323,10 +1332,16 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
       .where(and(...whereConditions))
-      .groupBy(addresses.villageNameEnglish, addresses.subdistrictNameEnglish, addresses.districtNameEnglish, addresses.stateNameEnglish, addresses.country);
+      .groupBy(
+        sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`,
+        addresses.subdistrictNameEnglish, 
+        addresses.districtNameEnglish, 
+        addresses.stateNameEnglish, 
+        addresses.country
+      );
 
     return results.map(result => ({
-      village: result.village || 'Unknown',
+      village: result.village || 'Unknown Village',
       subDistrict: result.subDistrict || 'Unknown',
       district: result.district || 'Unknown',
       state: result.state || 'Unknown',
