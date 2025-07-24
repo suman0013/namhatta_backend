@@ -437,7 +437,43 @@ export class DatabaseStorage implements IStorage {
 
     // District filtering for DISTRICT_SUPERVISOR
     if (filters.allowedDistricts && filters.allowedDistricts.length > 0) {
-      addressFilters.push(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
+      // Convert district codes to district names for filtering
+      // The allowedDistricts might contain either codes or names, handle both cases
+      const districtNames = [];
+      const districtCodes = [];
+      
+      for (const district of filters.allowedDistricts) {
+        // If it's a numeric code, treat as district code
+        if (/^\d+$/.test(district)) {
+          districtCodes.push(district);
+        } else {
+          // Otherwise treat as district name
+          districtNames.push(district);
+        }
+      }
+      
+      // If we have district codes, convert them to names by querying the addresses table
+      if (districtCodes.length > 0) {
+        const codeToNameResults = await db
+          .selectDistinct({ 
+            districtCode: addresses.districtCode,
+            districtNameEnglish: addresses.districtNameEnglish 
+          })
+          .from(addresses)
+          .where(inArray(addresses.districtCode, districtCodes));
+        
+        // Add the corresponding district names
+        codeToNameResults.forEach(result => {
+          if (result.districtNameEnglish) {
+            districtNames.push(result.districtNameEnglish);
+          }
+        });
+      }
+      
+      // Filter by district names
+      if (districtNames.length > 0) {
+        addressFilters.push(inArray(addresses.districtNameEnglish, districtNames));
+      }
     }
 
     // If we have address filters, create a subquery to filter namhattas by address
