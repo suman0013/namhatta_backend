@@ -705,14 +705,14 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                   <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
                   <div className="flex gap-2">
                     <SearchableSelect
-                      options={(shraddhakutirs || []).map((sk) => `${sk.name} (${sk.districtCode})`)}
+                      options={(shraddhakutirs || []).map((sk) => `${sk.name} - ${sk.id}`)}
                       value={
                         shraddhakutirs?.find(sk => sk.id === watch("shraddhakutirId"))
-                          ? `${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.name} (${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.districtCode})`
+                          ? `${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.name} - ${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.id}`
                           : ""
                       }
                       onValueChange={(value: string) => {
-                        const selectedShraddhakutir = shraddhakutirs?.find(sk => `${sk.name} (${sk.districtCode})` === value);
+                        const selectedShraddhakutir = shraddhakutirs?.find(sk => `${sk.name} - ${sk.id}` === value);
                         setValue("shraddhakutirId", selectedShraddhakutir?.id);
                       }}
                       placeholder="Search Shraddhakutir..."

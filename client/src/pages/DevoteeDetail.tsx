@@ -593,7 +593,9 @@ export default function DevoteeDetail() {
                       <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Shraddhakutir</p>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white text-sm">
-                      {shraddhakutirs?.find(sk => sk.id === devotee.shraddhakutirId)?.name || "Loading..."}
+                      {shraddhakutirs?.find(sk => sk.id === devotee.shraddhakutirId)?.name 
+                        ? `${shraddhakutirs.find(sk => sk.id === devotee.shraddhakutirId)!.name} - ${devotee.shraddhakutirId}`
+                        : "Loading..."}
                     </p>
                   </div>
                 )}
