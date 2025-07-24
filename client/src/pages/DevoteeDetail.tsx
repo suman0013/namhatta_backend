@@ -36,6 +36,8 @@ import {
 import type { Devotee } from "@/lib/types";
 import DevoteeForm from "@/components/forms/DevoteeForm";
 
+
+
 export default function DevoteeDetail() {
   const { id } = useParams();
   const [location] = useLocation();
@@ -70,6 +72,11 @@ export default function DevoteeDetail() {
     queryKey: ["/api/devotees", id, "status-history"],
     queryFn: () => api.getDevoteeStatusHistory(parseInt(id!)),
     enabled: !!id,
+  });
+
+  const { data: shraddhakutirs } = useQuery({
+    queryKey: ["/api/shraddhakutirs"],
+    queryFn: () => api.getShraddhakutirs(),
   });
 
   const upgradeStatusMutation = useMutation({
@@ -586,7 +593,7 @@ export default function DevoteeDetail() {
                       <p className="text-xs font-medium text-slate-600 dark:text-slate-400">Shraddhakutir</p>
                     </div>
                     <p className="font-medium text-gray-900 dark:text-white text-sm">
-                      Shraddhakutir ID: {devotee.shraddhakutirId}
+                      {shraddhakutirs?.find(sk => sk.id === devotee.shraddhakutirId)?.name || "Loading..."}
                     </p>
                   </div>
                 )}
