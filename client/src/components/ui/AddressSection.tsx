@@ -117,12 +117,14 @@ export default function AddressSection({
           {required && <Badge variant="destructive" className="text-xs">Required</Badge>}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {/* Address fields in the specified order */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Country */}
-          <div>
-            <Label htmlFor="country">Country {required && "*"}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="country" className="text-sm font-medium">
+              Country {required && <span className="text-red-500">*</span>}
+            </Label>
             <SearchableSelect
               value={address.country || ""}
               onValueChange={(value) => onAddressChange("country", value)}
@@ -136,8 +138,10 @@ export default function AddressSection({
           </div>
 
           {/* Pincode - searchable */}
-          <div>
-            <Label htmlFor="postalCode">Postal Code {required && "*"}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="postalCode" className="text-sm font-medium">
+              Postal Code {required && <span className="text-red-500">*</span>}
+            </Label>
             <SearchablePincodeSelect
               value={address.postalCode || ""}
               onValueChange={handlePincodeChange}
@@ -154,8 +158,10 @@ export default function AddressSection({
           </div>
 
           {/* State - auto-populated (read-only) */}
-          <div>
-            <Label htmlFor="state">State {required && "*"}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="state" className="text-sm font-medium">
+              State {required && <span className="text-red-500">*</span>}
+            </Label>
             <Input
               value={address.state || ""}
               placeholder={isLoadingPincode ? "Loading..." : "Auto-populated from postal code"}
@@ -168,8 +174,10 @@ export default function AddressSection({
           </div>
 
           {/* District - auto-populated (read-only) */}
-          <div>
-            <Label htmlFor="district">District {required && "*"}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="district" className="text-sm font-medium">
+              District {required && <span className="text-red-500">*</span>}
+            </Label>
             <Input
               value={address.district || ""}
               placeholder={isLoadingPincode ? "Loading..." : "Auto-populated from postal code"}
@@ -182,8 +190,10 @@ export default function AddressSection({
           </div>
 
           {/* Sub-District - user selectable */}
-          <div>
-            <Label htmlFor="subDistrict">Sub-District {required && "*"}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="subDistrict" className="text-sm font-medium">
+              Sub-District {required && <span className="text-red-500">*</span>}
+            </Label>
             <SearchableSelect
               value={address.subDistrict || ""}
               onValueChange={(value) => onAddressChange("subDistrict", value)}
@@ -197,8 +207,10 @@ export default function AddressSection({
           </div>
 
           {/* Village - user selectable */}
-          <div>
-            <Label htmlFor="village">Village {required && "*"}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="village" className="text-sm font-medium">
+              Village {required && <span className="text-red-500">*</span>}
+            </Label>
             <SearchableSelect
               value={address.village || ""}
               onValueChange={(value) => onAddressChange("village", value)}
@@ -212,14 +224,15 @@ export default function AddressSection({
           </div>
         </div>
 
-        {/* Landmark field */}
-        <div>
-          <Label htmlFor="landmark">Landmark</Label>
+        {/* Landmark field - full width */}
+        <div className="space-y-2">
+          <Label htmlFor="landmark" className="text-sm font-medium">Landmark</Label>
           <Textarea
             value={address.landmark || ""}
             onChange={(e) => onAddressChange("landmark", e.target.value)}
             placeholder="Enter landmark or additional details"
             disabled={disabled}
+            className="min-h-[80px]"
           />
         </div>
       </CardContent>
