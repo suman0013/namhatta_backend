@@ -4,7 +4,7 @@ import { neon } from '@neondatabase/serverless';
 import * as schema from "@shared/schema";
 
 // Load environment variables from .env file
-dotenv.config();
+dotenv.config({ path: ['.env.local', '.env'] });
 
 // Get database connection string from environment variable
 let connectionString = process.env.DATABASE_URL;
