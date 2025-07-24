@@ -55,6 +55,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   });
 
   const [address, setAddress] = useState<Address>(namhatta?.address || {});
+  const [showAddressValidation, setShowAddressValidation] = useState(false);
   const [codeValidation, setCodeValidation] = useState<{
     isChecking: boolean;
     isValid: boolean | null;
@@ -173,6 +174,11 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     console.log("Namhatta address change:", field, "->", value, "New address:", newAddress);
     setAddress(newAddress);
     setValue("address", newAddress);
+    
+    // Clear validation errors when user starts fixing them
+    if (showAddressValidation && value) {
+      setShowAddressValidation(false);
+    }
   };
 
   // Handle batch address changes (for pincode auto-population)
@@ -181,6 +187,11 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     console.log("Namhatta batch address change:", newAddressFields, "New address:", newAddress);
     setAddress(newAddress);
     setValue("address", newAddress);
+    
+    // Clear validation errors when batch changes happen (pincode auto-population)
+    if (showAddressValidation) {
+      setShowAddressValidation(false);
+    }
   };
 
   const onSubmit = (data: FormData) => {
@@ -191,6 +202,28 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
         description: "Please choose a unique code before submitting.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Validate required address fields
+    const requiredAddressFields = ['country', 'postalCode', 'state', 'district', 'subDistrict', 'village'];
+    const missingFields = requiredAddressFields.filter(field => !address[field as keyof Address]);
+    
+    if (missingFields.length > 0) {
+      const fieldNames = missingFields.map(field => {
+        switch (field) {
+          case 'postalCode': return 'Postal Code';
+          case 'subDistrict': return 'Sub-District';
+          default: return field.charAt(0).toUpperCase() + field.slice(1);
+        }
+      });
+      
+      toast({
+        title: "Validation Error",
+        description: `Please fill in all required address fields: ${fieldNames.join(', ')}`,
+        variant: "destructive",
+      });
+      setShowAddressValidation(true);
       return;
     }
 
@@ -334,11 +367,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   />
                 </div>
                 <div>
-                  <Label htmlFor="secretary">Secretary</Label>
+                  <Label htmlFor="secretary">Secretary *</Label>
                   <Input
-                    {...register("secretary")}
+                    {...register("secretary", { required: "Secretary is required" })}
                     placeholder="Enter Secretary name"
                   />
+                  {errors.secretary && (
+                    <p className="text-sm text-red-500 mt-1">{errors.secretary.message}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -351,8 +387,8 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
               address={address}
               onAddressChange={handleAddressChange}
               onBatchAddressChange={handleBatchAddressChange}
-              required={false}
-              showValidation={false}
+              required={true}
+              showValidation={showAddressValidation}
             />
 
             <Separator />
