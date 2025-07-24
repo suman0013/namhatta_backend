@@ -109,7 +109,16 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   const createMutation = useMutation({
     mutationFn: (data: Partial<Namhatta>) => api.createNamhatta(data),
     onSuccess: () => {
+      // Invalidate namhatta queries
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
+      // Invalidate map data queries to refresh geographic counts
+      queryClient.invalidateQueries({ queryKey: ["/api/map/countries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/states"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/districts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/sub-districts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/villages"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       toast({
         title: "Success",
         description: "Namhatta created successfully",
@@ -130,8 +139,17 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   const updateMutation = useMutation({
     mutationFn: (data: Partial<Namhatta>) => api.updateNamhatta(namhatta!.id, data),
     onSuccess: () => {
+      // Invalidate namhatta queries
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
       queryClient.invalidateQueries({ queryKey: [`/api/namhattas/${namhatta!.id}`] });
+      // Invalidate map data queries to refresh geographic counts
+      queryClient.invalidateQueries({ queryKey: ["/api/map/countries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/states"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/districts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/sub-districts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/villages"] });
+      // Invalidate dashboard data
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       toast({
         title: "Success",
         description: "Namhatta updated successfully",

@@ -108,6 +108,12 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       // Also invalidate the general updates list
       queryClient.invalidateQueries({ queryKey: ["/api/updates"] });
+      // Invalidate map data queries to refresh counts if needed
+      queryClient.invalidateQueries({ queryKey: ["/api/map/countries"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/states"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/districts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/sub-districts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/map/villages"] });
       toast({
         title: "Success",
         description: "Update posted successfully",
