@@ -375,6 +375,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(namhatta);
   });
 
+  // Check if namhatta code exists
+  app.get("/api/namhattas/check-code/:code", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const code = req.params.code;
+      const exists = await storage.checkNamhattaCodeExists(code);
+      res.json({ exists });
+    } catch (error) {
+      res.status(500).json({ message: "Error checking code uniqueness", error: error.message });
+    }
+  });
+
   app.post("/api/namhattas", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     try {
       // Extract address and other fields separately
@@ -392,7 +403,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const namhatta = await storage.createNamhatta(namhattaDataWithAddress);
       res.status(201).json(namhatta);
     } catch (error) {
-      res.status(400).json({ message: "Invalid namhatta data", error: error.message });
+      // Return appropriate error status based on error type
+      if (error.message && error.message.includes('already exists')) {
+        res.status(409).json({ message: error.message });
+      } else {
+        res.status(400).json({ message: "Invalid namhatta data", error: error.message });
+      }
     }
   });
 

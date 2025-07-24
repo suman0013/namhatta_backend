@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { api } from "@/services/api";
@@ -10,7 +10,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Save, X } from "lucide-react";
+import { Save, X, AlertCircle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AddressSection from "@/components/ui/AddressSection";
 import type { Namhatta, Address } from "@/lib/types";
@@ -55,6 +55,52 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   });
 
   const [address, setAddress] = useState<Address>(namhatta?.address || {});
+  const [codeValidation, setCodeValidation] = useState<{
+    isChecking: boolean;
+    isValid: boolean | null;
+    message: string;
+  }>({ isChecking: false, isValid: null, message: "" });
+
+  const currentCode = watch("code");
+
+  // Debounced code validation
+  useEffect(() => {
+    if (!currentCode || isEditing) return;
+
+    const timeoutId = setTimeout(async () => {
+      if (currentCode.length < 2) {
+        setCodeValidation({ isChecking: false, isValid: null, message: "" });
+        return;
+      }
+
+      setCodeValidation({ isChecking: true, isValid: null, message: "Checking..." });
+
+      try {
+        const result = await api.checkNamhattaCodeExists(currentCode);
+        if (result.exists) {
+          setCodeValidation({ 
+            isChecking: false, 
+            isValid: false, 
+            message: "This code already exists. Please choose a unique code." 
+          });
+        } else {
+          setCodeValidation({ 
+            isChecking: false, 
+            isValid: true, 
+            message: "Code is available!" 
+          });
+        }
+      } catch (error) {
+        setCodeValidation({ 
+          isChecking: false, 
+          isValid: null, 
+          message: "Error checking code" 
+        });
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [currentCode, isEditing]);
 
 
 
@@ -70,10 +116,11 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
       onSuccess?.();
       onClose();
     },
-    onError: () => {
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Failed to create namhatta";
       toast({
         title: "Error",
-        description: "Failed to create namhatta",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -137,6 +184,16 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
   };
 
   const onSubmit = (data: FormData) => {
+    // Prevent submission if code validation failed (for new namhattas)
+    if (!isEditing && codeValidation.isValid === false) {
+      toast({
+        title: "Validation Error",
+        description: "Please choose a unique code before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const submitData = {
       ...data,
       address,
@@ -177,12 +234,43 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                 </div>
                 <div>
                   <Label htmlFor="code">Namhatta Code *</Label>
-                  <Input
-                    {...register("code", { required: "Code is required" })}
-                    placeholder="Enter namhatta code"
-                  />
+                  <div className="relative">
+                    <Input
+                      {...register("code", { required: "Code is required" })}
+                      placeholder="Enter namhatta code"
+                      className={`${
+                        !isEditing && codeValidation.isValid === false 
+                          ? "border-red-500 focus:border-red-500" 
+                          : !isEditing && codeValidation.isValid === true 
+                          ? "border-green-500 focus:border-green-500" 
+                          : ""
+                      }`}
+                    />
+                    {!isEditing && currentCode && currentCode.length >= 2 && (
+                      <div className="absolute right-3 top-3">
+                        {codeValidation.isChecking ? (
+                          <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
+                        ) : codeValidation.isValid === false ? (
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                        ) : codeValidation.isValid === true ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
                   {errors.code && (
                     <p className="text-sm text-red-500 mt-1">{errors.code.message}</p>
+                  )}
+                  {!isEditing && codeValidation.message && (
+                    <p className={`text-sm mt-1 ${
+                      codeValidation.isValid === false 
+                        ? "text-red-500" 
+                        : codeValidation.isValid === true 
+                        ? "text-green-500" 
+                        : "text-gray-500"
+                    }`}>
+                      {codeValidation.message}
+                    </p>
                   )}
                 </div>
                 <div>
@@ -274,7 +362,10 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
               <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                disabled={isLoading || (!isEditing && codeValidation.isValid === false)}
+              >
                 <Save className="h-4 w-4 mr-2" />
                 {isLoading ? "Saving..." : (isEditing ? "Update Namhatta" : "Create Namhatta")}
               </Button>

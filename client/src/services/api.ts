@@ -169,6 +169,11 @@ export const api = {
     return res.json();
   },
 
+  checkNamhattaCodeExists: async (code: string): Promise<{ exists: boolean }> => {
+    const res = await apiRequest("GET", `/api/namhattas/check-code/${encodeURIComponent(code)}`);
+    return res.json();
+  },
+
   createNamhatta: async (namhatta: Partial<Namhatta>): Promise<Namhatta> => {
     const res = await apiRequest("POST", "/api/namhattas", namhatta);
     return res.json();

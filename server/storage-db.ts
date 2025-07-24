@@ -573,35 +573,56 @@ export class DatabaseStorage implements IStorage {
     return namhatta;
   }
 
+  async checkNamhattaCodeExists(code: string): Promise<boolean> {
+    const result = await db.select().from(namhattas).where(eq(namhattas.code, code)).limit(1);
+    return result.length > 0;
+  }
+
   async createNamhatta(namhattaData: any): Promise<Namhatta> {
     // Extract address information from the request data
     const { address, landmark, ...namhattaDetails } = namhattaData;
     
-    // Create the namhatta record first
-    const result = await db.insert(namhattas).values(namhattaDetails).returning();
-    const namhatta = result[0];
-    
-    // If address information is provided, store it in normalized tables
-    if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
-      // Use findOrCreateAddress method instead of directly creating
-      const addressId = await this.findOrCreateAddress({
-        country: address.country,
-        state: address.state,
-        district: address.district,
-        subDistrict: address.subDistrict,
-        village: address.village,
-        postalCode: address.postalCode
-      });
-      
-      // Link namhatta to address with landmark
-      await db.insert(namhattaAddresses).values({
-        namhattaId: namhatta.id,
-        addressId: addressId,
-        landmark: landmark || address.landmark
-      });
+    // Check if code already exists
+    if (namhattaDetails.code) {
+      const codeExists = await this.checkNamhattaCodeExists(namhattaDetails.code);
+      if (codeExists) {
+        throw new Error(`Namhatta code '${namhattaDetails.code}' already exists. Please choose a unique code.`);
+      }
     }
     
-    return namhatta;
+    try {
+      // Create the namhatta record first
+      const result = await db.insert(namhattas).values(namhattaDetails).returning();
+      const namhatta = result[0];
+      
+      // If address information is provided, store it in normalized tables
+      if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
+        // Use findOrCreateAddress method instead of directly creating
+        const addressId = await this.findOrCreateAddress({
+          country: address.country,
+          state: address.state,
+          district: address.district,
+          subDistrict: address.subDistrict,
+          village: address.village,
+          postalCode: address.postalCode
+        });
+        
+        // Link namhatta to address with landmark
+        await db.insert(namhattaAddresses).values({
+          namhattaId: namhatta.id,
+          addressId: addressId,
+          landmark: landmark || address.landmark
+        });
+      }
+      
+      return namhatta;
+    } catch (error) {
+      // Handle database unique constraint violation
+      if (error.message && error.message.includes('unique constraint') && error.message.includes('code')) {
+        throw new Error(`Namhatta code '${namhattaDetails.code}' already exists. Please choose a unique code.`);
+      }
+      throw error;
+    }
   }
 
   async updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta> {
