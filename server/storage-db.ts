@@ -1243,8 +1243,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
+    // Include ALL namhattas from state level, even if district data is missing
     let whereConditions = [
-      sql`${addresses.stateNameEnglish} IS NOT NULL`, // Changed to include all namhattas with state info
       ne(namhattas.status, 'Rejected')
     ];
     
@@ -1254,8 +1254,8 @@ export class DatabaseStorage implements IStorage {
     
     const results = await db.select({
       district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
-      state: addresses.stateNameEnglish,
-      country: addresses.country,
+      state: sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`.as('state'),
+      country: sql`COALESCE(${addresses.country}, 'Unknown Country')`.as('country'),
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
@@ -1263,33 +1263,33 @@ export class DatabaseStorage implements IStorage {
       .where(and(...whereConditions))
       .groupBy(
         sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
-        addresses.stateNameEnglish, 
-        addresses.country
+        sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`, 
+        sql`COALESCE(${addresses.country}, 'Unknown Country')`
       );
 
     return results.map(result => ({
-      district: result.district || 'Unknown District', // Handle missing district data
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
+      district: result.district || 'Unknown District',
+      state: result.state || 'Unknown State',
+      country: result.country || 'Unknown Country',
       count: result.count
     }));
   }
 
   async getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
+    // Include ALL namhattas from district level, even if sub-district data is missing
     let whereConditions = [
-      sql`${addresses.districtNameEnglish} IS NOT NULL`, // Changed to include all namhattas with district info
       ne(namhattas.status, 'Rejected')
     ];
     
     if (district) {
-      whereConditions.push(eq(addresses.districtNameEnglish, district));
+      whereConditions.push(sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District') = ${district}`);
     }
     
     const results = await db.select({
       subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
-      district: addresses.districtNameEnglish,
-      state: addresses.stateNameEnglish,
-      country: addresses.country,
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      state: sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`.as('state'),
+      country: sql`COALESCE(${addresses.country}, 'Unknown Country')`.as('country'),
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
@@ -1297,36 +1297,36 @@ export class DatabaseStorage implements IStorage {
       .where(and(...whereConditions))
       .groupBy(
         sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`,
-        addresses.districtNameEnglish, 
-        addresses.stateNameEnglish, 
-        addresses.country
+        sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
+        sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`, 
+        sql`COALESCE(${addresses.country}, 'Unknown Country')`
       );
 
     return results.map(result => ({
       subDistrict: result.subDistrict || 'Unknown Sub-District',
-      district: result.district || 'Unknown',
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
+      district: result.district || 'Unknown District',
+      state: result.state || 'Unknown State',
+      country: result.country || 'Unknown Country',
       count: result.count
     }));
   }
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
+    // Include ALL namhattas from sub-district level, even if village data is missing
     let whereConditions = [
-      sql`${addresses.subdistrictNameEnglish} IS NOT NULL`, // Changed to include all namhattas with sub-district info
       ne(namhattas.status, 'Rejected')
     ];
     
     if (subDistrict) {
-      whereConditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
+      whereConditions.push(sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District') = ${subDistrict}`);
     }
     
     const results = await db.select({
       village: sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`.as('village'),
-      subDistrict: addresses.subdistrictNameEnglish,
-      district: addresses.districtNameEnglish,
-      state: addresses.stateNameEnglish,
-      country: addresses.country,
+      subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      state: sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`.as('state'),
+      country: sql`COALESCE(${addresses.country}, 'Unknown Country')`.as('country'),
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
@@ -1334,18 +1334,18 @@ export class DatabaseStorage implements IStorage {
       .where(and(...whereConditions))
       .groupBy(
         sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`,
-        addresses.subdistrictNameEnglish, 
-        addresses.districtNameEnglish, 
-        addresses.stateNameEnglish, 
-        addresses.country
+        sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`, 
+        sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
+        sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`, 
+        sql`COALESCE(${addresses.country}, 'Unknown Country')`
       );
 
     return results.map(result => ({
       village: result.village || 'Unknown Village',
-      subDistrict: result.subDistrict || 'Unknown',
-      district: result.district || 'Unknown',
-      state: result.state || 'Unknown',
-      country: result.country || 'Unknown',
+      subDistrict: result.subDistrict || 'Unknown Sub-District',
+      district: result.district || 'Unknown District',
+      state: result.state || 'Unknown State',
+      country: result.country || 'Unknown Country',
       count: result.count
     }));
   }
