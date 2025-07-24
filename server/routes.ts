@@ -415,11 +415,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/namhattas/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
-      const namhattaData = insertNamhattaSchema.partial().parse(req.body);
-      const namhatta = await storage.updateNamhatta(id, namhattaData);
+      // Extract address and other fields separately (same as POST route)
+      const { address, ...namhattaFields } = req.body;
+      
+      // Validate only the namhatta fields against schema
+      const validatedNamhattaData = insertNamhattaSchema.partial().parse(namhattaFields);
+      
+      // Add address back to the data
+      const namhattaDataWithAddress = {
+        ...validatedNamhattaData,
+        address: address
+      };
+      
+      const namhatta = await storage.updateNamhatta(id, namhattaDataWithAddress);
       res.json(namhatta);
     } catch (error) {
-      res.status(400).json({ message: "Invalid namhatta data", error });
+      res.status(400).json({ message: "Invalid namhatta data", error: error.message });
     }
   });
 

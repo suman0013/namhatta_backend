@@ -661,9 +661,38 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta> {
-    const result = await db.update(namhattas).set(namhatta).where(eq(namhattas.id, id)).returning();
-    return result[0];
+  async updateNamhatta(id: number, namhattaData: any): Promise<Namhatta> {
+    // Extract address information from the request data
+    const { address, landmark, ...namhattaDetails } = namhattaData;
+    
+    // Update the namhatta record first
+    const result = await db.update(namhattas).set(namhattaDetails).where(eq(namhattas.id, id)).returning();
+    const namhatta = result[0];
+    
+    // If address information is provided, update it in normalized tables
+    if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
+      // Find or create the new address
+      const addressId = await this.findOrCreateAddress({
+        country: address.country,
+        state: address.state,
+        district: address.district,
+        subDistrict: address.subDistrict,
+        village: address.village,
+        postalCode: address.postalCode
+      });
+      
+      // Delete existing address link and insert new one
+      await db.delete(namhattaAddresses).where(eq(namhattaAddresses.namhattaId, id));
+      await db.insert(namhattaAddresses).values({
+        namhattaId: id,
+        addressId: addressId,
+        landmark: landmark || address.landmark
+      });
+      
+      console.log(`Updated namhatta ${id} with new address ID ${addressId} and landmark: ${landmark || address.landmark}`);
+    }
+    
+    return namhatta;
   }
 
   async approveNamhatta(id: number): Promise<void> {
