@@ -91,10 +91,10 @@ export class DatabaseStorage implements IStorage {
         addressFilterConditions.push(eq(addresses.country, filters.country));
       }
       if (filters.state) {
-        addressFilterConditions.push(eq(addresses.state, filters.state));
+        addressFilterConditions.push(eq(addresses.stateNameEnglish, filters.state));
       }
       if (filters.district) {
-        addressFilterConditions.push(eq(addresses.district, filters.district));
+        addressFilterConditions.push(eq(addresses.districtNameEnglish, filters.district));
       }
       
       // Get devotees who match the address filters in either present or permanent address
@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
         .select({ devoteeId: devoteeAddresses.devoteeId })
         .from(devoteeAddresses)
         .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
-        .where(inArray(addresses.district, filters.allowedDistricts));
+        .where(inArray(addresses.districtNameEnglish, filters.allowedDistricts));
       
       whereConditions.push(
         inArray(devotees.id, districtSubquery)
