@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { X, Home, Users, Layers, Building, Bell, Settings, MapPin } from "lucide-react";
+import { X, Home, Users, Layers, Bell, Settings, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +16,6 @@ const navigationItems = [
   { href: "/updates", label: "Updates", icon: Bell },
   { href: "/map", label: "Map View", icon: MapPin },
   { href: "/statuses", label: "Statuses", icon: Layers },
-  { href: "/shraddhakutirs", label: "Shraddhakutirs", icon: Building },
 ];
 
 export default function Sidebar({ onClose }: SidebarProps) {

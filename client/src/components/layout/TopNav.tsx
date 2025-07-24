@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Users, Layers, Building, Bell, Settings, MapPin } from "lucide-react";
+import { Home, Users, Layers, Bell, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -10,7 +10,6 @@ const navigationItems = [
   { href: "/updates", label: "Updates", shortLabel: "Upd", icon: Bell },
   { href: "/map", label: "Map View", shortLabel: "Map", icon: MapPin },
   { href: "/statuses", label: "Statuses", shortLabel: "Stat", icon: Layers },
-  { href: "/shraddhakutirs", label: "Shraddhakutirs", shortLabel: "Shr", icon: Building },
 ];
 
 export default function TopNav() {

@@ -173,7 +173,9 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
   const createShraddhakutirMutation = useMutation({
     mutationFn: (data: any) => api.createShraddhakutir(data),
     onSuccess: (newShraddhakutir) => {
+      // Invalidate all shraddhakutir queries (including the specific district one)
       queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs", permanentAddress.district] });
       setValue("shraddhakutirId", newShraddhakutir.id);
       setShowShraddhakutirForm(false);
       setNewShraddhakutir({ name: "" });

@@ -677,32 +677,50 @@ export class DatabaseStorage implements IStorage {
   // Shraddhakutirs
   async getShraddhakutirs(district?: string): Promise<Shraddhakutir[]> {
     if (district) {
-      // Since district can be either district name or district code, we need to handle both
-      // First, get the district code from addresses table if district is a name
-      const addressQuery = db
-        .selectDistinct({ districtCode: addresses.districtCode })
-        .from(addresses)
-        .where(eq(addresses.districtNameEnglish, district));
+      console.log(`Fetching shraddhakutirs for district: "${district}"`);
       
-      const addressResults = await addressQuery;
+      // Try multiple approaches to find matching shraddhakutirs
+      // 1. Direct match with district code
+      let results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, district));
+      console.log(`Direct match results: ${results.length}`);
       
-      if (addressResults.length > 0) {
-        // If we found a matching district code, use it for filtering
-        const districtCode = addressResults[0].districtCode;
-        return await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
-      } else {
-        // If no match by name, try by exact district code match
-        let results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, district.toUpperCase()));
-        
-        // If no results with exact match, try partial matching on district code
-        if (results.length === 0) {
-          results = await db.select().from(shraddhakutirs).where(like(shraddhakutirs.districtCode, `%${district.toUpperCase()}%`));
-        }
-        
-        return results;
+      if (results.length === 0) {
+        // 2. Case-insensitive match
+        results = await db.select().from(shraddhakutirs).where(sql`UPPER(${shraddhakutirs.districtCode}) = UPPER(${district})`);
+        console.log(`Case-insensitive match results: ${results.length}`);
       }
+      
+      if (results.length === 0) {
+        // 3. Try to get district code from addresses table using district name
+        const addressQuery = db
+          .selectDistinct({ districtCode: addresses.districtCode })
+          .from(addresses)
+          .where(eq(addresses.districtNameEnglish, district));
+        
+        const addressResults = await addressQuery;
+        console.log(`Address lookup results: ${addressResults.length}`);
+        
+        if (addressResults.length > 0) {
+          const districtCode = addressResults[0].districtCode;
+          console.log(`Found district code from address: "${districtCode}"`);
+          results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
+          console.log(`District code match results: ${results.length}`);
+        }
+      }
+      
+      if (results.length === 0) {
+        // 4. Partial matching as last resort
+        results = await db.select().from(shraddhakutirs).where(sql`${shraddhakutirs.districtCode} ILIKE ${'%' + district + '%'}`);
+        console.log(`Partial match results: ${results.length}`);
+      }
+      
+      console.log(`Final results for district "${district}":`, results.map(r => ({ id: r.id, name: r.name, districtCode: r.districtCode })));
+      return results;
     }
-    return await db.select().from(shraddhakutirs);
+    
+    const allResults = await db.select().from(shraddhakutirs);
+    console.log(`All shraddhakutirs:`, allResults.map(r => ({ id: r.id, name: r.name, districtCode: r.districtCode })));
+    return allResults;
   }
 
   async createShraddhakutir(shraddhakutir: InsertShraddhakutir): Promise<Shraddhakutir> {
