@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Eye, EyeOff, LogIn } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Heart, Users, Crown } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -59,13 +59,26 @@ export default function LoginPage() {
 
       <Card className="w-full max-w-md mx-4 relative z-10 glass-card border-white/20">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <LogIn className="w-8 h-8 text-white" />
+          <div className="relative mx-auto mb-4">
+            {/* Main spiritual center icon */}
+            <div className="w-20 h-20 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 rounded-full flex items-center justify-center shadow-xl">
+              <Heart className="w-10 h-10 text-white drop-shadow-md" />
+            </div>
+            {/* Small decorative icons around the main icon */}
+            <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+              <Crown className="w-4 h-4 text-white" />
+            </div>
+            <div className="absolute -bottom-1 -left-1 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg">
+              <Users className="w-4 h-4 text-white" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent mb-2">
             Namhatta Management
           </CardTitle>
-          <CardDescription className="text-slate-600 dark:text-slate-300">
+          <CardDescription className="text-slate-600 dark:text-slate-300 text-base">
+            Spiritual Center Management System
+          </CardDescription>
+          <CardDescription className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Sign in to access your dashboard
           </CardDescription>
         </CardHeader>
@@ -125,7 +138,7 @@ export default function LoginPage() {
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+              className="w-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 hover:from-orange-600 hover:via-amber-600 hover:to-yellow-600 text-white font-semibold shadow-lg"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -139,12 +152,15 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-2">Demo Credentials:</p>
-            <div className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
-              <div>Admin: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">admin / Admin@123456</code></div>
-              <div>Office: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">office1 / Office@123456</code></div>
-              <div>Supervisor: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">supervisor1 / Super@123456</code></div>
+          <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-yellow-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+            <p className="text-sm text-orange-700 dark:text-orange-300 font-medium mb-2 flex items-center gap-2">
+              <Crown className="w-4 h-4" />
+              Demo Credentials:
+            </p>
+            <div className="text-xs text-orange-600 dark:text-orange-400 space-y-1">
+              <div>Admin: <code className="bg-orange-100 dark:bg-orange-800 px-2 py-1 rounded">admin / Admin@123456</code></div>
+              <div>Office: <code className="bg-amber-100 dark:bg-amber-800 px-2 py-1 rounded">office1 / Office@123456</code></div>
+              <div>Supervisor: <code className="bg-yellow-100 dark:bg-yellow-800 px-2 py-1 rounded">supervisor1 / Super@123456</code></div>
             </div>
           </div>
         </CardContent>
