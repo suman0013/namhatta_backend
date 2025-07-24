@@ -25,8 +25,8 @@ export function SearchableSelect({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const filteredOptions = options.filter(option =>
-    option.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOptions = (options || []).filter(option =>
+    option?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {

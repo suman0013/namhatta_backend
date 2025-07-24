@@ -703,16 +703,19 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                   <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
                   <div className="flex gap-2">
                     <SearchableSelect
-                      items={(shraddhakutirs || []).map((sk) => ({
-                        value: sk.id.toString(),
-                        label: `${sk.name} (${sk.districtCode})`
-                      }))}
-                      value={watch("shraddhakutirId")?.toString() || ""}
-                      onChange={(value) => setValue("shraddhakutirId", value ? parseInt(value) : undefined)}
+                      options={(shraddhakutirs || []).map((sk) => `${sk.name} (${sk.districtCode})`)}
+                      value={
+                        shraddhakutirs?.find(sk => sk.id === watch("shraddhakutirId"))
+                          ? `${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.name} (${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.districtCode})`
+                          : ""
+                      }
+                      onValueChange={(value: string) => {
+                        const selectedShraddhakutir = shraddhakutirs?.find(sk => `${sk.name} (${sk.districtCode})` === value);
+                        setValue("shraddhakutirId", selectedShraddhakutir?.id);
+                      }}
                       placeholder="Search Shraddhakutir..."
                       className="flex-1"
                       disabled={!permanentAddress.district}
-                      emptyMessage={permanentAddress.district ? "No Shraddhakutirs found for this district" : "Please select district first"}
                     />
                     {permanentAddress.district ? (
                       <Button
