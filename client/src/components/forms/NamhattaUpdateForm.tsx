@@ -97,7 +97,7 @@ export default function NamhattaUpdateForm({ namhattaId, isOpen, onClose }: Namh
       };
       
       return api.createNamhattaUpdate({
-        namhattaId,
+        namhattaId: Number(namhattaId),
         ...processedData,
         imageUrls
       });

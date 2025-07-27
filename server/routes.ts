@@ -546,7 +546,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received update data:", JSON.stringify(req.body, null, 2));
       console.log("Date field type:", typeof req.body.date, "Value:", req.body.date);
-      const updateData = insertNamhattaUpdateSchema.parse(req.body);
+      
+      // Ensure proper type conversion for numeric fields
+      const processedData = {
+        ...req.body,
+        namhattaId: Number(req.body.namhattaId),
+        attendance: Number(req.body.attendance),
+        prasadDistribution: req.body.prasadDistribution ? Number(req.body.prasadDistribution) : undefined,
+      };
+      
+      const updateData = insertNamhattaUpdateSchema.parse(processedData);
       const update = await storage.createNamhattaUpdate(updateData);
       res.status(201).json(update);
     } catch (error) {
