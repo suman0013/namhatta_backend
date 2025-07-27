@@ -877,27 +877,29 @@ export class DatabaseStorage implements IStorage {
     count: number;
     percentage: number;
   }>> {
-    const [statusCounts, totalDevotees] = await Promise.all([
-      db.select({
-        statusId: devotees.devotionalStatusId,
-        count: count()
-      }).from(devotees).groupBy(devotees.devotionalStatusId),
-      db.select({ count: count() }).from(devotees)
-    ]);
+    // Use JOIN query to properly match devotees with their status names
+    const statusDistribution = await db
+      .select({
+        statusName: devotionalStatuses.name,
+        count: count(devotees.id)
+      })
+      .from(devotees)
+      .leftJoin(devotionalStatuses, eq(devotees.devotionalStatusId, devotionalStatuses.id))
+      .groupBy(devotionalStatuses.name)
+      .orderBy(desc(count(devotees.id)));
 
-    const total = totalDevotees[0].count;
-    const statuses = await db.select().from(devotionalStatuses);
-    
-    const distribution = statusCounts.map(item => {
-      const status = statuses.find(s => s.id === item.statusId);
-      return {
-        statusName: status?.name || "Unknown",
-        count: item.count,
-        percentage: Math.round((item.count / total) * 100)
-      };
-    });
+    // Get total count of devotees
+    const totalResult = await db.select({ count: count() }).from(devotees);
+    const total = totalResult[0].count;
 
-    return distribution.sort((a, b) => b.count - a.count);
+    // Calculate percentages and format response
+    const distribution = statusDistribution.map(item => ({
+      statusName: item.statusName || "Unknown Status",
+      count: item.count,
+      percentage: Math.round((item.count / total) * 100)
+    }));
+
+    return distribution;
   }
 
   async getDashboardSummary(): Promise<{
