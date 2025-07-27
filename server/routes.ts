@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import { storage } from "./storage-fresh";
-import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema } from "@shared/schema";
+import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema, insertGurudevSchema } from "@shared/schema";
 import { authRoutes } from "./auth/routes";
 import { authenticateJWT, authorize, validateDistrictAccess } from "./auth/middleware";
 
@@ -521,6 +521,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Status renamed successfully" });
     } catch (error) {
       res.status(404).json({ message: "Status not found" });
+    }
+  });
+
+  // Gurudevs
+  app.get("/api/gurudevs", async (req, res) => {
+    const gurudevs = await storage.getGurudevs();
+    res.json(gurudevs);
+  });
+
+  app.post("/api/gurudevs", async (req, res) => {
+    try {
+      const gurudevData = insertGurudevSchema.parse(req.body);
+      const gurudev = await storage.createGurudev(gurudevData);
+      res.status(201).json(gurudev);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid gurudev data", error });
     }
   });
 

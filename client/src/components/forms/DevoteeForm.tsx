@@ -111,6 +111,11 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
     queryFn: () => api.getStatuses(),
   });
 
+  const { data: gurudevs } = useQuery({
+    queryKey: ["/api/gurudevs"],
+    queryFn: () => api.getGurudevs(),
+  });
+
   const { data: shraddhakutirs } = useQuery({
     queryKey: ["/api/shraddhakutirs", permanentAddress.district],
     queryFn: () => api.getShraddhakutirs(permanentAddress.district),
@@ -441,6 +446,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
       permanentAddress: sameAsPresentAddress ? presentAddress : permanentAddress,
       devotionalCourses,
       devotionalStatusId: data.devotionalStatusId,
+      gurudevHarinam: data.gurudevHarinam,
+      gurudevPancharatrik: data.gurudevPancharatrik,
       harinamInitiationGurudev: data.harinamInitiationGurudev,
       pancharatrikInitiationGurudev: data.pancharatrikInitiationGurudev,
       initiatedName: data.initiatedName,
@@ -683,7 +690,20 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                 </div>
                 <div>
                   <Label htmlFor="harinamInitiationGurudev">Harinam Initiation Gurudev</Label>
-                  <Input {...register("harinamInitiationGurudev")} placeholder="Enter harinam initiation gurudev name" />
+                  <SearchableSelect
+                    options={(gurudevs || []).map((g) => `${g.title || ''} ${g.name}`.trim())}
+                    value={
+                      gurudevs?.find(g => g.id === watch("gurudevHarinam"))
+                        ? `${gurudevs.find(g => g.id === watch("gurudevHarinam"))?.title || ''} ${gurudevs.find(g => g.id === watch("gurudevHarinam"))?.name}`.trim()
+                        : ""
+                    }
+                    onValueChange={(value) => {
+                      const selectedGurudev = gurudevs?.find(g => `${g.title || ''} ${g.name}`.trim() === value);
+                      setValue("gurudevHarinam", selectedGurudev?.id);
+                      setValue("harinamInitiationGurudev", value);
+                    }}
+                    placeholder="Select harinam initiation gurudev"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="harinamDate">Harinama Initiation Date</Label>
@@ -695,7 +715,20 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                 </div>
                 <div>
                   <Label htmlFor="pancharatrikInitiationGurudev">Pancharatrik Initiation Gurudev</Label>
-                  <Input {...register("pancharatrikInitiationGurudev")} placeholder="Enter pancharatrik initiation gurudev name" />
+                  <SearchableSelect
+                    options={(gurudevs || []).map((g) => `${g.title || ''} ${g.name}`.trim())}
+                    value={
+                      gurudevs?.find(g => g.id === watch("gurudevPancharatrik"))
+                        ? `${gurudevs.find(g => g.id === watch("gurudevPancharatrik"))?.title || ''} ${gurudevs.find(g => g.id === watch("gurudevPancharatrik"))?.name}`.trim()
+                        : ""
+                    }
+                    onValueChange={(value) => {
+                      const selectedGurudev = gurudevs?.find(g => `${g.title || ''} ${g.name}`.trim() === value);
+                      setValue("gurudevPancharatrik", selectedGurudev?.id);
+                      setValue("pancharatrikInitiationGurudev", value);
+                    }}
+                    placeholder="Select pancharatrik initiation gurudev"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="pancharatrikDate">Pancharatrik Initiation Date</Label>

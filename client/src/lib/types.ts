@@ -109,6 +109,13 @@ export interface DevotionalStatus {
   createdAt: Date;
 }
 
+export interface Gurudev {
+  id: number;
+  name: string;
+  title?: string;
+  createdAt: Date;
+}
+
 export interface Shraddhakutir {
   id: number;
   name: string;

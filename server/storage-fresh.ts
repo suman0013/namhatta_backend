@@ -1,5 +1,5 @@
 import { DatabaseStorage } from "./storage-db";
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "../shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "../shared/schema";
 
 export interface IStorage {
   // Devotees
@@ -31,6 +31,10 @@ export interface IStorage {
   // Shraddhakutirs
   getShraddhakutirs(district?: string): Promise<Shraddhakutir[]>;
   createShraddhakutir(shraddhakutir: InsertShraddhakutir): Promise<Shraddhakutir>;
+
+  // Gurudevs
+  getGurudevs(): Promise<Gurudev[]>;
+  createGurudev(gurudev: InsertGurudev): Promise<Gurudev>;
 
   // Updates
   createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate>;

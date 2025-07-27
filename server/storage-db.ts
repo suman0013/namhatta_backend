@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory } from "@shared/schema";
+import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs } from "@shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
@@ -796,6 +796,16 @@ export class DatabaseStorage implements IStorage {
 
   async renameDevotionalStatus(id: number, newName: string): Promise<void> {
     await db.update(devotionalStatuses).set({ name: newName }).where(eq(devotionalStatuses.id, id));
+  }
+
+  // Gurudevs
+  async getGurudevs(): Promise<Gurudev[]> {
+    return await db.select().from(gurudevs).orderBy(asc(gurudevs.name));
+  }
+
+  async createGurudev(gurudev: InsertGurudev): Promise<Gurudev> {
+    const result = await db.insert(gurudevs).values(gurudev).returning();
+    return result[0];
   }
 
   // Shraddhakutirs

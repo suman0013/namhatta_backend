@@ -7,7 +7,8 @@ import type {
   Namhatta, 
   DevotionalStatus,
   Shraddhakutir,
-  Leader
+  Leader,
+  Gurudev
 } from "@/lib/types";
 
 export const api = {
@@ -223,6 +224,17 @@ export const api = {
 
   renameStatus: async (id: number, newName: string): Promise<void> => {
     await apiRequest("POST", `/api/statuses/${id}/rename`, { newName });
+  },
+
+  // Gurudevs
+  getGurudevs: async (): Promise<Gurudev[]> => {
+    const res = await apiRequest("GET", "/api/gurudevs");
+    return res.json();
+  },
+
+  createGurudev: async (gurudev: Partial<Gurudev>): Promise<Gurudev> => {
+    const res = await apiRequest("POST", "/api/gurudevs", gurudev);
+    return res.json();
   },
 
   // Shraddhakutirs

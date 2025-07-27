@@ -19,10 +19,8 @@ export const devotees = pgTable("devotees", {
   // Remove inline address JSON fields - use normalized address tables instead
   devotionalStatusId: integer("devotional_status_id"),
   namhattaId: integer("namhatta_id"),
-  gurudevHarinam: integer("gurudev_harinam"), // Reference to leader ID
-  gurudevPancharatrik: integer("gurudev_pancharatrik"), // Reference to leader ID
-  harinamInitiationGurudev: text("harinam_initiation_gurudev"), // Spiritual name of harinam guru
-  pancharatrikInitiationGurudev: text("pancharatrik_initiation_gurudev"), // Spiritual name of pancharatrik guru
+  harinamInitiationGurudevId: integer("harinam_initiation_gurudev_id"), // Reference to gurudevs table
+  pancharatrikInitiationGurudevId: integer("pancharatrik_initiation_gurudev_id"), // Reference to gurudevs table
   initiatedName: text("initiated_name"),
   harinamDate: text("harinam_date"), // Store as text to match OpenAPI format
   pancharatrikDate: text("pancharatrik_date"), // Store as text to match OpenAPI format
@@ -99,6 +97,14 @@ export const namhattaUpdates = pgTable("namhatta_updates", {
   facebookLink: text("facebook_link"),
   youtubeLink: text("youtube_link"),
   specialAttraction: text("special_attraction"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Gurudevs table
+export const gurudevs = pgTable("gurudevs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  title: text("title"), // HH, HG, etc.
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -218,6 +224,11 @@ export const insertNamhattaUpdateSchema = createInsertSchema(namhattaUpdates).om
   createdAt: true,
 });
 
+export const insertGurudevSchema = createInsertSchema(gurudevs).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertLeaderSchema = createInsertSchema(leaders).omit({
   id: true,
   createdAt: true,
@@ -296,6 +307,9 @@ export type InsertShraddhakutir = z.infer<typeof insertShraddhakutirSchema>;
 
 export type NamhattaUpdate = typeof namhattaUpdates.$inferSelect;
 export type InsertNamhattaUpdate = z.infer<typeof insertNamhattaUpdateSchema>;
+
+export type Gurudev = typeof gurudevs.$inferSelect;
+export type InsertGurudev = z.infer<typeof insertGurudevSchema>;
 
 export type Leader = typeof leaders.$inferSelect;
 export type InsertLeader = z.infer<typeof insertLeaderSchema>;
