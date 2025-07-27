@@ -34,12 +34,26 @@ export default function Statuses() {
     queryFn: () => api.getStatuses(),
   });
 
+  const { data: statusDistribution } = useQuery({
+    queryKey: ["/api/status-distribution"],
+    queryFn: () => api.getStatusDistribution(),
+  });
+
   const { data: devotees } = useQuery({
     queryKey: ["/api/devotees"],
     queryFn: () => api.getDevotees(1, 1000), // Get all for counting
   });
 
-  const getDevoteeCount = (statusId: number) => {
+  const getDevoteeCount = (statusId: number, statusName: string) => {
+    // First try to get count from status distribution API
+    if (statusDistribution) {
+      const statusData = statusDistribution.find(s => s.statusName === statusName);
+      if (statusData) {
+        return statusData.count;
+      }
+    }
+    
+    // Fallback to filtering devotees data
     if (!devotees?.data) return 0;
     return devotees.data.filter(devotee => devotee.devotionalStatusId === statusId).length;
   };
@@ -158,7 +172,7 @@ export default function Statuses() {
                       key={status.id}
                       status={status}
                       index={index}
-                      devoteeCount={getDevoteeCount(status.id)}
+                      devoteeCount={getDevoteeCount(status.id, status.name)}
                       totalDevotees={getTotalDevotees()}
                       onEdit={() => startEditing(status)}
                     />

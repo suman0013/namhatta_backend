@@ -125,6 +125,11 @@ export default function DevoteeDetail() {
   }
 
   const getStatusName = (statusId?: number) => {
+    // Use the devotionalStatusName from the API response if available
+    if (devotee?.devotionalStatusName) {
+      return devotee.devotionalStatusName;
+    }
+    // Fallback to lookup if devotionalStatusName is not available
     if (!statusId) return "Unknown";
     const status = statuses?.find(s => s.id === statusId);
     return status?.name || "Unknown";

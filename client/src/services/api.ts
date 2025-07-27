@@ -17,6 +17,11 @@ export const api = {
     return res.json();
   },
 
+  getStatusDistribution: async (): Promise<Array<{statusName: string; count: number; percentage: number}>> => {
+    const res = await apiRequest("GET", "/api/status-distribution");
+    return res.json();
+  },
+
   // Hierarchy
   getHierarchy: async (): Promise<HierarchyResponse> => {
     const res = await apiRequest("GET", "/api/hierarchy");
