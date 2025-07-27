@@ -159,7 +159,44 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDevotee(id: number): Promise<Devotee | undefined> {
-    const result = await db.select().from(devotees).where(eq(devotees.id, id)).limit(1);
+    // Join devotees with devotional statuses to get status name
+    const result = await db
+      .select({
+        id: devotees.id,
+        legalName: devotees.legalName,
+        name: devotees.name,
+        dob: devotees.dob,
+        email: devotees.email,
+        phone: devotees.phone,
+        fatherName: devotees.fatherName,
+        motherName: devotees.motherName,
+        husbandName: devotees.husbandName,
+        gender: devotees.gender,
+        bloodGroup: devotees.bloodGroup,
+        maritalStatus: devotees.maritalStatus,
+        devotionalStatusId: devotees.devotionalStatusId,
+        devotionalStatusName: devotionalStatuses.name,
+        namhattaId: devotees.namhattaId,
+        gurudevHarinam: devotees.gurudevHarinam,
+        gurudevPancharatrik: devotees.gurudevPancharatrik,
+        harinamInitiationGurudev: devotees.harinamInitiationGurudev,
+        pancharatrikInitiationGurudev: devotees.pancharatrikInitiationGurudev,
+        initiatedName: devotees.initiatedName,
+        harinamDate: devotees.harinamDate,
+        pancharatrikDate: devotees.pancharatrikDate,
+        education: devotees.education,
+        occupation: devotees.occupation,
+        devotionalCourses: devotees.devotionalCourses,
+        additionalComments: devotees.additionalComments,
+        shraddhakutirId: devotees.shraddhakutirId,
+        createdAt: devotees.createdAt,
+        updatedAt: devotees.updatedAt
+      })
+      .from(devotees)
+      .leftJoin(devotionalStatuses, eq(devotees.devotionalStatusId, devotionalStatuses.id))
+      .where(eq(devotees.id, id))
+      .limit(1);
+      
     const devotee = result[0];
     
     if (!devotee) return undefined;
@@ -173,6 +210,7 @@ export class DatabaseStorage implements IStorage {
     
     return {
       ...devotee,
+      devotionalStatusName: devotee.devotionalStatusName || "Unknown Status",
       presentAddress: presentAddr ? {
         country: presentAddr.country,
         state: presentAddr.state,
