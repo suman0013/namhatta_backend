@@ -43,6 +43,19 @@ Navigation layout: Horizontal top navigation bar instead of left sidebar for des
 - **Updates System**: Comprehensive Namhatta Updates system with rich forms, activity tracking (kirtan, prasadam, book distribution, chanting, arati, bhagwat path), image upload, and dedicated Updates page with filtering and search.
 - **Address Management**: Normalized address handling, present and permanent addresses for devotees, and proper address linking for Namhattas.
 
+## Recent Changes
+
+### 2025-01-04: Gurudev Selection Fix & Project Cleanup
+- **Fixed gurudev selection bug**: Updated form field names to match database schema (harinamInitiationGurudevId and pancharatrikInitiationGurudevId)
+- **Enhanced backend**: Added gurudev name fetching in devotee queries with proper joins to gurudevs table
+- **Updated types**: Fixed TypeScript interfaces to include gurudev display fields
+- **Project cleanup**: Removed unnecessary files including:
+  - 200+ attached assets (development images and text files)
+  - Old documentation files (API_CONFIGURATION.md, AUTH_IMPLEMENTATION_PLAN.md, etc.)
+  - Unused migration scripts and seed files
+  - Configuration files no longer needed
+- **Result**: Gurudev selections now save properly and display correctly in devotee views
+
 ## External Dependencies
 
 - **React Ecosystem**: React 18, React Query, React Hook Form
@@ -53,3 +66,19 @@ Navigation layout: Horizontal top navigation bar instead of left sidebar for des
 - **Authentication**: bcryptjs, jsonwebtoken
 - **Build Tools**: Vite, ESBuild
 - **Other**: Wouter (router)
+
+## Project Structure
+
+```
+/
+├── client/                 # React frontend
+├── server/                 # Express backend
+├── shared/                 # Shared types and schemas
+├── migrations/             # Database migrations
+├── node_modules/           # Dependencies
+├── package.json           # Project configuration
+├── drizzle.config.ts      # Database configuration
+├── vite.config.ts         # Build configuration
+├── tailwind.config.ts     # Styling configuration
+└── replit.md             # Project documentation
+```
