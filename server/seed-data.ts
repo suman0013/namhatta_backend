@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses } from "@shared/schema";
+import { devotees, namhattas, devotionalStatuses, namhattaUpdates, addresses, devoteeAddresses, namhattaAddresses, leaders } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 // Sample data for seeding the database
@@ -87,6 +87,9 @@ export async function seedDatabase() {
     "Mataji Radha Devi", "Prabhu Govinda Das", "Mataji Krishna Devi", "Prabhu Hari Das", "Mataji Tulasi Devi"
   ];
 
+  // Get district supervisors for assignment
+  const supervisorsForAssignment = await db.select().from(leaders).where(eq(leaders.role, 'DISTRICT_SUPERVISOR'));
+  
   // Generate 100 Namhattas
   const namhattasData = [];
   for (let i = 1; i <= 100; i++) {
@@ -94,6 +97,19 @@ export async function seedDatabase() {
     const president = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     const vicePresident = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
     const secretary = leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)];
+    
+    // Find a district supervisor for this district or assign a default one
+    let assignedSupervisor = supervisorsForAssignment.find(supervisor => 
+      supervisor.location && 
+      typeof supervisor.location === 'object' && 
+      'district' in supervisor.location &&
+      supervisor.location.district === location.district
+    );
+    
+    // If no supervisor found for this district, assign a random one
+    if (!assignedSupervisor && supervisorsForAssignment.length > 0) {
+      assignedSupervisor = supervisorsForAssignment[Math.floor(Math.random() * supervisorsForAssignment.length)];
+    }
     
     namhattasData.push({
       code: `NAM${String(i).padStart(3, '0')}`,
@@ -105,6 +121,7 @@ export async function seedDatabase() {
       chakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       upaChakraSenapoti: Math.random() > 0.9 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
       secretary: Math.random() > 0.5 ? leadershipRoles[Math.floor(Math.random() * leadershipRoles.length)] : null,
+      districtSupervisorId: assignedSupervisor ? assignedSupervisor.id : supervisorsForAssignment[0]?.id || 1,
       status: Math.random() > 0.1 ? "APPROVED" : "PENDING_APPROVAL",
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -247,7 +264,7 @@ export async function seedDatabase() {
   }
 
   console.log(`Database seeded successfully with:
-  - ${namhattaData.length} Namhattas
+  - ${namhattasData.length} Namhattas
   - ${devoteeData.length} Devotees  
   - ${updateData.length} Updates`);
 }

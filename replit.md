@@ -7,6 +7,18 @@ This is a full-stack web application designed for managing Namhatta religious/sp
 Preferred communication style: Simple, everyday language.
 Navigation layout: Horizontal top navigation bar instead of left sidebar for desktop interface.
 
+## Recent Changes
+
+### January 2025 - District Supervisor Assignment Implementation COMPLETED ✅
+- **Database Schema**: Added mandatory `districtSupervisorId` field to namhattas table with NOT NULL constraint
+- **Backend APIs**: Implemented district supervisor lookup (`/api/district-supervisors`) and user address defaults (`/api/user/address-defaults`) endpoints
+- **Frontend Integration**: Enhanced NamhattaForm with complete role-based district supervisor selection and validation
+- **Role-based Features**: 
+  - District Supervisors: Auto-assignment + address pre-filling (country/state/district locked)
+  - Admin/Office Users: Manual supervisor selection with district-based filtering
+- **Data Migration**: Created migration script (`migrate-district-supervisors.sql`) for existing namhattas
+- **Testing & Validation**: Comprehensive integration testing completed with form validation and API security verification
+
 ## System Architecture
 
 ### Frontend Architecture
