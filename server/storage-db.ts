@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs } from "@shared/schema";
+import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs, users, userDistricts } from "@shared/schema";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
@@ -1533,6 +1533,132 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error in getAddressByPincode:', error);
       return null;
+    }
+  }
+
+  // Admin functions
+  async createDistrictSupervisor(data: {
+    username: string;
+    fullName: string;
+    email: string;
+    password: string;
+    districts: string[];
+  }): Promise<{ user: any; districts: string[] }> {
+    try {
+      const { createUser, assignDistrictsToUser } = await import('./storage-auth');
+      
+      // Create the user
+      const user = await createUser({
+        username: data.username,
+        passwordHash: data.password, // Will be hashed in createUser
+        fullName: data.fullName,
+        email: data.email,
+        role: 'DISTRICT_SUPERVISOR',
+        isActive: true
+      });
+
+      // Assign districts
+      await assignDistrictsToUser(user.id, data.districts);
+
+      return {
+        user,
+        districts: data.districts
+      };
+    } catch (error) {
+      console.error('Error creating district supervisor:', error);
+      throw error;
+    }
+  }
+
+  async getAllUsers(): Promise<any[]> {
+    try {
+      const { getAllUsersWithDistricts } = await import('./storage-auth');
+      return await getAllUsersWithDistricts();
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      throw error;
+    }
+  }
+
+  async getAvailableDistricts(): Promise<Array<{ code: string; name: string }>> {
+    try {
+      const distinctDistricts = await db
+        .selectDistinct({
+          code: addresses.districtCode,
+          name: addresses.districtNameEnglish
+        })
+        .from(addresses)
+        .where(and(
+          isNotNull(addresses.districtCode),
+          isNotNull(addresses.districtNameEnglish)
+        ))
+        .orderBy(addresses.districtNameEnglish);
+
+      return distinctDistricts
+        .filter(d => d.code && d.name)
+        .map(d => ({ code: d.code!, name: d.name! }));
+    } catch (error) {
+      console.error('Error getting available districts:', error);
+      throw error;
+    }
+  }
+
+  async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string }>> {
+    try {
+      const supervisors = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          fullName: users.fullName,
+          email: users.email
+        })
+        .from(users)
+        .innerJoin(userDistricts, eq(users.id, userDistricts.userId))
+        .where(
+          and(
+            eq(users.role, 'DISTRICT_SUPERVISOR'),
+            eq(users.isActive, true),
+            eq(userDistricts.districtCode, district)
+          )
+        );
+
+      return supervisors;
+    } catch (error) {
+      console.error('Error getting district supervisors:', error);
+      throw error;
+    }
+  }
+
+  async getUserAddressDefaults(userId: number): Promise<{ country?: string; state?: string; district?: string }> {
+    try {
+      const { getUserDistricts } = await import('./storage-auth');
+      const userDistrictsData = await getUserDistricts(userId);
+      
+      if (userDistrictsData.length === 0) {
+        return {};
+      }
+
+      // Get the first district's full address info
+      const districtCode = userDistrictsData[0].districtCode;
+      
+      const [addressInfo] = await db
+        .select({
+          country: addresses.country,
+          state: addresses.stateNameEnglish,
+          district: addresses.districtNameEnglish
+        })
+        .from(addresses)
+        .where(eq(addresses.districtCode, districtCode))
+        .limit(1);
+
+      return {
+        country: addressInfo?.country || 'India',
+        state: addressInfo?.state || undefined,
+        district: addressInfo?.district || undefined
+      };
+    } catch (error) {
+      console.error('Error getting user address defaults:', error);
+      return {};
     }
   }
 }

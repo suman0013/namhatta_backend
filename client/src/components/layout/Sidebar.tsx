@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { X, Home, Users, Layers, Bell, Settings, MapPin, LogOut } from "lucide-react";
+import { X, Home, Users, Layers, Bell, Settings, MapPin, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,10 @@ const navigationItems = [
   { href: "/updates", label: "Updates", icon: Bell },
   { href: "/map", label: "Map View", icon: MapPin },
   { href: "/statuses", label: "Statuses", icon: Layers },
+];
+
+const adminNavigationItems = [
+  { href: "/admin/supervisors", label: "District Supervisors", icon: Shield },
 ];
 
 export default function Sidebar({ onClose }: SidebarProps) {
@@ -113,6 +117,37 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
           );
         })}
+
+        {/* Admin Section */}
+        {user?.role === 'ADMIN' && (
+          <>
+            <div className="my-4 px-3">
+              <hr className="border-white/20 dark:border-slate-700/50" />
+              <p className="text-xs text-muted-foreground mt-2 mb-2 font-medium uppercase tracking-wider">
+                Administration
+              </p>
+            </div>
+            {adminNavigationItems.map((item) => {
+              const isActive = location === item.href;
+              const Icon = item.icon;
+              
+              return (
+                <Link key={item.href} href={item.href}>
+                  <div
+                    className={cn(
+                      "nav-item group cursor-pointer",
+                      isActive ? "nav-item-active" : "nav-item-inactive"
+                    )}
+                    onClick={onClose}
+                  >
+                    <Icon className="mr-3 h-5 w-5" />
+                    {item.label}
+                  </div>
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       {/* User Profile Section */}

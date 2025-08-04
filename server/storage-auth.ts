@@ -20,6 +20,12 @@ export async function getUserByUsername(username: string): Promise<User | undefi
   return user;
 }
 
+// Get user by email
+export async function getUserByEmail(email: string): Promise<User | undefined> {
+  const [user] = await db.select().from(users).where(eq(users.email, email));
+  return user;
+}
+
 // Get user with their assigned districts
 export async function getUserWithDistricts(userId: number): Promise<UserWithDistricts | undefined> {
   const user = await getUser(userId);

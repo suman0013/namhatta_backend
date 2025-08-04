@@ -25,6 +25,7 @@ import About from "@/pages/About";
 import Map from "@/pages/Map";
 import More from "@/pages/More";
 import Hierarchy from "@/pages/Hierarchy";
+import AdminSupervisorRegistration from "@/pages/AdminSupervisorRegistration";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/updates" component={Updates} />
       <Route path="/map" component={Map} />
       <Route path="/hierarchy" component={Hierarchy} />
+      <Route path="/admin/supervisors" component={AdminSupervisorRegistration} />
       <Route path="/more" component={More} />
       <Route path="/health" component={Health} />
       <Route path="/about" component={About} />

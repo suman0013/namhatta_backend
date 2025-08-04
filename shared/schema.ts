@@ -165,6 +165,8 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull().unique(),
   role: text("role").notNull(), // 'ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR'
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

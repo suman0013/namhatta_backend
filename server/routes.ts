@@ -605,6 +605,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // District Supervisor Registration (Admin only)
+  app.post("/api/admin/register-supervisor", authenticateJWT, authorize(['ADMIN']), async (req, res) => {
+    try {
+      const { username, fullName, email, password, districts } = req.body;
+      
+      // Validate required fields
+      if (!username || !fullName || !email || !password || !districts || !Array.isArray(districts) || districts.length === 0) {
+        return res.status(400).json({ 
+          error: "All fields are required: username, fullName, email, password, districts" 
+        });
+      }
+
+      // Check if username or email already exists
+      const { getUserByUsername, getUserByEmail } = await import('./storage-auth');
+      
+      const existingUser = await getUserByUsername(username).catch(() => null);
+      if (existingUser) {
+        return res.status(400).json({ error: "Username already exists" });
+      }
+
+      const existingEmail = await getUserByEmail(email).catch(() => null);
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+
+      // Create the district supervisor
+      const result = await storage.createDistrictSupervisor({
+        username,
+        fullName,
+        email,
+        password,
+        districts
+      });
+
+      res.status(201).json({
+        message: "District supervisor created successfully",
+        supervisor: {
+          id: result.user.id,
+          username: result.user.username,
+          fullName: result.user.fullName,
+          email: result.user.email,
+          districts: result.districts
+        }
+      });
+    } catch (error) {
+      console.error("Error creating district supervisor:", error);
+      res.status(500).json({ error: "Failed to create district supervisor" });
+    }
+  });
+
+  // Get all users (Admin only)
+  app.get("/api/admin/users", authenticateJWT, authorize(['ADMIN']), async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Get available districts for assignment
+  app.get("/api/admin/available-districts", authenticateJWT, authorize(['ADMIN']), async (req, res) => {
+    try {
+      const districts = await storage.getAvailableDistricts();
+      res.json(districts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch available districts" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

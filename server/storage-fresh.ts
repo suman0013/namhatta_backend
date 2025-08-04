@@ -73,6 +73,22 @@ export interface IStorage {
   getSubDistricts(district?: string, pincode?: string): Promise<string[]>;
   getVillages(subDistrict?: string, pincode?: string): Promise<string[]>;
   getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]>;
+
+  // Admin functions
+  createDistrictSupervisor(data: {
+    username: string;
+    fullName: string;
+    email: string;
+    password: string;
+    districts: string[];
+  }): Promise<{
+    user: any;
+    districts: string[];
+  }>;
+  getAllUsers(): Promise<any[]>;
+  getAvailableDistricts(): Promise<Array<{ code: string; name: string }>>;
+  getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string }>>;
+  getUserAddressDefaults(userId: number): Promise<{ country?: string; state?: string; district?: string }>;
   searchPincodes(country: string, searchTerm: string, page: number, limit: number): Promise<{
     pincodes: string[];
     total: number;
