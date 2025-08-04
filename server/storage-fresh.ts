@@ -1,4 +1,3 @@
-import { DatabaseStorage } from "./storage-db";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "../shared/schema";
 
 export interface IStorage {
