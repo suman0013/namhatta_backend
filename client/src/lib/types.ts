@@ -71,10 +71,8 @@ export interface Devotee {
   presentAddress?: Address;
   permanentAddress?: Address;
   devotionalStatusId?: number;
-  gurudevHarinam?: number;
-  gurudevPancharatrik?: number;
-  harinamInitiationGurudev?: string;
-  pancharatrikInitiationGurudev?: string;
+  harinamInitiationGurudevId?: number;
+  pancharatrikInitiationGurudevId?: number;
   initiatedName?: string;
   harinamDate?: string;
   pancharatrikDate?: string;

@@ -38,10 +38,8 @@ interface FormData {
   presentAddress: Address;
   permanentAddress: Address;
   devotionalStatusId: number | undefined;
-  gurudevHarinam: number | undefined;
-  gurudevPancharatrik: number | undefined;
-  harinamInitiationGurudev: string;
-  pancharatrikInitiationGurudev: string;
+  harinamInitiationGurudevId: number | undefined;
+  pancharatrikInitiationGurudevId: number | undefined;
   initiatedName: string;
   harinamDate: string;
   pancharatrikDate: string;
@@ -76,10 +74,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
       presentAddress: devotee?.presentAddress || {},
       permanentAddress: devotee?.permanentAddress || {},
       devotionalStatusId: devotee?.devotionalStatusId,
-      gurudevHarinam: devotee?.gurudevHarinam,
-      gurudevPancharatrik: devotee?.gurudevPancharatrik,
-      harinamInitiationGurudev: devotee?.harinamInitiationGurudev || "",
-      pancharatrikInitiationGurudev: devotee?.pancharatrikInitiationGurudev || "",
+      harinamInitiationGurudevId: devotee?.harinamInitiationGurudevId,
+      pancharatrikInitiationGurudevId: devotee?.pancharatrikInitiationGurudevId,
       initiatedName: devotee?.initiatedName || "",
       harinamDate: devotee?.harinamDate || "",
       pancharatrikDate: devotee?.pancharatrikDate || "",
@@ -446,10 +442,8 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
       permanentAddress: sameAsPresentAddress ? presentAddress : permanentAddress,
       devotionalCourses,
       devotionalStatusId: data.devotionalStatusId,
-      gurudevHarinam: data.gurudevHarinam,
-      gurudevPancharatrik: data.gurudevPancharatrik,
-      harinamInitiationGurudev: data.harinamInitiationGurudev,
-      pancharatrikInitiationGurudev: data.pancharatrikInitiationGurudev,
+      harinamInitiationGurudevId: data.harinamInitiationGurudevId,
+      pancharatrikInitiationGurudevId: data.pancharatrikInitiationGurudevId,
       initiatedName: data.initiatedName,
       harinamDate: data.harinamDate,
       pancharatrikDate: data.pancharatrikDate,
@@ -693,14 +687,13 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                   <SearchableSelect
                     options={(gurudevs || []).map((g) => `${g.title || ''} ${g.name}`.trim())}
                     value={
-                      gurudevs?.find(g => g.id === watch("gurudevHarinam"))
-                        ? `${gurudevs.find(g => g.id === watch("gurudevHarinam"))?.title || ''} ${gurudevs.find(g => g.id === watch("gurudevHarinam"))?.name}`.trim()
+                      gurudevs?.find(g => g.id === watch("harinamInitiationGurudevId"))
+                        ? `${gurudevs.find(g => g.id === watch("harinamInitiationGurudevId"))?.title || ''} ${gurudevs.find(g => g.id === watch("harinamInitiationGurudevId"))?.name}`.trim()
                         : ""
                     }
                     onValueChange={(value) => {
                       const selectedGurudev = gurudevs?.find(g => `${g.title || ''} ${g.name}`.trim() === value);
-                      setValue("gurudevHarinam", selectedGurudev?.id);
-                      setValue("harinamInitiationGurudev", value);
+                      setValue("harinamInitiationGurudevId", selectedGurudev?.id);
                     }}
                     placeholder="Select harinam initiation gurudev"
                   />
@@ -718,14 +711,13 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
                   <SearchableSelect
                     options={(gurudevs || []).map((g) => `${g.title || ''} ${g.name}`.trim())}
                     value={
-                      gurudevs?.find(g => g.id === watch("gurudevPancharatrik"))
-                        ? `${gurudevs.find(g => g.id === watch("gurudevPancharatrik"))?.title || ''} ${gurudevs.find(g => g.id === watch("gurudevPancharatrik"))?.name}`.trim()
+                      gurudevs?.find(g => g.id === watch("pancharatrikInitiationGurudevId"))
+                        ? `${gurudevs.find(g => g.id === watch("pancharatrikInitiationGurudevId"))?.title || ''} ${gurudevs.find(g => g.id === watch("pancharatrikInitiationGurudevId"))?.name}`.trim()
                         : ""
                     }
                     onValueChange={(value) => {
                       const selectedGurudev = gurudevs?.find(g => `${g.title || ''} ${g.name}`.trim() === value);
-                      setValue("gurudevPancharatrik", selectedGurudev?.id);
-                      setValue("pancharatrikInitiationGurudev", value);
+                      setValue("pancharatrikInitiationGurudevId", selectedGurudev?.id);
                     }}
                     placeholder="Select pancharatrik initiation gurudev"
                   />
