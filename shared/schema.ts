@@ -50,6 +50,7 @@ export const namhattas = pgTable("namhattas", {
   chakraSenapoti: text("chakra_senapoti"),
   upaChakraSenapoti: text("upa_chakra_senapoti"),
   secretary: text("secretary"),
+  districtSupervisorId: integer("district_supervisor_id").notNull(),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -298,6 +299,7 @@ export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
 
 export type Namhatta = typeof namhattas.$inferSelect & {
   devoteeCount?: number;
+  districtSupervisorName?: string;
 };
 export type InsertNamhatta = z.infer<typeof insertNamhattaSchema>;
 

@@ -79,6 +79,16 @@ export interface IStorage {
   getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>>;
   getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
   getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
+
+  // District Supervisor methods
+  getDistrictSupervisors(district: string): Promise<Leader[]>;
+  validateDistrictSupervisor(supervisorId: number, district: string): Promise<boolean>;
+  getUserAddressDefaults(userId: number): Promise<{
+    country?: string;
+    state?: string;
+    district?: string;
+    readonly: string[];
+  }>;
 }
 
 // Memory storage implementation for the migration
@@ -111,7 +121,9 @@ export class MemStorage implements IStorage {
     this.leaders = [
       { id: 1, name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", role: "FOUNDER_ACHARYA", reportingTo: null, location: { country: "India" }, createdAt: new Date() },
       { id: 2, name: "His Holiness Jayapataka Swami", role: "GBC", reportingTo: 1, location: { country: "India" }, createdAt: new Date() },
-      { id: 3, name: "HH Gauranga Prem Swami", role: "REGIONAL_DIRECTOR", reportingTo: 2, location: { country: "India", state: "West Bengal" }, createdAt: new Date() }
+      { id: 3, name: "HH Gauranga Prem Swami", role: "REGIONAL_DIRECTOR", reportingTo: 2, location: { country: "India", state: "West Bengal" }, createdAt: new Date() },
+      { id: 4, name: "HG Nitai Gauranga Das", role: "DISTRICT_SUPERVISOR", reportingTo: 3, location: { country: "India", state: "West Bengal", district: "Bankura" }, createdAt: new Date() },
+      { id: 5, name: "HG Chaitanya Das", role: "DISTRICT_SUPERVISOR", reportingTo: 3, location: { country: "India", state: "West Bengal", district: "Nadia" }, createdAt: new Date() }
     ];
 
     this.shraddhakutirs = [
@@ -161,10 +173,8 @@ export class MemStorage implements IStorage {
       maritalStatus: devotee.maritalStatus || null,
       devotionalStatusId: devotee.devotionalStatusId || null,
       namhattaId: devotee.namhattaId || null,
-      gurudevHarinam: devotee.gurudevHarinam || null,
-      gurudevPancharatrik: devotee.gurudevPancharatrik || null,
-      harinamInitiationGurudev: devotee.harinamInitiationGurudev || null,
-      pancharatrikInitiationGurudev: devotee.pancharatrikInitiationGurudev || null,
+      harinamInitiationGurudevId: devotee.harinamInitiationGurudevId || null,
+      pancharatrikInitiationGurudevId: devotee.pancharatrikInitiationGurudevId || null,
       initiatedName: devotee.initiatedName || null,
       harinamDate: devotee.harinamDate || null,
       pancharatrikDate: devotee.pancharatrikDate || null,
@@ -204,10 +214,8 @@ export class MemStorage implements IStorage {
       maritalStatus: devotee.maritalStatus !== undefined ? devotee.maritalStatus : existing.maritalStatus,
       devotionalStatusId: devotee.devotionalStatusId !== undefined ? devotee.devotionalStatusId : existing.devotionalStatusId,
       namhattaId: devotee.namhattaId !== undefined ? devotee.namhattaId : existing.namhattaId,
-      gurudevHarinam: devotee.gurudevHarinam !== undefined ? devotee.gurudevHarinam : existing.gurudevHarinam,
-      gurudevPancharatrik: devotee.gurudevPancharatrik !== undefined ? devotee.gurudevPancharatrik : existing.gurudevPancharatrik,
-      harinamInitiationGurudev: devotee.harinamInitiationGurudev !== undefined ? devotee.harinamInitiationGurudev : existing.harinamInitiationGurudev,
-      pancharatrikInitiationGurudev: devotee.pancharatrikInitiationGurudev !== undefined ? devotee.pancharatrikInitiationGurudev : existing.pancharatrikInitiationGurudev,
+      harinamInitiationGurudevId: devotee.harinamInitiationGurudevId !== undefined ? devotee.harinamInitiationGurudevId : existing.harinamInitiationGurudevId,
+      pancharatrikInitiationGurudevId: devotee.pancharatrikInitiationGurudevId !== undefined ? devotee.pancharatrikInitiationGurudevId : existing.pancharatrikInitiationGurudevId,
       initiatedName: devotee.initiatedName !== undefined ? devotee.initiatedName : existing.initiatedName,
       harinamDate: devotee.harinamDate !== undefined ? devotee.harinamDate : existing.harinamDate,
       pancharatrikDate: devotee.pancharatrikDate !== undefined ? devotee.pancharatrikDate : existing.pancharatrikDate,
@@ -293,6 +301,7 @@ export class MemStorage implements IStorage {
       chakraSenapoti: namhatta.chakraSenapoti || null,
       upaChakraSenapoti: namhatta.upaChakraSenapoti || null,
       secretary: namhatta.secretary || null,
+      districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status || "PENDING_APPROVAL",
       createdAt: new Date(),
       updatedAt: new Date()
@@ -572,6 +581,34 @@ export class MemStorage implements IStorage {
 
   async getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
     return [{ village: "Sample Village", subDistrict: subDistrict || "Sample Sub-District", district: "Sample District", state: "Sample State", country: "India", count: this.namhattas.length }];
+  }
+
+  // District Supervisor methods
+  async getDistrictSupervisors(district: string): Promise<Leader[]> {
+    return this.leaders.filter(leader => 
+      leader.role === 'DISTRICT_SUPERVISOR' && 
+      leader.location?.district === district
+    );
+  }
+
+  async validateDistrictSupervisor(supervisorId: number, district: string): Promise<boolean> {
+    const supervisor = this.leaders.find(leader => 
+      leader.id === supervisorId && 
+      leader.role === 'DISTRICT_SUPERVISOR' && 
+      leader.location?.district === district
+    );
+    return !!supervisor;
+  }
+
+  async getUserAddressDefaults(userId: number): Promise<{
+    country?: string;
+    state?: string;
+    district?: string;
+    readonly: string[];
+  }> {
+    // This would normally fetch user data from database
+    // For now, return empty defaults since we don't have user-location mapping in MemStorage
+    return { readonly: [] };
   }
 }
 

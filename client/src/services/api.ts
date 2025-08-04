@@ -272,5 +272,22 @@ export const api = {
   getAbout: async () => {
     const res = await apiRequest("GET", "/api/about");
     return res.json();
+  },
+
+  // District Supervisors
+  getDistrictSupervisors: async (district: string): Promise<Leader[]> => {
+    const res = await apiRequest("GET", `/api/district-supervisors?district=${encodeURIComponent(district)}`);
+    return res.json();
+  },
+
+  // User Address Defaults
+  getUserAddressDefaults: async (): Promise<{
+    country?: string;
+    state?: string;
+    district?: string;
+    readonly: string[];
+  }> => {
+    const res = await apiRequest("GET", "/api/user/address-defaults");
+    return res.json();
   }
 };

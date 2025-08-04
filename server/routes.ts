@@ -43,6 +43,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get district supervisors
+  app.get("/api/district-supervisors", authenticateJWT, async (req, res) => {
+    try {
+      const { district } = req.query;
+      if (!district) {
+        return res.status(400).json({ error: "District is required" });
+      }
+      
+      const supervisors = await storage.getDistrictSupervisors(district as string);
+      res.json(supervisors);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user address defaults
+  app.get("/api/user/address-defaults", authenticateJWT, async (req, res) => {
+    try {
+      const defaults = await storage.getUserAddressDefaults(req.user.id);
+      res.json(defaults);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Dev endpoint to check users (development only)
   app.get("/api/dev/users", async (req, res) => {
     if (process.env.NODE_ENV !== 'development') {
