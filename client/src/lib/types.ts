@@ -73,6 +73,8 @@ export interface Devotee {
   devotionalStatusId?: number;
   harinamInitiationGurudevId?: number;
   pancharatrikInitiationGurudevId?: number;
+  harinamInitiationGurudev?: string;
+  pancharatrikInitiationGurudev?: string;
   initiatedName?: string;
   harinamDate?: string;
   pancharatrikDate?: string;

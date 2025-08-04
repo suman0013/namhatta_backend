@@ -159,7 +159,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDevotee(id: number): Promise<Devotee | undefined> {
-    // Join devotees with devotional statuses to get status name
+    // Join devotees with devotional statuses and gurudevs to get names
     const result = await db
       .select({
         id: devotees.id,
@@ -179,6 +179,10 @@ export class DatabaseStorage implements IStorage {
         namhattaId: devotees.namhattaId,
         harinamInitiationGurudevId: devotees.harinamInitiationGurudevId,
         pancharatrikInitiationGurudevId: devotees.pancharatrikInitiationGurudevId,
+        harinamInitiationGurudevName: sql`harinamGurudev.name`,
+        harinamInitiationGurudevTitle: sql`harinamGurudev.title`,
+        pancharatrikInitiationGurudevName: sql`pancharatrikGurudev.name`,
+        pancharatrikInitiationGurudevTitle: sql`pancharatrikGurudev.title`,
         initiatedName: devotees.initiatedName,
         harinamDate: devotees.harinamDate,
         pancharatrikDate: devotees.pancharatrikDate,
@@ -192,6 +196,8 @@ export class DatabaseStorage implements IStorage {
       })
       .from(devotees)
       .leftJoin(devotionalStatuses, eq(devotees.devotionalStatusId, devotionalStatuses.id))
+      .leftJoin(sql`${gurudevs} as harinamGurudev`, eq(devotees.harinamInitiationGurudevId, sql`harinamGurudev.id`))
+      .leftJoin(sql`${gurudevs} as pancharatrikGurudev`, eq(devotees.pancharatrikInitiationGurudevId, sql`pancharatrikGurudev.id`))
       .where(eq(devotees.id, id))
       .limit(1);
       
@@ -206,9 +212,20 @@ export class DatabaseStorage implements IStorage {
     const presentAddr = addresses.find(addr => addr.addressType === 'present');
     const permanentAddr = addresses.find(addr => addr.addressType === 'permanent');
     
+    // Format gurudev names for display
+    const harinamInitiationGurudev = devotee.harinamInitiationGurudevName 
+      ? `${devotee.harinamInitiationGurudevTitle || ''} ${devotee.harinamInitiationGurudevName}`.trim()
+      : undefined;
+    
+    const pancharatrikInitiationGurudev = devotee.pancharatrikInitiationGurudevName 
+      ? `${devotee.pancharatrikInitiationGurudevTitle || ''} ${devotee.pancharatrikInitiationGurudevName}`.trim()
+      : undefined;
+
     return {
       ...devotee,
       devotionalStatusName: devotee.devotionalStatusName || "Unknown Status",
+      harinamInitiationGurudev,
+      pancharatrikInitiationGurudev,
       presentAddress: presentAddr ? {
         country: presentAddr.country,
         state: presentAddr.state,

@@ -273,6 +273,8 @@ export const insertJwtBlacklistSchema = createInsertSchema(jwtBlacklist).omit({
 // Types
 export type Devotee = typeof devotees.$inferSelect & {
   devotionalStatusName?: string;
+  harinamInitiationGurudev?: string;
+  pancharatrikInitiationGurudev?: string;
   presentAddress?: {
     country?: string;
     state?: string;
