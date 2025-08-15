@@ -603,6 +603,7 @@ export class DatabaseStorage implements IStorage {
       chakraSenapoti: namhatta.chakraSenapoti,
       upaChakraSenapoti: namhatta.upaChakraSenapoti,
       secretary: namhatta.secretary,
+      districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status,
       createdAt: namhatta.createdAt,
       updatedAt: namhatta.updatedAt,
@@ -705,7 +706,7 @@ export class DatabaseStorage implements IStorage {
       }
       
       return namhatta;
-    } catch (error) {
+    } catch (error: any) {
       // Handle database unique constraint violation
       if (error.message && error.message.includes('unique constraint') && error.message.includes('code')) {
         throw new Error(`Namhatta code '${namhattaDetails.code}' already exists. Please choose a unique code.`);
