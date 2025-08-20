@@ -13,7 +13,8 @@ import {
   Crown,
   Layout,
   Home,
-  Monitor
+  Monitor,
+  UserPlus
 } from "lucide-react";
 
 export default function More() {
@@ -83,6 +84,14 @@ export default function More() {
       icon: Heart,
       href: "/shraddhakutirs",
       color: "from-pink-500 to-purple-600",
+      category: "Management"
+    },
+    {
+      title: "Register User",
+      description: "Register new district supervisors and manage users",
+      icon: UserPlus,
+      href: "/admin/supervisors",
+      color: "from-emerald-500 to-green-600",
       category: "Management"
     },
     
