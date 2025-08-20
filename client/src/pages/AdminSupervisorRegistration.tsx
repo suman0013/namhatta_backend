@@ -299,33 +299,38 @@ export default function AdminSupervisorRegistration() {
               No district supervisors registered yet.
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {districtSupervisors.map((user: User) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  className="flex items-center justify-between p-2 border rounded hover:bg-accent/50 transition-colors"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <h3 className="font-semibold">{user.fullName}</h3>
-                        <p className="text-sm text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-sm truncate">{user.fullName}</h3>
+                          {!user.isActive && (
+                            <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">
                           @{user.username} • {user.email}
                         </p>
                       </div>
-                      {!user.isActive && (
-                        <Badge variant="secondary">Inactive</Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {user.districts?.map((districtCode: string) => {
-                        const district = Array.isArray(districts) ? districts.find((d: District) => d.code === districtCode) : null;
-                        return (
-                          <Badge key={districtCode} variant="outline" className="text-xs">
-                            {district?.name || districtCode}
-                          </Badge>
-                        );
-                      })}
+                      <div className="flex flex-wrap gap-1 ml-2">
+                        {user.districts?.slice(0, 3).map((districtCode: string) => {
+                          const district = Array.isArray(districts) ? districts.find((d: District) => d.code === districtCode) : null;
+                          return (
+                            <Badge key={districtCode} variant="outline" className="text-xs px-1 py-0">
+                              {district?.name || districtCode}
+                            </Badge>
+                          );
+                        })}
+                        {user.districts && user.districts.length > 3 && (
+                          <Badge variant="outline" className="text-xs px-1 py-0">+{user.districts.length - 3}</Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
