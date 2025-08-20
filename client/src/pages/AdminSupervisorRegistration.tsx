@@ -62,24 +62,21 @@ export default function AdminSupervisorRegistration() {
 
   // Fetch available districts
   const { data: districts = [], isLoading: loadingDistricts } = useQuery({
-    queryKey: ["/api/admin/available-districts"],
-    queryFn: () => apiRequest("/api/admin/available-districts")
+    queryKey: ["/api/admin/available-districts"]
   });
 
   // Fetch all users
   const { data: users = [], isLoading: loadingUsers } = useQuery({
-    queryKey: ["/api/admin/users"],
-    queryFn: () => apiRequest("/api/admin/users")
+    queryKey: ["/api/admin/users"]
   });
 
   // Registration mutation
   const registerMutation = useMutation({
-    mutationFn: (data: RegistrationForm) =>
-      apiRequest("/api/admin/register-supervisor", {
-        method: "POST",
-        body: JSON.stringify(data)
-      }),
-    onSuccess: (data) => {
+    mutationFn: async (data: RegistrationForm) => {
+      const res = await apiRequest("POST", "/api/admin/register-supervisor", data);
+      return res.json();
+    },
+    onSuccess: (data: any) => {
       toast({
         title: "Success!",
         description: `District supervisor ${data.supervisor.fullName} has been created successfully.`
@@ -101,10 +98,10 @@ export default function AdminSupervisorRegistration() {
     registerMutation.mutate(data);
   };
 
-  const districtSupervisors = users.filter((user: User) => user.role === 'DISTRICT_SUPERVISOR');
+  const districtSupervisors = Array.isArray(users) ? users.filter((user: User) => user.role === 'DISTRICT_SUPERVISOR') : [];
   const westBengalSupervisors = districtSupervisors.filter((user: User) => 
-    user.districts.some(district => 
-      districts.find((d: District) => d.code === district)?.name?.includes('West Bengal') ||
+    user.districts?.some(district => 
+      Array.isArray(districts) && districts.find((d: District) => d.code === district)?.name?.includes('West Bengal') ||
       ['NADIA', 'KOLKATA', 'HOWRAH', 'HOOGHLY', 'PURBA_BARDHAMAN', 'PASCHIM_MEDINIPUR', 'BANKURA', 'MURSHIDABAD', 'MALDA'].includes(district)
     )
   );
@@ -231,7 +228,7 @@ export default function AdminSupervisorRegistration() {
                     <FormItem>
                       <FormLabel>Assigned Districts</FormLabel>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-4 border rounded-md">
-                        {districts.map((district: District) => (
+                        {Array.isArray(districts) && districts.map((district: District) => (
                           <FormField
                             key={district.code}
                             control={form.control}
@@ -321,8 +318,8 @@ export default function AdminSupervisorRegistration() {
                       )}
                     </div>
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {user.districts.map((districtCode: string) => {
-                        const district = districts.find((d: District) => d.code === districtCode);
+                      {user.districts?.map((districtCode: string) => {
+                        const district = Array.isArray(districts) ? districts.find((d: District) => d.code === districtCode) : null;
                         return (
                           <Badge key={districtCode} variant="outline" className="text-xs">
                             {district?.name || districtCode}
@@ -358,7 +355,7 @@ export default function AdminSupervisorRegistration() {
                     <div key={user.id} className="text-sm">
                       <span className="font-medium">{user.fullName}</span>
                       <span className="text-muted-foreground ml-2">
-                        ({user.districts.map(code => districts.find((d: District) => d.code === code)?.name || code).join(', ')})
+                        ({user.districts?.map(code => Array.isArray(districts) ? districts.find((d: District) => d.code === code)?.name || code : code).join(', ')})
                       </span>
                     </div>
                   ))}
