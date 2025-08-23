@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Users, Layers, Bell, MapPin, Shield, CheckCircle, Heart } from "lucide-react";
+import { Home, Users, Layers, Bell, MapPin, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,9 +14,7 @@ const navigationItems = [
 ];
 
 const adminNavigationItems = [
-  { href: "/approvals", label: "Approvals", shortLabel: "App", icon: CheckCircle },
-  { href: "/admin/supervisors", label: "Supervisors", shortLabel: "Sup", icon: Shield },
-  { href: "/shraddhakutirs", label: "Shraddhakutirs", shortLabel: "Shr", icon: Heart },
+  { href: "/more", label: "More", shortLabel: "More", icon: MoreHorizontal },
 ];
 
 export default function TopNav() {

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   Settings, 
   Users, 
@@ -14,10 +15,41 @@ import {
   Layout,
   Home,
   Monitor,
-  UserPlus
+  UserPlus,
+  Shield
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function More() {
+  const { user } = useAuth();
+  
+  // Restrict access to admin users only
+  if (user?.role !== 'ADMIN') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <Alert className="glass-card border-red-200 dark:border-red-800">
+            <Shield className="h-4 w-4 text-red-500" />
+            <AlertDescription className="text-center">
+              <div className="space-y-2">
+                <p className="font-semibold text-red-800 dark:text-red-200">Access Restricted</p>
+                <p className="text-sm text-red-600 dark:text-red-300">
+                  This page is only accessible to administrators. Please contact your system administrator for access.
+                </p>
+                <div className="pt-2">
+                  <Link href="/dashboard">
+                    <Button variant="outline" size="sm">
+                      Return to Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
   const menuItems = [
     // Core Application Pages
     {
