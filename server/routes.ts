@@ -675,6 +675,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Deactivate user (Admin only)
+  app.delete("/api/admin/users/:id", authenticateJWT, authorize(['ADMIN']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const { deactivateUser } = await import('./storage-auth');
+      const success = await deactivateUser(userId);
+      
+      if (success) {
+        res.json({ message: "User deactivated successfully" });
+      } else {
+        res.status(404).json({ error: "User not found" });
+      }
+    } catch (error) {
+      console.error("Error deactivating user:", error);
+      res.status(500).json({ error: "Failed to deactivate user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

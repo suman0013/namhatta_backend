@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,8 +10,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Loader2, UserPlus, Users, Shield } from "lucide-react";
+import { Loader2, UserPlus, Users, Shield, Edit, Trash2, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Registration form schema
 const registrationSchema = z.object({
@@ -47,6 +58,7 @@ export default function AdminSupervisorRegistration() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const form = useForm<RegistrationForm>({
     resolver: zodResolver(registrationSchema),
@@ -99,12 +111,47 @@ export default function AdminSupervisorRegistration() {
   };
 
   const districtSupervisors = Array.isArray(users) ? users.filter((user: User) => user.role === 'DISTRICT_SUPERVISOR') : [];
-  const westBengalSupervisors = districtSupervisors.filter((user: User) => 
-    user.districts?.some(district => 
-      Array.isArray(districts) && districts.find((d: District) => d.code === district)?.name?.includes('West Bengal') ||
-      ['NADIA', 'KOLKATA', 'HOWRAH', 'HOOGHLY', 'PURBA_BARDHAMAN', 'PASCHIM_MEDINIPUR', 'BANKURA', 'MURSHIDABAD', 'MALDA'].includes(district)
-    )
-  );
+  
+  // Group supervisors by district
+  const groupedByDistrict = React.useMemo(() => {
+    const groups: Record<string, { district: District; supervisors: User[] }> = {};
+    
+    districtSupervisors.forEach((user: User) => {
+      user.districts?.forEach((districtCode: string) => {
+        const district = Array.isArray(districts) ? districts.find((d: District) => d.code === districtCode) : null;
+        if (district) {
+          if (!groups[districtCode]) {
+            groups[districtCode] = { district, supervisors: [] };
+          }
+          groups[districtCode].supervisors.push(user);
+        }
+      });
+    });
+    
+    return Object.values(groups).sort((a, b) => a.district.name.localeCompare(b.district.name));
+  }, [districtSupervisors, districts]);
+  
+  // Delete supervisor mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const res = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Supervisor deactivated successfully."
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Deactivation Failed",
+        description: error.message || "Failed to deactivate supervisor",
+        variant: "destructive"
+      });
+    }
+  });
 
   if (loadingDistricts || loadingUsers) {
     return (
@@ -282,101 +329,107 @@ export default function AdminSupervisorRegistration() {
         </Card>
       )}
 
-      {/* Current District Supervisors */}
+      {/* District-Grouped Supervisors */}
       <Card className="glass-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Current District Supervisors ({districtSupervisors.length})
+            <MapPin className="h-5 w-5" />
+            Supervisors by District ({districtSupervisors.length} total)
           </CardTitle>
           <CardDescription>
-            Manage existing district supervisor accounts
+            District supervisors organized by their assigned districts
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {districtSupervisors.length === 0 ? (
+          {groupedByDistrict.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
               No district supervisors registered yet.
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {districtSupervisors.map((user: User) => (
-                <div
-                  key={user.id}
-                  className="p-3 border rounded hover:bg-accent/50 transition-colors"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-sm truncate flex-1">{user.fullName}</h3>
-                      {!user.isActive && (
-                        <Badge variant="secondary" className="text-xs">Inactive</Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      @{user.username} • {user.email}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {user.districts?.slice(0, 2).map((districtCode: string) => {
-                        const district = Array.isArray(districts) ? districts.find((d: District) => d.code === districtCode) : null;
-                        return (
-                          <Badge key={districtCode} variant="outline" className="text-xs px-1 py-0">
-                            {district?.name || districtCode}
-                          </Badge>
-                        );
-                      })}
-                      {user.districts && user.districts.length > 2 && (
-                        <Badge variant="outline" className="text-xs px-1 py-0">+{user.districts.length - 2}</Badge>
-                      )}
-                    </div>
+            <div className="space-y-6">
+              {groupedByDistrict.map(({ district, supervisors }) => (
+                <div key={district.code} className="border rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <h3 className="font-semibold text-lg">{district.name}</h3>
+                    <Badge variant="outline" className="text-xs">
+                      {supervisors.length} supervisor{supervisors.length !== 1 ? 's' : ''}
+                    </Badge>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    {supervisors.map((user: User) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center justify-between p-3 bg-accent/30 rounded-md hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-sm">{user.fullName}</h4>
+                            {!user.isActive && (
+                              <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">
+                            @{user.username} • {user.email}
+                          </p>
+                          {user.districts && user.districts.length > 1 && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Also assigned to: {user.districts
+                                .filter(code => code !== district.code)
+                                .map(code => Array.isArray(districts) ? districts.find((d: District) => d.code === code)?.name || code : code)
+                                .join(', ')}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingUser(user)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Deactivate Supervisor</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to deactivate {user.fullName}? They will no longer be able to access the system, but their data will be preserved.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteMutation.mutate(user.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  disabled={deleteMutation.isPending}
+                                >
+                                  {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                                  Deactivate
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
-
-      {/* West Bengal Summary */}
-      <Card className="glass-card border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-primary">West Bengal Summary</CardTitle>
-          <CardDescription>
-            District supervisors specifically for West Bengal districts
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-2">West Bengal Supervisors ({westBengalSupervisors.length})</h4>
-              {westBengalSupervisors.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No West Bengal supervisors registered yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {westBengalSupervisors.map((user: User) => (
-                    <div key={user.id} className="text-sm">
-                      <span className="font-medium">{user.fullName}</span>
-                      <span className="text-muted-foreground ml-2">
-                        ({user.districts?.map(code => Array.isArray(districts) ? districts.find((d: District) => d.code === code)?.name || code : code).join(', ')})
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Nadia District Coverage</h4>
-              <p className="text-sm text-muted-foreground">
-                Supervisors assigned: {westBengalSupervisors.filter(user => 
-                  user.districts.includes('NADIA')
-                ).length}
-              </p>
-              {westBengalSupervisors.filter(user => user.districts.includes('NADIA')).map((user: User) => (
-                <div key={user.id} className="text-sm mt-1">
-                  <span className="font-medium">{user.fullName}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
