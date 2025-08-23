@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getQueryFn } from "@/lib/queryClient";
-import { Map as MapIcon, ZoomIn, ZoomOut, RotateCcw, Globe, MapPin, ArrowRight } from "lucide-react";
+import { Map as MapIcon, ZoomIn, ZoomOut, RotateCcw, Globe, MapPin, ArrowRight, X } from "lucide-react";
 import { Link } from "wouter";
 import L from "leaflet";
 
@@ -618,13 +617,92 @@ export default function Map() {
       </div>
 
       {/* Full Width Map */}
-      <Card>
+      <Card className="relative">
         <CardContent className="p-0">
           <div 
             id="leaflet-map" 
             className="w-full h-[68vh] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
             style={{ minHeight: '68vh' }}
           />
+          
+          {/* Embedded Namhatta List Panel */}
+          {showNamhattaList && selectedLocation && (
+            <div className="absolute top-4 right-4 w-80 max-h-[60vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[1000]">
+              <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-blue-500" />
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {selectedLocation.name}
+                    </h3>
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedLocation.count} total
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => setShowNamhattaList(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="overflow-y-auto max-h-[50vh] p-2">
+                {namhattasLoading ? (
+                  <div className="space-y-2 p-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
+                  </div>
+                ) : locationNamhattas && (locationNamhattas as any).data.length > 0 ? (
+                  <div className="space-y-2">
+                    {(locationNamhattas as any).data.map((namhatta: any) => (
+                      <Link
+                        key={namhatta.id}
+                        href={`/namhattas/${namhatta.id}`}
+                        onClick={() => setShowNamhattaList(false)}
+                      >
+                        <div className="p-3 rounded-md bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 cursor-pointer group border border-gray-100 dark:border-gray-600">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-gray-900 dark:text-white text-sm truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {namhatta.name}
+                              </h4>
+                              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                {[
+                                  namhatta.address?.village,
+                                  namhatta.address?.subDistrict,
+                                  namhatta.address?.district,
+                                  namhatta.address?.state
+                                ].filter(Boolean).join(", ")}
+                              </div>
+                              {namhatta.status && (
+                                <Badge 
+                                  variant={namhatta.status === 'APPROVED' ? 'default' : 'secondary'}
+                                  className="mt-1 text-xs h-5"
+                                >
+                                  {namhatta.status}
+                                </Badge>
+                              )}
+                            </div>
+                            <ArrowRight className="h-3 w-3 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0 mt-0.5" />
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                    <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No namhattas found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -667,75 +745,6 @@ export default function Map() {
         </Card>
       </div>
 
-      {/* Namhatta List Dialog */}
-      <Dialog open={showNamhattaList} onOpenChange={setShowNamhattaList}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-blue-500" />
-              Namhattas in {selectedLocation?.name}
-              <Badge variant="secondary" className="ml-2">
-                {selectedLocation?.count} total
-              </Badge>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="overflow-y-auto max-h-[60vh] space-y-3">
-            {namhattasLoading ? (
-              <div className="space-y-3">
-                {[...Array(3)].map((_, i) => (
-                  <Skeleton key={i} className="h-20 w-full" />
-                ))}
-              </div>
-            ) : locationNamhattas && (locationNamhattas as any).data.length > 0 ? (
-              (locationNamhattas as any).data.map((namhatta: any) => (
-                <Link
-                  key={namhatta.id}
-                  href={`/namhattas/${namhatta.id}`}
-                  onClick={() => setShowNamhattaList(false)}
-                >
-                  <Card className="glass-card hover:shadow-md transition-all duration-200 cursor-pointer group">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {namhatta.name}
-                          </h3>
-                          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {[
-                                namhatta.address?.village,
-                                namhatta.address?.subDistrict, 
-                                namhatta.address?.district,
-                                namhatta.address?.state
-                              ].filter(Boolean).join(", ")}
-                            </div>
-                          </div>
-                          {namhatta.status && (
-                            <Badge 
-                              variant={namhatta.status === 'APPROVED' ? 'default' : 'secondary'}
-                              className="mt-2 text-xs"
-                            >
-                              {namhatta.status}
-                            </Badge>
-                          )}
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No namhattas found in this location</p>
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
