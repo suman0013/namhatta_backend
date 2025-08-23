@@ -683,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid user ID" });
       }
 
-      const { fullName, email } = req.body;
+      const { fullName, email, password } = req.body;
       if (!fullName || !email) {
         return res.status(400).json({ error: "Full name and email are required" });
       }
@@ -694,7 +694,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const updatedUser = await updateUser(userId, { fullName, email });
+      const updateData: any = { fullName, email };
+      // Only update password if provided
+      if (password && password.trim()) {
+        updateData.passwordHash = password; // Will be hashed in updateUser function
+      }
+
+      const updatedUser = await updateUser(userId, updateData);
       res.json({ message: "User updated successfully", user: updatedUser });
     } catch (error) {
       console.error("Error updating user:", error);

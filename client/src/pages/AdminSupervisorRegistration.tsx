@@ -464,31 +464,39 @@ export default function AdminSupervisorRegistration() {
       
       {/* Edit User Dialog */}
       {editingUser && (
-        <Card className="glass-card fixed inset-4 z-50 max-w-md mx-auto my-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Edit Supervisor</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditingUser(null)}
-              className="h-8 w-8 p-0"
-            >
-              ×
-            </Button>
-          </div>
-          
-          <Form {...form}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <Card className="w-full max-w-sm mx-4 p-4 bg-background border shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Edit Supervisor</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditingUser(null)}
+                className="h-6 w-6 p-0"
+              >
+                ×
+              </Button>
+            </div>
+            
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target as HTMLFormElement);
-                editMutation.mutate({
+                const password = formData.get('password') as string;
+                const updateData: any = {
                   id: editingUser.id,
                   fullName: formData.get('fullName') as string,
                   email: formData.get('email') as string,
-                });
+                };
+                
+                // Only include password if it's provided
+                if (password && password.trim()) {
+                  updateData.password = password;
+                }
+                
+                editMutation.mutate(updateData);
               }}
-              className="space-y-4"
+              className="space-y-3"
             >
               <div>
                 <label className="text-sm font-medium">Full Name</label>
@@ -509,26 +517,38 @@ export default function AdminSupervisorRegistration() {
                 />
               </div>
               
-              <div className="flex justify-end space-x-2">
+              <div>
+                <label className="text-sm font-medium">New Password (optional)</label>
+                <Input
+                  name="password"
+                  type="password"
+                  placeholder="Leave blank to keep current password"
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-2 pt-2">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={() => setEditingUser(null)}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
+                  size="sm"
                   disabled={editMutation.isPending}
                   className="flex items-center gap-2"
                 >
                   {editMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Save Changes
+                  Save
                 </Button>
               </div>
             </form>
-          </Form>
-        </Card>
+          </Card>
+        </div>
       )}
       
       {editingUser && (
