@@ -34,6 +34,7 @@ export default function Map() {
   const [zoomLevel, setZoomLevel] = useState<number>(3);
   const [showNamhattaList, setShowNamhattaList] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<MapData | null>(null);
+  const [panelPosition, setPanelPosition] = useState<{ x: number; y: number } | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
@@ -536,6 +537,40 @@ export default function Map() {
     if (data.count <= 5) {
       console.log('Showing namhatta list for:', data.name);
       setSelectedLocation(data);
+      
+      // Calculate panel position based on marker coordinates
+      if (mapRef.current && data.coordinates) {
+        const [lng, lat] = data.coordinates;
+        const point = mapRef.current.latLngToContainerPoint([lat, lng]);
+        
+        // Get map container dimensions
+        const mapContainer = document.getElementById('leaflet-map');
+        if (mapContainer) {
+          const containerRect = mapContainer.getBoundingClientRect();
+          
+          // Panel dimensions (approximate)
+          const panelWidth = 320; // 80 * 4 (w-80 = 320px)
+          const panelHeight = 400; // approximate max height
+          
+          // Calculate position with boundary checks
+          let x = point.x + 20; // 20px offset from marker
+          let y = point.y - panelHeight / 2; // Center vertically on marker
+          
+          // Keep panel within map bounds
+          if (x + panelWidth > containerRect.width) {
+            x = point.x - panelWidth - 20; // Show on left side
+          }
+          if (y < 0) {
+            y = 10; // Top margin
+          }
+          if (y + panelHeight > containerRect.height) {
+            y = containerRect.height - panelHeight - 10; // Bottom margin
+          }
+          
+          setPanelPosition({ x, y });
+        }
+      }
+      
       setShowNamhattaList(true);
       return;
     }
@@ -626,8 +661,15 @@ export default function Map() {
           />
           
           {/* Embedded Namhatta List Panel */}
-          {showNamhattaList && selectedLocation && (
-            <div className="absolute top-4 right-4 w-80 max-h-[60vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[1000]">
+          {showNamhattaList && selectedLocation && panelPosition && (
+            <div 
+              className="absolute w-80 max-h-[60vh] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-[1000]"
+              style={{
+                left: `${panelPosition.x}px`,
+                top: `${panelPosition.y}px`,
+                transform: 'translate(0, 0)'
+              }}
+            >
               <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -643,7 +685,10 @@ export default function Map() {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => setShowNamhattaList(false)}
+                    onClick={() => {
+                      setShowNamhattaList(false);
+                      setPanelPosition(null);
+                    }}
                   >
                     <X className="h-4 w-4" />
                   </Button>
