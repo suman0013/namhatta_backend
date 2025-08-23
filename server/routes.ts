@@ -1,10 +1,24 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
+import { z } from "zod";
 import { storage } from "./storage-fresh";
 import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema, insertGurudevSchema } from "@shared/schema";
 import { authRoutes } from "./auth/routes";
 import { authenticateJWT, authorize, validateDistrictAccess } from "./auth/middleware";
+
+// Input validation schemas
+const queryParamsSchema = z.object({
+  page: z.string().regex(/^[0-9]+$/).optional().default("1"),
+  limit: z.string().regex(/^[0-9]+$/).optional().default("25"),
+  search: z.string().max(100).optional(),
+  country: z.string().max(50).optional(),
+  state: z.string().max(50).optional(),
+  district: z.string().max(50).optional(),
+  subDistrict: z.string().max(50).optional(),
+  village: z.string().max(50).optional(),
+  pincode: z.string().regex(/^[0-9]{6}$/).optional()
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add cookie parser middleware
@@ -39,7 +53,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }))
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
@@ -54,7 +69,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const supervisors = await storage.getDistrictSupervisors(district as string);
       res.json(supervisors);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
@@ -64,7 +80,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const defaults = await storage.getUserAddressDefaults(req.user.id);
       res.json(defaults);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
@@ -85,7 +102,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         supervisor1: supervisor1 ? { id: supervisor1.id, username: supervisor1.username, role: supervisor1.role, isActive: supervisor1.isActive, passwordHashLength: supervisor1.passwordHash.length } : null,
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 
@@ -126,22 +144,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/pincodes/search", async (req, res) => {
-    const { country, search, page = "1", limit = "25" } = req.query;
-    
-    if (!country) {
-      return res.status(400).json({ error: "Country is required" });
+    try {
+      // Validate query parameters
+      const validatedQuery = queryParamsSchema.parse(req.query);
+      
+      if (!validatedQuery.country) {
+        return res.status(400).json({ error: "Country is required" });
+      }
+      
+      const pageNum = parseInt(validatedQuery.page, 10);
+      const limitNum = Math.min(parseInt(validatedQuery.limit, 10), 100); // Cap at 100
+      
+      const result = await storage.searchPincodes(
+        validatedQuery.country, 
+        validatedQuery.search || "", 
+        pageNum, 
+        limitNum
+      );
+      res.json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid query parameters', details: error.errors });
+      }
+      console.error('Search pincodes error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-    
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
-    
-    const result = await storage.searchPincodes(
-      country as string, 
-      search as string || "", 
-      pageNum, 
-      limitNum
-    );
-    res.json(result);
   });
 
   app.get("/api/address-by-pincode", async (req, res) => {

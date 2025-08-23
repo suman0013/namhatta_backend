@@ -1,10 +1,17 @@
 import { neon } from '@neondatabase/serverless';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
+import dotenv from 'dotenv';
 
-// PostgreSQL connection with your specified database
-const connectionString = 'postgresql://neondb_owner:npg_5MIwCD4YhSdP@ep-calm-silence-a15zko7l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
-const sql = neon(connectionString);
+// Load environment variables
+dotenv.config({ path: ['.env.local', '.env'] });
+
+// PostgreSQL connection - use environment variable for security
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is required');
+}
+
+const sql = neon(process.env.DATABASE_URL);
 
 async function importFullAddressCSV() {
   console.log('Starting full CSV address import to PostgreSQL...');

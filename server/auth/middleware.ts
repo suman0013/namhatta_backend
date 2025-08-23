@@ -31,10 +31,11 @@ export const loginRateLimit = rateLimit({
   },
 });
 
-// Authentication middleware with development bypass
+// Authentication middleware with production-safe development bypass
 export const authenticateJWT = async (req: Request, res: Response, next: NextFunction) => {
-  // Development bypass
-  if (process.env.AUTHENTICATION_ENABLED === 'false') {
+  // Development bypass - ONLY allowed in development environment
+  if (process.env.AUTHENTICATION_ENABLED === 'false' && process.env.NODE_ENV === 'development') {
+    console.warn('⚠️ WARNING: Authentication bypass is active in development mode');
     req.user = {
       id: 1,
       username: 'dev-user',
@@ -42,6 +43,12 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
       districts: [] // Full access in dev mode
     };
     return next();
+  }
+  
+  // Fail-safe: Ensure authentication bypass is never active in production
+  if (process.env.AUTHENTICATION_ENABLED === 'false' && process.env.NODE_ENV === 'production') {
+    console.error('🚨 SECURITY ERROR: Authentication bypass attempted in production!');
+    return res.status(500).json({ error: 'Security configuration error' });
   }
 
   try {
@@ -92,9 +99,15 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
 // Authorization middleware - check roles
 export const authorize = (allowedRoles: Array<'ADMIN' | 'OFFICE' | 'DISTRICT_SUPERVISOR'>) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    // Skip authorization in development bypass mode
-    if (process.env.AUTHENTICATION_ENABLED === 'false') {
+    // Skip authorization in development bypass mode - ONLY in development
+    if (process.env.AUTHENTICATION_ENABLED === 'false' && process.env.NODE_ENV === 'development') {
       return next();
+    }
+    
+    // Fail-safe: Block authorization bypass in production
+    if (process.env.AUTHENTICATION_ENABLED === 'false' && process.env.NODE_ENV === 'production') {
+      console.error('🚨 SECURITY ERROR: Authorization bypass attempted in production!');
+      return res.status(500).json({ error: 'Security configuration error' });
     }
 
     if (!req.user) {
@@ -111,9 +124,15 @@ export const authorize = (allowedRoles: Array<'ADMIN' | 'OFFICE' | 'DISTRICT_SUP
 
 // District access validation middleware
 export const validateDistrictAccess = (req: Request, res: Response, next: NextFunction) => {
-  // Skip district validation in development bypass mode
-  if (process.env.AUTHENTICATION_ENABLED === 'false') {
+  // Skip district validation in development bypass mode - ONLY in development
+  if (process.env.AUTHENTICATION_ENABLED === 'false' && process.env.NODE_ENV === 'development') {
     return next();
+  }
+  
+  // Fail-safe: Block district validation bypass in production
+  if (process.env.AUTHENTICATION_ENABLED === 'false' && process.env.NODE_ENV === 'production') {
+    console.error('🚨 SECURITY ERROR: District validation bypass attempted in production!');
+    return res.status(500).json({ error: 'Security configuration error' });
   }
 
   if (!req.user) {
