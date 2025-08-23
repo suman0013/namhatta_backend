@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { Home, Users, Layers, Bell, MapPin } from "lucide-react";
+import { Home, Users, Layers, Bell, MapPin, Shield, CheckCircle, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigationItems = [
   { href: "/dashboard", label: "Dashboard", shortLabel: "Dash", icon: Home },
@@ -12,13 +13,26 @@ const navigationItems = [
   { href: "/statuses", label: "Statuses", shortLabel: "Stat", icon: Layers },
 ];
 
+const adminNavigationItems = [
+  { href: "/approvals", label: "Approvals", shortLabel: "App", icon: CheckCircle },
+  { href: "/admin/supervisors", label: "Supervisors", shortLabel: "Sup", icon: Shield },
+  { href: "/shraddhakutirs", label: "Shraddhakutirs", shortLabel: "Shr", icon: Heart },
+];
+
 export default function TopNav() {
   const [location] = useLocation();
+  const { user } = useAuth();
+  
+  // Combine regular and admin navigation items based on user role
+  const allNavigationItems = [
+    ...navigationItems,
+    ...(user?.role === 'ADMIN' ? adminNavigationItems : [])
+  ];
 
   return (
     <nav className="flex justify-center px-1 overflow-hidden">
       <div className="flex items-center space-x-1 justify-center min-w-0">
-        {navigationItems.map((item) => {
+        {allNavigationItems.map((item) => {
           const isActive = location === item.href || 
             (item.href !== "/dashboard" && location.startsWith(item.href));
           const Icon = item.icon;
