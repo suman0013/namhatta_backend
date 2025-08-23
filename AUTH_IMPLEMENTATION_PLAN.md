@@ -161,26 +161,7 @@ JWT_SECRET=your-secure-secret-key
 ```
 
 ## Default Users
-```javascript
-[
-  {
-    username: 'admin',
-    password: 'Admin@123456',
-    role: 'ADMIN'
-  },
-  {
-    username: 'office1', 
-    password: 'Office@123456',
-    role: 'OFFICE'
-  },
-  {
-    username: 'supervisor1',
-    password: 'Super@123456', 
-    role: 'DISTRICT_SUPERVISOR',
-    districts: [1, 2]
-  }
-]
-```
+Demo users are seeded during development setup. Contact system administrator for login credentials.
 
 ## Progress Log
 - 2025-01-19 12:48: Started implementation plan creation

@@ -16,20 +16,10 @@ The application has been configured with the following defaults to ensure immedi
 ### 2. Authentication System
 - **JWT Tokens**: Pre-configured with secure secrets
 - **Session Management**: PostgreSQL-backed sessions
-- **Demo Users Available**:
-  - Admin: `admin` / `Admin@123456`
-  - Office: `office1` / `Office@123456` 
-  - Supervisor: `supervisor1` / `Super@123456`
+- **Demo Users**: Available after initial setup (contact administrator for credentials)
 
 ### 3. Environment Variables
-All necessary environment variables are pre-configured in `.env.local`:
-```
-DATABASE_URL=postgresql://neondb_owner:npg_5MIwCD4YhSdP@ep-calm-silence-a15zko7l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-JWT_SECRET=42d236149a7fe69b8f2f5ec7093f4805873e6569098cacbdc076eae0f80eef53
-SESSION_SECRET=5fcddc0a4c6ed316629c871d768422995efc66aff8fa0c658c1f0006db3c2351
-NODE_ENV=development
-VITE_AUTHENTICATION_ENABLED=true
-```
+All necessary environment variables are configured automatically during setup. The application includes secure defaults for development and production environments.
 
 ## Import Steps
 
@@ -44,7 +34,7 @@ VITE_AUTHENTICATION_ENABLED=true
 
 ### Step 3: Access the Application
 1. Open the application URL in your browser
-2. Login with any of the demo credentials above
+2. Login with provided demo credentials (contact administrator)
 3. All features are immediately available
 
 ## What's Included

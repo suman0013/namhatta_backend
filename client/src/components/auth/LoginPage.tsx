@@ -152,17 +152,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-yellow-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
-            <p className="text-sm text-orange-700 dark:text-orange-300 font-medium mb-2 flex items-center gap-2">
-              <Crown className="w-4 h-4" />
-              Demo Credentials:
-            </p>
-            <div className="text-xs text-orange-600 dark:text-orange-400 space-y-1">
-              <div>Admin: <code className="bg-orange-100 dark:bg-orange-800 px-2 py-1 rounded">admin / Admin@123456</code></div>
-              <div>Office: <code className="bg-amber-100 dark:bg-amber-800 px-2 py-1 rounded">office1 / Office@123456</code></div>
-              <div>Supervisor: <code className="bg-yellow-100 dark:bg-yellow-800 px-2 py-1 rounded">supervisor1 / Super@123456</code></div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>
