@@ -29,7 +29,7 @@ const registrationSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   fullName: z.string().min(2, "Full name is required"),
   email: z.string().email("Valid email is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(10, "Password must be at least 10 characters"),
   confirmPassword: z.string(),
   districts: z.array(z.string()).min(1, "At least one district must be selected")
 }).refine(data => data.password === data.confirmPassword, {
