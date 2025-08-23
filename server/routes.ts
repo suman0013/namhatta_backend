@@ -675,6 +675,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user (Admin only)
+  app.put("/api/admin/users/:id", authenticateJWT, authorize(['ADMIN']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      const { fullName, email } = req.body;
+      if (!fullName || !email) {
+        return res.status(400).json({ error: "Full name and email are required" });
+      }
+
+      const { getUserById, updateUser } = await import('./storage-auth');
+      const existingUser = await getUserById(userId);
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const updatedUser = await updateUser(userId, { fullName, email });
+      res.json({ message: "User updated successfully", user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
   // Deactivate user (Admin only)
   app.delete("/api/admin/users/:id", authenticateJWT, authorize(['ADMIN']), async (req, res) => {
     try {

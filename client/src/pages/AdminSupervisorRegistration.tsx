@@ -114,22 +114,51 @@ export default function AdminSupervisorRegistration() {
   
   // Group supervisors by district
   const groupedByDistrict = React.useMemo(() => {
-    const groups: Record<string, { district: District; supervisors: User[] }> = {};
+    const groups: Record<string, { district: District | null; supervisors: User[] }> = {};
     
     districtSupervisors.forEach((user: User) => {
       user.districts?.forEach((districtCode: string) => {
         const district = Array.isArray(districts) ? districts.find((d: District) => d.code === districtCode) : null;
-        if (district) {
-          if (!groups[districtCode]) {
-            groups[districtCode] = { district, supervisors: [] };
-          }
-          groups[districtCode].supervisors.push(user);
+        // Include even if district not found, showing the code
+        if (!groups[districtCode]) {
+          groups[districtCode] = { 
+            district: district || { code: districtCode, name: districtCode }, 
+            supervisors: [] 
+          };
         }
+        groups[districtCode].supervisors.push(user);
       });
     });
     
-    return Object.values(groups).sort((a, b) => a.district.name.localeCompare(b.district.name));
+    return Object.values(groups).sort((a, b) => {
+      const aName = a.district?.name || a.district?.code || '';
+      const bName = b.district?.name || b.district?.code || '';
+      return aName.localeCompare(bName);
+    });
   }, [districtSupervisors, districts]);
+  
+  // Edit supervisor mutation
+  const editMutation = useMutation({
+    mutationFn: async (userData: Partial<User>) => {
+      const res = await apiRequest("PUT", `/api/admin/users/${userData.id}`, userData);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "Supervisor updated successfully."
+      });
+      setEditingUser(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update supervisor",
+        variant: "destructive"
+      });
+    }
+  });
   
   // Delete supervisor mutation
   const deleteMutation = useMutation({
@@ -346,92 +375,168 @@ export default function AdminSupervisorRegistration() {
               No district supervisors registered yet.
             </p>
           ) : (
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {groupedByDistrict.map(({ district, supervisors }) => (
-                <div key={district.code} className="border rounded-lg p-4">
+                <Card key={district?.code} className="p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <h3 className="font-semibold text-lg">{district.name}</h3>
+                    <h3 className="font-semibold text-lg">{district?.name || district?.code}</h3>
                     <Badge variant="outline" className="text-xs">
-                      {supervisors.length} supervisor{supervisors.length !== 1 ? 's' : ''}
+                      {supervisors.length}
                     </Badge>
                   </div>
                   
-                  <div className="grid gap-2">
+                  <div className="space-y-2">
                     {supervisors.map((user: User) => (
                       <div
                         key={user.id}
-                        className="flex items-center justify-between p-3 bg-accent/30 rounded-md hover:bg-accent/50 transition-colors"
+                        className="p-2 bg-accent/30 rounded-md hover:bg-accent/50 transition-colors"
                       >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-sm">{user.fullName}</h4>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-sm truncate">{user.fullName}</h4>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingUser(user)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Deactivate Supervisor</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to deactivate {user.fullName}? They will no longer be able to access the system, but their data will be preserved.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => deleteMutation.mutate(user.id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      disabled={deleteMutation.isPending}
+                                    >
+                                      {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                                      Deactivate
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
                             {!user.isActive && (
                               <Badge variant="secondary" className="text-xs">Inactive</Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">
-                            @{user.username} • {user.email}
-                          </p>
+                          
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          
                           {user.districts && user.districts.length > 1 && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Also assigned to: {user.districts
-                                .filter(code => code !== district.code)
-                                .map(code => Array.isArray(districts) ? districts.find((d: District) => d.code === code)?.name || code : code)
-                                .join(', ')}
+                            <p className="text-xs text-muted-foreground">
+                              +{user.districts.length - 1} more district{user.districts.length - 1 !== 1 ? 's' : ''}
                             </p>
                           )}
-                        </div>
-                        
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditingUser(user)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Deactivate Supervisor</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to deactivate {user.fullName}? They will no longer be able to access the system, but their data will be preserved.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => deleteMutation.mutate(user.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  disabled={deleteMutation.isPending}
-                                >
-                                  {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                                  Deactivate
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+      
+      {/* Edit User Dialog */}
+      {editingUser && (
+        <Card className="glass-card fixed inset-4 z-50 max-w-md mx-auto my-auto p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Edit Supervisor</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditingUser(null)}
+              className="h-8 w-8 p-0"
+            >
+              ×
+            </Button>
+          </div>
+          
+          <Form {...form}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                editMutation.mutate({
+                  id: editingUser.id,
+                  fullName: formData.get('fullName') as string,
+                  email: formData.get('email') as string,
+                });
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-sm font-medium">Full Name</label>
+                <Input
+                  name="fullName"
+                  defaultValue={editingUser.fullName}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  name="email"
+                  type="email"
+                  defaultValue={editingUser.email}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingUser(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={editMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  {editMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </Card>
+      )}
+      
+      {editingUser && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40" 
+          onClick={() => setEditingUser(null)}
+        />
+      )}
     </div>
   );
 }
