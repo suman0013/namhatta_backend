@@ -16,17 +16,56 @@ app.set('trust proxy', true);
 // CORS configuration - restrict cross-origin requests
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com'] // Replace with actual production domains
-    : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5000'],
-  credentials: true, // Allow cookies
+    ? (origin, callback) => {
+        // In production, be strict about origins
+        const allowedOrigins = [
+          process.env.REPLIT_DOMAINS || 'https://*.replit.app',
+          process.env.ALLOWED_ORIGINS || ''
+        ].filter(Boolean);
+        
+        if (!origin) return callback(null, true); // Allow requests with no origin
+        
+        const isAllowed = allowedOrigins.some(allowed => 
+          allowed.includes('*') ? 
+            origin.match(allowed.replace('*', '.*')) : 
+            origin === allowed
+        );
+        
+        if (isAllowed) {
+          return callback(null, true);
+        }
+        
+        return callback(new Error('Not allowed by CORS'), false);
+      }
+    : true, // In development, allow all origins
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400 // Cache preflight response for 24 hours
 }));
 
 // Security headers - protect against common vulnerabilities
 app.use(helmet({
-  contentSecurityPolicy: false, // Disabled for development with Vite
-  crossOriginEmbedderPolicy: false // Disabled for development compatibility
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Needed for React dev
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://api.replit.com"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
+    }
+  } : false,
+  crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
+  hsts: process.env.NODE_ENV === 'production' ? {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  } : false
 }));
 
 // Request size limits to prevent DoS attacks

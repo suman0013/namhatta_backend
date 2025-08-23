@@ -5,9 +5,28 @@ import { z } from "zod";
 import { storage } from "./storage-fresh";
 import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema, insertGurudevSchema } from "@shared/schema";
 import { authRoutes } from "./auth/routes";
-import { authenticateJWT, authorize, validateDistrictAccess } from "./auth/middleware";
+import { authenticateJWT, authorize, validateDistrictAccess, loginRateLimit, sanitizeInput } from "./auth/middleware";
+import rateLimit from 'express-rate-limit';
 
 // Input validation schemas
+// Rate limiting for API endpoints
+const apiRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window per IP
+  message: { error: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Stricter rate limiting for data modification endpoints
+const modifyRateLimit = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10, // 10 requests per minute per IP
+  message: { error: 'Too many modification attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const queryParamsSchema = z.object({
   page: z.string().regex(/^[0-9]+$/).optional().default("1"),
   limit: z.string().regex(/^[0-9]+$/).optional().default("25"),
@@ -45,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/user-districts", authenticateJWT, async (req, res) => {
     try {
       const { getUserDistricts } = await import('./storage-auth');
-      const districts = await getUserDistricts(req.user.id);
+      const districts = await getUserDistricts(req.user!.id);
       res.json({ 
         districts: districts.map(d => ({
           code: d.districtCode,
@@ -77,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user address defaults
   app.get("/api/user/address-defaults", authenticateJWT, async (req, res) => {
     try {
-      const defaults = await storage.getUserAddressDefaults(req.user.id);
+      const defaults = await storage.getUserAddressDefaults(req.user!.id);
       res.json(defaults);
     } catch (error) {
       console.error('API Error:', error);
@@ -264,7 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(devotee);
   });
 
-  app.post("/api/devotees", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+  app.post("/api/devotees", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     try {
       // Extract address and other fields separately (similar to namhatta creation)
       const { presentAddress, permanentAddress, ...devoteeFields } = req.body;
@@ -282,12 +301,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const devotee = await storage.createDevotee(devoteeDataWithAddresses);
       res.status(201).json(devotee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ message: "Invalid devotee data", error: errorMessage });
     }
   });
 
   // Add devotee to specific Namhatta
-  app.post("/api/devotees/:namhattaId", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+  app.post("/api/devotees/:namhattaId", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const namhattaId = parseInt(req.params.namhattaId);
     try {
       // Extract address and other fields separately
@@ -306,11 +326,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const devotee = await storage.createDevoteeForNamhatta(devoteeDataWithAddresses, namhattaId);
       res.status(201).json(devotee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ message: "Invalid devotee data", error: errorMessage });
     }
   });
 
-  app.put("/api/devotees/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
+  app.put("/api/devotees/:id", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
     const id = parseInt(req.params.id);
     try {
       // Extract address and other fields separately (similar to create operations)
@@ -340,7 +361,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const devotee = await storage.updateDevotee(id, devoteeDataWithAddresses);
       res.json(devotee);
     } catch (error) {
-      res.status(400).json({ message: "Invalid devotee data", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ message: "Invalid devotee data", error: errorMessage });
     }
   });
 
@@ -371,7 +393,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Status updated successfully" });
     } catch (error) {
       console.error("Error upgrading devotee status:", error);
-      res.status(500).json({ message: "Failed to upgrade status", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(500).json({ message: "Failed to upgrade status", error: errorMessage });
     }
   });
 
@@ -434,11 +457,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const exists = await storage.checkNamhattaCodeExists(code);
       res.json({ exists });
     } catch (error) {
-      res.status(500).json({ message: "Error checking code uniqueness", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(500).json({ message: "Error checking code uniqueness", error: errorMessage });
     }
   });
 
-  app.post("/api/namhattas", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+  app.post("/api/namhattas", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     try {
       // Extract address and other fields separately
       const { address, ...namhattaFields } = req.body;
@@ -456,15 +480,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(namhatta);
     } catch (error) {
       // Return appropriate error status based on error type
-      if (error.message && error.message.includes('already exists')) {
-        res.status(409).json({ message: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      if (errorMessage.includes('already exists')) {
+        res.status(409).json({ message: errorMessage });
       } else {
-        res.status(400).json({ message: "Invalid namhatta data", error: error.message });
+        res.status(400).json({ message: "Invalid namhatta data", error: errorMessage });
       }
     }
   });
 
-  app.put("/api/namhattas/:id", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+  app.put("/api/namhattas/:id", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
       // Extract address and other fields separately (same as POST route)
@@ -482,7 +507,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const namhatta = await storage.updateNamhatta(id, namhattaDataWithAddress);
       res.json(namhatta);
     } catch (error) {
-      res.status(400).json({ message: "Invalid namhatta data", error: error.message });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ message: "Invalid namhatta data", error: errorMessage });
     }
   });
 
@@ -715,8 +741,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Full name and email are required" });
       }
 
-      const { getUserById, updateUser } = await import('./storage-auth');
-      const existingUser = await getUserById(userId);
+      const { getUser, updateUser } = await import('./storage-auth');
+      const existingUser = await getUser(userId);
       if (!existingUser) {
         return res.status(404).json({ error: "User not found" });
       }

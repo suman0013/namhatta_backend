@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
+import validator from 'validator';
 import { verifyToken, isTokenBlacklisted } from './jwt';
 import { validateSession } from './session';
 import { getUserWithDistricts } from '../storage-auth';
@@ -149,6 +150,35 @@ export const validateDistrictAccess = (req: Request, res: Response, next: NextFu
     // Add districts filter to request for use in queries
     req.body.allowedDistricts = req.user.districts;
     req.query.allowedDistricts = req.user.districts.join(',');
+  }
+
+  next();
+};
+
+// Input sanitization middleware
+export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+  const sanitizeValue = (value: any): any => {
+    if (typeof value === 'string') {
+      // Trim whitespace and escape HTML entities
+      return validator.escape(value.trim());
+    }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      // Recursively sanitize object properties
+      const sanitized: any = {};
+      Object.keys(value).forEach(key => {
+        sanitized[key] = sanitizeValue(value[key]);
+      });
+      return sanitized;
+    }
+    if (Array.isArray(value)) {
+      return value.map(sanitizeValue);
+    }
+    return value;
+  };
+
+  // Only sanitize for POST, PUT, PATCH requests
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    req.body = sanitizeValue(req.body);
   }
 
   next();
