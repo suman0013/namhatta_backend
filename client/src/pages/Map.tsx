@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getQueryFn } from "@/lib/queryClient";
-import { Map as MapIcon, ZoomIn, ZoomOut, RotateCcw, Globe, MapPin } from "lucide-react";
+import { Map as MapIcon, ZoomIn, ZoomOut, RotateCcw, Globe, MapPin, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import L from "leaflet";
 
 // Geographic boundaries for different zoom levels
@@ -31,6 +33,8 @@ interface MapData {
 export default function Map() {
   const [currentLevel, setCurrentLevel] = useState<MapLevel>('COUNTRY');
   const [zoomLevel, setZoomLevel] = useState<number>(3);
+  const [showNamhattaList, setShowNamhattaList] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<MapData | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
 
@@ -80,6 +84,25 @@ export default function Map() {
   const { data: villageData = [], isLoading: villageLoading } = useQuery({
     queryKey: ["/api/map/villages"], 
     queryFn: getQueryFn({ on401: "throw" }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Query for namhattas in selected location
+  const { data: locationNamhattas, isLoading: namhattasLoading } = useQuery({
+    queryKey: ["/api/namhattas", selectedLocation?.level, selectedLocation?.name],
+    queryFn: async () => {
+      if (!selectedLocation) return { data: [], total: 0 };
+      const queryParams = buildLocationQuery(selectedLocation);
+      const response = await fetch(`/api/namhattas${queryParams}`, {
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch namhattas');
+      return response.json();
+    },
+    enabled: !!selectedLocation && selectedLocation.count <= 5,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -480,7 +503,7 @@ export default function Map() {
               Level: ${currentLevel.replace('_', ' ')}
             </p>
             <p style="margin: 8px 0 0 0; color: #6366f1; font-size: 12px; cursor: pointer;">
-              Click to zoom in →
+              ${data.count <= 5 ? 'Click to view namhattas →' : 'Click to zoom in →'}
             </p>
           </div>
         `);
@@ -508,8 +531,17 @@ export default function Map() {
 
 
   const handleMarkerClick = (data: MapData) => {
-    console.log('Marker clicked:', data.name, 'Level:', data.level);
+    console.log('Marker clicked:', data.name, 'Level:', data.level, 'Count:', data.count);
     
+    // If count is 5 or less, show namhatta list instead of zooming
+    if (data.count <= 5) {
+      console.log('Showing namhatta list for:', data.name);
+      setSelectedLocation(data);
+      setShowNamhattaList(true);
+      return;
+    }
+    
+    // Otherwise, zoom in as before
     if (mapRef.current && data.coordinates) {
       const [lng, lat] = data.coordinates;
       
@@ -536,6 +568,33 @@ export default function Map() {
       mapRef.current.setView([lat, lng], targetZoom);
     }
   };
+
+  // Build query params for namhatta API based on location level
+  const buildLocationQuery = (location: MapData) => {
+    const params = new URLSearchParams();
+    params.append('size', '50'); // Get up to 50 namhattas
+    
+    switch (location.level) {
+      case 'COUNTRY':
+        params.append('country', location.name);
+        break;
+      case 'STATE':
+        params.append('state', location.name);
+        break;
+      case 'DISTRICT':
+        params.append('district', location.name);
+        break;
+      case 'SUB_DISTRICT':
+        params.append('subDistrict', location.name);
+        break;
+      case 'VILLAGE':
+        params.append('village', location.name);
+        break;
+    }
+    
+    return `?${params.toString()}`;
+  };
+
 
   if (isLoading) {
     return <MapSkeleton />;
@@ -607,6 +666,76 @@ export default function Map() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Namhatta List Dialog */}
+      <Dialog open={showNamhattaList} onOpenChange={setShowNamhattaList}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-blue-500" />
+              Namhattas in {selectedLocation?.name}
+              <Badge variant="secondary" className="ml-2">
+                {selectedLocation?.count} total
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="overflow-y-auto max-h-[60vh] space-y-3">
+            {namhattasLoading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full" />
+                ))}
+              </div>
+            ) : locationNamhattas && (locationNamhattas as any).data.length > 0 ? (
+              (locationNamhattas as any).data.map((namhatta: any) => (
+                <Link
+                  key={namhatta.id}
+                  href={`/namhattas/${namhatta.id}`}
+                  onClick={() => setShowNamhattaList(false)}
+                >
+                  <Card className="glass-card hover:shadow-md transition-all duration-200 cursor-pointer group">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            {namhatta.name}
+                          </h3>
+                          <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {[
+                                namhatta.address?.village,
+                                namhatta.address?.subDistrict, 
+                                namhatta.address?.district,
+                                namhatta.address?.state
+                              ].filter(Boolean).join(", ")}
+                            </div>
+                          </div>
+                          {namhatta.status && (
+                            <Badge 
+                              variant={namhatta.status === 'APPROVED' ? 'default' : 'secondary'}
+                              className="mt-2 text-xs"
+                            >
+                              {namhatta.status}
+                            </Badge>
+                          )}
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No namhattas found in this location</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
