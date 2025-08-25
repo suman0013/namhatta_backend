@@ -3,8 +3,8 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
 import * as schema from "@shared/schema";
 
-// Load environment variables from .env file
-dotenv.config({ path: ['.env.local', '.env'] });
+// Load environment variables from .env file - force override of system vars
+dotenv.config({ path: ['.env.local', '.env'], override: true });
 
 // Get database connection string from environment variable
 let connectionString = process.env.DATABASE_URL;
