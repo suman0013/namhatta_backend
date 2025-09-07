@@ -371,13 +371,26 @@ export class DatabaseStorage implements IStorage {
     }
     const whereClause = and(...whereConditions);
 
-    const [data, totalResult] = await Promise.all([
-      db.select().from(devotees).where(whereClause).limit(size).offset(offset),
-      db.select({ count: count() }).from(devotees).where(whereClause)
-    ]);
+    // Get devotee IDs first
+    const devoteeIds = await db
+      .select({ id: devotees.id })
+      .from(devotees)
+      .where(whereClause)
+      .limit(size)
+      .offset(offset);
+
+    // Get full devotee data with addresses and status names using the getDevotee method
+    const devoteeData = await Promise.all(
+      devoteeIds.map(async ({ id }) => {
+        return await this.getDevotee(id);
+      })
+    );
+
+    // Get total count
+    const totalResult = await db.select({ count: count() }).from(devotees).where(whereClause);
 
     return {
-      data,
+      data: devoteeData.filter(Boolean) as Devotee[],
       total: totalResult[0].count
     };
   }
