@@ -63,7 +63,10 @@ export default function NamhattaDetail() {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showRejectionDialog, setShowRejectionDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = sessionStorage.getItem('namhatta-devotees-view-mode');
+    return (saved as 'grid' | 'list') || 'grid';
+  });
   
   // Only ADMIN and OFFICE users can approve/reject
   const canApprove = user?.role === 'ADMIN' || user?.role === 'OFFICE';
@@ -447,7 +450,10 @@ export default function NamhattaDetail() {
               {/* View Toggle */}
               <div className="flex items-center bg-gray-100/10 dark:bg-gray-800/10 rounded-lg p-1 border border-gray-200/20 dark:border-gray-700/30">
                 <button
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => {
+                    setViewMode('grid');
+                    sessionStorage.setItem('namhatta-devotees-view-mode', 'grid');
+                  }}
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'grid'
                       ? 'bg-white/20 dark:bg-white/10 text-gray-900 dark:text-white'
@@ -458,7 +464,10 @@ export default function NamhattaDetail() {
                   <Grid3X3 className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setViewMode('list')}
+                  onClick={() => {
+                    setViewMode('list');
+                    sessionStorage.setItem('namhatta-devotees-view-mode', 'list');
+                  }}
                   className={`p-2 rounded-md transition-colors ${
                     viewMode === 'list'
                       ? 'bg-white/20 dark:bg-white/10 text-gray-900 dark:text-white'

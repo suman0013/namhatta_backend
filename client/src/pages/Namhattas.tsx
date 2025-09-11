@@ -33,7 +33,10 @@ export default function Namhattas() {
   });
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = sessionStorage.getItem('namhattas-view-mode');
+    return (saved as 'grid' | 'list') || 'grid';
+  });
 
   const { data: namhattas, isLoading } = useQuery({
     queryKey: ["/api/namhattas", page, pageSize, searchTerm, filters, sortBy, sortOrder],
@@ -225,7 +228,10 @@ export default function Namhattas() {
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => {
+                    setViewMode('grid');
+                    sessionStorage.setItem('namhattas-view-mode', 'grid');
+                  }}
                   className="h-8 px-3"
                   data-testid="button-grid-view"
                 >
@@ -234,7 +240,10 @@ export default function Namhattas() {
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('list')}
+                  onClick={() => {
+                    setViewMode('list');
+                    sessionStorage.setItem('namhattas-view-mode', 'list');
+                  }}
                   className="h-8 px-3"
                   data-testid="button-list-view"
                 >

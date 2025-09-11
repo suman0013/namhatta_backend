@@ -45,7 +45,10 @@ export default function Devotees() {
   
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const saved = sessionStorage.getItem('devotees-view-mode');
+    return (saved as 'grid' | 'list') || 'grid';
+  });
 
   const { data: devotees, isLoading } = useQuery({
     queryKey: ["/api/devotees", page, pageSize, searchTerm, filters, sortBy, sortOrder],
@@ -217,7 +220,10 @@ export default function Devotees() {
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => {
+                    setViewMode('grid');
+                    sessionStorage.setItem('devotees-view-mode', 'grid');
+                  }}
                   className="h-8 px-3"
                   data-testid="button-grid-view"
                 >
@@ -226,7 +232,10 @@ export default function Devotees() {
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('list')}
+                  onClick={() => {
+                    setViewMode('list');
+                    sessionStorage.setItem('devotees-view-mode', 'list');
+                  }}
                   className="h-8 px-3"
                   data-testid="button-list-view"
                 >
@@ -347,12 +356,6 @@ function DevoteeCard({ devotee, statuses, viewMode = 'grid' }: { devotee: Devote
                       <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
                         <Crown className="inline h-3 w-3 mr-1" />
                         {devotee.initiatedName}
-                      </p>
-                    )}
-                    {devotee.permanentAddress && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                        <MapPin className="inline h-3 w-3 mr-1" />
-                        {devotee.permanentAddress.district || devotee.permanentAddress.state}
                       </p>
                     )}
                   </div>
