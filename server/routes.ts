@@ -522,11 +522,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
+  // Check registration number availability
+  app.get("/api/namhattas/check-registration/:registrationNo", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    const registrationNo = req.params.registrationNo;
+    try {
+      const exists = await storage.checkRegistrationNoExists(registrationNo);
+      res.json({ exists });
+    } catch (error) {
+      res.status(500).json({ message: "Error checking registration number" });
+    }
+  });
+
   // Namhatta approval endpoints - only ADMIN and OFFICE users can approve/reject
   app.post("/api/namhattas/:id/approve", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
+    const { registrationNo, registrationDate } = req.body;
+    
+    if (!registrationNo || !registrationDate) {
+      return res.status(400).json({ message: "Registration number and date are required" });
+    }
+    
     try {
-      await storage.approveNamhatta(id);
+      // Check if registration number already exists
+      const exists = await storage.checkRegistrationNoExists(registrationNo);
+      if (exists) {
+        return res.status(400).json({ message: "Registration number already exists" });
+      }
+      
+      await storage.approveNamhatta(id, registrationNo, registrationDate);
       res.json({ message: "Namhatta approved successfully" });
     } catch (error) {
       res.status(404).json({ message: "Namhatta not found" });

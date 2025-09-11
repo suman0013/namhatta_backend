@@ -1,7 +1,8 @@
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, StatusHistory } from "@shared/schema";
+import { IStorage } from "./storage-fresh";
 
-// Memory-based storage interface for the migration
-export interface IStorage {
+// Memory-based storage implementation for the migration
+export interface IMemoryStorage extends IStorage {
   // Devotees
   getDevotees(page?: number, size?: number, filters?: any): Promise<{ data: Devotee[], total: number }>;
   getDevotee(id: number): Promise<Devotee | undefined>;
@@ -17,8 +18,9 @@ export interface IStorage {
   getNamhatta(id: number): Promise<Namhatta | undefined>;
   createNamhatta(namhatta: InsertNamhatta): Promise<Namhatta>;
   updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta>;
-  approveNamhatta(id: number): Promise<void>;
+  approveNamhatta(id: number, registrationNo: string, registrationDate: string): Promise<void>;
   rejectNamhatta(id: number, reason?: string): Promise<void>;
+  checkRegistrationNoExists(registrationNo: string): Promise<boolean>;
   getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]>;
   getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>>;
   getNamhattaStatusHistory(id: number, page?: number, size?: number): Promise<{ data: StatusHistory[], total: number }>;
@@ -303,6 +305,8 @@ export class MemStorage implements IStorage {
       secretary: namhatta.secretary || null,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status || "PENDING_APPROVAL",
+      registrationNo: namhatta.registrationNo || null,
+      registrationDate: namhatta.registrationDate || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -318,8 +322,16 @@ export class MemStorage implements IStorage {
     return this.namhattas[index];
   }
 
-  async approveNamhatta(id: number): Promise<void> {
-    await this.updateNamhatta(id, { status: "APPROVED" });
+  async approveNamhatta(id: number, registrationNo: string, registrationDate: string): Promise<void> {
+    await this.updateNamhatta(id, { 
+      status: "APPROVED", 
+      registrationNo,
+      registrationDate 
+    });
+  }
+
+  async checkRegistrationNoExists(registrationNo: string): Promise<boolean> {
+    return this.namhattas.some(n => n.registrationNo === registrationNo);
   }
 
   async rejectNamhatta(id: number, reason?: string): Promise<void> {

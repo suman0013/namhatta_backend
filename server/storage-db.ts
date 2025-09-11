@@ -762,8 +762,19 @@ export class DatabaseStorage implements IStorage {
     return namhatta;
   }
 
-  async approveNamhatta(id: number): Promise<void> {
-    await db.update(namhattas).set({ status: "APPROVED" }).where(eq(namhattas.id, id));
+  async approveNamhatta(id: number, registrationNo: string, registrationDate: string): Promise<void> {
+    await db.update(namhattas).set({ 
+      status: "APPROVED", 
+      registrationNo,
+      registrationDate 
+    }).where(eq(namhattas.id, id));
+  }
+
+  async checkRegistrationNoExists(registrationNo: string): Promise<boolean> {
+    const result = await db.select({ count: count() })
+      .from(namhattas)
+      .where(eq(namhattas.registrationNo, registrationNo));
+    return Number(result[0].count) > 0;
   }
 
   async rejectNamhatta(id: number, reason?: string): Promise<void> {

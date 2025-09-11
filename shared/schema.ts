@@ -304,6 +304,9 @@ export type InsertDevotee = z.infer<typeof insertDevoteeSchema>;
 export type Namhatta = typeof namhattas.$inferSelect & {
   devoteeCount?: number;
   districtSupervisorName?: string;
+  districtSupervisorId: number;
+  registrationNo?: string;
+  registrationDate?: string;
 };
 export type InsertNamhatta = z.infer<typeof insertNamhattaSchema>;
 
