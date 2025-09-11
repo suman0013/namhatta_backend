@@ -33,6 +33,12 @@ export const devotees = pgTable("devotees", {
   }>>(),
   additionalComments: text("additional_comments"),
   shraddhakutirId: integer("shraddhakutir_id"),
+  // Leadership role fields
+  leadershipRole: text("leadership_role"), // MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI, NULL
+  reportingToDevoteeId: integer("reporting_to_devotee_id"), // References devotees.id for hierarchy
+  hasSystemAccess: boolean("has_system_access").default(false), // Determines if devotee gets login
+  appointedDate: text("appointed_date"), // When appointed to leadership role
+  appointedBy: integer("appointed_by"), // References users.id - who appointed them
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -172,6 +178,7 @@ export const users = pgTable("users", {
   fullName: text("full_name").notNull(),
   email: text("email").notNull().unique(),
   role: text("role").notNull(), // 'ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR'
+  devoteeId: integer("devotee_id"), // References devotees.id - links user account to devotee
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   isActive: boolean("is_active").default(true),
@@ -183,6 +190,7 @@ export const userDistricts = pgTable("user_districts", {
   userId: integer("user_id").notNull(),
   districtCode: text("district_code").notNull(), // References district from addresses table
   districtNameEnglish: text("district_name_english").notNull(), // Store district name for easy display
+  isDefaultDistrictSupervisor: boolean("is_default_district_supervisor").default(false), // One default DS per district
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   uniqueUserDistrict: unique().on(table.userId, table.districtCode),
