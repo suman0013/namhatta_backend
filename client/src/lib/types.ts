@@ -18,7 +18,10 @@ export interface HierarchyResponse {
   regionalDirectors: Leader[];
   coRegionalDirectors: Leader[];
   districtSupervisors: Leader[];
-  malaSenapotis: Leader[];
+  malaSenapotis: DevoteeLeader[];
+  mahaChakraSenapotis: DevoteeLeader[];
+  chakraSenapotis: DevoteeLeader[];
+  upaChakraSenapotis: DevoteeLeader[];
 }
 
 export interface Leader {
@@ -31,6 +34,21 @@ export interface Leader {
     state?: string;
     district?: string;
   };
+}
+
+export interface DevoteeLeader {
+  id: number;
+  devoteeId: number;
+  name: string; // devotee's name (legal or initiated)
+  legalName: string;
+  leadershipRole: 'MALA_SENAPOTI' | 'MAHA_CHAKRA_SENAPOTI' | 'CHAKRA_SENAPOTI' | 'UPA_CHAKRA_SENAPOTI';
+  reportingToDevoteeId?: number;
+  reportingToDevoteeName?: string;
+  appointedDate?: string;
+  appointedBy?: number;
+  namhattaId?: number;
+  namhattaName?: string;
+  hasSystemAccess?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -71,10 +89,12 @@ export interface Devotee {
   presentAddress?: Address;
   permanentAddress?: Address;
   devotionalStatusId?: number;
+  namhattaId?: number;
   harinamInitiationGurudevId?: number;
   pancharatrikInitiationGurudevId?: number;
   harinamInitiationGurudev?: string;
   pancharatrikInitiationGurudev?: string;
+  devotionalStatusName?: string;
   initiatedName?: string;
   harinamDate?: string;
   pancharatrikDate?: string;
@@ -83,7 +103,14 @@ export interface Devotee {
   devotionalCourses?: DevotionalCourse[];
   additionalComments?: string;
   shraddhakutirId?: number;
+  // Leadership fields
+  leadershipRole?: 'MALA_SENAPOTI' | 'MAHA_CHAKRA_SENAPOTI' | 'CHAKRA_SENAPOTI' | 'UPA_CHAKRA_SENAPOTI' | null;
+  reportingToDevoteeId?: number;
+  hasSystemAccess?: boolean;
+  appointedDate?: string;
+  appointedBy?: number;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Namhatta {
@@ -93,6 +120,7 @@ export interface Namhatta {
   meetingDay?: string;
   meetingTime?: string;
   address?: Address;
+  // Leadership positions - now storing devotee names as strings (from devotee lookup)
   malaSenapoti?: string;
   mahaChakraSenapoti?: string;
   chakraSenapoti?: string;
@@ -100,11 +128,13 @@ export interface Namhatta {
   secretary?: string;
   president?: string;
   accountant?: string;
-  districtSupervisorId?: number;
-  status: 'PENDING_APPROVAL' | 'APPROVED';
+  districtSupervisorId: number;
+  districtSupervisorName?: string;
+  status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
   registrationNo?: string;
   registrationDate?: string;
   createdAt: Date;
+  updatedAt: Date;
   devoteeCount?: number;
 }
 
