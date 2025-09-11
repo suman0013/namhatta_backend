@@ -173,6 +173,145 @@ export default function Hierarchy() {
         )}
       </div>
 
+      {/* Devotee Leadership Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* Mala Senapotis */}
+        {(hierarchy as any)?.malaSenapotis && (hierarchy as any).malaSenapotis.length > 0 && (
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-sm">
+                <Crown className="mr-2 h-4 w-4 text-red-500" />
+                Mala Senapotis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {(hierarchy as any).malaSenapotis.map((leader: any) => (
+                  <div key={leader.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20">
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center">
+                      <Crown className="h-3 w-3 text-white float-animation" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate" title={leader.name}>
+                        {leader.name}
+                      </h3>
+                      <p className="text-xs text-red-700 dark:text-red-300">Mala Senapoti</p>
+                      {leader.namhattaName && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate" title={leader.namhattaName}>
+                          {leader.namhattaName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Maha Chakra Senapotis */}
+        {(hierarchy as any)?.mahaChakraSenapotis && (hierarchy as any).mahaChakraSenapotis.length > 0 && (
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-sm">
+                <UserCheck className="mr-2 h-4 w-4 text-indigo-500" />
+                Maha Chakra Senapotis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {(hierarchy as any).mahaChakraSenapotis.map((leader: any) => (
+                  <div key={leader.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20">
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center">
+                      <UserCheck className="h-3 w-3 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate" title={leader.name}>
+                        {leader.name}
+                      </h3>
+                      <p className="text-xs text-indigo-700 dark:text-indigo-300">Maha Chakra Senapoti</p>
+                      {leader.namhattaName && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate" title={leader.namhattaName}>
+                          {leader.namhattaName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Chakra Senapotis */}
+        {(hierarchy as any)?.chakraSenapotis && (hierarchy as any).chakraSenapotis.length > 0 && (
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-sm">
+                <Users className="mr-2 h-4 w-4 text-green-500" />
+                Chakra Senapotis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {(hierarchy as any).chakraSenapotis.map((leader: any) => (
+                  <div key={leader.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                    <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                      <Users className="h-3 w-3 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate" title={leader.name}>
+                        {leader.name}
+                      </h3>
+                      <p className="text-xs text-green-700 dark:text-green-300">Chakra Senapoti</p>
+                      {leader.namhattaName && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate" title={leader.namhattaName}>
+                          {leader.namhattaName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Upa Chakra Senapotis */}
+        {(hierarchy as any)?.upaChakraSenapotis && (hierarchy as any).upaChakraSenapotis.length > 0 && (
+          <Card className="glass-card">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-sm">
+                <MapPin className="mr-2 h-4 w-4 text-yellow-500" />
+                Upa Chakra Senapotis
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                {(hierarchy as any).upaChakraSenapotis.map((leader: any) => (
+                  <div key={leader.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20">
+                    <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-full flex items-center justify-center">
+                      <MapPin className="h-3 w-3 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate" title={leader.name}>
+                        {leader.name}
+                      </h3>
+                      <p className="text-xs text-yellow-700 dark:text-yellow-300">Upa Chakra Senapoti</p>
+                      {leader.namhattaName && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate" title={leader.namhattaName}>
+                          {leader.namhattaName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
       {/* Horizontal Line Separator */}
       <div className="my-8">
         <hr className="border-t border-gray-200 dark:border-gray-700 opacity-50" />
