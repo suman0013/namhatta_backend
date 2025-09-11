@@ -1,97 +1,8 @@
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, StatusHistory } from "@shared/schema";
 import { IStorage } from "./storage-fresh";
 
-// Memory-based storage implementation for the migration
-export interface IMemoryStorage extends IStorage {
-  // Devotees
-  getDevotees(page?: number, size?: number, filters?: any): Promise<{ data: Devotee[], total: number }>;
-  getDevotee(id: number): Promise<Devotee | undefined>;
-  createDevotee(devotee: InsertDevotee): Promise<Devotee>;
-  createDevoteeForNamhatta(devotee: InsertDevotee, namhattaId: number): Promise<Devotee>;
-  updateDevotee(id: number, devotee: Partial<InsertDevotee>): Promise<Devotee>;
-  getDevoteesByNamhatta(namhattaId: number, page?: number, size?: number, statusId?: number): Promise<{ data: Devotee[], total: number }>;
-  upgradeDevoteeStatus(id: number, newStatusId: number, notes?: string): Promise<void>;
-  getDevoteeStatusHistory(id: number): Promise<StatusHistory[]>;
-
-  // Namhattas
-  getNamhattas(page?: number, size?: number, filters?: any): Promise<{ data: Namhatta[], total: number }>;
-  getNamhatta(id: number): Promise<Namhatta | undefined>;
-  createNamhatta(namhatta: InsertNamhatta): Promise<Namhatta>;
-  updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta>;
-  approveNamhatta(id: number, registrationNo: string, registrationDate: string): Promise<void>;
-  rejectNamhatta(id: number, reason?: string): Promise<void>;
-  checkRegistrationNoExists(registrationNo: string): Promise<boolean>;
-  getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]>;
-  getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>>;
-  getNamhattaStatusHistory(id: number, page?: number, size?: number): Promise<{ data: StatusHistory[], total: number }>;
-
-  // Statuses
-  getDevotionalStatuses(): Promise<DevotionalStatus[]>;
-  createDevotionalStatus(status: InsertDevotionalStatus): Promise<DevotionalStatus>;
-  renameDevotionalStatus(id: number, newName: string): Promise<void>;
-
-  // Shraddhakutirs
-  getShraddhakutirs(): Promise<Shraddhakutir[]>;
-  createShraddhakutir(shraddhakutir: InsertShraddhakutir): Promise<Shraddhakutir>;
-
-  // Updates
-  createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate>;
-  getAllUpdates(): Promise<Array<NamhattaUpdate & { namhattaName: string }>>;
-
-  // Hierarchy
-  getTopLevelHierarchy(): Promise<{
-    founder: Leader[];
-    gbc: Leader[];
-    regionalDirectors: Leader[];
-    coRegionalDirectors: Leader[];
-  }>;
-  getLeadersByLevel(level: string): Promise<Leader[]>;
-
-  // Dashboard
-  getDashboardSummary(): Promise<{
-    totalDevotees: number;
-    totalNamhattas: number;
-    recentUpdates: Array<{
-      namhattaId: number;
-      namhattaName: string;
-      programType: string;
-      date: string;
-      attendance: number;
-    }>;
-  }>;
-  getStatusDistribution(): Promise<Array<{
-    statusName: string;
-    count: number;
-    percentage: number;
-  }>>;
-
-  // Geography
-  getCountries(): Promise<string[]>;
-  getStates(country?: string): Promise<string[]>;
-  getDistricts(state?: string): Promise<string[]>;
-  getSubDistricts(district?: string, pincode?: string): Promise<string[]>;
-  getVillages(subDistrict?: string, pincode?: string): Promise<string[]>;
-  getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]>;
-  searchPincodes(query?: string, page?: number, size?: number): Promise<{ data: string[], hasMore: boolean }>;
-  getAddressByPincode(pincode: string): Promise<{ state: string; district: string; villages: string[] } | null>;
-
-  // Map data methods
-  getNamhattaCountsByCountry(): Promise<Array<{ country: string; count: number }>>;
-  getNamhattaCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>>;
-  getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>>;
-  getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
-  getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
-
-  // District Supervisor methods
-  getDistrictSupervisors(district: string): Promise<Leader[]>;
-  validateDistrictSupervisor(supervisorId: number, district: string): Promise<boolean>;
-  getUserAddressDefaults(userId: number): Promise<{
-    country?: string;
-    state?: string;
-    district?: string;
-    readonly: string[];
-  }>;
-}
+// Import Gurudev type
+import { Gurudev, InsertGurudev } from "@shared/schema";
 
 // Memory storage implementation for the migration
 export class MemStorage implements IStorage {
@@ -102,6 +13,8 @@ export class MemStorage implements IStorage {
   private namhattaUpdates: NamhattaUpdate[] = [];
   private leaders: Leader[] = [];
   private statusHistory: StatusHistory[] = [];
+  private gurudevs: Gurudev[] = [];
+  private users: Array<{ id: number; username: string; fullName: string; email: string; districts: string[] }> = [];
   private nextId = 1;
 
   constructor() {
@@ -133,7 +46,18 @@ export class MemStorage implements IStorage {
       { id: 2, name: "Kolkata Shraddhakutir", districtCode: "KOLKATA", createdAt: new Date() }
     ];
 
-    this.nextId = 8;
+    this.gurudevs = [
+      { id: 1, name: "His Divine Grace A.C. Bhaktivedanta Swami Prabhupada", title: "His Divine Grace", createdAt: new Date() },
+      { id: 2, name: "His Holiness Jayapataka Swami", title: "His Holiness", createdAt: new Date() },
+      { id: 3, name: "His Grace Nitai Gauranga Das", title: "His Grace", createdAt: new Date() }
+    ];
+
+    this.users = [
+      { id: 1, username: "nitai.gauranga", fullName: "HG Nitai Gauranga Das", email: "nitai.gauranga@example.com", districts: ["Bankura"] },
+      { id: 2, username: "chaitanya.das", fullName: "HG Chaitanya Das", email: "chaitanya.das@example.com", districts: ["Nadia"] }
+    ];
+
+    this.nextId = 10;
   }
 
   // Devotees
@@ -185,6 +109,12 @@ export class MemStorage implements IStorage {
       devotionalCourses: devotee.devotionalCourses as any || null,
       additionalComments: devotee.additionalComments || null,
       shraddhakutirId: devotee.shraddhakutirId || null,
+      // Leadership fields
+      leadershipRole: devotee.leadershipRole || null,
+      reportingToDevoteeId: devotee.reportingToDevoteeId || null,
+      hasSystemAccess: devotee.hasSystemAccess || false,
+      appointedDate: devotee.appointedDate || null,
+      appointedBy: devotee.appointedBy || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -226,6 +156,12 @@ export class MemStorage implements IStorage {
       devotionalCourses: devotee.devotionalCourses !== undefined ? devotee.devotionalCourses as any : existing.devotionalCourses,
       additionalComments: devotee.additionalComments !== undefined ? devotee.additionalComments : existing.additionalComments,
       shraddhakutirId: devotee.shraddhakutirId !== undefined ? devotee.shraddhakutirId : existing.shraddhakutirId,
+      // Leadership fields
+      leadershipRole: devotee.leadershipRole !== undefined ? devotee.leadershipRole : existing.leadershipRole,
+      reportingToDevoteeId: devotee.reportingToDevoteeId !== undefined ? devotee.reportingToDevoteeId : existing.reportingToDevoteeId,
+      hasSystemAccess: devotee.hasSystemAccess !== undefined ? devotee.hasSystemAccess : existing.hasSystemAccess,
+      appointedDate: devotee.appointedDate !== undefined ? devotee.appointedDate : existing.appointedDate,
+      appointedBy: devotee.appointedBy !== undefined ? devotee.appointedBy : existing.appointedBy,
       updatedAt: new Date()
     };
     return this.devotees[index];
@@ -303,13 +239,15 @@ export class MemStorage implements IStorage {
       chakraSenapoti: namhatta.chakraSenapoti || null,
       upaChakraSenapoti: namhatta.upaChakraSenapoti || null,
       secretary: namhatta.secretary || null,
+      president: namhatta.president || null,
+      accountant: namhatta.accountant || null,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status || "PENDING_APPROVAL",
       registrationNo: namhatta.registrationNo || null,
       registrationDate: namhatta.registrationDate || null,
       createdAt: new Date(),
       updatedAt: new Date()
-    };
+    } as Namhatta;
     this.namhattas.push(newNamhatta);
     return newNamhatta;
   }
@@ -318,16 +256,21 @@ export class MemStorage implements IStorage {
     const index = this.namhattas.findIndex(n => n.id === id);
     if (index === -1) throw new Error('Namhatta not found');
     
-    this.namhattas[index] = { ...this.namhattas[index], ...namhatta, updatedAt: new Date() };
+    this.namhattas[index] = { ...this.namhattas[index], ...namhatta, updatedAt: new Date() } as Namhatta;
     return this.namhattas[index];
   }
 
   async approveNamhatta(id: number, registrationNo: string, registrationDate: string): Promise<void> {
-    await this.updateNamhatta(id, { 
-      status: "APPROVED", 
-      registrationNo,
-      registrationDate 
-    });
+    const index = this.namhattas.findIndex(n => n.id === id);
+    if (index !== -1) {
+      this.namhattas[index] = {
+        ...this.namhattas[index],
+        status: "APPROVED",
+        registrationNo,
+        registrationDate,
+        updatedAt: new Date()
+      } as Namhatta;
+    }
   }
 
   async checkRegistrationNoExists(registrationNo: string): Promise<boolean> {
@@ -393,8 +336,14 @@ export class MemStorage implements IStorage {
   }
 
   // Shraddhakutirs
-  async getShraddhakutirs(): Promise<Shraddhakutir[]> {
-    return [...this.shraddhakutirs];
+  async getShraddhakutirs(district?: string): Promise<Shraddhakutir[]> {
+    let filteredShraddhakutirs = [...this.shraddhakutirs];
+    
+    if (district) {
+      filteredShraddhakutirs = filteredShraddhakutirs.filter(s => s.districtCode === district);
+    }
+    
+    return filteredShraddhakutirs;
   }
 
   async createShraddhakutir(shraddhakutir: InsertShraddhakutir): Promise<Shraddhakutir> {
@@ -405,6 +354,22 @@ export class MemStorage implements IStorage {
     };
     this.shraddhakutirs.push(newShraddhakutir);
     return newShraddhakutir;
+  }
+
+  // Gurudevs
+  async getGurudevs(): Promise<Gurudev[]> {
+    return [...this.gurudevs];
+  }
+
+  async createGurudev(gurudev: InsertGurudev): Promise<Gurudev> {
+    const newGurudev: Gurudev = {
+      id: this.nextId++,
+      name: gurudev.name,
+      title: gurudev.title || null,
+      createdAt: new Date()
+    };
+    this.gurudevs.push(newGurudev);
+    return newGurudev;
   }
 
   // Updates
@@ -539,27 +504,27 @@ export class MemStorage implements IStorage {
     return ["700001", "700002", "700003"];
   }
 
-  async searchPincodes(query?: string, page = 1, size = 10): Promise<{ data: string[], hasMore: boolean }> {
+  async searchPincodes(country: string, searchTerm: string, page: number, limit: number): Promise<{ pincodes: string[]; total: number; hasMore: boolean }> {
     const allPincodes = ["700001", "700002", "700003", "734001", "734002"];
     let filteredPincodes = allPincodes;
     
-    if (query) {
-      filteredPincodes = allPincodes.filter(p => p.includes(query));
+    if (searchTerm) {
+      filteredPincodes = allPincodes.filter(p => p.includes(searchTerm));
     }
     
-    const offset = (page - 1) * size;
-    const data = filteredPincodes.slice(offset, offset + size);
-    const hasMore = offset + size < filteredPincodes.length;
+    const offset = (page - 1) * limit;
+    const pincodes = filteredPincodes.slice(offset, offset + limit);
+    const hasMore = offset + limit < filteredPincodes.length;
     
-    return { data, hasMore };
+    return { pincodes, total: filteredPincodes.length, hasMore };
   }
 
-  async getAddressByPincode(pincode: string): Promise<{ state: string; district: string; villages: string[] } | null> {
+  async getAddressByPincode(pincode: string): Promise<{ country: string; state: string; district: string; subDistricts: string[]; villages: string[] } | null> {
     // Basic mapping for migration
-    const addressMap: Record<string, { state: string; district: string; villages: string[] }> = {
-      "700001": { state: "West Bengal", district: "Kolkata", villages: ["Kolkata City"] },
-      "700002": { state: "West Bengal", district: "Kolkata", villages: ["Salt Lake"] },
-      "734001": { state: "West Bengal", district: "Nadia", villages: ["Mayapur"] }
+    const addressMap: Record<string, { country: string; state: string; district: string; subDistricts: string[]; villages: string[] }> = {
+      "700001": { country: "India", state: "West Bengal", district: "Kolkata", subDistricts: ["Kolkata North"], villages: ["Kolkata City"] },
+      "700002": { country: "India", state: "West Bengal", district: "Kolkata", subDistricts: ["Salt Lake"], villages: ["Salt Lake"] },
+      "734001": { country: "India", state: "West Bengal", district: "Nadia", subDistricts: ["Mayapur"], villages: ["Mayapur"] }
     };
     
     return addressMap[pincode] || null;
@@ -595,32 +560,62 @@ export class MemStorage implements IStorage {
     return [{ village: "Sample Village", subDistrict: subDistrict || "Sample Sub-District", district: "Sample District", state: "Sample State", country: "India", count: this.namhattas.length }];
   }
 
-  // District Supervisor methods
-  async getDistrictSupervisors(district: string): Promise<Leader[]> {
-    return this.leaders.filter(leader => 
-      leader.role === 'DISTRICT_SUPERVISOR' && 
-      leader.location?.district === district
-    );
+  // Admin functions
+  async createDistrictSupervisor(data: {
+    username: string;
+    fullName: string;
+    email: string;
+    password: string;
+    districts: string[];
+  }): Promise<{ user: any; districts: string[] }> {
+    const newUser = {
+      id: this.nextId++,
+      username: data.username,
+      fullName: data.fullName,
+      email: data.email,
+      districts: data.districts
+    };
+    this.users.push(newUser);
+    return { user: newUser, districts: data.districts };
+  }
+
+  async getAllUsers(): Promise<any[]> {
+    return [...this.users];
+  }
+
+  async getAvailableDistricts(): Promise<Array<{ code: string; name: string }>> {
+    return [
+      { code: "NADIA", name: "Nadia" },
+      { code: "KOLKATA", name: "Kolkata" },
+      { code: "BANKURA", name: "Bankura" }
+    ];
+  }
+
+  async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string }>> {
+    return this.users.filter(u => u.districts.includes(district)).map(u => ({
+      id: u.id,
+      username: u.username,
+      fullName: u.fullName,
+      email: u.email
+    }));
   }
 
   async validateDistrictSupervisor(supervisorId: number, district: string): Promise<boolean> {
-    const supervisor = this.leaders.find(leader => 
-      leader.id === supervisorId && 
-      leader.role === 'DISTRICT_SUPERVISOR' && 
-      leader.location?.district === district
-    );
-    return !!supervisor;
+    const user = this.users.find(u => u.id === supervisorId);
+    return user ? user.districts.includes(district) : false;
   }
 
-  async getUserAddressDefaults(userId: number): Promise<{
-    country?: string;
-    state?: string;
-    district?: string;
-    readonly: string[];
-  }> {
-    // This would normally fetch user data from database
-    // For now, return empty defaults since we don't have user-location mapping in MemStorage
-    return { readonly: [] };
+  async getUserAddressDefaults(userId: number): Promise<{ country?: string; state?: string; district?: string }> {
+    const user = this.users.find(u => u.id === userId);
+    if (!user || user.districts.length === 0) {
+      return { country: "India" };
+    }
+    
+    return {
+      country: "India",
+      state: "West Bengal", // Default for this implementation
+      district: user.districts[0] // Use first district as default
+    };
   }
 }
 
