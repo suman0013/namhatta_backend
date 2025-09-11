@@ -591,12 +591,13 @@ export class MemStorage implements IStorage {
     ];
   }
 
-  async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string }>> {
+  async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string; isDefault: boolean }>> {
     return this.users.filter(u => u.districts.includes(district)).map(u => ({
       id: u.id,
       username: u.username,
       fullName: u.fullName,
-      email: u.email
+      email: u.email,
+      isDefault: false // Memory storage doesn't track default flag - always false
     }));
   }
 
@@ -616,6 +617,130 @@ export class MemStorage implements IStorage {
       state: "West Bengal", // Default for this implementation
       district: user.districts[0] // Use first district as default
     };
+  }
+
+  // Leadership Management - Stub implementations for memory storage
+  async getDevoteeLeaders(page = 1, size = 10, filters: any = {}): Promise<{ data: Array<Devotee & { reportingToName?: string }>, total: number }> {
+    let leaders = this.devotees.filter(d => d.leadershipRole);
+    
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      leaders = leaders.filter(d => 
+        d.legalName.toLowerCase().includes(searchLower) ||
+        (d.name && d.name.toLowerCase().includes(searchLower)) ||
+        (d.leadershipRole && d.leadershipRole.toLowerCase().includes(searchLower))
+      );
+    }
+
+    if (filters.role) {
+      leaders = leaders.filter(d => d.leadershipRole === filters.role);
+    }
+
+    const total = leaders.length;
+    const offset = (page - 1) * size;
+    const data = leaders.slice(offset, offset + size).map(leader => {
+      const reportingTo = leader.reportingToDevoteeId ? 
+        this.devotees.find(d => d.id === leader.reportingToDevoteeId) : null;
+      return {
+        ...leader,
+        reportingToName: reportingTo?.name || reportingTo?.legalName
+      };
+    });
+
+    return { data, total };
+  }
+
+  async getDevoteesByRole(role: string): Promise<Array<Devotee & { reportingToName?: string }>> {
+    const leaders = this.devotees.filter(d => d.leadershipRole === role);
+    return leaders.map(leader => {
+      const reportingTo = leader.reportingToDevoteeId ? 
+        this.devotees.find(d => d.id === leader.reportingToDevoteeId) : null;
+      return {
+        ...leader,
+        reportingToName: reportingTo?.name || reportingTo?.legalName
+      };
+    });
+  }
+
+  async assignLeadershipRole(devoteeId: number, data: {
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    hasSystemAccess: boolean;
+    appointedBy: number;
+    appointedDate: string;
+  }): Promise<Devotee> {
+    const index = this.devotees.findIndex(d => d.id === devoteeId);
+    if (index === -1) throw new Error('Devotee not found');
+    
+    this.devotees[index] = {
+      ...this.devotees[index],
+      leadershipRole: data.leadershipRole,
+      reportingToDevoteeId: data.reportingToDevoteeId || null,
+      hasSystemAccess: data.hasSystemAccess,
+      appointedBy: data.appointedBy,
+      appointedDate: data.appointedDate,
+      updatedAt: new Date()
+    };
+    
+    return this.devotees[index];
+  }
+
+  async removeLeadershipRole(devoteeId: number): Promise<Devotee> {
+    const index = this.devotees.findIndex(d => d.id === devoteeId);
+    if (index === -1) throw new Error('Devotee not found');
+    
+    this.devotees[index] = {
+      ...this.devotees[index],
+      leadershipRole: null,
+      reportingToDevoteeId: null,
+      hasSystemAccess: false,
+      appointedBy: null,
+      appointedDate: null,
+      updatedAt: new Date()
+    };
+    
+    return this.devotees[index];
+  }
+
+  async getLeadershipHierarchy(): Promise<Array<{
+    id: number;
+    name: string;
+    legalName: string;
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    children: Array<any>;
+  }>> {
+    const leaders = this.devotees.filter(d => d.leadershipRole);
+    const hierarchy = leaders.map(leader => ({
+      id: leader.id,
+      name: leader.name || leader.legalName,
+      legalName: leader.legalName,
+      leadershipRole: leader.leadershipRole!,
+      reportingToDevoteeId: leader.reportingToDevoteeId || undefined,
+      children: [] as Array<any>
+    }));
+
+    // Build hierarchy tree (simple version for memory storage)
+    const hierarchyMap = new Map();
+    hierarchy.forEach(item => hierarchyMap.set(item.id, item));
+    
+    const roots: Array<any> = [];
+    hierarchy.forEach(item => {
+      if (item.reportingToDevoteeId && hierarchyMap.has(item.reportingToDevoteeId)) {
+        hierarchyMap.get(item.reportingToDevoteeId).children.push(item);
+      } else {
+        roots.push(item);
+      }
+    });
+
+    return roots;
+  }
+
+  async getEligibleLeaders(): Promise<Devotee[]> {
+    // Return devotees who could potentially be leaders (have higher devotional status)
+    return this.devotees.filter(d => 
+      d.devotionalStatusId && d.devotionalStatusId >= 5 // Sri Guru Charan Asraya or higher
+    );
   }
 }
 

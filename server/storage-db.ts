@@ -1662,14 +1662,15 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string }>> {
+  async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string; isDefault: boolean }>> {
     try {
       const supervisors = await db
         .select({
           id: users.id,
           username: users.username,
           fullName: users.fullName,
-          email: users.email
+          email: users.email,
+          isDefault: userDistricts.isDefaultDistrictSupervisor
         })
         .from(users)
         .innerJoin(userDistricts, eq(users.id, userDistricts.userId))
@@ -1681,7 +1682,10 @@ export class DatabaseStorage implements IStorage {
           )
         );
 
-      return supervisors;
+      return supervisors.map(s => ({
+        ...s,
+        isDefault: s.isDefault || false
+      }));
     } catch (error) {
       console.error('Error getting district supervisors:', error);
       throw error;
