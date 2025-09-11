@@ -1,6 +1,6 @@
 import { db } from './db';
 import { users, userDistricts, type User, type InsertUser, type InsertUserDistrict } from '@shared/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, and } from 'drizzle-orm';
 import { hashPassword } from './auth/password';
 
 // User with districts type
@@ -10,19 +10,68 @@ export interface UserWithDistricts extends User {
 
 // Get user by ID
 export async function getUser(id: number): Promise<User | undefined> {
-  const [user] = await db.select().from(users).where(eq(users.id, id));
+  const [user] = await db.select({
+    id: users.id,
+    username: users.username,
+    passwordHash: users.passwordHash, // Keep for compatibility with User type, but don't use in API responses
+    fullName: users.fullName,
+    email: users.email,
+    role: users.role,
+    devoteeId: users.devoteeId
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    isActive: users.isActive
+  }).from(users).where(eq(users.id, id));
   return user;
 }
 
-// Get user by username
+// Get user by ID without password hash (for API responses)
+export async function getUserSafe(id: number): Promise<Omit<User, 'passwordHash'> | undefined> {
+  const [user] = await db.select({
+    id: users.id,
+    username: users.username,
+    fullName: users.fullName,
+    email: users.email,
+    role: users.role,
+    devoteeId: users.devoteeId
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    isActive: users.isActive
+  }).from(users).where(eq(users.id, id));
+  return user;
+}
+
+// Get user by username (includes passwordHash for authentication)
 export async function getUserByUsername(username: string): Promise<User | undefined> {
-  const [user] = await db.select().from(users).where(eq(users.username, username));
+  const [user] = await db.select({
+    id: users.id,
+    username: users.username,
+    passwordHash: users.passwordHash,
+    fullName: users.fullName,
+    email: users.email,
+    role: users.role,
+    devoteeId: users.devoteeId
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    isActive: users.isActive
+  }).from(users).where(eq(users.username, username));
   return user;
 }
 
-// Get user by email
+// Get user by email (includes passwordHash for authentication)
 export async function getUserByEmail(email: string): Promise<User | undefined> {
-  const [user] = await db.select().from(users).where(eq(users.email, email));
+  const [user] = await db.select({
+    id: users.id,
+    username: users.username,
+    passwordHash: users.passwordHash,
+    fullName: users.fullName,
+    email: users.email,
+    role: users.role,
+    devoteeId: users.devoteeId
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    isActive: users.isActive
+  }).from(users).where(eq(users.email, email));
   return user;
 }
 
@@ -85,9 +134,20 @@ export async function deactivateUser(id: number): Promise<boolean> {
   return !!result;
 }
 
-// Get all users with their districts
+// Get all users with their districts (excludes passwordHash for security)
 export async function getAllUsersWithDistricts(): Promise<UserWithDistricts[]> {
-  const allUsers = await db.select().from(users).where(eq(users.isActive, true));
+  const allUsers = await db.select({
+    id: users.id,
+    username: users.username,
+    passwordHash: "" as string, // Excluded for security, but keep for type compatibility
+    fullName: users.fullName,
+    email: users.email,
+    role: users.role,
+    devoteeId: users.devoteeId
+    createdAt: users.createdAt,
+    updatedAt: users.updatedAt,
+    isActive: users.isActive
+  }).from(users).where(eq(users.isActive, true));
   
   const usersWithDistricts: UserWithDistricts[] = [];
   
@@ -107,7 +167,14 @@ export async function getAllUsersWithDistricts(): Promise<UserWithDistricts[]> {
 // Get user's assigned districts
 export async function getUserDistricts(userId: number) {
   return await db
-    .select()
+    .select({
+      id: userDistricts.id,
+      userId: userDistricts.userId,
+      districtCode: userDistricts.districtCode,
+      districtNameEnglish: userDistricts.districtNameEnglish,
+      isDefaultDistrictSupervisor: userDistricts.isDefaultDistrictSupervisor,
+      createdAt: userDistricts.createdAt
+    })
     .from(userDistricts)
     .where(eq(userDistricts.userId, userId));
 }
@@ -143,10 +210,10 @@ export async function assignDistrictsToUser(userId: number, districtCodes: strin
 export async function removeDistrictFromUser(userId: number, districtCode: string): Promise<void> {
   await db
     .delete(userDistricts)
-    .where(eq(userDistricts.userId, userId) && eq(userDistricts.districtCode, districtCode));
+    .where(and(eq(userDistricts.userId, userId), eq(userDistricts.districtCode, districtCode)));
 }
 
-// Get users by district
+// Get users by district (excludes passwordHash for security)
 export async function getUsersByDistrict(districtCode: string): Promise<UserWithDistricts[]> {
   const districtUsers = await db
     .select({ userId: userDistricts.userId })
@@ -157,9 +224,20 @@ export async function getUsersByDistrict(districtCode: string): Promise<UserWith
 
   const userIds = districtUsers.map(u => u.userId);
   const usersData = await db
-    .select()
+    .select({
+      id: users.id,
+      username: users.username,
+      passwordHash: "" as string, // Excluded for security, but keep for type compatibility
+      fullName: users.fullName,
+      email: users.email,
+      role: users.role,
+      devoteeId: users.devoteeId
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+      isActive: users.isActive
+    })
     .from(users)
-    .where(inArray(users.id, userIds) && eq(users.isActive, true));
+    .where(and(inArray(users.id, userIds), eq(users.isActive, true)));
 
   const result: UserWithDistricts[] = [];
   for (const user of usersData) {
@@ -184,9 +262,16 @@ export async function userHasDistrictAccess(userId: number, districtCode: string
   // DISTRICT_SUPERVISOR: check assigned districts
   if (user.role === 'DISTRICT_SUPERVISOR') {
     const [assignment] = await db
-      .select()
+      .select({
+        id: userDistricts.id,
+        userId: userDistricts.userId,
+        districtCode: userDistricts.districtCode,
+        districtNameEnglish: userDistricts.districtNameEnglish,
+        isDefaultDistrictSupervisor: userDistricts.isDefaultDistrictSupervisor,
+        createdAt: userDistricts.createdAt
+      })
       .from(userDistricts)
-      .where(eq(userDistricts.userId, userId) && eq(userDistricts.districtCode, districtCode));
+      .where(and(eq(userDistricts.userId, userId), eq(userDistricts.districtCode, districtCode)));
     
     return !!assignment;
   }

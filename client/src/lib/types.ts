@@ -120,7 +120,7 @@ export interface Namhatta {
   meetingDay?: string;
   meetingTime?: string;
   address?: Address;
-  // Leadership positions - now storing devotee names as strings (from devotee lookup)
+  // Leadership positions - stored as devotee names (matches database schema)
   malaSenapoti?: string;
   mahaChakraSenapoti?: string;
   chakraSenapoti?: string;
@@ -128,6 +128,14 @@ export interface Namhatta {
   secretary?: string;
   president?: string;
   accountant?: string;
+  // For form handling - temporary fields to store devotee IDs during creation/editing
+  malaSenapotiId?: number;
+  mahaChakraSenapotiId?: number;
+  chakraSenapotiId?: number;
+  upaChakraSenapotiId?: number;
+  secretaryId?: number;
+  presidentId?: number;
+  accountantId?: number;
   districtSupervisorId: number;
   districtSupervisorName?: string;
   status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';

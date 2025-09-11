@@ -51,6 +51,7 @@ export const namhattas = pgTable("namhattas", {
   meetingDay: text("meeting_day"),
   meetingTime: text("meeting_time"),
   // Remove inline address JSON field - use normalized address tables instead
+  // Leadership positions stored as text (devotee names) - matches current database schema
   malaSenapoti: text("mala_senapoti"),
   mahaChakraSenapoti: text("maha_chakra_senapoti"),
   chakraSenapoti: text("chakra_senapoti"),

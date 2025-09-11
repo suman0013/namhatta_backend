@@ -12,7 +12,9 @@ export class DatabaseStorage implements IStorage {
 
   private async initializeDefaultData() {
     // Check if data already exists
-    const existingStatuses = await db.select().from(devotionalStatuses).limit(1);
+    const existingStatuses = await db.select({
+      id: devotionalStatuses.id
+    }).from(devotionalStatuses).limit(1);
     
     if (existingStatuses.length === 0) {
       // Initialize devotional statuses
@@ -653,7 +655,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNamhatta(id: number): Promise<Namhatta | undefined> {
-    const result = await db.select().from(namhattas).where(eq(namhattas.id, id)).limit(1);
+    const result = await db.select({
+      id: namhattas.id,
+      code: namhattas.code,
+      name: namhattas.name,
+      meetingDay: namhattas.meetingDay,
+      meetingTime: namhattas.meetingTime,
+      malaSenapoti: namhattas.malaSenapoti,
+      mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
+      chakraSenapoti: namhattas.chakraSenapoti,
+      upaChakraSenapoti: namhattas.upaChakraSenapoti,
+      secretary: namhattas.secretary,
+      president: namhattas.president,
+      accountant: namhattas.accountant,
+      districtSupervisorId: namhattas.districtSupervisorId,
+      status: namhattas.status,
+      registrationNo: namhattas.registrationNo,
+      registrationDate: namhattas.registrationDate,
+      createdAt: namhattas.createdAt,
+      updatedAt: namhattas.updatedAt
+    }).from(namhattas).where(eq(namhattas.id, id)).limit(1);
     if (!result[0]) return undefined;
     
     // Fetch address information from normalized tables
@@ -674,7 +695,7 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     
     // Add address information to the namhatta object
-    const namhatta = result[0] as any;
+    let namhatta = result[0] as any;
     if (addressResults[0]) {
       namhatta.address = {
         country: addressResults[0].country,
@@ -687,17 +708,107 @@ export class DatabaseStorage implements IStorage {
       };
     }
     
+    // Enrich with devotee IDs for form editing
+    namhatta = await this.enrichNamhattaWithDevoteeIds(namhatta);
+    
     return namhatta;
   }
 
   async checkNamhattaCodeExists(code: string): Promise<boolean> {
-    const result = await db.select().from(namhattas).where(eq(namhattas.code, code)).limit(1);
+    const result = await db.select({
+      id: namhattas.id
+    }).from(namhattas).where(eq(namhattas.code, code)).limit(1);
     return result.length > 0;
+  }
+
+  // Helper function to convert devotee IDs to names for database storage
+  private async mapDevoteeIdsToNames(namhattaData: any): Promise<any> {
+    const mappedData = { ...namhattaData };
+    
+    // Define mapping between ID fields and name fields
+    const idFieldMappings = [
+      { idField: 'malaSenapotiId', nameField: 'malaSenapoti' },
+      { idField: 'mahaChakraSenapotiId', nameField: 'mahaChakraSenapoti' },
+      { idField: 'chakraSenapotiId', nameField: 'chakraSenapoti' },
+      { idField: 'upaChakraSenapotiId', nameField: 'upaChakraSenapoti' },
+      { idField: 'secretaryId', nameField: 'secretary' },
+      { idField: 'presidentId', nameField: 'president' },
+      { idField: 'accountantId', nameField: 'accountant' }
+    ];
+    
+    // Convert devotee IDs to names
+    for (const mapping of idFieldMappings) {
+      const devoteeId = mappedData[mapping.idField];
+      if (devoteeId && typeof devoteeId === 'number') {
+        try {
+          const devotee = await db.select({
+            name: devotees.name,
+            legalName: devotees.legalName
+          }).from(devotees).where(eq(devotees.id, devoteeId)).limit(1);
+          
+          if (devotee[0]) {
+            // Use initiated name if available, otherwise use legal name
+            mappedData[mapping.nameField] = devotee[0].name || devotee[0].legalName;
+          }
+        } catch (error) {
+          console.warn(`Failed to map ${mapping.idField} ${devoteeId} to name:`, error);
+        }
+        
+        // Remove the ID field from the data being stored
+        delete mappedData[mapping.idField];
+      }
+    }
+    
+    return mappedData;
+  }
+
+  // Helper function to convert devotee names to IDs for form editing
+  private async enrichNamhattaWithDevoteeIds(namhatta: any): Promise<any> {
+    const enrichedData = { ...namhatta };
+    
+    // Define mapping between name fields and ID fields
+    const nameFieldMappings = [
+      { nameField: 'malaSenapoti', idField: 'malaSenapotiId' },
+      { nameField: 'mahaChakraSenapoti', idField: 'mahaChakraSenapotiId' },
+      { nameField: 'chakraSenapoti', idField: 'chakraSenapotiId' },
+      { nameField: 'upaChakraSenapoti', idField: 'upaChakraSenapotiId' },
+      { nameField: 'secretary', idField: 'secretaryId' },
+      { nameField: 'president', idField: 'presidentId' },
+      { nameField: 'accountant', idField: 'accountantId' }
+    ];
+    
+    // Convert devotee names to IDs for form editing
+    for (const mapping of nameFieldMappings) {
+      const devoteeName = enrichedData[mapping.nameField];
+      if (devoteeName && typeof devoteeName === 'string') {
+        try {
+          const devotee = await db.select({
+            id: devotees.id
+          }).from(devotees).where(
+            or(
+              eq(devotees.name, devoteeName),
+              eq(devotees.legalName, devoteeName)
+            )
+          ).limit(1);
+          
+          if (devotee[0]) {
+            enrichedData[mapping.idField] = devotee[0].id;
+          }
+        } catch (error) {
+          console.warn(`Failed to map name ${devoteeName} to ID:`, error);
+        }
+      }
+    }
+    
+    return enrichedData;
   }
 
   async createNamhatta(namhattaData: any): Promise<Namhatta> {
     // Extract address information from the request data
-    const { address, landmark, ...namhattaDetails } = namhattaData;
+    const { address, landmark, ...inputData } = namhattaData;
+    
+    // Map devotee IDs to names for database storage
+    const namhattaDetails = await this.mapDevoteeIdsToNames(inputData);
     
     // Check if code already exists
     if (namhattaDetails.code) {
@@ -749,7 +860,10 @@ export class DatabaseStorage implements IStorage {
 
   async updateNamhatta(id: number, namhattaData: any): Promise<Namhatta> {
     // Extract address information from the request data
-    const { address, landmark, ...namhattaDetails } = namhattaData;
+    const { address, landmark, ...inputData } = namhattaData;
+    
+    // Map devotee IDs to names for database storage
+    const namhattaDetails = await this.mapDevoteeIdsToNames(inputData);
     
     // Update the namhatta record first
     const result = await db.update(namhattas).set(namhattaDetails).where(eq(namhattas.id, id)).returning();
