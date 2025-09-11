@@ -343,8 +343,14 @@ function DevoteeCard({ devotee, statuses, viewMode = 'grid' }: { devotee: Devote
                     <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
                       {devotee.legalName}
                     </h3>
+                    {devotee.initiatedName && (
+                      <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
+                        <Crown className="inline h-3 w-3 mr-1" />
+                        {devotee.initiatedName}
+                      </p>
+                    )}
                     {devotee.permanentAddress && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                         <MapPin className="inline h-3 w-3 mr-1" />
                         {devotee.permanentAddress.district || devotee.permanentAddress.state}
                       </p>

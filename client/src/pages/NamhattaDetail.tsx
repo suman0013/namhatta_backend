@@ -46,7 +46,9 @@ import {
   GraduationCap,
   Briefcase,
   X,
-  AlertCircle
+  AlertCircle,
+  Grid3X3,
+  List
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
@@ -61,6 +63,7 @@ export default function NamhattaDetail() {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showRejectionDialog, setShowRejectionDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   // Only ADMIN and OFFICE users can approve/reject
   const canApprove = user?.role === 'ADMIN' || user?.role === 'OFFICE';
@@ -440,15 +443,46 @@ export default function NamhattaDetail() {
         <TabsContent value="devotees" className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Devotees</h3>
-            <Button className="gradient-button" onClick={() => setShowDevoteeForm(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add Devotee
-            </Button>
+            <div className="flex items-center space-x-3">
+              {/* View Toggle */}
+              <div className="flex items-center bg-gray-100/10 dark:bg-gray-800/10 rounded-lg p-1 border border-gray-200/20 dark:border-gray-700/30">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-white/20 dark:bg-white/10 text-gray-900 dark:text-white'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                  }`}
+                  data-testid="button-grid-view"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-md transition-colors ${
+                    viewMode === 'list'
+                      ? 'bg-white/20 dark:bg-white/10 text-gray-900 dark:text-white'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                  }`}
+                  data-testid="button-list-view"
+                >
+                  <List className="h-4 w-4" />
+                </button>
+              </div>
+              
+              <Button className="gradient-button" onClick={() => setShowDevoteeForm(true)}>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Add Devotee
+              </Button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={viewMode === 'grid' 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            : "grid grid-cols-1 md:grid-cols-2 gap-3"
+          }>
             {devotees?.data?.map((devotee) => (
-              <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses} namhattaId={namhatta.id} />
+              <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses} namhattaId={namhatta.id} viewMode={viewMode} />
             ))}
           </div>
 
@@ -662,7 +696,7 @@ export default function NamhattaDetail() {
   );
 }
 
-function DevoteeCard({ devotee, statuses, namhattaId }: { devotee: Devotee; statuses?: any[]; namhattaId: number }) {
+function DevoteeCard({ devotee, statuses, namhattaId, viewMode = 'grid' }: { devotee: Devotee; statuses?: any[]; namhattaId: number; viewMode?: 'grid' | 'list' }) {
   const getStatusName = (statusId?: number) => {
     // Use the devotionalStatusName from the API response if available
     if (devotee.devotionalStatusName) {
@@ -685,9 +719,49 @@ function DevoteeCard({ devotee, statuses, namhattaId }: { devotee: Devotee; stat
     return "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300";
   };
 
+  if (viewMode === 'list') {
+    // List View - Minimal Details with Initiated Name
+    return (
+      <Link href={`/devotees/${devotee.id}?from=${namhattaId}`} data-testid={`link-devotee-${devotee.id}`}>
+        <Card className="glass-card card-hover-effect group cursor-pointer">
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white text-sm">
+                  {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
+                      {devotee.legalName}
+                    </h3>
+                    {devotee.initiatedName && (
+                      <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
+                        <Crown className="inline h-3 w-3 mr-1" />
+                        {devotee.initiatedName}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <Badge className={`${getStatusColor(devotee.devotionalStatusId)} ml-2 text-xs`}>
+                    {getStatusName(devotee.devotionalStatusId)}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    );
+  }
+
+  // Grid View (default)
   return (
     <div className="h-[160px]">
-      <Link href={`/devotees/${devotee.id}?from=${namhattaId}`}>
+      <Link href={`/devotees/${devotee.id}?from=${namhattaId}`} data-testid={`link-devotee-${devotee.id}`}>
         <Card className="glass-card card-hover-effect group h-full cursor-pointer">
           <CardContent className="p-3 h-full flex flex-col">
             {/* Header */}
