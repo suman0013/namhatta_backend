@@ -526,24 +526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/namhattas/:id/approve", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     const id = parseInt(req.params.id);
     try {
-      // Validate registration data
-      const { registrationNo, registrationDate } = req.body;
-      
-      if (!registrationNo || !registrationDate) {
-        return res.status(400).json({ 
-          message: "Registration number and date are required" 
-        });
-      }
-
-      // Check if registration number is already taken
-      const isRegistrationTaken = await storage.isRegistrationNoTaken(registrationNo);
-      if (isRegistrationTaken) {
-        return res.status(400).json({ 
-          message: "Registration number already exists" 
-        });
-      }
-
-      await storage.approveNamhatta(id, { registrationNo, registrationDate });
+      await storage.approveNamhatta(id);
       res.json({ message: "Namhatta approved successfully" });
     } catch (error) {
       res.status(404).json({ message: "Namhatta not found" });

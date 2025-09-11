@@ -52,8 +52,6 @@ export const namhattas = pgTable("namhattas", {
   secretary: text("secretary"),
   districtSupervisorId: integer("district_supervisor_id").notNull(),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
-  registrationNo: text("registration_no").unique(), // Unique registration number when approved
-  registrationDate: text("registration_date"), // Registration date when approved
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
