@@ -479,14 +479,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   <Label htmlFor="malaSenapotiId">Mala Senapoti</Label>
                   <Select
                     value={watch("malaSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("malaSenapotiId", value ? parseInt(value) : null)}
+                    onValueChange={(value) => setValue("malaSenapotiId", value && value !== "none" ? parseInt(value) : null)}
                     disabled={devoteesLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Mala Senapoti"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {devotees.map(devotee => (
                         <SelectItem key={devotee.id} value={devotee.id.toString()}>
                           {devotee.name || devotee.legalName} ({devotee.legalName})
@@ -499,14 +499,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   <Label htmlFor="mahaChakraSenapotiId">Maha Chakra Senapoti</Label>
                   <Select
                     value={watch("mahaChakraSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("mahaChakraSenapotiId", value ? parseInt(value) : null)}
+                    onValueChange={(value) => setValue("mahaChakraSenapotiId", value && value !== "none" ? parseInt(value) : null)}
                     disabled={devoteesLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Maha Chakra Senapoti"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {devotees.map(devotee => (
                         <SelectItem key={devotee.id} value={devotee.id.toString()}>
                           {devotee.name || devotee.legalName} ({devotee.legalName})
@@ -519,14 +519,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   <Label htmlFor="chakraSenapotiId">Chakra Senapoti</Label>
                   <Select
                     value={watch("chakraSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("chakraSenapotiId", value ? parseInt(value) : null)}
+                    onValueChange={(value) => setValue("chakraSenapotiId", value && value !== "none" ? parseInt(value) : null)}
                     disabled={devoteesLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Chakra Senapoti"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {devotees.map(devotee => (
                         <SelectItem key={devotee.id} value={devotee.id.toString()}>
                           {devotee.name || devotee.legalName} ({devotee.legalName})
@@ -539,14 +539,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   <Label htmlFor="upaChakraSenapotiId">Upa Chakra Senapoti</Label>
                   <Select
                     value={watch("upaChakraSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("upaChakraSenapotiId", value ? parseInt(value) : null)}
+                    onValueChange={(value) => setValue("upaChakraSenapotiId", value && value !== "none" ? parseInt(value) : null)}
                     disabled={devoteesLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Upa Chakra Senapoti"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {devotees.map(devotee => (
                         <SelectItem key={devotee.id} value={devotee.id.toString()}>
                           {devotee.name || devotee.legalName} ({devotee.legalName})
@@ -582,14 +582,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   <Label htmlFor="presidentId">President</Label>
                   <Select
                     value={watch("presidentId")?.toString() || ""}
-                    onValueChange={(value) => setValue("presidentId", value ? parseInt(value) : null)}
+                    onValueChange={(value) => setValue("presidentId", value && value !== "none" ? parseInt(value) : null)}
                     disabled={devoteesLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select President"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {devotees.map(devotee => (
                         <SelectItem key={devotee.id} value={devotee.id.toString()}>
                           {devotee.name || devotee.legalName} ({devotee.legalName})
@@ -602,14 +602,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   <Label htmlFor="accountantId">Accountant</Label>
                   <Select
                     value={watch("accountantId")?.toString() || ""}
-                    onValueChange={(value) => setValue("accountantId", value ? parseInt(value) : null)}
+                    onValueChange={(value) => setValue("accountantId", value && value !== "none" ? parseInt(value) : null)}
                     disabled={devoteesLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Accountant"} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       {devotees.map(devotee => (
                         <SelectItem key={devotee.id} value={devotee.id.toString()}>
                           {devotee.name || devotee.legalName} ({devotee.legalName})
