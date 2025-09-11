@@ -100,13 +100,14 @@ export default function NamhattaApprovalCard({ namhatta }: NamhattaApprovalCardP
   };
 
   const approveMutation = useMutation({
-    mutationFn: (data: RegistrationData) => apiRequest(`/api/namhattas/${namhatta.id}/approve`, {
-      method: "POST",
-      body: JSON.stringify({
+    mutationFn: (data: RegistrationData) => apiRequest(
+      "POST",
+      `/api/namhattas/${namhatta.id}/approve`,
+      {
         registrationNo: data.registrationNo,
         registrationDate: data.registrationDate,
-      }),
-    }),
+      }
+    ),
     onSuccess: () => {
       toast({
         title: "Namhatta Approved",
@@ -127,10 +128,11 @@ export default function NamhattaApprovalCard({ namhatta }: NamhattaApprovalCardP
   });
 
   const rejectMutation = useMutation({
-    mutationFn: (reason: string) => apiRequest(`/api/namhattas/${namhatta.id}/reject`, {
-      method: "POST",
-      body: JSON.stringify({ reason }),
-    }),
+    mutationFn: (reason: string) => apiRequest(
+      "POST",
+      `/api/namhattas/${namhatta.id}/reject`,
+      { reason }
+    ),
     onSuccess: () => {
       toast({
         title: "Namhatta Rejected",
