@@ -98,6 +98,9 @@ export interface Namhatta {
   chakraSenapoti?: string;
   upaChakraSenapoti?: string;
   secretary?: string;
+  president?: string;
+  accountant?: string;
+  districtSupervisorId?: number;
   status: 'PENDING_APPROVAL' | 'APPROVED';
   registrationNo?: string;
   registrationDate?: string;
