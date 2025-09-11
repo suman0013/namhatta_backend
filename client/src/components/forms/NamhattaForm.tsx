@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -28,13 +27,13 @@ interface FormData {
   meetingDay: string;
   meetingTime: string;
   address: Address;
-  malaSenapoti: string;
-  mahaChakraSenapoti: string;
-  chakraSenapoti: string;
-  upaChakraSenapoti: string;
-  secretary: string;
-  president: string;
-  accountant: string;
+  malaSenapotiId: number | null;
+  mahaChakraSenapotiId: number | null;
+  chakraSenapotiId: number | null;
+  upaChakraSenapotiId: number | null;
+  secretaryId: number | null;
+  presidentId: number | null;
+  accountantId: number | null;
   districtSupervisorId: number;
 }
 
@@ -51,13 +50,13 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
       meetingDay: namhatta?.meetingDay || "",
       meetingTime: namhatta?.meetingTime || "",
       address: namhatta?.address || {},
-      malaSenapoti: namhatta?.malaSenapoti || "",
-      mahaChakraSenapoti: namhatta?.mahaChakraSenapoti || "",
-      chakraSenapoti: namhatta?.chakraSenapoti || "",
-      upaChakraSenapoti: namhatta?.upaChakraSenapoti || "",
-      secretary: namhatta?.secretary || "",
-      president: namhatta?.president || "",
-      accountant: namhatta?.accountant || "",
+      malaSenapotiId: null, // Will be set from namhatta data lookup
+      mahaChakraSenapotiId: null, // Will be set from namhatta data lookup
+      chakraSenapotiId: null, // Will be set from namhatta data lookup
+      upaChakraSenapotiId: null, // Will be set from namhatta data lookup
+      secretaryId: null, // Will be set from namhatta data lookup
+      presidentId: null, // Will be set from namhatta data lookup
+      accountantId: null, // Will be set from namhatta data lookup
       districtSupervisorId: namhatta?.districtSupervisorId || 0,
     }
   });
@@ -96,6 +95,40 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     queryFn: () => api.getDistrictSupervisors(watchedAddress?.district || ""),
     enabled: !!watchedAddress?.district && (user?.role === 'ADMIN' || user?.role === 'OFFICE'),
   });
+
+  // Fetch devotees for leadership dropdowns - show all devotees for now
+  const { data: devoteesData, isLoading: devoteesLoading } = useQuery({
+    queryKey: ["/api/devotees", "leadership"],
+    queryFn: () => api.getDevotees(1, 1000), // Get a large number for dropdown
+    enabled: true,
+  });
+
+  const devotees = devoteesData?.data || [];
+
+  // Initialize leadership dropdowns for editing
+  useEffect(() => {
+    if (isEditing && namhatta && devotees.length > 0) {
+      // Map existing leadership names to devotee IDs
+      const findDevoteeByName = (name: string | undefined) => {
+        if (!name) return null;
+        const devotee = devotees.find(d => 
+          (d.name === name) || (d.legalName === name) ||
+          (d.name && d.name.toLowerCase() === name.toLowerCase()) ||
+          (d.legalName && d.legalName.toLowerCase() === name.toLowerCase())
+        );
+        return devotee ? devotee.id : null;
+      };
+
+      // Set form values from existing namhatta data
+      setValue("malaSenapotiId", findDevoteeByName(namhatta.malaSenapoti));
+      setValue("mahaChakraSenapotiId", findDevoteeByName(namhatta.mahaChakraSenapoti));  
+      setValue("chakraSenapotiId", findDevoteeByName(namhatta.chakraSenapoti));
+      setValue("upaChakraSenapotiId", findDevoteeByName(namhatta.upaChakraSenapoti));
+      setValue("secretaryId", findDevoteeByName(namhatta.secretary));
+      setValue("presidentId", findDevoteeByName(namhatta.president));
+      setValue("accountantId", findDevoteeByName(namhatta.accountant));
+    }
+  }, [isEditing, namhatta, devotees, setValue]);
 
   // Address pre-filling effect
   useEffect(() => {
@@ -295,6 +328,16 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
       return;
     }
 
+    // Validate secretary selection is mandatory
+    if (!data.secretaryId) {
+      toast({
+        title: "Error",
+        description: "Secretary selection is mandatory",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate required address fields
     const requiredAddressFields = ['country', 'postalCode', 'state', 'district', 'subDistrict', 'village'];
     const missingFields = requiredAddressFields.filter(field => !address[field as keyof Address]);
@@ -433,56 +476,147 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
               {/* Leadership Roles */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="malaSenapoti">Mala Senapoti</Label>
-                  <Input
-                    {...register("malaSenapoti")}
-                    placeholder="Enter Mala Senapoti name"
-                  />
+                  <Label htmlFor="malaSenapotiId">Mala Senapoti</Label>
+                  <Select
+                    value={watch("malaSenapotiId")?.toString() || ""}
+                    onValueChange={(value) => setValue("malaSenapotiId", value ? parseInt(value) : null)}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Mala Senapoti"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="mahaChakraSenapoti">Maha Chakra Senapoti</Label>
-                  <Input
-                    {...register("mahaChakraSenapoti")}
-                    placeholder="Enter Maha Chakra Senapoti name"
-                  />
+                  <Label htmlFor="mahaChakraSenapotiId">Maha Chakra Senapoti</Label>
+                  <Select
+                    value={watch("mahaChakraSenapotiId")?.toString() || ""}
+                    onValueChange={(value) => setValue("mahaChakraSenapotiId", value ? parseInt(value) : null)}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Maha Chakra Senapoti"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="chakraSenapoti">Chakra Senapoti</Label>
-                  <Input
-                    {...register("chakraSenapoti")}
-                    placeholder="Enter Chakra Senapoti name"
-                  />
+                  <Label htmlFor="chakraSenapotiId">Chakra Senapoti</Label>
+                  <Select
+                    value={watch("chakraSenapotiId")?.toString() || ""}
+                    onValueChange={(value) => setValue("chakraSenapotiId", value ? parseInt(value) : null)}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Chakra Senapoti"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="upaChakraSenapoti">Upa Chakra Senapoti</Label>
-                  <Input
-                    {...register("upaChakraSenapoti")}
-                    placeholder="Enter Upa Chakra Senapoti name"
-                  />
+                  <Label htmlFor="upaChakraSenapotiId">Upa Chakra Senapoti</Label>
+                  <Select
+                    value={watch("upaChakraSenapotiId")?.toString() || ""}
+                    onValueChange={(value) => setValue("upaChakraSenapotiId", value ? parseInt(value) : null)}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Upa Chakra Senapoti"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="secretary">Secretary *</Label>
-                  <Input
-                    {...register("secretary", { required: "Secretary is required" })}
-                    placeholder="Enter Secretary name"
-                  />
-                  {errors.secretary && (
-                    <p className="text-sm text-red-500 mt-1">{errors.secretary.message}</p>
+                  <Label htmlFor="secretaryId">Secretary *</Label>
+                  <Select
+                    value={watch("secretaryId")?.toString() || ""}
+                    onValueChange={(value) => setValue("secretaryId", value ? parseInt(value) : null, { shouldValidate: true })}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Secretary"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* Remove "None" option for required field */}
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.secretaryId && (
+                    <p className="text-sm text-red-500 mt-1">{errors.secretaryId.message}</p>
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="president">President</Label>
-                  <Input
-                    {...register("president")}
-                    placeholder="Enter President name"
-                  />
+                  <Label htmlFor="presidentId">President</Label>
+                  <Select
+                    value={watch("presidentId")?.toString() || ""}
+                    onValueChange={(value) => setValue("presidentId", value ? parseInt(value) : null)}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select President"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <Label htmlFor="accountant">Accountant</Label>
-                  <Input
-                    {...register("accountant")}
-                    placeholder="Enter Accountant name"
-                  />
+                  <Label htmlFor="accountantId">Accountant</Label>
+                  <Select
+                    value={watch("accountantId")?.toString() || ""}
+                    onValueChange={(value) => setValue("accountantId", value ? parseInt(value) : null)}
+                    disabled={devoteesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Accountant"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {devotees.map(devotee => (
+                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                          {devotee.name || devotee.legalName} ({devotee.legalName})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
