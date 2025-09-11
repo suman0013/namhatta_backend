@@ -1,4 +1,4 @@
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, StatusHistory } from "@shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, StatusHistory, User, InsertUser } from "@shared/schema";
 import { IStorage } from "./storage-fresh";
 
 // Import Gurudev type
@@ -14,7 +14,7 @@ export class MemStorage implements IStorage {
   private leaders: Leader[] = [];
   private statusHistory: StatusHistory[] = [];
   private gurudevs: Gurudev[] = [];
-  private users: Array<{ id: number; username: string; fullName: string; email: string; districts: string[] }> = [];
+  private users: User[] = [];
   private nextId = 1;
 
   constructor() {
@@ -53,8 +53,30 @@ export class MemStorage implements IStorage {
     ];
 
     this.users = [
-      { id: 1, username: "nitai.gauranga", fullName: "HG Nitai Gauranga Das", email: "nitai.gauranga@example.com", districts: ["Bankura"] },
-      { id: 2, username: "chaitanya.das", fullName: "HG Chaitanya Das", email: "chaitanya.das@example.com", districts: ["Nadia"] }
+      { 
+        id: 1, 
+        username: "nitai.gauranga", 
+        passwordHash: "dummy_hash", 
+        fullName: "HG Nitai Gauranga Das", 
+        email: "nitai.gauranga@example.com", 
+        role: "DISTRICT_SUPERVISOR",
+        devoteeId: null,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      { 
+        id: 2, 
+        username: "chaitanya.das", 
+        passwordHash: "dummy_hash", 
+        fullName: "HG Chaitanya Das", 
+        email: "chaitanya.das@example.com", 
+        role: "DISTRICT_SUPERVISOR",
+        devoteeId: null,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
     ];
 
     this.nextId = 10;
@@ -568,14 +590,21 @@ export class MemStorage implements IStorage {
     password: string;
     districts: string[];
   }): Promise<{ user: any; districts: string[] }> {
-    const newUser = {
+    const newUser: User = {
       id: this.nextId++,
       username: data.username,
+      passwordHash: `hashed_${data.password}`,
       fullName: data.fullName,
       email: data.email,
-      districts: data.districts
+      role: "DISTRICT_SUPERVISOR",
+      devoteeId: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
     this.users.push(newUser);
+    // For memory storage, we'll simulate district management by returning the districts array
+    // In a real implementation, this would be stored in a separate userDistricts table
     return { user: newUser, districts: data.districts };
   }
 
@@ -592,7 +621,8 @@ export class MemStorage implements IStorage {
   }
 
   async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string; isDefault: boolean }>> {
-    return this.users.filter(u => u.districts.includes(district)).map(u => ({
+    // For memory storage, return all district supervisors (simplified implementation)
+    return this.users.filter(u => u.role === "DISTRICT_SUPERVISOR" && u.isActive).map(u => ({
       id: u.id,
       username: u.username,
       fullName: u.fullName,
@@ -603,19 +633,21 @@ export class MemStorage implements IStorage {
 
   async validateDistrictSupervisor(supervisorId: number, district: string): Promise<boolean> {
     const user = this.users.find(u => u.id === supervisorId);
-    return user ? user.districts.includes(district) : false;
+    // For memory storage, assume all active district supervisors are valid for any district
+    return user ? (user.role === "DISTRICT_SUPERVISOR" && user.isActive === true) : false;
   }
 
   async getUserAddressDefaults(userId: number): Promise<{ country?: string; state?: string; district?: string }> {
     const user = this.users.find(u => u.id === userId);
-    if (!user || user.districts.length === 0) {
+    if (!user) {
       return { country: "India" };
     }
     
+    // For memory storage, return default values (simplified implementation)
     return {
       country: "India",
       state: "West Bengal", // Default for this implementation
-      district: user.districts[0] // Use first district as default
+      district: "Nadia" // Default district
     };
   }
 
@@ -741,6 +773,153 @@ export class MemStorage implements IStorage {
     return this.devotees.filter(d => 
       d.devotionalStatusId && d.devotionalStatusId >= 5 // Sri Guru Charan Asraya or higher
     );
+  }
+
+  // User-Devotee Linking Methods (Memory Storage Stubs)
+
+  async getDevoteeLinkedUser(devoteeId: number): Promise<User | null> {
+    // Find user linked to this devotee
+    const user = this.users.find(u => u.devoteeId === devoteeId && u.isActive);
+    return user || null;
+  }
+
+  async getUserLinkedDevotee(userId: number): Promise<Devotee | null> {
+    // Get user and check if they have a linked devotee
+    const user = this.users.find(u => u.id === userId && u.isActive);
+    if (!user || !user.devoteeId) {
+      return null;
+    }
+
+    // Find the linked devotee
+    const devotee = this.devotees.find(d => d.id === user.devoteeId);
+    return devotee || null;
+  }
+
+  async linkUserToDevotee(userId: number, devoteeId: number, force: boolean = false): Promise<void> {
+    // Find user
+    const userIndex = this.users.findIndex(u => u.id === userId && u.isActive);
+    if (userIndex === -1) {
+      throw new Error(`User with ID ${userId} not found or inactive`);
+    }
+
+    const user = this.users[userIndex];
+
+    // Find devotee
+    const devotee = this.devotees.find(d => d.id === devoteeId);
+    if (!devotee) {
+      throw new Error(`Devotee with ID ${devoteeId} not found`);
+    }
+
+    // Check if user is already linked to a different devotee
+    if (user.devoteeId && user.devoteeId !== devoteeId && !force) {
+      throw new Error(`User is already linked to another devotee. Use force flag to override.`);
+    }
+
+    // Check if devotee is already linked to another user
+    const existingUserLink = this.users.find(u => u.devoteeId === devoteeId && u.isActive && u.id !== userId);
+    if (existingUserLink && !force) {
+      throw new Error(`Devotee is already linked to another user. Use force flag to override.`);
+    }
+
+    // If force is enabled and devotee is linked to another user, unlink the other user first
+    if (existingUserLink && force) {
+      const existingUserIndex = this.users.findIndex(u => u.id === existingUserLink.id);
+      if (existingUserIndex !== -1) {
+        this.users[existingUserIndex] = {
+          ...this.users[existingUserIndex],
+          devoteeId: null,
+          updatedAt: new Date()
+        };
+      }
+    }
+
+    // Update user to link to devotee
+    this.users[userIndex] = {
+      ...this.users[userIndex],
+      devoteeId: devoteeId,
+      updatedAt: new Date()
+    };
+  }
+
+  async unlinkUserFromDevotee(userId: number): Promise<void> {
+    // Find user
+    const userIndex = this.users.findIndex(u => u.id === userId && u.isActive);
+    if (userIndex === -1) {
+      throw new Error(`User with ID ${userId} not found or inactive`);
+    }
+
+    // Remove devotee link from user
+    this.users[userIndex] = {
+      ...this.users[userIndex],
+      devoteeId: null,
+      updatedAt: new Date()
+    };
+  }
+
+  async createUserForDevotee(devoteeId: number, userData: {
+    username: string;
+    fullName?: string;
+    email: string;
+    password: string;
+    role: string;
+    force?: boolean;
+    createdBy?: number;
+  }): Promise<{ user: User; devotee: any }> {
+    // Find devotee
+    const devotee = this.devotees.find(d => d.id === devoteeId);
+    if (!devotee) {
+      throw new Error(`Devotee with ID ${devoteeId} not found`);
+    }
+
+    // Check if devotee is already linked to another user
+    const existingUserLink = this.users.find(u => u.devoteeId === devoteeId && u.isActive);
+    if (existingUserLink && !userData.force) {
+      throw new Error(`Devotee is already linked to another user. Use force flag to override.`);
+    }
+
+    // Check if username already exists
+    const existingUsername = this.users.find(u => u.username === userData.username);
+    if (existingUsername) {
+      throw new Error(`Username already exists`);
+    }
+
+    // Check if email already exists
+    const existingEmail = this.users.find(u => u.email === userData.email);
+    if (existingEmail) {
+      throw new Error(`Email already exists`);
+    }
+
+    // If force is enabled and devotee is linked to another user, unlink the other user first
+    if (existingUserLink && userData.force) {
+      const existingUserIndex = this.users.findIndex(u => u.id === existingUserLink.id);
+      if (existingUserIndex !== -1) {
+        this.users[existingUserIndex] = {
+          ...this.users[existingUserIndex],
+          devoteeId: null,
+          updatedAt: new Date()
+        };
+      }
+    }
+
+    // Create new user with devotee link, using devotee's legal name as fullName if not provided
+    const newUser: User = {
+      id: this.nextId++,
+      username: userData.username,
+      passwordHash: `hashed_${userData.password}`, // Simple hash simulation for memory storage
+      fullName: userData.fullName || devotee.legalName,
+      email: userData.email,
+      role: userData.role,
+      devoteeId: devoteeId,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    this.users.push(newUser);
+    return {
+      user: newUser,
+      devotee: devotee
+    };
   }
 }
 

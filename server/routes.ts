@@ -18,6 +18,25 @@ const leadershipRoleSchema = z.object({
   hasSystemAccess: z.boolean().default(false)
 });
 
+// User creation validation schema for devotees
+const createUserForDevoteeSchema = z.object({
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters long')
+    .max(50, 'Username must be less than 50 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(100, 'Password must be less than 100 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
+  email: z.string()
+    .email('Please provide a valid email address')
+    .max(100, 'Email must be less than 100 characters'),
+  role: z.enum(['DISTRICT_SUPERVISOR', 'OFFICE'], {
+    errorMap: () => ({ message: 'Invalid role. Must be DISTRICT_SUPERVISOR or OFFICE' })
+  }),
+  force: z.boolean().optional().default(false) // For overriding existing links if needed
+});
+
 // Role parameter validation schema
 const validLeadershipRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'] as const;
 const roleParamSchema = z.enum(validLeadershipRoles, {
@@ -545,6 +564,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('API Error:', error);
       res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // User-Devotee Links Management Endpoints
+
+  // Get user linked to a devotee
+  app.get("/api/devotees/:id/user", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.id);
+      if (isNaN(devoteeId)) {
+        return res.status(400).json({ error: "Invalid devotee ID" });
+      }
+
+      const user = await storage.getDevoteeLinkedUser(devoteeId);
+      if (!user) {
+        return res.status(404).json({ error: "No user linked to this devotee" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get devotee linked to a user
+  app.get("/api/users/:id/devotee", authenticateJWT, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      // Users can only access their own linked devotee unless they're admin/office
+      if (req.user!.role !== 'ADMIN' && req.user!.role !== 'OFFICE' && req.user!.id !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const devotee = await storage.getUserLinkedDevotee(userId);
+      if (!devotee) {
+        return res.status(404).json({ error: "No devotee linked to this user" });
+      }
+
+      res.json(devotee);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Link existing user to devotee
+  app.post("/api/users/:userId/link-devotee/:devoteeId", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const devoteeId = parseInt(req.params.devoteeId);
+      const { force } = req.body;
+      
+      if (isNaN(userId) || isNaN(devoteeId) || userId <= 0 || devoteeId <= 0) {
+        return res.status(400).json({ error: "Invalid user ID or devotee ID" });
+      }
+
+      await storage.linkUserToDevotee(userId, devoteeId, force || false);
+      res.json({ message: "User linked to devotee successfully" });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to link user to devotee';
+      
+      // Handle specific conflict scenarios with appropriate HTTP status codes
+      if (errorMessage.includes('already linked') && !errorMessage.includes('force flag')) {
+        return res.status(409).json({ error: errorMessage });
+      }
+      
+      res.status(400).json({ error: errorMessage });
+    }
+  });
+
+  // Unlink user from devotee
+  app.delete("/api/users/:userId/unlink-devotee", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: "Invalid user ID" });
+      }
+
+      await storage.unlinkUserFromDevotee(userId);
+      res.json({ message: "User unlinked from devotee successfully" });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to unlink user from devotee';
+      res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Create user account for devotee with leadership access
+  app.post("/api/devotees/:id/create-user", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.id);
+      if (isNaN(devoteeId) || devoteeId <= 0) {
+        return res.status(400).json({ error: "Invalid devotee ID" });
+      }
+
+      // Validate request body using Zod schema
+      const validationResult = createUserForDevoteeSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid request data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const { username, password, email, role, force } = validationResult.data;
+
+      const result = await storage.createUserForDevotee(devoteeId, {
+        username,
+        password,
+        email,
+        role,
+        force,
+        createdBy: req.user!.id
+      });
+
+      res.status(201).json({
+        message: "User account created for devotee successfully",
+        user: {
+          id: result.user.id,
+          username: result.user.username,
+          fullName: result.user.fullName,
+          email: result.user.email,
+          role: result.user.role
+        },
+        devotee: result.devotee
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create user for devotee';
+      
+      // Handle specific conflict scenarios with appropriate HTTP status codes
+      if (errorMessage.includes('already linked') || errorMessage.includes('already exists')) {
+        return res.status(409).json({ error: errorMessage });
+      }
+      
+      res.status(400).json({ error: errorMessage });
     }
   });
 

@@ -1,4 +1,4 @@
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "../shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser } from "../shared/schema";
 
 export interface IStorage {
   // Devotees
@@ -130,6 +130,21 @@ export interface IStorage {
     children: Array<any>;
   }>>;
   getEligibleLeaders(): Promise<Devotee[]>;
+
+  // User-Devotee Linking
+  getDevoteeLinkedUser(devoteeId: number): Promise<User | null>;
+  getUserLinkedDevotee(userId: number): Promise<Devotee | null>;
+  linkUserToDevotee(userId: number, devoteeId: number, force?: boolean): Promise<void>;
+  unlinkUserFromDevotee(userId: number): Promise<void>;
+  createUserForDevotee(devoteeId: number, userData: {
+    username: string;
+    fullName?: string;
+    email: string;
+    password: string;
+    role: string;
+    force?: boolean;
+    createdBy?: number;
+  }): Promise<{ user: User; devotee: any }>;
 }
 
 // Import database storage implementation

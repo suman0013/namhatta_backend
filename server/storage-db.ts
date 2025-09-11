@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs, users, userDistricts } from "@shared/schema";
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "@shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
@@ -1979,6 +1979,250 @@ export class DatabaseStorage implements IStorage {
       return devoteeData.filter(Boolean) as Devotee[];
     } catch (error) {
       console.error('Error in getEligibleLeaders:', error);
+      throw error;
+    }
+  }
+
+  // User-Devotee Linking Methods
+
+  async getDevoteeLinkedUser(devoteeId: number): Promise<User | null> {
+    try {
+      // Validate devotee exists
+      const devotee = await this.getDevotee(devoteeId);
+      if (!devotee) {
+        throw new Error(`Devotee with ID ${devoteeId} not found`);
+      }
+
+      // Find user linked to this devotee
+      const result = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.devoteeId, devoteeId),
+          eq(users.isActive, true)
+        ))
+        .limit(1);
+
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error in getDevoteeLinkedUser:', error);
+      throw error;
+    }
+  }
+
+  async getUserLinkedDevotee(userId: number): Promise<Devotee | null> {
+    try {
+      // Get user and check if they have a linked devotee
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.id, userId),
+          eq(users.isActive, true)
+        ))
+        .limit(1);
+
+      const user = userResult[0];
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found`);
+      }
+
+      if (!user.devoteeId) {
+        return null;
+      }
+
+      // Get the linked devotee
+      return await this.getDevotee(user.devoteeId);
+    } catch (error) {
+      console.error('Error in getUserLinkedDevotee:', error);
+      throw error;
+    }
+  }
+
+  async linkUserToDevotee(userId: number, devoteeId: number, force: boolean = false): Promise<void> {
+    try {
+      // Validate user exists and is active
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.id, userId),
+          eq(users.isActive, true)
+        ))
+        .limit(1);
+
+      const user = userResult[0];
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found or inactive`);
+      }
+
+      // Validate devotee exists
+      const devotee = await this.getDevotee(devoteeId);
+      if (!devotee) {
+        throw new Error(`Devotee with ID ${devoteeId} not found`);
+      }
+
+      // Check if user is already linked to a different devotee
+      if (user.devoteeId && user.devoteeId !== devoteeId && !force) {
+        throw new Error(`User is already linked to another devotee. Use force flag to override.`);
+      }
+
+      // Check if devotee is already linked to another user
+      const existingUserLink = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.devoteeId, devoteeId),
+          eq(users.isActive, true),
+          ne(users.id, userId)
+        ))
+        .limit(1);
+
+      if (existingUserLink[0] && !force) {
+        throw new Error(`Devotee is already linked to another user. Use force flag to override.`);
+      }
+
+      // If force is enabled and devotee is linked to another user, unlink the other user first
+      if (existingUserLink[0] && force) {
+        await db
+          .update(users)
+          .set({ 
+            devoteeId: null,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, existingUserLink[0].id));
+      }
+
+      // Update user to link to devotee
+      await db
+        .update(users)
+        .set({ 
+          devoteeId: devoteeId,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+    } catch (error) {
+      console.error('Error in linkUserToDevotee:', error);
+      throw error;
+    }
+  }
+
+  async unlinkUserFromDevotee(userId: number): Promise<void> {
+    try {
+      // Validate user exists and is active
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.id, userId),
+          eq(users.isActive, true)
+        ))
+        .limit(1);
+
+      if (!userResult[0]) {
+        throw new Error(`User with ID ${userId} not found or inactive`);
+      }
+
+      // Remove devotee link from user
+      await db
+        .update(users)
+        .set({ 
+          devoteeId: null,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+    } catch (error) {
+      console.error('Error in unlinkUserFromDevotee:', error);
+      throw error;
+    }
+  }
+
+  async createUserForDevotee(devoteeId: number, userData: {
+    username: string;
+    fullName?: string;
+    email: string;
+    password: string;
+    role: string;
+    force?: boolean;
+    createdBy?: number;
+  }): Promise<{ user: User; devotee: any }> {
+    try {
+      // Validate devotee exists
+      const devotee = await this.getDevotee(devoteeId);
+      if (!devotee) {
+        throw new Error(`Devotee with ID ${devoteeId} not found`);
+      }
+
+      // Check if devotee is already linked to another user
+      const existingUserLink = await db
+        .select()
+        .from(users)
+        .where(and(
+          eq(users.devoteeId, devoteeId),
+          eq(users.isActive, true)
+        ))
+        .limit(1);
+
+      if (existingUserLink[0] && !userData.force) {
+        throw new Error(`Devotee is already linked to another user. Use force flag to override.`);
+      }
+
+      // Check if username already exists
+      const existingUsername = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, userData.username))
+        .limit(1);
+
+      if (existingUsername[0]) {
+        throw new Error(`Username already exists`);
+      }
+
+      // Check if email already exists
+      const existingEmail = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, userData.email))
+        .limit(1);
+
+      if (existingEmail[0]) {
+        throw new Error(`Email already exists`);
+      }
+
+      // If force is enabled and devotee is linked to another user, unlink the other user first
+      if (existingUserLink[0] && userData.force) {
+        await db
+          .update(users)
+          .set({ 
+            devoteeId: null,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, existingUserLink[0].id));
+      }
+
+      // Import createUser function from storage-auth
+      const { createUser } = await import('./storage-auth');
+
+      // Create user with devotee link, using devotee's legal name as fullName if not provided
+      const newUser = await createUser({
+        username: userData.username,
+        passwordHash: userData.password, // createUser will hash this
+        fullName: userData.fullName || devotee.legalName,
+        email: userData.email,
+        role: userData.role,
+        devoteeId: devoteeId,
+        isActive: true,
+        createdBy: userData.createdBy
+      });
+
+      return {
+        user: newUser,
+        devotee: devotee
+      };
+    } catch (error) {
+      console.error('Error in createUserForDevotee:', error);
       throw error;
     }
   }
