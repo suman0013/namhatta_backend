@@ -50,6 +50,8 @@ export const namhattas = pgTable("namhattas", {
   chakraSenapoti: text("chakra_senapoti"),
   upaChakraSenapoti: text("upa_chakra_senapoti"),
   secretary: text("secretary"),
+  president: text("president"),
+  accountant: text("accountant"),
   districtSupervisorId: integer("district_supervisor_id").notNull(),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
   registrationNo: text("registration_no").unique(),
