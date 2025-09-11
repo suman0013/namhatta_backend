@@ -33,6 +33,8 @@ interface FormData {
   chakraSenapoti: string;
   upaChakraSenapoti: string;
   secretary: string;
+  president: string;
+  accountant: string;
   districtSupervisorId: number;
 }
 
@@ -54,6 +56,8 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
       chakraSenapoti: namhatta?.chakraSenapoti || "",
       upaChakraSenapoti: namhatta?.upaChakraSenapoti || "",
       secretary: namhatta?.secretary || "",
+      president: namhatta?.president || "",
+      accountant: namhatta?.accountant || "",
       districtSupervisorId: namhatta?.districtSupervisorId || 0,
     }
   });
@@ -465,6 +469,20 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                   {errors.secretary && (
                     <p className="text-sm text-red-500 mt-1">{errors.secretary.message}</p>
                   )}
+                </div>
+                <div>
+                  <Label htmlFor="president">President</Label>
+                  <Input
+                    {...register("president")}
+                    placeholder="Enter President name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="accountant">Accountant</Label>
+                  <Input
+                    {...register("accountant")}
+                    placeholder="Enter Accountant name"
+                  />
                 </div>
               </div>
 
