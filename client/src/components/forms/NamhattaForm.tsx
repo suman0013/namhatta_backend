@@ -357,6 +357,11 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                     <Input
                       {...register("code", { required: "Code is required" })}
                       placeholder="Enter namhatta code"
+                      onChange={(e) => {
+                        const upperValue = e.target.value.toUpperCase();
+                        setValue("code", upperValue);
+                      }}
+                      style={{ textTransform: 'uppercase' }}
                       className={`${
                         !isEditing && codeValidation.isValid === false 
                           ? "border-red-500 focus:border-red-500" 
