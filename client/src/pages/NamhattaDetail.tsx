@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { api } from "@/services/api";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { 
   Dialog, 
   DialogContent, 
@@ -19,6 +23,14 @@ import {
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import NamhattaForm from "@/components/forms/NamhattaForm";
@@ -52,6 +64,14 @@ import {
 } from "lucide-react";
 import type { Namhatta, Devotee } from "@/lib/types";
 
+// Registration form schema
+const registrationSchema = z.object({
+  registrationNo: z.string().min(4, "Registration number must be at least 4 characters"),
+  registrationDate: z.string().min(1, "Registration date is required"),
+});
+
+type RegistrationData = z.infer<typeof registrationSchema>;
+
 export default function NamhattaDetail() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -63,6 +83,7 @@ export default function NamhattaDetail() {
   const [showApprovalDialog, setShowApprovalDialog] = useState(false);
   const [showRejectionDialog, setShowRejectionDialog] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [registrationCheckError, setRegistrationCheckError] = useState<string>("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
     const saved = sessionStorage.getItem('namhatta-devotees-view-mode');
     return (saved as 'grid' | 'list') || 'grid';
@@ -70,6 +91,50 @@ export default function NamhattaDetail() {
   
   // Only ADMIN and OFFICE users can approve/reject
   const canApprove = user?.role === 'ADMIN' || user?.role === 'OFFICE';
+
+  // Registration form
+  const form = useForm<RegistrationData>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      registrationNo: "",
+      registrationDate: "",
+    },
+  });
+
+  // Check registration number uniqueness after 3 characters
+  const checkRegistrationUnique = async (regNo: string) => {
+    if (regNo.length < 3) {
+      setRegistrationCheckError("");
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/namhattas/check-registration/${regNo}`);
+      const { exists } = await response.json();
+      
+      if (exists) {
+        setRegistrationCheckError("This registration number already exists");
+        return false;
+      } else {
+        setRegistrationCheckError("");
+        return true;
+      }
+    } catch (error) {
+      console.error("Error checking registration:", error);
+      setRegistrationCheckError("Error checking registration number");
+      return false;
+    }
+  };
+
+  // Handle registration number change with unique check
+  const handleRegistrationNoChange = (value: string) => {
+    form.setValue("registrationNo", value);
+    if (value.length >= 3) {
+      checkRegistrationUnique(value);
+    } else {
+      setRegistrationCheckError("");
+    }
+  };
 
   const { data: namhatta, isLoading } = useQuery({
     queryKey: ["/api/namhattas", id],
@@ -101,15 +166,24 @@ export default function NamhattaDetail() {
   });
 
   const approveMutation = useMutation({
-    mutationFn: () => apiRequest("POST", `/api/namhattas/${id}/approve`),
+    mutationFn: (data: RegistrationData) => apiRequest(
+      "POST",
+      `/api/namhattas/${id}/approve`,
+      {
+        registrationNo: data.registrationNo,
+        registrationDate: data.registrationDate,
+      }
+    ),
     onSuccess: () => {
       toast({
         title: "Namhatta Approved",
-        description: "Namhatta has been successfully approved.",
+        description: "Namhatta has been successfully approved with registration details.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
       setShowApprovalDialog(false);
+      form.reset();
+      setRegistrationCheckError("");
     },
     onError: () => {
       toast({
@@ -441,6 +515,60 @@ export default function NamhattaDetail() {
               </CardContent>
             </Card>
           )}
+
+          {/* Registration Details - shown for approved Namhattas with registration info */}
+          {namhatta.status === "APPROVED" && namhatta.registrationNo && (
+            <Card className="glass-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-base">
+                  <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mr-2">
+                    <CheckCircle className="h-3 w-3 text-white" />
+                  </div>
+                  Official Registration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <AlertCircle className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Registration Number</p>
+                        <p className="text-lg font-mono font-bold text-emerald-900 dark:text-emerald-100 bg-white/50 dark:bg-black/20 px-3 py-1 rounded mt-1">
+                          {namhatta.registrationNo}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {namhatta.registrationDate && (
+                      <div className="flex items-start space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                          <Calendar className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">Registration Date</p>
+                          <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-100 mt-1">
+                            {new Date(namhatta.registrationDate).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4 flex items-center space-x-2 text-sm text-emerald-700 dark:text-emerald-300">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="font-medium">This Namhatta is officially registered and approved for operations.</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="devotees" className="space-y-6">
@@ -630,31 +758,107 @@ export default function NamhattaDetail() {
         />
       )}
 
-      {/* Approval Dialog */}
+      {/* Approval Registration Dialog */}
       <Dialog open={showApprovalDialog} onOpenChange={setShowApprovalDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirm Approval</DialogTitle>
+            <DialogTitle>Approve Namhatta - Registration Details</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve this Namhatta? This action cannot be undone.
+              Please provide official registration details to approve "{namhatta?.name}". This will activate the namhatta and allow it to operate officially.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowApprovalDialog(false)}
-              disabled={approveMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => approveMutation.mutate()}
-              disabled={approveMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {approveMutation.isPending ? "Approving..." : "Approve"}
-            </Button>
-          </DialogFooter>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit((data) => {
+              if (registrationCheckError) {
+                toast({
+                  title: "Validation Error",
+                  description: "Please fix the registration number error before submitting.",
+                  variant: "destructive",
+                });
+                return;
+              }
+              approveMutation.mutate(data);
+            })}>
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="registrationNo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Registration Number *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter registration number"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handleRegistrationNoChange(e.target.value);
+                          }}
+                          className={registrationCheckError ? "border-red-500" : ""}
+                          data-testid="input-registration-number"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      {registrationCheckError && (
+                        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4" />
+                          {registrationCheckError}
+                        </p>
+                      )}
+                      {field.value.length >= 3 && !registrationCheckError && (
+                        <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          Registration number is available
+                        </p>
+                      )}
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="registrationDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Registration Date *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          data-testid="input-registration-date"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <DialogFooter className="mt-6">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowApprovalDialog(false);
+                    form.reset();
+                    setRegistrationCheckError("");
+                  }}
+                  data-testid="button-cancel-approval"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700"
+                  disabled={approveMutation.isPending || !!registrationCheckError}
+                  data-testid="button-confirm-approval"
+                >
+                  {approveMutation.isPending ? "Approving..." : "Approve Namhatta"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
