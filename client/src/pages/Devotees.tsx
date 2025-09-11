@@ -241,7 +241,7 @@ export default function Devotees() {
       {/* Devotees Grid/List */}
       <div className={viewMode === 'grid' 
         ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 relative z-10"
-        : "space-y-3 relative z-10"
+        : "grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10"
       }>
         {devotees?.data?.map((devotee: any) => (
           <DevoteeCard 
@@ -325,14 +325,14 @@ function DevoteeCard({ devotee, statuses, viewMode = 'grid' }: { devotee: Devote
   };
 
   if (viewMode === 'list') {
-    // List View
+    // List View - Minimal Details
     return (
       <Link href={`/devotees/${devotee.id}`} data-testid={`link-devotee-${devotee.id}`}>
         <Card className="glass-card card-hover-effect group cursor-pointer">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-4">
-              <Avatar className="h-14 w-14 flex-shrink-0">
-                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white">
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-400 to-purple-600 text-white text-sm">
                   {(devotee.legalName || devotee.name || "").substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -340,54 +340,20 @@ function DevoteeCard({ devotee, statuses, viewMode = 'grid' }: { devotee: Devote
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 flex items-center">
-                      <User className="mr-2 h-4 w-4 flex-shrink-0" />
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
                       {devotee.legalName}
                     </h3>
-                    {devotee.initiatedName && (
-                      <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center mt-1">
-                        <Crown className="mr-2 h-4 w-4 flex-shrink-0" />
-                        {devotee.initiatedName}
+                    {devotee.permanentAddress && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <MapPin className="inline h-3 w-3 mr-1" />
+                        {devotee.permanentAddress.district || devotee.permanentAddress.state}
                       </p>
                     )}
                   </div>
                   
-                  <Badge className={getStatusColor(devotee.devotionalStatusId)}>
+                  <Badge className={`${getStatusColor(devotee.devotionalStatusId)} ml-2 text-xs`}>
                     {getStatusName(devotee.devotionalStatusId)}
                   </Badge>
-                </div>
-                
-                <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600 dark:text-gray-400">
-                  {devotee.occupation && (
-                    <div className="flex items-center">
-                      <Briefcase className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span>{devotee.occupation}</span>
-                    </div>
-                  )}
-                  {devotee.permanentAddress && (
-                    <div className="flex items-center">
-                      <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span className="truncate">
-                        {[
-                          devotee.permanentAddress.village,
-                          devotee.permanentAddress.district,
-                          devotee.permanentAddress.state
-                        ].filter(Boolean).join(", ")}
-                      </span>
-                    </div>
-                  )}
-                  {devotee.education && (
-                    <div className="flex items-center">
-                      <GraduationCap className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span>{devotee.education}</span>
-                    </div>
-                  )}
-                  {devotee.maritalStatus && (
-                    <div className="flex items-center">
-                      <Users className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span>{devotee.maritalStatus}</span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

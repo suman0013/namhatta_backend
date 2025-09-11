@@ -276,7 +276,7 @@ export default function Namhattas() {
       {/* Namhattas Grid/List */}
       <div className={viewMode === 'grid' 
         ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 relative z-10"
-        : "space-y-3 relative z-10"
+        : "grid grid-cols-1 md:grid-cols-2 gap-3 relative z-10"
       }>
         {namhattas?.data?.map((namhatta) => (
           <NamhattaCard key={namhatta.id} namhatta={namhatta} viewMode={viewMode} />
@@ -346,60 +346,31 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
   };
 
   if (viewMode === 'list') {
-    // List View
+    // List View - Minimal Details
     return (
       <Link href={`/namhattas/${namhatta.id}`} data-testid={`link-namhatta-${namhatta.id}`}>
         <Card className="glass-card hover-lift group cursor-pointer">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-4">
-              <div className={`w-14 h-14 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <Home className="h-7 w-7 text-white" />
+          <CardContent className="p-3">
+            <div className="flex items-center space-x-3">
+              <div className={`w-10 h-10 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                <Home className="h-5 w-5 text-white" />
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200 truncate">
                       {namhatta.name}
                     </h3>
                     {namhatta.address && (
-                      <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mt-1">
-                        <MapPin className="mr-1 h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">
-                          {[
-                            namhatta.address.village,
-                            namhatta.address.district,
-                            namhatta.address.state
-                          ].filter(Boolean).join(", ")}
-                        </span>
-                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <MapPin className="inline h-3 w-3 mr-1" />
+                        {namhatta.address.district || namhatta.address.state}
+                      </p>
                     )}
                   </div>
                   
                   {getStatusBadge(namhatta.status)}
-                </div>
-                
-                <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center">
-                    <Users className="mr-2 h-4 w-4 flex-shrink-0" />
-                    <span>{namhatta.devoteeCount || 0} devotees</span>
-                  </div>
-                  {namhatta.secretary && (
-                    <div className="flex items-center">
-                      <User className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span>Secretary: {namhatta.secretary}</span>
-                    </div>
-                  )}
-                  {(namhatta.meetingDay || namhatta.meetingTime) && (
-                    <div className="flex items-center">
-                      <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-                      <span>
-                        {namhatta.meetingDay && namhatta.meetingTime 
-                          ? `${namhatta.meetingDay} at ${namhatta.meetingTime}`
-                          : namhatta.meetingDay || namhatta.meetingTime}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
