@@ -146,6 +146,15 @@ export const api = {
     return res.json();
   },
 
+  assignLeadershipRole: async (devoteeId: number, assignment: {
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    hasSystemAccess: boolean;
+  }): Promise<Devotee> => {
+    const res = await apiRequest("POST", `/api/devotees/${devoteeId}/assign-role`, assignment);
+    return res.json();
+  },
+
   upgradeDevoteeStatus: async (id: number, newStatusId: number, notes?: string): Promise<void> => {
     await apiRequest("POST", `/api/devotees/${id}/upgrade-status`, { newStatusId, notes });
   },
