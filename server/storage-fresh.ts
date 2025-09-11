@@ -16,8 +16,7 @@ export interface IStorage {
   getNamhatta(id: number): Promise<Namhatta | undefined>;
   createNamhatta(namhatta: InsertNamhatta): Promise<Namhatta>;
   updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta>;
-  approveNamhatta(id: number, approval: { registrationNo: string; registrationDate: string }): Promise<void>;
-  isRegistrationNoTaken(registrationNo: string): Promise<boolean>;
+  approveNamhatta(id: number): Promise<void>;
   rejectNamhatta(id: number, reason?: string): Promise<void>;
   getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]>;
   getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>>;

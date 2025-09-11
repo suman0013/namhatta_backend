@@ -2,7 +2,6 @@ import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs, users, userDistricts } from "@shared/schema";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
 
@@ -160,10 +159,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDevotee(id: number): Promise<Devotee | undefined> {
-    // Create aliases for the gurudev table to join multiple times
-    const harinamGurudev = alias(gurudevs, 'harinamGurudev');
-    const pancharatrikGurudev = alias(gurudevs, 'pancharatrikGurudev');
-    
     // Join devotees with devotional statuses and gurudevs to get names
     const result = await db
       .select({
@@ -184,10 +179,10 @@ export class DatabaseStorage implements IStorage {
         namhattaId: devotees.namhattaId,
         harinamInitiationGurudevId: devotees.harinamInitiationGurudevId,
         pancharatrikInitiationGurudevId: devotees.pancharatrikInitiationGurudevId,
-        harinamInitiationGurudevName: harinamGurudev.name,
-        harinamInitiationGurudevTitle: harinamGurudev.title,
-        pancharatrikInitiationGurudevName: pancharatrikGurudev.name,
-        pancharatrikInitiationGurudevTitle: pancharatrikGurudev.title,
+        harinamInitiationGurudevName: sql`harinamGurudev.name`,
+        harinamInitiationGurudevTitle: sql`harinamGurudev.title`,
+        pancharatrikInitiationGurudevName: sql`pancharatrikGurudev.name`,
+        pancharatrikInitiationGurudevTitle: sql`pancharatrikGurudev.title`,
         initiatedName: devotees.initiatedName,
         harinamDate: devotees.harinamDate,
         pancharatrikDate: devotees.pancharatrikDate,
@@ -201,8 +196,8 @@ export class DatabaseStorage implements IStorage {
       })
       .from(devotees)
       .leftJoin(devotionalStatuses, eq(devotees.devotionalStatusId, devotionalStatuses.id))
-      .leftJoin(harinamGurudev, eq(devotees.harinamInitiationGurudevId, harinamGurudev.id))
-      .leftJoin(pancharatrikGurudev, eq(devotees.pancharatrikInitiationGurudevId, pancharatrikGurudev.id))
+      .leftJoin(sql`${gurudevs} as harinamGurudev`, eq(devotees.harinamInitiationGurudevId, sql`harinamGurudev.id`))
+      .leftJoin(sql`${gurudevs} as pancharatrikGurudev`, eq(devotees.pancharatrikInitiationGurudevId, sql`pancharatrikGurudev.id`))
       .where(eq(devotees.id, id))
       .limit(1);
       
@@ -585,10 +580,7 @@ export class DatabaseStorage implements IStorage {
         chakraSenapoti: namhattas.chakraSenapoti,
         upaChakraSenapoti: namhattas.upaChakraSenapoti,
         secretary: namhattas.secretary,
-        districtSupervisorId: namhattas.districtSupervisorId,
         status: namhattas.status,
-        registrationNo: namhattas.registrationNo,
-        registrationDate: namhattas.registrationDate,
         createdAt: namhattas.createdAt,
         updatedAt: namhattas.updatedAt,
         devoteeCount: count(devotees.id),
@@ -626,8 +618,6 @@ export class DatabaseStorage implements IStorage {
       secretary: namhatta.secretary,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status,
-      registrationNo: namhatta.registrationNo,
-      registrationDate: namhatta.registrationDate,
       createdAt: namhatta.createdAt,
       updatedAt: namhatta.updatedAt,
       devoteeCount: namhatta.devoteeCount,
@@ -772,17 +762,8 @@ export class DatabaseStorage implements IStorage {
     return namhatta;
   }
 
-  async approveNamhatta(id: number, approval: { registrationNo: string; registrationDate: string }): Promise<void> {
-    await db.update(namhattas).set({ 
-      status: "APPROVED",
-      registrationNo: approval.registrationNo,
-      registrationDate: approval.registrationDate
-    }).where(eq(namhattas.id, id));
-  }
-
-  async isRegistrationNoTaken(registrationNo: string): Promise<boolean> {
-    const result = await db.select().from(namhattas).where(eq(namhattas.registrationNo, registrationNo)).limit(1);
-    return result.length > 0;
+  async approveNamhatta(id: number): Promise<void> {
+    await db.update(namhattas).set({ status: "APPROVED" }).where(eq(namhattas.id, id));
   }
 
   async rejectNamhatta(id: number, reason?: string): Promise<void> {
@@ -801,11 +782,9 @@ export class DatabaseStorage implements IStorage {
 
     const statusCounts: Record<string, number> = {};
     for (const item of devoteesByStatus) {
-      if (item.statusId !== null) {
-        const status = await db.select().from(devotionalStatuses).where(eq(devotionalStatuses.id, item.statusId)).limit(1);
-        if (status[0]) {
-          statusCounts[status[0].name] = item.count;
-        }
+      const status = await db.select().from(devotionalStatuses).where(eq(devotionalStatuses.id, item.statusId)).limit(1);
+      if (status[0]) {
+        statusCounts[status[0].name] = item.count;
       }
     }
 
@@ -887,10 +866,8 @@ export class DatabaseStorage implements IStorage {
         if (addressResults.length > 0) {
           const districtCode = addressResults[0].districtCode;
           console.log(`Found district code from address: "${districtCode}"`);
-          if (districtCode !== null) {
-            results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
-            console.log(`District code match results: ${results.length}`);
-          }
+          results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
+          console.log(`District code match results: ${results.length}`);
         }
       }
       
@@ -915,7 +892,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Updates
-  async createNamhattaUpdate(update: any): Promise<NamhattaUpdate> {
+  async createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate> {
     const result = await db.insert(namhattaUpdates).values(update).returning();
     return result[0];
   }
@@ -1026,7 +1003,7 @@ export class DatabaseStorage implements IStorage {
         namhattaId: update.namhattaId,
         namhattaName: namhatta[0]?.name || "Unknown",
         programType: update.programType,
-        date: update.date,
+        date: typeof update.date === 'string' ? update.date : update.date.toISOString().split('T')[0],
         attendance: update.attendance
       });
     }
@@ -1064,8 +1041,9 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(addresses.country, country));
       }
       
-      const results = await query.where(and(...conditions));
+      query = query.where(and(...conditions));
       
+      const results = await query;
       return results.map(row => row.state).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting states from database:', error);
@@ -1084,7 +1062,9 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(addresses.stateNameEnglish, state));
       }
       
-      const results = await query.where(and(...conditions));
+      query = query.where(and(...conditions));
+      
+      const results = await query;
       return results.map(row => row.district).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting districts from database:', error);
@@ -1108,7 +1088,9 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(addresses.districtNameEnglish, district));
       }
       
-      const results = await query.where(and(...conditions));
+      query = query.where(and(...conditions));
+      
+      const results = await query;
       return results.map(row => row.subDistrict).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting sub-districts from database:', error);
@@ -1131,7 +1113,9 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(addresses.pincode, pincode));
       }
       
-      const results = await query.where(and(...conditions));
+      query = query.where(and(...conditions));
+      
+      const results = await query;
       return results.map(row => row.village).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting villages from database:', error);
@@ -1141,8 +1125,13 @@ export class DatabaseStorage implements IStorage {
 
   async getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]> {
     try {
+      let query = db
+        .selectDistinct({ postalCode: addresses.pincode })
+        .from(addresses)
+        .where(sql`${addresses.pincode} IS NOT NULL`);
+      
       // Apply hierarchical filtering - be more specific to reduce too many postal codes
-      const conditions = [sql`${addresses.pincode} IS NOT NULL`];
+      const conditions = [];
       
       if (village) {
         conditions.push(eq(addresses.villageNameEnglish, village));
@@ -1155,13 +1144,12 @@ export class DatabaseStorage implements IStorage {
       }
       
       // Apply all conditions together for more precise filtering
-      const results = await db
-        .selectDistinct({ postalCode: addresses.pincode })
-        .from(addresses)
-        .where(and(...conditions))
-        .limit(50); // Limit to prevent too many results
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
       
-      return results.map((row: any) => row.postalCode).filter(Boolean as any);
+      const results = await query.limit(50); // Limit to prevent too many results
+      return results.map(row => row.postalCode).filter(Boolean as any);
     } catch (error) {
       console.error('Error getting postal codes from database:', error);
       return [];
@@ -1189,11 +1177,11 @@ export class DatabaseStorage implements IStorage {
       // Filter in memory for search term to avoid SQL issues
       let filteredPincodes = allDistinctPincodes
         .map(row => row.pincode)
-        .filter((pincode): pincode is string => Boolean(pincode));
+        .filter(Boolean);
       
       if (searchTerm.trim()) {
         filteredPincodes = filteredPincodes.filter(pincode => 
-          pincode && pincode.toLowerCase().includes(searchTerm.trim().toLowerCase())
+          pincode.toLowerCase().includes(searchTerm.trim().toLowerCase())
         );
       }
       
@@ -1202,7 +1190,7 @@ export class DatabaseStorage implements IStorage {
       const hasMore = offset + paginatedResults.length < total;
       
       return {
-        pincodes: paginatedResults as string[],
+        pincodes: paginatedResults,
         total,
         hasMore
       };
@@ -1321,16 +1309,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
       .where(eq(devoteeAddresses.devoteeId, devoteeId));
 
-    return result.map(item => ({
-      ...item,
-      landmark: item.landmark || undefined,
-      country: item.country || undefined,
-      state: item.state || undefined,
-      district: item.district || undefined,
-      subDistrict: item.subDistrict || undefined,
-      village: item.village || undefined,
-      postalCode: item.postalCode || undefined
-    }));
+    return result;
   }
 
   async getNamhattaAddress(namhattaId: number): Promise<{
@@ -1357,18 +1336,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(namhattaAddresses.namhattaId, namhattaId))
       .limit(1);
 
-    if (!result[0]) return undefined;
-    
-    return {
-      ...result[0],
-      landmark: result[0].landmark || undefined,
-      country: result[0].country || undefined,
-      state: result[0].state || undefined,
-      district: result[0].district || undefined,
-      subDistrict: result[0].subDistrict || undefined,
-      village: result[0].village || undefined,
-      postalCode: result[0].postalCode || undefined
-    };
+    return result[0];
   }
 
   // Map data methods - Updated to use normalized address tables
@@ -1444,9 +1412,9 @@ export class DatabaseStorage implements IStorage {
       );
 
     return results.map(result => ({
-      district: String(result.district) || 'Unknown District',
-      state: String(result.state) || 'Unknown State',
-      country: String(result.country) || 'Unknown Country',
+      district: result.district || 'Unknown District',
+      state: result.state || 'Unknown State',
+      country: result.country || 'Unknown Country',
       count: result.count
     }));
   }
@@ -1479,10 +1447,10 @@ export class DatabaseStorage implements IStorage {
       );
 
     return results.map(result => ({
-      subDistrict: String(result.subDistrict) || 'Unknown Sub-District',
-      district: String(result.district) || 'Unknown District',
-      state: String(result.state) || 'Unknown State',
-      country: String(result.country) || 'Unknown Country',
+      subDistrict: result.subDistrict || 'Unknown Sub-District',
+      district: result.district || 'Unknown District',
+      state: result.state || 'Unknown State',
+      country: result.country || 'Unknown Country',
       count: result.count
     }));
   }
@@ -1517,11 +1485,11 @@ export class DatabaseStorage implements IStorage {
       );
 
     return results.map(result => ({
-      village: String(result.village) || 'Unknown Village',
-      subDistrict: String(result.subDistrict) || 'Unknown Sub-District',
-      district: String(result.district) || 'Unknown District',
-      state: String(result.state) || 'Unknown State',
-      country: String(result.country) || 'Unknown Country',
+      village: result.village || 'Unknown Village',
+      subDistrict: result.subDistrict || 'Unknown Sub-District',
+      district: result.district || 'Unknown District',
+      state: result.state || 'Unknown State',
+      country: result.country || 'Unknown Country',
       count: result.count
     }));
   }
