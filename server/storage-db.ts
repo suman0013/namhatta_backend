@@ -191,6 +191,11 @@ export class DatabaseStorage implements IStorage {
         devotionalCourses: devotees.devotionalCourses,
         additionalComments: devotees.additionalComments,
         shraddhakutirId: devotees.shraddhakutirId,
+        leadershipRole: devotees.leadershipRole,
+        reportingToDevoteeId: devotees.reportingToDevoteeId,
+        hasSystemAccess: devotees.hasSystemAccess,
+        appointedDate: devotees.appointedDate,
+        appointedBy: devotees.appointedBy,
         createdAt: devotees.createdAt,
         updatedAt: devotees.updatedAt
       })
@@ -227,22 +232,22 @@ export class DatabaseStorage implements IStorage {
       harinamInitiationGurudev,
       pancharatrikInitiationGurudev,
       presentAddress: presentAddr ? {
-        country: presentAddr.country,
-        state: presentAddr.state,
-        district: presentAddr.district,
-        subDistrict: presentAddr.subDistrict,
-        village: presentAddr.village,
-        postalCode: presentAddr.postalCode,
-        landmark: presentAddr.landmark
+        country: presentAddr.country ?? undefined,
+        state: presentAddr.state ?? undefined,
+        district: presentAddr.district ?? undefined,
+        subDistrict: presentAddr.subDistrict ?? undefined,
+        village: presentAddr.village ?? undefined,
+        postalCode: presentAddr.postalCode ?? undefined,
+        landmark: presentAddr.landmark ?? undefined
       } : undefined,
       permanentAddress: permanentAddr ? {
-        country: permanentAddr.country,
-        state: permanentAddr.state,
-        district: permanentAddr.district,
-        subDistrict: permanentAddr.subDistrict,
-        village: permanentAddr.village,
-        postalCode: permanentAddr.postalCode,
-        landmark: permanentAddr.landmark
+        country: permanentAddr.country ?? undefined,
+        state: permanentAddr.state ?? undefined,
+        district: permanentAddr.district ?? undefined,
+        subDistrict: permanentAddr.subDistrict ?? undefined,
+        village: permanentAddr.village ?? undefined,
+        postalCode: permanentAddr.postalCode ?? undefined,
+        landmark: permanentAddr.landmark ?? undefined
       } : undefined
     };
   }
@@ -580,7 +585,12 @@ export class DatabaseStorage implements IStorage {
         chakraSenapoti: namhattas.chakraSenapoti,
         upaChakraSenapoti: namhattas.upaChakraSenapoti,
         secretary: namhattas.secretary,
+        president: namhattas.president,
+        accountant: namhattas.accountant,
+        districtSupervisorId: namhattas.districtSupervisorId,
         status: namhattas.status,
+        registrationNo: namhattas.registrationNo,
+        registrationDate: namhattas.registrationDate,
         createdAt: namhattas.createdAt,
         updatedAt: namhattas.updatedAt,
         devoteeCount: count(devotees.id),
@@ -616,8 +626,12 @@ export class DatabaseStorage implements IStorage {
       chakraSenapoti: namhatta.chakraSenapoti,
       upaChakraSenapoti: namhatta.upaChakraSenapoti,
       secretary: namhatta.secretary,
+      president: namhatta.president,
+      accountant: namhatta.accountant,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status,
+      registrationNo: namhatta.registrationNo || undefined,
+      registrationDate: namhatta.registrationDate || undefined,
       createdAt: namhatta.createdAt,
       updatedAt: namhatta.updatedAt,
       devoteeCount: namhatta.devoteeCount,
@@ -718,7 +732,12 @@ export class DatabaseStorage implements IStorage {
         });
       }
       
-      return namhatta;
+      // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
+      return {
+        ...namhatta,
+        registrationNo: namhatta.registrationNo || undefined,
+        registrationDate: namhatta.registrationDate || undefined
+      } as Namhatta;
     } catch (error: any) {
       // Handle database unique constraint violation
       if (error.message && error.message.includes('unique constraint') && error.message.includes('code')) {
@@ -759,7 +778,12 @@ export class DatabaseStorage implements IStorage {
       console.log(`Updated namhatta ${id} with new address ID ${addressId} and landmark: ${landmark || address.landmark}`);
     }
     
-    return namhatta;
+    // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
+    return {
+      ...namhatta,
+      registrationNo: namhatta.registrationNo || undefined,
+      registrationDate: namhatta.registrationDate || undefined
+    } as Namhatta;
   }
 
   async approveNamhatta(id: number, registrationNo: string, registrationDate: string): Promise<void> {
@@ -793,9 +817,11 @@ export class DatabaseStorage implements IStorage {
 
     const statusCounts: Record<string, number> = {};
     for (const item of devoteesByStatus) {
-      const status = await db.select().from(devotionalStatuses).where(eq(devotionalStatuses.id, item.statusId)).limit(1);
-      if (status[0]) {
-        statusCounts[status[0].name] = item.count;
+      if (item.statusId) {
+        const status = await db.select().from(devotionalStatuses).where(eq(devotionalStatuses.id, item.statusId)).limit(1);
+        if (status[0]) {
+          statusCounts[status[0].name] = item.count;
+        }
       }
     }
 
@@ -877,8 +903,10 @@ export class DatabaseStorage implements IStorage {
         if (addressResults.length > 0) {
           const districtCode = addressResults[0].districtCode;
           console.log(`Found district code from address: "${districtCode}"`);
-          results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
-          console.log(`District code match results: ${results.length}`);
+          if (districtCode) {
+            results = await db.select().from(shraddhakutirs).where(eq(shraddhakutirs.districtCode, districtCode));
+            console.log(`District code match results: ${results.length}`);
+          }
         }
       }
       
@@ -904,7 +932,7 @@ export class DatabaseStorage implements IStorage {
 
   // Updates
   async createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate> {
-    const result = await db.insert(namhattaUpdates).values(update).returning();
+    const result = await db.insert(namhattaUpdates).values([update]).returning();
     return result[0];
   }
 
@@ -1014,7 +1042,7 @@ export class DatabaseStorage implements IStorage {
         namhattaId: update.namhattaId,
         namhattaName: namhatta[0]?.name || "Unknown",
         programType: update.programType,
-        date: typeof update.date === 'string' ? update.date : update.date.toISOString().split('T')[0],
+        date: update.date,
         attendance: update.attendance
       });
     }
@@ -1045,14 +1073,11 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db
         .selectDistinct({ state: addresses.stateNameEnglish })
-        .from(addresses);
-      
-      const conditions = [sql`${addresses.stateNameEnglish} IS NOT NULL`];
-      if (country) {
-        conditions.push(eq(addresses.country, country));
-      }
-      
-      query = query.where(and(...conditions));
+        .from(addresses)
+        .where(and(
+          sql`${addresses.stateNameEnglish} IS NOT NULL`,
+          country ? eq(addresses.country, country) : sql`1=1`
+        ));
       
       const results = await query;
       return results.map(row => row.state).filter(Boolean as any);
@@ -1066,14 +1091,11 @@ export class DatabaseStorage implements IStorage {
     try {
       let query = db
         .selectDistinct({ district: addresses.districtNameEnglish })
-        .from(addresses);
-      
-      const conditions = [sql`${addresses.districtNameEnglish} IS NOT NULL`];
-      if (state) {
-        conditions.push(eq(addresses.stateNameEnglish, state));
-      }
-      
-      query = query.where(and(...conditions));
+        .from(addresses)
+        .where(and(
+          sql`${addresses.districtNameEnglish} IS NOT NULL`,
+          state ? eq(addresses.stateNameEnglish, state) : sql`1=1`
+        ));
       
       const results = await query;
       return results.map(row => row.district).filter(Boolean as any);
@@ -1085,21 +1107,20 @@ export class DatabaseStorage implements IStorage {
 
   async getSubDistricts(district?: string, pincode?: string): Promise<string[]> {
     try {
-      let query = db
-        .selectDistinct({ subDistrict: addresses.subdistrictNameEnglish })
-        .from(addresses);
-      
-      const conditions = [sql`${addresses.subdistrictNameEnglish} IS NOT NULL`];
+      const baseConditions = [sql`${addresses.subdistrictNameEnglish} IS NOT NULL`];
       
       // If pincode is provided, filter by pincode only (ignore district parameter)
       if (pincode) {
-        conditions.push(eq(addresses.pincode, pincode));
+        baseConditions.push(eq(addresses.pincode, pincode));
       } else if (district) {
         // Only use district filter if no pincode is provided
-        conditions.push(eq(addresses.districtNameEnglish, district));
+        baseConditions.push(eq(addresses.districtNameEnglish, district));
       }
       
-      query = query.where(and(...conditions));
+      const query = db
+        .selectDistinct({ subDistrict: addresses.subdistrictNameEnglish })
+        .from(addresses)
+        .where(and(...baseConditions));
       
       const results = await query;
       return results.map(row => row.subDistrict).filter(Boolean as any);
@@ -1111,20 +1132,19 @@ export class DatabaseStorage implements IStorage {
 
   async getVillages(subDistrict?: string, pincode?: string): Promise<string[]> {
     try {
-      let query = db
-        .selectDistinct({ village: addresses.villageNameEnglish })
-        .from(addresses);
-      
-      const conditions = [sql`${addresses.villageNameEnglish} IS NOT NULL`];
+      const baseConditions = [sql`${addresses.villageNameEnglish} IS NOT NULL`];
       // For villages, we need both sub-district and pincode if both are provided
       if (subDistrict) {
-        conditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
+        baseConditions.push(eq(addresses.subdistrictNameEnglish, subDistrict));
       }
       if (pincode) {
-        conditions.push(eq(addresses.pincode, pincode));
+        baseConditions.push(eq(addresses.pincode, pincode));
       }
       
-      query = query.where(and(...conditions));
+      const query = db
+        .selectDistinct({ village: addresses.villageNameEnglish })
+        .from(addresses)
+        .where(and(...baseConditions));
       
       const results = await query;
       return results.map(row => row.village).filter(Boolean as any);
@@ -1136,13 +1156,8 @@ export class DatabaseStorage implements IStorage {
 
   async getPincodes(village?: string, district?: string, subDistrict?: string): Promise<string[]> {
     try {
-      let query = db
-        .selectDistinct({ postalCode: addresses.pincode })
-        .from(addresses)
-        .where(sql`${addresses.pincode} IS NOT NULL`);
-      
       // Apply hierarchical filtering - be more specific to reduce too many postal codes
-      const conditions = [];
+      const conditions = [sql`${addresses.pincode} IS NOT NULL`];
       
       if (village) {
         conditions.push(eq(addresses.villageNameEnglish, village));
@@ -1154,10 +1169,10 @@ export class DatabaseStorage implements IStorage {
         conditions.push(eq(addresses.districtNameEnglish, district));
       }
       
-      // Apply all conditions together for more precise filtering
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
+      const query = db
+        .selectDistinct({ postalCode: addresses.pincode })
+        .from(addresses)
+        .where(and(...conditions));
       
       const results = await query.limit(50); // Limit to prevent too many results
       return results.map(row => row.postalCode).filter(Boolean as any);
@@ -1192,7 +1207,7 @@ export class DatabaseStorage implements IStorage {
       
       if (searchTerm.trim()) {
         filteredPincodes = filteredPincodes.filter(pincode => 
-          pincode.toLowerCase().includes(searchTerm.trim().toLowerCase())
+          pincode && pincode.toLowerCase().includes(searchTerm.trim().toLowerCase())
         );
       }
       
@@ -1201,7 +1216,7 @@ export class DatabaseStorage implements IStorage {
       const hasMore = offset + paginatedResults.length < total;
       
       return {
-        pincodes: paginatedResults,
+        pincodes: paginatedResults.filter(Boolean) as string[],
         total,
         hasMore
       };
@@ -1320,7 +1335,17 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
       .where(eq(devoteeAddresses.devoteeId, devoteeId));
 
-    return result;
+    return result.map(item => ({
+      id: item.id,
+      addressType: item.addressType,
+      landmark: item.landmark ?? undefined,
+      country: item.country ?? undefined,
+      state: item.state ?? undefined,
+      district: item.district ?? undefined,
+      subDistrict: item.subDistrict ?? undefined,
+      village: item.village ?? undefined,
+      postalCode: item.postalCode ?? undefined
+    }));
   }
 
   async getNamhattaAddress(namhattaId: number): Promise<{
@@ -1347,7 +1372,16 @@ export class DatabaseStorage implements IStorage {
       .where(eq(namhattaAddresses.namhattaId, namhattaId))
       .limit(1);
 
-    return result[0];
+    return result[0] ? {
+      id: result[0].id,
+      landmark: result[0].landmark ?? undefined,
+      country: result[0].country ?? undefined,
+      state: result[0].state ?? undefined,
+      district: result[0].district ?? undefined,
+      subDistrict: result[0].subDistrict ?? undefined,
+      village: result[0].village ?? undefined,
+      postalCode: result[0].postalCode ?? undefined
+    } : undefined;
   }
 
   // Map data methods - Updated to use normalized address tables
@@ -1423,9 +1457,9 @@ export class DatabaseStorage implements IStorage {
       );
 
     return results.map(result => ({
-      district: result.district || 'Unknown District',
-      state: result.state || 'Unknown State',
-      country: result.country || 'Unknown Country',
+      district: (result.district as string) || 'Unknown District',
+      state: (result.state as string) || 'Unknown State',
+      country: (result.country as string) || 'Unknown Country',
       count: result.count
     }));
   }
@@ -1458,10 +1492,10 @@ export class DatabaseStorage implements IStorage {
       );
 
     return results.map(result => ({
-      subDistrict: result.subDistrict || 'Unknown Sub-District',
-      district: result.district || 'Unknown District',
-      state: result.state || 'Unknown State',
-      country: result.country || 'Unknown Country',
+      subDistrict: (result.subDistrict as string) || 'Unknown Sub-District',
+      district: (result.district as string) || 'Unknown District',
+      state: (result.state as string) || 'Unknown State',
+      country: (result.country as string) || 'Unknown Country',
       count: result.count
     }));
   }
@@ -1496,11 +1530,11 @@ export class DatabaseStorage implements IStorage {
       );
 
     return results.map(result => ({
-      village: result.village || 'Unknown Village',
-      subDistrict: result.subDistrict || 'Unknown Sub-District',
-      district: result.district || 'Unknown District',
-      state: result.state || 'Unknown State',
-      country: result.country || 'Unknown Country',
+      village: (result.village as string) || 'Unknown Village',
+      subDistrict: (result.subDistrict as string) || 'Unknown Sub-District',
+      district: (result.district as string) || 'Unknown District',
+      state: (result.state as string) || 'Unknown State',
+      country: (result.country as string) || 'Unknown Country',
       count: result.count
     }));
   }
@@ -1684,6 +1718,264 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error getting user address defaults:', error);
       return {};
+    }
+  }
+
+  // Leadership Management Methods
+
+  async getDevoteeLeaders(page = 1, size = 10, filters: any = {}): Promise<{ data: Array<Devotee & { reportingToName?: string }>, total: number }> {
+    try {
+      const offset = (page - 1) * size;
+      
+      let whereConditions = [isNotNull(devotees.leadershipRole)];
+      
+      if (filters.search) {
+        whereConditions.push(
+          or(
+            like(devotees.legalName, `%${filters.search}%`),
+            like(devotees.name, `%${filters.search}%`),
+            like(devotees.leadershipRole, `%${filters.search}%`)
+          )!
+        );
+      }
+      
+      if (filters.leadershipRole) {
+        whereConditions.push(eq(devotees.leadershipRole, filters.leadershipRole));
+      }
+
+      const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+      
+      // Get devotee IDs first
+      const devoteeIds = await db
+        .select({ id: devotees.id })
+        .from(devotees)
+        .where(whereClause)
+        .limit(size)
+        .offset(offset)
+        .orderBy(asc(devotees.legalName));
+
+      // Get full devotee data with reporting relationships
+      const devoteeData = await Promise.all(
+        devoteeIds.map(async ({ id }) => {
+          const devotee = await this.getDevotee(id);
+          if (!devotee) return null;
+
+          let reportingToName = undefined;
+          if (devotee.reportingToDevoteeId) {
+            const reportingTo = await this.getDevotee(devotee.reportingToDevoteeId);
+            reportingToName = reportingTo?.legalName || reportingTo?.name;
+          }
+
+          return {
+            ...devotee,
+            reportingToName
+          };
+        })
+      );
+
+      // Get total count
+      const totalResult = await db.select({ count: count() }).from(devotees).where(whereClause);
+
+      return {
+        data: devoteeData.filter(Boolean) as Array<Devotee & { reportingToName?: string }>,
+        total: totalResult[0].count
+      };
+    } catch (error) {
+      console.error('Error in getDevoteeLeaders:', error);
+      throw error;
+    }
+  }
+
+  async getDevoteesByRole(role: string): Promise<Array<Devotee & { reportingToName?: string }>> {
+    try {
+      const devoteeResults = await db
+        .select({ id: devotees.id })
+        .from(devotees)
+        .where(eq(devotees.leadershipRole, role))
+        .orderBy(asc(devotees.legalName));
+
+      const devoteeData = await Promise.all(
+        devoteeResults.map(async ({ id }) => {
+          const devotee = await this.getDevotee(id);
+          if (!devotee) return null;
+
+          let reportingToName = undefined;
+          if (devotee.reportingToDevoteeId) {
+            const reportingTo = await this.getDevotee(devotee.reportingToDevoteeId);
+            reportingToName = reportingTo?.legalName || reportingTo?.name;
+          }
+
+          return {
+            ...devotee,
+            reportingToName
+          };
+        })
+      );
+
+      return devoteeData.filter(Boolean) as Array<Devotee & { reportingToName?: string }>;
+    } catch (error) {
+      console.error('Error in getDevoteesByRole:', error);
+      throw error;
+    }
+  }
+
+  async assignLeadershipRole(devoteeId: number, data: {
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    hasSystemAccess: boolean;
+    appointedBy: number;
+    appointedDate: string;
+  }): Promise<Devotee> {
+    try {
+      // Validate that the devotee exists
+      const existingDevotee = await this.getDevotee(devoteeId);
+      if (!existingDevotee) {
+        throw new Error(`Devotee with ID ${devoteeId} not found`);
+      }
+
+      // Validate that reporting devotee exists if provided
+      if (data.reportingToDevoteeId) {
+        const reportingTo = await this.getDevotee(data.reportingToDevoteeId);
+        if (!reportingTo) {
+          throw new Error(`Reporting devotee with ID ${data.reportingToDevoteeId} not found`);
+        }
+      }
+
+      // Update the devotee with leadership role
+      await db.update(devotees)
+        .set({
+          leadershipRole: data.leadershipRole,
+          reportingToDevoteeId: data.reportingToDevoteeId || null,
+          hasSystemAccess: data.hasSystemAccess,
+          appointedBy: data.appointedBy,
+          appointedDate: data.appointedDate
+        })
+        .where(eq(devotees.id, devoteeId));
+
+      // Return the updated devotee
+      const updatedDevotee = await this.getDevotee(devoteeId);
+      if (!updatedDevotee) {
+        throw new Error('Failed to retrieve updated devotee');
+      }
+
+      return updatedDevotee;
+    } catch (error) {
+      console.error('Error in assignLeadershipRole:', error);
+      throw error;
+    }
+  }
+
+  async removeLeadershipRole(devoteeId: number): Promise<Devotee> {
+    try {
+      // Validate that the devotee exists
+      const existingDevotee = await this.getDevotee(devoteeId);
+      if (!existingDevotee) {
+        throw new Error(`Devotee with ID ${devoteeId} not found`);
+      }
+
+      // Remove leadership role and related fields
+      await db.update(devotees)
+        .set({
+          leadershipRole: null,
+          reportingToDevoteeId: null,
+          hasSystemAccess: false,
+          appointedBy: null,
+          appointedDate: null
+        })
+        .where(eq(devotees.id, devoteeId));
+
+      // Return the updated devotee
+      const updatedDevotee = await this.getDevotee(devoteeId);
+      if (!updatedDevotee) {
+        throw new Error('Failed to retrieve updated devotee');
+      }
+
+      return updatedDevotee;
+    } catch (error) {
+      console.error('Error in removeLeadershipRole:', error);
+      throw error;
+    }
+  }
+
+  async getLeadershipHierarchy(): Promise<Array<{
+    id: number;
+    name: string;
+    legalName: string;
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    children: Array<any>;
+  }>> {
+    try {
+      // Get all devotees with leadership roles
+      const leaderDevotees = await db
+        .select({
+          id: devotees.id,
+          name: devotees.name,
+          legalName: devotees.legalName,
+          leadershipRole: devotees.leadershipRole,
+          reportingToDevoteeId: devotees.reportingToDevoteeId
+        })
+        .from(devotees)
+        .where(isNotNull(devotees.leadershipRole))
+        .orderBy(asc(devotees.legalName));
+
+      // Create a map for quick lookup
+      const devoteeMap = new Map();
+      const hierarchy: Array<any> = [];
+
+      // Initialize all devotees in the map
+      leaderDevotees.forEach(devotee => {
+        devoteeMap.set(devotee.id, {
+          ...devotee,
+          name: devotee.name || devotee.legalName,
+          children: []
+        });
+      });
+
+      // Build the hierarchy by connecting children to parents
+      leaderDevotees.forEach(devotee => {
+        const devoteeNode = devoteeMap.get(devotee.id);
+        
+        if (devotee.reportingToDevoteeId && devoteeMap.has(devotee.reportingToDevoteeId)) {
+          // This devotee reports to someone, add them as a child
+          const parent = devoteeMap.get(devotee.reportingToDevoteeId);
+          parent.children.push(devoteeNode);
+        } else {
+          // This is a top-level devotee (no reporting relationship)
+          hierarchy.push(devoteeNode);
+        }
+      });
+
+      return hierarchy;
+    } catch (error) {
+      console.error('Error in getLeadershipHierarchy:', error);
+      throw error;
+    }
+  }
+
+  async getEligibleLeaders(): Promise<Devotee[]> {
+    try {
+      // Get devotees without leadership roles
+      const devoteeIds = await db
+        .select({ id: devotees.id })
+        .from(devotees)
+        .where(or(
+          eq(devotees.leadershipRole, sql`NULL`),
+          eq(devotees.leadershipRole, "")
+        ))
+        .orderBy(asc(devotees.legalName));
+
+      // Get full devotee data
+      const devoteeData = await Promise.all(
+        devoteeIds.map(async ({ id }) => {
+          return await this.getDevotee(id);
+        })
+      );
+
+      return devoteeData.filter(Boolean) as Devotee[];
+    } catch (error) {
+      console.error('Error in getEligibleLeaders:', error);
+      throw error;
     }
   }
 }

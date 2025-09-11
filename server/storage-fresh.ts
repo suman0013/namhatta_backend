@@ -109,6 +109,27 @@ export interface IStorage {
   getNamhattaCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>>;
   getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
   getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
+
+  // Leadership Management
+  getDevoteeLeaders(page?: number, size?: number, filters?: any): Promise<{ data: Array<Devotee & { reportingToName?: string }>, total: number }>;
+  getDevoteesByRole(role: string): Promise<Array<Devotee & { reportingToName?: string }>>;
+  assignLeadershipRole(devoteeId: number, data: {
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    hasSystemAccess: boolean;
+    appointedBy: number;
+    appointedDate: string;
+  }): Promise<Devotee>;
+  removeLeadershipRole(devoteeId: number): Promise<Devotee>;
+  getLeadershipHierarchy(): Promise<Array<{
+    id: number;
+    name: string;
+    legalName: string;
+    leadershipRole: string;
+    reportingToDevoteeId?: number;
+    children: Array<any>;
+  }>>;
+  getEligibleLeaders(): Promise<Devotee[]>;
 }
 
 // Import database storage implementation

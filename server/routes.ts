@@ -9,6 +9,21 @@ import { authenticateJWT, authorize, validateDistrictAccess, loginRateLimit, san
 import rateLimit from 'express-rate-limit';
 
 // Input validation schemas
+// Leadership role validation schema
+const leadershipRoleSchema = z.object({
+  leadershipRole: z.enum(['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'], {
+    errorMap: () => ({ message: 'Invalid leadership role. Must be one of: MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI' })
+  }),
+  reportingToDevoteeId: z.number().int().positive().optional(),
+  hasSystemAccess: z.boolean().default(false)
+});
+
+// Role parameter validation schema
+const validLeadershipRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'] as const;
+const roleParamSchema = z.enum(validLeadershipRoles, {
+  errorMap: () => ({ message: 'Invalid role parameter. Must be one of: MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI' })
+});
+
 // Rate limiting for API endpoints
 const apiRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -409,6 +424,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const id = parseInt(req.params.id);
     const addresses = await storage.getDevoteeAddresses(id);
     res.json(addresses);
+  });
+
+  // Leadership Management Endpoints
+  
+  // Get all devotees with leadership roles (for hierarchy display)
+  app.get("/api/devotees/leaders", authenticateJWT, async (req, res) => {
+    try {
+      const leaders = await storage.getDevoteeLeaders();
+      res.json(leaders);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get devotees by leadership role
+  app.get("/api/devotees/role/:role", authenticateJWT, async (req, res) => {
+    try {
+      const { role } = req.params;
+      
+      // Validate role parameter
+      const validationResult = roleParamSchema.safeParse(role);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid role parameter', 
+          details: validationResult.error.errors 
+        });
+      }
+      
+      const devotees = await storage.getDevoteesByRole(validationResult.data);
+      res.json(devotees);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Assign leadership role to devotee (Admin/Office only)
+  app.post("/api/devotees/:id/assign-role", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.id);
+      if (isNaN(devoteeId) || devoteeId <= 0) {
+        return res.status(400).json({ error: "Invalid devotee ID" });
+      }
+      
+      // Validate request body using Zod schema
+      const validationResult = leadershipRoleSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid request data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const { leadershipRole, reportingToDevoteeId, hasSystemAccess } = validationResult.data;
+
+      // Additional validation: if reportingToDevoteeId is provided, check if devotee exists
+      if (reportingToDevoteeId) {
+        const reportingDevotee = await storage.getDevotee(reportingToDevoteeId);
+        if (!reportingDevotee) {
+          return res.status(400).json({ error: "Reporting devotee not found" });
+        }
+      }
+
+      const result = await storage.assignLeadershipRole(devoteeId, {
+        leadershipRole,
+        reportingToDevoteeId: reportingToDevoteeId || null,
+        hasSystemAccess,
+        appointedBy: req.user!.id, // Store user ID who made the appointment
+        appointedDate: new Date().toISOString()
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to assign role';
+      res.status(400).json({ error: errorMessage });
+    }
+  });
+
+  // Remove leadership role from devotee (Admin/Office only)
+  app.delete("/api/devotees/:id/remove-role", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.id);
+      if (isNaN(devoteeId) || devoteeId <= 0) {
+        return res.status(400).json({ error: "Invalid devotee ID" });
+      }
+      
+      // Check if devotee exists before attempting to remove role
+      const devotee = await storage.getDevotee(devoteeId);
+      if (!devotee) {
+        return res.status(404).json({ error: "Devotee not found" });
+      }
+      
+      await storage.removeLeadershipRole(devoteeId);
+      res.json({ message: "Leadership role removed successfully" });
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Failed to remove leadership role' });
+    }
+  });
+
+  // Get leadership hierarchy tree
+  app.get("/api/leadership/hierarchy", authenticateJWT, async (req, res) => {
+    try {
+      const hierarchy = await storage.getLeadershipHierarchy();
+      res.json(hierarchy);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get devotees eligible for leadership roles (no current role)
+  app.get("/api/devotees/eligible-leaders", authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
+    try {
+      const devotees = await storage.getEligibleLeaders();
+      res.json(devotees);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   });
 
   // Namhattas (requires authentication, district filtering for supervisors)
