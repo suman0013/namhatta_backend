@@ -17,7 +17,8 @@ export interface IStorage {
   getNamhatta(id: number): Promise<Namhatta | undefined>;
   createNamhatta(namhatta: InsertNamhatta): Promise<Namhatta>;
   updateNamhatta(id: number, namhatta: Partial<InsertNamhatta>): Promise<Namhatta>;
-  approveNamhatta(id: number): Promise<void>;
+  approveNamhatta(id: number, approval: { registrationNo: string; registrationDate: string }): Promise<void>;
+  isRegistrationNoTaken(registrationNo: string): Promise<boolean>;
   rejectNamhatta(id: number, reason?: string): Promise<void>;
   getNamhattaUpdates(id: number): Promise<NamhattaUpdate[]>;
   getNamhattaDevoteeStatusCount(id: number): Promise<Record<string, number>>;
@@ -303,6 +304,8 @@ export class MemStorage implements IStorage {
       secretary: namhatta.secretary || null,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status || "PENDING_APPROVAL",
+      registrationNo: null,
+      registrationDate: null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -318,8 +321,16 @@ export class MemStorage implements IStorage {
     return this.namhattas[index];
   }
 
-  async approveNamhatta(id: number): Promise<void> {
-    await this.updateNamhatta(id, { status: "APPROVED" });
+  async approveNamhatta(id: number, approval: { registrationNo: string; registrationDate: string }): Promise<void> {
+    await this.updateNamhatta(id, { 
+      status: "APPROVED",
+      registrationNo: approval.registrationNo,
+      registrationDate: approval.registrationDate
+    });
+  }
+
+  async isRegistrationNoTaken(registrationNo: string): Promise<boolean> {
+    return this.namhattas.some(n => n.registrationNo === registrationNo);
   }
 
   async rejectNamhatta(id: number, reason?: string): Promise<void> {
@@ -612,6 +623,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Export the interface and storage instance
-export { IStorage };
+// Export the storage instance
 export const storage = new MemStorage();
