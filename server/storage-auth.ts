@@ -17,7 +17,7 @@ export async function getUser(id: number): Promise<User | undefined> {
     fullName: users.fullName,
     email: users.email,
     role: users.role,
-    devoteeId: users.devoteeId
+    devoteeId: users.devoteeId,
     createdAt: users.createdAt,
     updatedAt: users.updatedAt,
     isActive: users.isActive
@@ -33,7 +33,7 @@ export async function getUserSafe(id: number): Promise<Omit<User, 'passwordHash'
     fullName: users.fullName,
     email: users.email,
     role: users.role,
-    devoteeId: users.devoteeId
+    devoteeId: users.devoteeId,
     createdAt: users.createdAt,
     updatedAt: users.updatedAt,
     isActive: users.isActive
@@ -50,7 +50,7 @@ export async function getUserByUsername(username: string): Promise<User | undefi
     fullName: users.fullName,
     email: users.email,
     role: users.role,
-    devoteeId: users.devoteeId
+    devoteeId: users.devoteeId,
     createdAt: users.createdAt,
     updatedAt: users.updatedAt,
     isActive: users.isActive
@@ -67,7 +67,7 @@ export async function getUserByEmail(email: string): Promise<User | undefined> {
     fullName: users.fullName,
     email: users.email,
     role: users.role,
-    devoteeId: users.devoteeId
+    devoteeId: users.devoteeId,
     createdAt: users.createdAt,
     updatedAt: users.updatedAt,
     isActive: users.isActive
@@ -143,7 +143,7 @@ export async function getAllUsersWithDistricts(): Promise<UserWithDistricts[]> {
     fullName: users.fullName,
     email: users.email,
     role: users.role,
-    devoteeId: users.devoteeId
+    devoteeId: users.devoteeId,
     createdAt: users.createdAt,
     updatedAt: users.updatedAt,
     isActive: users.isActive
@@ -231,7 +231,7 @@ export async function getUsersByDistrict(districtCode: string): Promise<UserWith
       fullName: users.fullName,
       email: users.email,
       role: users.role,
-      devoteeId: users.devoteeId
+      devoteeId: users.devoteeId,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
       isActive: users.isActive
