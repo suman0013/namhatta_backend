@@ -11,10 +11,11 @@ import { ActiveFilters } from "@/components/ui/filter-badge";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdvancedPagination } from "@/components/ui/advanced-pagination";
-import { Home, Users, Calendar, Search, Plus, MapPin, User, Grid3X3, List } from "lucide-react";
+import { Users, Calendar, Search, Plus, MapPin, User, Grid3X3, List } from "lucide-react";
 import { Link } from "wouter";
 import NamhattaForm from "@/components/forms/NamhattaForm";
 import type { Namhatta } from "@/lib/types";
+import namhattaLogo from "@assets/namhatta_logo_1757673165218.png";
 
 export default function Namhattas() {
   const [page, setPage] = useState(1);
@@ -362,7 +363,11 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
           <CardContent className="p-3">
             <div className="flex items-center space-x-3">
               <div className={`w-10 h-10 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <Home className="h-5 w-5 text-white" />
+                <img 
+                  src={namhattaLogo} 
+                  alt="Namhatta Logo" 
+                  className="h-5 w-5 object-contain filter brightness-0 invert"
+                />
               </div>
               
               <div className="flex-1 min-w-0">
@@ -397,7 +402,11 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
           <CardContent className="p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center`}>
-                <Home className="h-6 w-6 text-white" />
+                <img 
+                  src={namhattaLogo} 
+                  alt="Namhatta Logo" 
+                  className="h-6 w-6 object-contain filter brightness-0 invert"
+                />
               </div>
               {getStatusBadge(namhatta.status)}
             </div>
