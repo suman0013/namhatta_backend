@@ -80,16 +80,16 @@ export default function Hierarchy() {
             <CardContent className="p-8">
               <div className="flex items-center justify-center gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full overflow-hidden">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
                     <img 
-                      src={prabhupadaImage} 
-                      alt="Srila Prabhupada" 
-                      className="w-16 h-16 object-cover"
+                      src={iskconLogo} 
+                      alt="ISKCON Logo" 
+                      className="w-12 h-12 object-contain filter brightness-0 invert"
                       data-testid="img-founder-logo"
                     />
                   </div>
                 </div>
-                <div className="text-center">
+                <div className="text-center flex-1">
                   <h2 className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2" data-testid="text-founder-title">
                     ISKCON Founder Acharya
                   </h2>
@@ -98,6 +98,14 @@ export default function Hierarchy() {
                       {founder.name}
                     </p>
                   </div>
+                </div>
+                <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg flex-shrink-0">
+                  <img 
+                    src={prabhupadaImage} 
+                    alt="Srila Prabhupada" 
+                    className="w-16 h-16 object-cover"
+                    data-testid="img-founder-prabhupada"
+                  />
                 </div>
               </div>
             </CardContent>
