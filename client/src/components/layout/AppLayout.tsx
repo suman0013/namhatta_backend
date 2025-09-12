@@ -54,15 +54,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </button>
               
               <div className="flex items-center space-x-2">
-                <div className="w-7 sm:w-8 lg:w-10 h-7 sm:h-8 lg:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 relative overflow-hidden">
-                  {/* Inner glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg lg:rounded-xl"></div>
-                  <img 
-                    src={namhattaLogo} 
-                    alt="Namhatta Logo" 
-                    className="w-5 sm:w-6 lg:w-8 h-5 sm:h-6 lg:h-8 object-contain relative z-10 drop-shadow-sm"
-                  />
-                </div>
+                <img 
+                  src={namhattaLogo} 
+                  alt="Namhatta Logo" 
+                  className="w-10 sm:w-12 lg:w-16 h-10 sm:h-12 lg:h-16 object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300"
+                />
                 <div className="block">
                   <h1 className="text-sm sm:text-base lg:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">Namhatta</h1>
                   <p className="text-xs font-medium bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Management System</p>

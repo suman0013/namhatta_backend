@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Eye, EyeOff, Heart, Users, Crown } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff, Users, Crown } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
+import namhattaLogo from "@assets/namhatta_logo_1757674329685.png";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -60,9 +61,13 @@ export default function LoginPage() {
       <Card className="w-full max-w-md mx-4 relative z-10 glass-card border-white/20">
         <CardHeader className="text-center">
           <div className="relative mx-auto mb-4">
-            {/* Main spiritual center icon */}
-            <div className="w-20 h-20 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500 rounded-full flex items-center justify-center shadow-xl">
-              <Heart className="w-10 h-10 text-white drop-shadow-md" />
+            {/* Namhatta Logo */}
+            <div className="w-20 h-20 flex items-center justify-center">
+              <img 
+                src={namhattaLogo} 
+                alt="Namhatta Logo" 
+                className="w-20 h-20 object-contain drop-shadow-lg"
+              />
             </div>
             {/* Small decorative icons around the main icon */}
             <div className="absolute -top-1 -right-1 w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
