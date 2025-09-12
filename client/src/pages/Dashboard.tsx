@@ -104,36 +104,38 @@ export default function Dashboard() {
         {/* Founder Acharya Card */}
         <Card className="bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-xl" data-testid="card-founder">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
-                <img 
-                  src={iskconLogo} 
-                  alt="ISKCON Logo" 
-                  className="w-10 h-10 object-contain filter brightness-0 invert"
-                  data-testid="img-founder-logo"
-                />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold text-orange-700 dark:text-orange-300 mb-2" data-testid="text-founder-title">
-                  ISKCON Founder Acharya
-                </h3>
-                <div className="space-y-2">
-                  {(hierarchy as any)?.founder?.map((founder: any, index: number) => (
-                    <div key={founder.id}>
-                      <p className="text-xl font-semibold text-orange-800 dark:text-orange-200" data-testid={`text-founder-name-${index}`}>
-                        {founder.name}
-                      </p>
-                    </div>
-                  ))}
+            <div className="flex items-center justify-center">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                  <img 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
+                    className="w-10 h-10 object-contain filter brightness-0 invert"
+                    data-testid="img-founder-logo"
+                  />
                 </div>
-              </div>
-              <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg flex-shrink-0">
-                <img 
-                  src={prabhupadaImage} 
-                  alt="Srila Prabhupada" 
-                  className="w-16 h-16 object-cover"
-                  data-testid="img-founder-prabhupada"
-                />
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-orange-700 dark:text-orange-300 mb-2" data-testid="text-founder-title">
+                    ISKCON Founder Acharya
+                  </h3>
+                  <div className="space-y-2">
+                    {(hierarchy as any)?.founder?.map((founder: any, index: number) => (
+                      <div key={founder.id}>
+                        <p className="text-xl font-semibold text-orange-800 dark:text-orange-200" data-testid={`text-founder-name-${index}`}>
+                          {founder.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
+                  <img 
+                    src={prabhupadaImage} 
+                    alt="Srila Prabhupada" 
+                    className="w-16 h-16 object-cover"
+                    data-testid="img-founder-prabhupada"
+                  />
+                </div>
               </div>
             </div>
           </CardContent>

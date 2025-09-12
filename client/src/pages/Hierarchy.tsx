@@ -78,8 +78,8 @@ export default function Hierarchy() {
         {hierarchy.founder && hierarchy.founder.map((founder) => (
           <Card key={founder.id} className="bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-2xl w-full" data-testid="card-founder-acharya">
             <CardContent className="p-8">
-              <div className="flex items-center justify-center gap-6">
-                <div className="flex-shrink-0">
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
                     <img 
                       src={iskconLogo} 
@@ -88,24 +88,24 @@ export default function Hierarchy() {
                       data-testid="img-founder-logo"
                     />
                   </div>
-                </div>
-                <div className="text-center flex-1">
-                  <h2 className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2" data-testid="text-founder-title">
-                    ISKCON Founder Acharya
-                  </h2>
-                  <div className="space-y-1">
-                    <p className="text-lg md:text-xl font-semibold text-orange-700 dark:text-orange-200" data-testid="text-founder-name">
-                      {founder.name}
-                    </p>
+                  <div className="text-center">
+                    <h2 className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2" data-testid="text-founder-title">
+                      ISKCON Founder Acharya
+                    </h2>
+                    <div className="space-y-1">
+                      <p className="text-lg md:text-xl font-semibold text-orange-700 dark:text-orange-200" data-testid="text-founder-name">
+                        {founder.name}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg flex-shrink-0">
-                  <img 
-                    src={prabhupadaImage} 
-                    alt="Srila Prabhupada" 
-                    className="w-16 h-16 object-cover"
-                    data-testid="img-founder-prabhupada"
-                  />
+                  <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
+                    <img 
+                      src={prabhupadaImage} 
+                      alt="Srila Prabhupada" 
+                      className="w-16 h-16 object-cover"
+                      data-testid="img-founder-prabhupada"
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>
