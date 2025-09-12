@@ -81,10 +81,12 @@ export default function Statuses() {
             Manage spiritual progression levels and track devotee advancement
           </p>
         </div>
+        {/* Add New Status button hidden for now 
         <Button className="gradient-button" onClick={() => setShowForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add New Status
         </Button>
+        */}
       </div>
 
       {/* Statistics Cards */}
@@ -196,6 +198,17 @@ export default function Statuses() {
               )}
             </CardContent>
           </Card>
+        </div>
+      </div>
+
+      {/* Status Hierarchy Image */}
+      <div className="flex justify-center mt-8">
+        <div className="w-full max-w-4xl">
+          <img 
+            src="/attached_assets/status_stairs_1757676779443.jpg" 
+            alt="Devotional Status Hierarchy"
+            className="w-full h-auto rounded-lg shadow-lg"
+          />
         </div>
       </div>
 
