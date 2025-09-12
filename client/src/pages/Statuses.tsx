@@ -23,6 +23,7 @@ import {
   Sparkles
 } from "lucide-react";
 import type { DevotionalStatus } from "@/lib/types";
+import statusHierarchyImage from "@assets/status_stairs_1757676779443.jpg";
 
 export default function Statuses() {
   const { toast } = useToast();
@@ -205,7 +206,7 @@ export default function Statuses() {
       <div className="flex justify-center mt-8">
         <div className="w-full max-w-4xl">
           <img 
-            src="/attached_assets/status_stairs_1757676779443.jpg" 
+            src={statusHierarchyImage} 
             alt="Devotional Status Hierarchy"
             className="w-full h-auto rounded-lg shadow-lg"
           />
