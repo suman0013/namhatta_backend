@@ -80,11 +80,11 @@ export default function Hierarchy() {
             <CardContent className="p-8">
               <div className="flex items-center justify-center">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
+                  <div className="w-[4.8rem] h-[4.8rem] bg-orange-500 rounded-full flex items-center justify-center">
                     <img 
                       src={iskconLogo} 
                       alt="ISKCON Logo" 
-                      className="w-12 h-12 object-contain filter brightness-0 invert"
+                      className="w-[3.6rem] h-[3.6rem] object-contain filter brightness-0 invert"
                       data-testid="img-founder-logo"
                     />
                   </div>
@@ -98,11 +98,11 @@ export default function Hierarchy() {
                       </p>
                     </div>
                   </div>
-                  <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
+                  <div className="w-[4.8rem] h-[4.8rem] rounded-full overflow-hidden shadow-lg">
                     <img 
                       src={prabhupadaImage} 
                       alt="Srila Prabhupada" 
-                      className="w-16 h-16 object-cover"
+                      className="w-[4.8rem] h-[4.8rem] object-cover"
                       data-testid="img-founder-prabhupada"
                     />
                   </div>
