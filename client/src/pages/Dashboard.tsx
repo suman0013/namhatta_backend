@@ -30,6 +30,7 @@ import {
   MapPin
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -87,78 +88,140 @@ export default function Dashboard() {
       </div>
 
       {/* Leadership Hierarchy Section */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle 
-            className="flex items-center cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-200"
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 
+            className="text-2xl font-bold text-black dark:text-white cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200 flex items-center"
             onClick={() => setLocation("/hierarchy")}
           >
-            <Crown className="mr-3 h-5 w-5 text-indigo-500" />
+            <Crown className="mr-3 h-6 w-6 text-purple-600 dark:text-purple-400" />
             Leadership Hierarchy
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Left Column */}
-            <div className="space-y-3">
-              {/* Founder Acharya */}
-              {(hierarchy as any)?.founder?.map((founder: any) => (
-                <div key={founder.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
-                  <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
-                    <Crown className="h-5 w-5 text-white float-animation" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-sm text-gray-900 dark:text-white">{founder.name}</h3>
-                    <p className="text-xs text-amber-700 dark:text-amber-300">ISKCON Founder Acharya</p>
-                  </div>
-                </div>
-              ))}
-              
-              {/* GBC */}
-              {(hierarchy as any)?.gbc?.map((leader: any) => (
-                <div key={leader.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                    <Crown className="h-5 w-5 text-white float-animation" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-sm text-gray-900 dark:text-white">{leader.name}</h3>
-                    <p className="text-xs text-purple-700 dark:text-purple-300">GBC - Governing Body Commissioner</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          </h2>
+        </div>
 
-            {/* Right Column */}
-            <div className="space-y-3">
-              {/* Regional Directors */}
-              {(hierarchy as any)?.regionalDirectors?.map((director: any) => (
-                <div key={director.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
-                    <UserCheck className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-sm text-gray-900 dark:text-white">{director.name}</h5>
-                    <p className="text-xs text-blue-700 dark:text-blue-300">Regional Director</p>
-                  </div>
+        {/* Founder Acharya Card */}
+        <Card className="bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-xl" data-testid="card-founder">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                <img 
+                  src={iskconLogo} 
+                  alt="ISKCON Logo" 
+                  className="w-10 h-10 object-contain filter brightness-0 invert"
+                  data-testid="img-founder-logo"
+                />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-orange-700 dark:text-orange-300 mb-2" data-testid="text-founder-title">
+                  ISKCON Founder Acharya
+                </h3>
+                <div className="space-y-2">
+                  {(hierarchy as any)?.founder?.map((founder: any, index: number) => (
+                    <div key={founder.id}>
+                      <p className="text-xl font-semibold text-orange-800 dark:text-orange-200" data-testid={`text-founder-name-${index}`}>
+                        {founder.name}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-
-              {/* Co-Regional Directors */}
-              {(hierarchy as any)?.coRegionalDirectors?.map((coDirector: any) => (
-                <div key={coDirector.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                    <Users className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h5 className="font-medium text-sm text-gray-900 dark:text-white">{coDirector.name}</h5>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-300">Co-Regional Director</p>
-                  </div>
-                </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Three Main Leadership Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* GBC & Namhatta Preaching Minister */}
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-purple-300 dark:border-purple-500/30 shadow-xl" data-testid="card-gbc">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto">
+                  <img 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
+                    className="w-8 h-8 object-contain filter brightness-0 invert"
+                    data-testid="img-gbc-logo"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-purple-700 dark:text-purple-300 mb-2" data-testid="text-gbc-title">
+                    ISKCON GBC & Namhatta Preaching Minister
+                  </h3>
+                  <div className="space-y-2">
+                    {(hierarchy as any)?.gbc?.map((gbcMember: any, index: number) => (
+                      <div key={gbcMember.id}>
+                        <p className="text-lg font-semibold text-purple-800 dark:text-purple-200" data-testid={`text-gbc-name-${index}`}>
+                          {gbcMember.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Regional Director */}
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-blue-300 dark:border-blue-500/30 shadow-xl" data-testid="card-regional-director">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
+                  <img 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
+                    className="w-8 h-8 object-contain filter brightness-0 invert"
+                    data-testid="img-regional-director-logo"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-2" data-testid="text-regional-director-title">
+                    ISKCON Namhatta Regional Director
+                  </h3>
+                  <div className="space-y-2">
+                    {(hierarchy as any)?.regionalDirectors?.map((director: any, index: number) => (
+                      <div key={director.id}>
+                        <p className="text-lg font-semibold text-blue-800 dark:text-blue-200" data-testid={`text-regional-director-name-${index}`}>
+                          {director.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Co-Regional Director */}
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-teal-300 dark:border-teal-500/30 shadow-xl" data-testid="card-co-regional-director">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center mx-auto">
+                  <img 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
+                    className="w-8 h-8 object-contain filter brightness-0 invert"
+                    data-testid="img-co-regional-director-logo"
+                  />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-teal-700 dark:text-teal-300 mb-2" data-testid="text-co-regional-director-title">
+                    ISKCON Namhatta Co-Regional Director
+                  </h3>
+                  <div className="space-y-2">
+                    {(hierarchy as any)?.coRegionalDirectors?.map((coDirector: any, index: number) => (
+                      <div key={coDirector.id}>
+                        <p className="text-lg font-semibold text-teal-800 dark:text-teal-200" data-testid={`text-co-regional-director-name-${index}`}>
+                          {coDirector.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Stats Cards */}
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
