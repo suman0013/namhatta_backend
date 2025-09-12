@@ -174,8 +174,10 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
         selectedSupervisor = defaultSupervisor || districtSupervisors[0];
       }
       
-      setSelectedDistrictSupervisor(selectedSupervisor.id);
-      setValue("districtSupervisorId", selectedSupervisor.id);
+      // Ensure ID is converted to number for consistency
+      const supervisorIdNum = typeof selectedSupervisor.id === 'string' ? parseInt(selectedSupervisor.id) : selectedSupervisor.id;
+      setSelectedDistrictSupervisor(supervisorIdNum);
+      setValue("districtSupervisorId", supervisorIdNum);
     }
   }, [districtSupervisors, selectedDistrictSupervisor, user?.role, isEditing, setValue]);
 
@@ -702,7 +704,10 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                                 : districtSupervisors.length === 0 
                                 ? "No supervisors available for this district"
                                 : selectedDistrictSupervisor 
-                                ? districtSupervisors.find(s => s.id === selectedDistrictSupervisor)?.name || "Select District Supervisor"
+                                ? districtSupervisors.find(s => {
+                                    const sId = typeof s.id === 'string' ? parseInt(s.id) : s.id;
+                                    return sId === selectedDistrictSupervisor;
+                                  })?.name || "Select District Supervisor"
                                 : "Select District Supervisor"
                             } />
                           </SelectTrigger>
