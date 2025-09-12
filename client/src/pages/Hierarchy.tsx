@@ -21,7 +21,11 @@ export default function Hierarchy() {
     queryKey: ["/api/hierarchy"],
   });
 
-  if (isLoading) {
+  const { data: districtSupervisors, isLoading: isLoadingDistrictSupervisors } = useQuery({
+    queryKey: ["/api/district-supervisors/all"],
+  });
+
+  if (isLoading || isLoadingDistrictSupervisors) {
     return (
       <div className="space-y-6 animate-fade-in">
         <div>
@@ -318,14 +322,14 @@ export default function Hierarchy() {
       </div>
 
       {/* District Supervisors Section - Collapsible */}
-      {(hierarchy as any)?.districtSupervisors && (hierarchy as any).districtSupervisors.length > 0 && (
+      {(districtSupervisors as any[]) && (districtSupervisors as any[]).length > 0 && (
         <Collapsible open={isDistrictSupervisorsOpen} onOpenChange={setIsDistrictSupervisorsOpen}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between p-4 h-auto glass-card hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
+            <Button variant="ghost" className="w-full justify-between p-4 h-auto glass-card hover:bg-gray-50/50 dark:hover:bg-gray-800/50" data-testid="button-district-supervisors-toggle">
               <div className="flex items-center">
                 <MapPin className="mr-3 h-5 w-5 text-orange-500" />
                 <span className="text-lg font-semibold">District Supervisors</span>
-                <span className="ml-2 text-sm text-gray-500">({(hierarchy as any).districtSupervisors.length})</span>
+                <span className="ml-2 text-sm text-gray-500">({(districtSupervisors as any[]).length})</span>
               </div>
               {isDistrictSupervisorsOpen ? (
                 <ChevronDown className="h-5 w-5 text-gray-500" />
@@ -336,17 +340,36 @@ export default function Hierarchy() {
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-              {(hierarchy as any).districtSupervisors.map((supervisor: any) => (
-                <Card key={supervisor.id} className="glass-card">
+              {(districtSupervisors as any[]).map((supervisor: any) => (
+                <Card key={supervisor.id} className="glass-card" data-testid={`card-district-supervisor-${supervisor.id}`}>
                   <CardContent className="p-3">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
-                        <MapPin className="h-3 w-3 text-white" />
+                    <div className="flex flex-col space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+                          <MapPin className="h-3 w-3 text-white" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate" title={supervisor.fullName}>
+                            {supervisor.fullName}
+                          </h3>
+                          <p className="text-xs text-orange-700 dark:text-orange-300">District Supervisor</p>
+                        </div>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate">{supervisor.name}</h3>
-                        <p className="text-xs text-orange-700 dark:text-orange-300">District Supervisor</p>
-                      </div>
+                      {supervisor.districts && supervisor.districts.length > 0 && (
+                        <div className="mt-1">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1">Districts:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {supervisor.districts.map((district: string, index: number) => (
+                              <span 
+                                key={index}
+                                className="inline-block px-2 py-0.5 text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 rounded-full"
+                              >
+                                {district}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
