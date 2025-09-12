@@ -150,14 +150,43 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     }
   }, [userAddressDefaults, user?.role, setValue]);
 
-  // Auto-assign district supervisor for DISTRICT_SUPERVISOR users
+  // Auto-assign district supervisor for DISTRICT_SUPERVISOR users (only when not editing)
   useEffect(() => {
-    if (user?.role === 'DISTRICT_SUPERVISOR' && user.districts && user.districts.length > 0) {
+    if (!isEditing && user?.role === 'DISTRICT_SUPERVISOR' && user.districts && user.districts.length > 0) {
       // For district supervisors, auto-assign themselves
       setSelectedDistrictSupervisor(user.id);
       setValue("districtSupervisorId", user.id);
     }
-  }, [user, setValue]);
+  }, [user, setValue, isEditing]);
+
+  // Auto-select district supervisor when supervisors are loaded
+  useEffect(() => {
+    // Only auto-select for ADMIN and OFFICE users when not editing
+    if ((user?.role === 'ADMIN' || user?.role === 'OFFICE') && districtSupervisors.length > 0 && !selectedDistrictSupervisor && !isEditing) {
+      let selectedSupervisor;
+      
+      if (districtSupervisors.length === 1) {
+        // If only 1 supervisor available, auto-select it
+        selectedSupervisor = districtSupervisors[0];
+      } else {
+        // If multiple supervisors, first look for default supervisor
+        const defaultSupervisor = districtSupervisors.find(s => (s as any).isDefault === true);
+        selectedSupervisor = defaultSupervisor || districtSupervisors[0];
+      }
+      
+      setSelectedDistrictSupervisor(selectedSupervisor.id);
+      setValue("districtSupervisorId", selectedSupervisor.id);
+    }
+  }, [districtSupervisors, selectedDistrictSupervisor, user?.role, isEditing, setValue]);
+
+  // Reset district supervisor when district changes
+  useEffect(() => {
+    if (watchedAddress?.district && (user?.role === 'ADMIN' || user?.role === 'OFFICE') && !isEditing) {
+      // Reset selected supervisor when district changes
+      setSelectedDistrictSupervisor(0);
+      setValue("districtSupervisorId", 0);
+    }
+  }, [watchedAddress?.district, user?.role, isEditing, setValue]);
 
   // Debounced code validation
   useEffect(() => {
@@ -363,6 +392,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
     const submitData = {
       ...data,
       address,
+      // Convert null to undefined for API compatibility
+      malaSenapotiId: data.malaSenapotiId || undefined,
+      mahaChakraSenapotiId: data.mahaChakraSenapotiId || undefined,
+      chakraSenapotiId: data.chakraSenapotiId || undefined,
+      upaChakraSenapotiId: data.upaChakraSenapotiId || undefined,
+      secretaryId: data.secretaryId || undefined,
+      presidentId: data.presidentId || undefined,
+      accountantId: data.accountantId || undefined,
     };
 
     if (isEditing) {
@@ -631,9 +668,14 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                 
                 {user?.role === 'DISTRICT_SUPERVISOR' ? (
                   // Auto-assigned for District Supervisors
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>Auto-assigned:</strong> You are automatically assigned as the District Supervisor for this Namhatta 
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-center">
+                      <Lock className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
+                      <span className="font-medium text-blue-800 dark:text-blue-200">{user.username}</span>
+                      <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">(Auto-assigned)</span>
+                    </div>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                      You are automatically assigned as the District Supervisor for this Namhatta 
                       since it's in your district ({address.district || 'your assigned district'}).
                     </p>
                     <input type="hidden" {...register("districtSupervisorId")} />
@@ -651,7 +693,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                             setSelectedDistrictSupervisor(supervisorId);
                             setValue("districtSupervisorId", supervisorId);
                           }}
-                          disabled={supervisorsLoading}
+                          disabled={supervisorsLoading || districtSupervisors.length === 0}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder={
@@ -659,33 +701,54 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                                 ? "Loading supervisors..." 
                                 : districtSupervisors.length === 0 
                                 ? "No supervisors available for this district"
+                                : selectedDistrictSupervisor 
+                                ? districtSupervisors.find(s => s.id === selectedDistrictSupervisor)?.name || "Select District Supervisor"
                                 : "Select District Supervisor"
                             } />
                           </SelectTrigger>
                           <SelectContent>
-                            {districtSupervisors.map((supervisor) => (
-                              <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
-                                {supervisor.name}
+                            {districtSupervisors.length === 0 ? (
+                              <SelectItem value="no-supervisors" disabled>
+                                No supervisors available for {watchedAddress.district}
                               </SelectItem>
-                            ))}
+                            ) : (
+                              districtSupervisors.map((supervisor) => {
+                                const isDefault = (supervisor as any).isDefault === true;
+                                return (
+                                  <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
+                                    <div className="flex items-center justify-between w-full">
+                                      <span>{supervisor.name}</span>
+                                      {isDefault && (
+                                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded ml-2">
+                                          Default
+                                        </span>
+                                      )}
+                                    </div>
+                                  </SelectItem>
+                                );
+                              })
+                            )}
                           </SelectContent>
                         </Select>
                         {districtSupervisors.length === 0 && !supervisorsLoading && (
-                          <p className="text-sm text-amber-600 mt-1">
+                          <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
                             No District Supervisors found for {watchedAddress.district}. 
                             Please contact admin to assign a supervisor to this district.
                           </p>
                         )}
                       </div>
                     ) : (
-                      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <p className="text-sm text-yellow-800">
-                          Please fill in the address district first to load available District Supervisors.
+                      // No district selected
+                      <div>
+                        <Select disabled>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Please select a district first to see available supervisors" />
+                          </SelectTrigger>
+                        </Select>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          Please fill in the district address field to see available district supervisors.
                         </p>
                       </div>
-                    )}
-                    {errors.districtSupervisorId && (
-                      <p className="text-sm text-red-500 mt-1">{errors.districtSupervisorId.message}</p>
                     )}
                   </div>
                 )}
