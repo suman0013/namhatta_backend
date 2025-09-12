@@ -289,7 +289,8 @@ function StatusCard({
             {devoteeCount} ({percentage.toFixed(0)}%)
           </div>
           
-          {/* Rename Icon on the far right */}
+          {/* Rename Icon on the far right - Hidden for now */}
+          {/* 
           <Button
             variant="ghost"
             size="sm"
@@ -299,6 +300,7 @@ function StatusCard({
             <Edit className="h-3 w-3" />
             <span className="sr-only">Rename</span>
           </Button>
+          */}
         </div>
       </div>
 
