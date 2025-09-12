@@ -145,8 +145,8 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = 5000;
   
-  // Use localhost for local development, 0.0.0.0 for cloud environments
-  const host = process.env.NODE_ENV === 'development' ? 'localhost' : '0.0.0.0';
+  // Use 0.0.0.0 for Replit environment to allow external access
+  const host = '0.0.0.0';
   
   server.listen({
     port,
