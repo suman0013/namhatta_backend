@@ -345,15 +345,6 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
     }
   };
 
-  const getGradientClass = (index: number) => {
-    const gradients = [
-      "from-emerald-400 to-teal-500",
-      "from-blue-400 to-indigo-500",
-      "from-purple-400 to-pink-500",
-      "from-orange-400 to-red-500",
-    ];
-    return gradients[index % gradients.length];
-  };
 
   if (viewMode === 'list') {
     // List View - Minimal Details
@@ -362,13 +353,11 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
         <Card className="glass-card hover-lift group cursor-pointer">
           <CardContent className="p-3">
             <div className="flex items-center space-x-3">
-              <div className={`w-10 h-10 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                <img 
-                  src={namhattaLogo} 
-                  alt="Namhatta Logo" 
-                  className="h-5 w-5 object-contain filter brightness-0 invert"
-                />
-              </div>
+              <img 
+                src={namhattaLogo} 
+                alt="Namhatta Logo" 
+                className="h-16 w-16 object-contain flex-shrink-0"
+              />
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
@@ -401,13 +390,11 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
         <Card className="glass-card hover-lift group cursor-pointer h-full">
           <CardContent className="p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${getGradientClass(namhatta.id)} rounded-xl flex items-center justify-center`}>
-                <img 
-                  src={namhattaLogo} 
-                  alt="Namhatta Logo" 
-                  className="h-6 w-6 object-contain filter brightness-0 invert"
-                />
-              </div>
+              <img 
+                src={namhattaLogo} 
+                alt="Namhatta Logo" 
+                className="h-20 w-20 object-contain"
+              />
               {getStatusBadge(namhatta.status)}
             </div>
             
