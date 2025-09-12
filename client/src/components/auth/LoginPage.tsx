@@ -62,11 +62,13 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <div className="relative mx-auto mb-4">
             {/* Namhatta Logo */}
-            <div className="w-20 h-20 flex items-center justify-center">
+            <div className="w-24 h-24 flex items-center justify-center">
               <img 
                 src={namhattaLogo} 
                 alt="Namhatta Logo" 
-                className="w-20 h-20 object-contain drop-shadow-lg"
+                className="w-24 h-24 object-contain drop-shadow-lg"
+                loading="eager"
+                decoding="async"
               />
             </div>
             {/* Small decorative icons around the main icon */}
