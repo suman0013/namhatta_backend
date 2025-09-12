@@ -141,8 +141,8 @@ export default function Hierarchy() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={namhattaLogo} 
-                    alt="Namhatta Logo" 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-regional-director-logo"
                   />
@@ -171,8 +171,8 @@ export default function Hierarchy() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={namhattaLogo} 
-                    alt="Namhatta Logo" 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-co-regional-director-logo"
                   />
