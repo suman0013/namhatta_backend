@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AlertCircle, Eye, EyeOff, Users, Crown } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import namhattaLogo from "@assets/namhatta_logo_1757674329685.png";
+import namhattaLogo from "@assets/namhatta_logo_1757690747029.png";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();

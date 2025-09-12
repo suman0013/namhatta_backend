@@ -3,7 +3,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import TopNav from "./TopNav";
 import { cn } from "@/lib/utils";
-import namhattaLogo from "@assets/namhatta_logo_1757674329685.png";
+import namhattaLogo from "@assets/namhatta_logo_1757690747029.png";
 
 interface AppLayoutProps {
   children: React.ReactNode;
