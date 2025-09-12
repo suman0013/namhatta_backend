@@ -11,6 +11,7 @@ import { getQueryFn } from "@/lib/queryClient";
 import { Map as MapIcon, ZoomIn, ZoomOut, RotateCcw, Globe, MapPin, ArrowRight, X } from "lucide-react";
 import { Link } from "wouter";
 import L from "leaflet";
+import namhattaLogo from "@assets/namhatta_logo_1757690747029.png";
 
 // Geographic boundaries for different zoom levels
 const ZOOM_LEVELS = {
@@ -462,7 +463,10 @@ export default function Map() {
         const combinedIcon = L.divIcon({
           html: `
             <div style="
-              background: ${colorScale(data.count)};
+              background-image: url('${namhattaLogo}');
+              background-size: cover;
+              background-position: center;
+              background-repeat: no-repeat;
               color: white;
               border: 3px solid white;
               border-radius: 50%;
@@ -473,15 +477,26 @@ export default function Map() {
               align-items: center;
               justify-content: center;
               font-weight: bold;
-              text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+              text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
               box-shadow: 0 4px 12px rgba(0,0,0,0.3);
               cursor: pointer;
               font-size: ${Math.max(12, markerSize * 0.3)}px;
               line-height: 1;
               z-index: 1000;
+              position: relative;
             ">
-              <div style="font-size: ${Math.max(18, markerSize * 0.4)}px; margin-bottom: 2px;">${data.count}</div>
-              <div style="font-size: ${Math.max(10, markerSize * 0.25)}px; opacity: 0.9;">${data.name.length > 8 ? data.name.substring(0, 8) + '...' : data.name}</div>
+              <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.3);
+                border-radius: 50%;
+                z-index: 1;
+              "></div>
+              <div style="font-size: ${Math.max(18, markerSize * 0.4)}px; margin-bottom: 2px; position: relative; z-index: 2; color: white;">${data.count}</div>
+              <div style="font-size: ${Math.max(10, markerSize * 0.25)}px; opacity: 0.9; position: relative; z-index: 2; color: white;">${data.name.length > 8 ? data.name.substring(0, 8) + '...' : data.name}</div>
             </div>
           `,
           className: 'namhatta-marker',
