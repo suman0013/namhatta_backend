@@ -30,7 +30,7 @@ import {
   MapPin
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import namhattaLogo from "@assets/namhatta_logo_1757673165218.png";
+import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -105,8 +105,8 @@ export default function Dashboard() {
             <div className="flex items-center space-x-6">
               <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
                 <img 
-                  src={namhattaLogo} 
-                  alt="Namhatta Logo" 
+                  src={iskconLogo} 
+                  alt="ISKCON Logo" 
                   className="w-10 h-10 object-contain filter brightness-0 invert"
                   data-testid="img-founder-logo"
                 />
@@ -137,8 +137,8 @@ export default function Dashboard() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={namhattaLogo} 
-                    alt="Namhatta Logo" 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-gbc-logo"
                   />
@@ -167,8 +167,8 @@ export default function Dashboard() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={namhattaLogo} 
-                    alt="Namhatta Logo" 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-regional-director-logo"
                   />
@@ -197,8 +197,8 @@ export default function Dashboard() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={namhattaLogo} 
-                    alt="Namhatta Logo" 
+                    src={iskconLogo} 
+                    alt="ISKCON Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-co-regional-director-logo"
                   />
