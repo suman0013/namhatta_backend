@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield } from "lucide-react";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
 import namhattaLogo from "@assets/namhatta_logo_1757665218139.png";
 
@@ -65,7 +65,7 @@ export default function Hierarchy() {
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl md:text-6xl font-bold text-purple-300" data-testid="text-header">
+          <h1 className="text-3xl md:text-4xl font-bold text-purple-300" data-testid="text-header">
             Leadership Hierarchy
           </h1>
           <p className="text-xl md:text-2xl text-slate-300" data-testid="text-organization">
@@ -90,14 +90,11 @@ export default function Hierarchy() {
                 </div>
                 <div className="text-center">
                   <h2 className="text-2xl md:text-3xl font-bold text-orange-400 mb-2" data-testid="text-founder-title">
-                    Founder Acharya
+                    ISKCON Founder Acharya
                   </h2>
                   <div className="space-y-1">
                     <p className="text-lg md:text-xl font-semibold text-orange-200" data-testid="text-founder-name">
                       {founder.name}
-                    </p>
-                    <p className="text-sm text-orange-300" data-testid="text-founder-subtitle">
-                      ISKCON Founder Acharya
                     </p>
                   </div>
                 </div>
@@ -122,16 +119,13 @@ export default function Hierarchy() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-purple-300 mb-2" data-testid="text-gbc-title">
-                    GBC
+                    ISKCON GBC & Namhatta Preaching Minister
                   </h3>
                   <div className="space-y-2">
                     {hierarchy.gbc && hierarchy.gbc.map((gbcMember, index) => (
                       <div key={gbcMember.id}>
                         <p className="text-lg font-semibold text-purple-200" data-testid={`text-gbc-name-${index}`}>
                           {gbcMember.name}
-                        </p>
-                        <p className="text-sm text-purple-300" data-testid={`text-gbc-subtitle-${index}`}>
-                          GBC & Namhatta Preaching Minister
                         </p>
                       </div>
                     ))}
@@ -149,22 +143,19 @@ export default function Hierarchy() {
                   <img 
                     src={namhattaLogo} 
                     alt="Namhatta Logo" 
-                    className="w-8 h-8 object-contain"
+                    className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-regional-director-logo"
                   />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-blue-300 mb-2" data-testid="text-regional-director-title">
-                    REGIONAL DIRECTOR
+                    ISKCON Namhatta Regional Director
                   </h3>
                   <div className="space-y-2">
                     {hierarchy.regionalDirectors && hierarchy.regionalDirectors.map((director, index) => (
                       <div key={director.id}>
                         <p className="text-lg font-semibold text-blue-200" data-testid={`text-regional-director-name-${index}`}>
                           {director.name}
-                        </p>
-                        <p className="text-sm text-blue-300" data-testid={`text-regional-director-subtitle-${index}`}>
-                          Regional Director
                         </p>
                       </div>
                     ))}
@@ -182,22 +173,19 @@ export default function Hierarchy() {
                   <img 
                     src={namhattaLogo} 
                     alt="Namhatta Logo" 
-                    className="w-8 h-8 object-contain"
+                    className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-co-regional-director-logo"
                   />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-teal-300 mb-2" data-testid="text-co-regional-director-title">
-                    CO REGIONAL DIRECTOR
+                    ISKCON Namhatta Co-Regional Director
                   </h3>
                   <div className="space-y-2">
                     {hierarchy.coRegionalDirectors && hierarchy.coRegionalDirectors.map((coDirector, index) => (
                       <div key={coDirector.id}>
                         <p className="text-lg font-semibold text-teal-200" data-testid={`text-co-regional-director-name-${index}`}>
                           {coDirector.name}
-                        </p>
-                        <p className="text-sm text-teal-300" data-testid={`text-co-regional-director-subtitle-${index}`}>
-                          Co-Regional Director
                         </p>
                       </div>
                     ))}
@@ -351,7 +339,7 @@ export default function Hierarchy() {
                 data-testid="button-district-supervisors-toggle"
               >
                 <div className="flex items-center">
-                  <MapPin className="mr-3 h-5 w-5 text-orange-400" />
+                  <Shield className="mr-3 h-5 w-5 text-orange-400" />
                   <span className="text-lg font-semibold">District Supervisors</span>
                   <span className="ml-2 text-sm text-slate-400">({(districtSupervisors as any[]).length})</span>
                 </div>
@@ -369,7 +357,7 @@ export default function Hierarchy() {
                     <CardContent className="p-4">
                       <div className="text-center space-y-2">
                         <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center mx-auto">
-                          <MapPin className="h-5 w-5 text-white" />
+                          <Shield className="h-5 w-5 text-white" />
                         </div>
                         <div>
                           <h4 className="text-sm font-semibold text-orange-200 truncate" title={supervisor.fullName}>
