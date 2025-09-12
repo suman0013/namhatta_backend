@@ -107,7 +107,7 @@ export default function Hierarchy() {
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="font-medium text-sm text-gray-900 dark:text-white" data-testid="text-gbc-name">
-                  His Holiness Jaypataka Swami
+                  His Holiness Jayapataka Swami
                 </h3>
                 <p className="text-xs text-purple-700 dark:text-purple-300">GBC & Namhatta Preaching Minister</p>
               </div>
