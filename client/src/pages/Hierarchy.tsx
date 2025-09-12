@@ -5,7 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield } from "lucide-react";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
-import namhattaLogo from "@assets/namhatta_logo_1757665218139.png";
+import namhattaLogo from "@assets/namhatta_logo_1757673165218.png";
 
 interface Leader {
   id: number;
