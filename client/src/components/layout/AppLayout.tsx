@@ -41,7 +41,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="flex flex-col min-h-screen relative z-10">
         {/* Combined Header and Navigation */}
         <div className="glass-card border-0 border-b border-white/20 dark:border-slate-700/50">
-          <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1.5 lg:py-2">
+          <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 h-16 lg:h-18">
             {/* Mobile Menu Button and Logo */}
             <div className="flex items-center space-x-2 lg:space-x-3">
               <button
