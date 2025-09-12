@@ -111,7 +111,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get district supervisors
+  // Get all district supervisors (for Leadership Hierarchy)
+  app.get("/api/district-supervisors/all", authenticateJWT, async (req, res) => {
+    try {
+      const supervisors = await storage.getAllDistrictSupervisors();
+      res.json(supervisors);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Get district supervisors by district (for Namhatta form)
   app.get("/api/district-supervisors", authenticateJWT, async (req, res) => {
     try {
       const { district } = req.query;

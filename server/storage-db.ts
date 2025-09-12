@@ -1776,6 +1776,49 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllDistrictSupervisors(): Promise<Array<{ id: number; username: string; fullName: string; email: string; districts: string[]; isDefault: boolean }>> {
+    try {
+      const supervisors = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          fullName: users.fullName,
+          email: users.email,
+          districtName: userDistricts.districtNameEnglish,
+          isDefault: userDistricts.isDefaultDistrictSupervisor
+        })
+        .from(users)
+        .innerJoin(userDistricts, eq(users.id, userDistricts.userId))
+        .where(
+          and(
+            eq(users.role, 'DISTRICT_SUPERVISOR'),
+            eq(users.isActive, true)
+          )
+        );
+
+      // Group supervisors by ID and collect their districts
+      const supervisorMap = new Map();
+      for (const sup of supervisors) {
+        if (!supervisorMap.has(sup.id)) {
+          supervisorMap.set(sup.id, {
+            id: sup.id,
+            username: sup.username,
+            fullName: sup.fullName,
+            email: sup.email,
+            districts: [],
+            isDefault: sup.isDefault || false
+          });
+        }
+        supervisorMap.get(sup.id).districts.push(sup.districtName);
+      }
+
+      return Array.from(supervisorMap.values());
+    } catch (error) {
+      console.error('Error getting all district supervisors:', error);
+      throw error;
+    }
+  }
+
   async getDistrictSupervisors(district: string): Promise<Array<{ id: number; username: string; fullName: string; email: string; isDefault: boolean }>> {
     try {
       const supervisors = await db
@@ -1792,7 +1835,10 @@ export class DatabaseStorage implements IStorage {
           and(
             eq(users.role, 'DISTRICT_SUPERVISOR'),
             eq(users.isActive, true),
-            eq(userDistricts.districtCode, district)
+            or(
+              eq(userDistricts.districtCode, district),
+              eq(userDistricts.districtNameEnglish, district)
+            )
           )
         );
 
