@@ -3,6 +3,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import TopNav from "./TopNav";
 import { cn } from "@/lib/utils";
+import namhattaLogo from "@assets/namhatta_logo_1757674329685.png";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -56,7 +57,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <div className="w-7 sm:w-8 lg:w-10 h-7 sm:h-8 lg:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 relative overflow-hidden">
                   {/* Inner glow effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg lg:rounded-xl"></div>
-                  <span className="text-white text-sm lg:text-lg font-bold relative z-10 drop-shadow-sm">ॐ</span>
+                  <img 
+                    src={namhattaLogo} 
+                    alt="Namhatta Logo" 
+                    className="w-5 sm:w-6 lg:w-8 h-5 sm:h-6 lg:h-8 object-contain relative z-10 drop-shadow-sm"
+                  />
                 </div>
                 <div className="block">
                   <h1 className="text-sm sm:text-base lg:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">Namhatta</h1>

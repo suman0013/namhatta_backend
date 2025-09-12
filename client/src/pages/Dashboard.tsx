@@ -342,8 +342,8 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4">
-              {statusDistribution && statusDistribution.length > 0 ? (
-                statusDistribution.map((status, index) => {
+              {statusDistribution && Array.isArray(statusDistribution) && statusDistribution.length > 0 ? (
+                statusDistribution.map((status: any, index: number) => {
                   const colors = [
                     "from-blue-400 to-blue-600",
                     "from-emerald-400 to-emerald-600",
