@@ -385,10 +385,10 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
 
   // Grid View (default)
   return (
-    <div className="h-[220px]">
+    <div className="h-[160px]">
       <Link href={`/namhattas/${namhatta.id}`} data-testid={`link-namhatta-${namhatta.id}`}>
         <Card className="glass-card hover-lift group cursor-pointer h-full">
-          <CardContent className="p-2 h-full flex flex-col">
+          <CardContent className="p-1 h-full flex flex-col">
             <div className="flex items-center justify-between">
               <img 
                 src={namhattaLogo} 
@@ -404,7 +404,7 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
             
             <div className="flex-grow">
               {namhatta.address && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-1">
+                <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm">
                   <MapPin className="mr-1 h-3 w-3 flex-shrink-0" />
                   <span className="line-clamp-2">
                     {[
@@ -416,7 +416,7 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
                 </div>
               )}
               
-              <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+              <div className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center">
                   <Users className="mr-2 h-3 w-3" />
                   <span>{namhatta.devoteeCount || 0} devotees</span>
