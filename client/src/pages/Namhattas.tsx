@@ -388,8 +388,8 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
     <div className="h-[280px]">
       <Link href={`/namhattas/${namhatta.id}`} data-testid={`link-namhatta-${namhatta.id}`}>
         <Card className="glass-card hover-lift group cursor-pointer h-full">
-          <CardContent className="p-6 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+          <CardContent className="p-4 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-2">
               <img 
                 src={namhattaLogo} 
                 alt="Namhatta Logo" 
@@ -398,7 +398,7 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
               {getStatusBadge(namhatta.status)}
             </div>
             
-            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
               {namhatta.name}
             </h3>
             
