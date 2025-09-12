@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield } from "lucide-react";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
 import namhattaLogo from "@assets/namhatta_logo_1757673165218.png";
+import prabhupadaImage from "@assets/PRAVUPADA_1757698417419.jpg";
 
 interface Leader {
   id: number;
@@ -79,11 +80,11 @@ export default function Hierarchy() {
             <CardContent className="p-8">
               <div className="flex items-center justify-center gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-orange-500 rounded-full overflow-hidden">
                     <img 
-                      src={iskconLogo} 
-                      alt="ISKCON Logo" 
-                      className="w-12 h-12 object-contain filter brightness-0 invert"
+                      src={prabhupadaImage} 
+                      alt="Srila Prabhupada" 
+                      className="w-16 h-16 object-cover"
                       data-testid="img-founder-logo"
                     />
                   </div>

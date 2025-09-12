@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
+import prabhupadaImage from "@assets/PRAVUPADA_1757698417419.jpg";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -104,11 +105,11 @@ export default function Dashboard() {
         <Card className="bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-xl" data-testid="card-founder">
           <CardContent className="p-6">
             <div className="flex items-center space-x-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full overflow-hidden shadow-lg">
                 <img 
-                  src={iskconLogo} 
-                  alt="ISKCON Logo" 
-                  className="w-10 h-10 object-contain filter brightness-0 invert"
+                  src={prabhupadaImage} 
+                  alt="Srila Prabhupada" 
+                  className="w-16 h-16 object-cover"
                   data-testid="img-founder-logo"
                 />
               </div>
