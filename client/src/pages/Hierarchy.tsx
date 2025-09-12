@@ -5,6 +5,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield } from "lucide-react";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
+import namhattaLogo from "@assets/namhatta_logo_1757665218139.png";
 
 interface Leader {
   id: number;
@@ -140,8 +141,8 @@ export default function Hierarchy() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={iskconLogo} 
-                    alt="ISKCON Logo" 
+                    src={namhattaLogo} 
+                    alt="Namhatta Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-regional-director-logo"
                   />
@@ -170,8 +171,8 @@ export default function Hierarchy() {
               <div className="text-center space-y-4">
                 <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
-                    src={iskconLogo} 
-                    alt="ISKCON Logo" 
+                    src={namhattaLogo} 
+                    alt="Namhatta Logo" 
                     className="w-8 h-8 object-contain filter brightness-0 invert"
                     data-testid="img-co-regional-director-logo"
                   />
