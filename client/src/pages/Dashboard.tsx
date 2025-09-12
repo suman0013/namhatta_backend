@@ -106,11 +106,11 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-center">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-[4.8rem] h-[4.8rem] bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
                   <img 
                     src={iskconLogo} 
                     alt="ISKCON Logo" 
-                    className="w-10 h-10 object-contain filter brightness-0 invert"
+                    className="w-[3rem] h-[3rem] object-contain filter brightness-0 invert"
                     data-testid="img-founder-logo"
                   />
                 </div>
@@ -128,11 +128,11 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </div>
-                <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
+                <div className="w-[4.8rem] h-[4.8rem] rounded-full overflow-hidden shadow-lg">
                   <img 
                     src={prabhupadaImage} 
                     alt="Srila Prabhupada" 
-                    className="w-16 h-16 object-cover"
+                    className="w-[4.8rem] h-[4.8rem] object-cover"
                     data-testid="img-founder-prabhupada"
                   />
                 </div>
@@ -147,11 +147,11 @@ export default function Dashboard() {
           <Card className="bg-white/80 dark:bg-slate-800/50 border-purple-300 dark:border-purple-500/30 shadow-xl" data-testid="card-gbc">
             <CardContent className="p-6">
               <div className="text-center space-y-4">
-                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-[3.6rem] h-[3.6rem] bg-purple-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
                     src={iskconLogo} 
                     alt="ISKCON Logo" 
-                    className="w-8 h-8 object-contain filter brightness-0 invert"
+                    className="w-[2.4rem] h-[2.4rem] object-contain filter brightness-0 invert"
                     data-testid="img-gbc-logo"
                   />
                 </div>
@@ -177,11 +177,11 @@ export default function Dashboard() {
           <Card className="bg-white/80 dark:bg-slate-800/50 border-blue-300 dark:border-blue-500/30 shadow-xl" data-testid="card-regional-director">
             <CardContent className="p-6">
               <div className="text-center space-y-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-[3.6rem] h-[3.6rem] bg-blue-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
                     src={iskconLogo} 
                     alt="ISKCON Logo" 
-                    className="w-8 h-8 object-contain filter brightness-0 invert"
+                    className="w-[2.4rem] h-[2.4rem] object-contain filter brightness-0 invert"
                     data-testid="img-regional-director-logo"
                   />
                 </div>
@@ -207,11 +207,11 @@ export default function Dashboard() {
           <Card className="bg-white/80 dark:bg-slate-800/50 border-teal-300 dark:border-teal-500/30 shadow-xl" data-testid="card-co-regional-director">
             <CardContent className="p-6">
               <div className="text-center space-y-4">
-                <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-[3.6rem] h-[3.6rem] bg-teal-500 rounded-full flex items-center justify-center mx-auto">
                   <img 
                     src={iskconLogo} 
                     alt="ISKCON Logo" 
-                    className="w-8 h-8 object-contain filter brightness-0 invert"
+                    className="w-[2.4rem] h-[2.4rem] object-contain filter brightness-0 invert"
                     data-testid="img-co-regional-director-logo"
                   />
                 </div>
