@@ -80,13 +80,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-        <div>
-          <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your spiritual organization management center</p>
-          <p className="text-lg font-semibold text-orange-700 dark:text-orange-300 mt-3">International Society for Krishna Consciousness</p>
-        </div>
-
+      <div className="text-center space-y-3">
+        <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
+        <p className="text-2xl font-semibold text-orange-700 dark:text-orange-300">International Society for Krishna Consciousness</p>
       </div>
 
       {/* Leadership Hierarchy Section */}
