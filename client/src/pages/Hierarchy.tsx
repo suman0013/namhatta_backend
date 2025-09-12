@@ -60,121 +60,119 @@ export default function Hierarchy() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-4xl font-bold gradient-text">Leadership Hierarchy</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Organizational structure and leadership roles</p>
+      {/* Organization Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-5xl font-bold gradient-text mb-2">International Society for Krishna Consciousness</h1>
+        <h2 className="text-3xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Leadership Hierarchy</h2>
+        <p className="text-gray-600 dark:text-gray-400">Organizational structure and leadership roles</p>
       </div>
 
       {/* Hierarchy Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-        {/* Founder Acharya */}
-        {(hierarchy as any)?.founder && (hierarchy as any).founder.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-sm">
-                <Crown className="mr-2 h-4 w-4 text-amber-500" />
-                Founder Acharya
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {(hierarchy as any).founder.map((founder: any) => (
-                  <div key={founder.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
-                    <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
-                      <Crown className="h-3 w-3 text-white float-animation" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate">{founder.name}</h3>
-                      <p className="text-xs text-amber-700 dark:text-amber-300">ISKCON Founder Acharya</p>
-                    </div>
-                  </div>
-                ))}
+        {/* ISKCON Founder Acharya */}
+        <Card className="glass-card col-span-full lg:col-span-2" data-testid="card-founder-acharya">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-base">
+              <Crown className="mr-2 h-5 w-5 text-amber-500" />
+              ISKCON Founder Acharya
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center space-x-3 p-3 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center">
+                <Crown className="h-5 w-5 text-white float-animation" />
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-base text-gray-900 dark:text-white" data-testid="text-founder-name">
+                  His Divine Grace A. C. Bhaktivedanta Swami Prabhupada
+                </h3>
+                <p className="text-sm text-amber-700 dark:text-amber-300">ISKCON Founder Acharya</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* GBC */}
-        {(hierarchy as any)?.gbc && (hierarchy as any).gbc.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-sm">
-                <Crown className="mr-2 h-4 w-4 text-purple-500" />
-                Governing Body Commissioner
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {(hierarchy as any).gbc.map((leader: any) => (
-                  <div key={leader.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
-                      <Crown className="h-3 w-3 text-white float-animation" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate">{leader.name}</h3>
-                      <p className="text-xs text-purple-700 dark:text-purple-300">GBC</p>
-                    </div>
-                  </div>
-                ))}
+        {/* ISKCON GBC & Namhatta Preaching Minister */}
+        <Card className="glass-card" data-testid="card-gbc-minister">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-sm">
+              <Crown className="mr-2 h-4 w-4 text-purple-500" />
+              ISKCON GBC & Namhatta Preaching Minister
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <Crown className="h-3 w-3 text-white float-animation" />
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-sm text-gray-900 dark:text-white" data-testid="text-gbc-name">
+                  His Holiness Jaypataka Swami
+                </h3>
+                <p className="text-xs text-purple-700 dark:text-purple-300">GBC & Namhatta Preaching Minister</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Regional Directors */}
-        {(hierarchy as any)?.regionalDirectors && (hierarchy as any).regionalDirectors.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-sm">
-                <UserCheck className="mr-2 h-4 w-4 text-blue-500" />
-                Regional Directors
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {(hierarchy as any).regionalDirectors.map((director: any) => (
-                  <div key={director.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
-                      <UserCheck className="h-3 w-3 text-white" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate">{director.name}</h3>
-                      <p className="text-xs text-blue-700 dark:text-blue-300">Regional Director</p>
-                    </div>
-                  </div>
-                ))}
+        {/* ISKCON Namhatta Regional Directors */}
+        <Card className="glass-card col-span-full lg:col-span-2" data-testid="card-regional-directors">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-sm">
+              <UserCheck className="mr-2 h-4 w-4 text-blue-500" />
+              ISKCON Namhatta Regional Directors
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
+                  <UserCheck className="h-3 w-3 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-sm text-gray-900 dark:text-white" data-testid="text-regional-director-1">
+                    His Holiness Gauranga Prem Swami
+                  </h3>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">ISKCON Namhatta Regional Director</p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full flex items-center justify-center">
+                  <UserCheck className="h-3 w-3 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-sm text-gray-900 dark:text-white" data-testid="text-regional-director-2">
+                    His Holiness Bhaktivilasa Gaurachandra Swami
+                  </h3>
+                  <p className="text-xs text-blue-700 dark:text-blue-300">ISKCON Namhatta Regional Director</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Co-Regional Directors */}
-        {(hierarchy as any)?.coRegionalDirectors && (hierarchy as any).coRegionalDirectors.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-sm">
-                <Users className="mr-2 h-4 w-4 text-emerald-500" />
-                Co-Regional Directors
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {(hierarchy as any).coRegionalDirectors.map((coDirector: any) => (
-                  <div key={coDirector.id} className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
-                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
-                      <Users className="h-3 w-3 text-white" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-medium text-xs text-gray-900 dark:text-white truncate">{coDirector.name}</h3>
-                      <p className="text-xs text-emerald-700 dark:text-emerald-300">Co-Regional Director</p>
-                    </div>
-                  </div>
-                ))}
+        {/* Co-Regional Director */}
+        <Card className="glass-card" data-testid="card-co-regional-director">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-sm">
+              <Users className="mr-2 h-4 w-4 text-emerald-500" />
+              Co-Regional Director
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex items-center space-x-2 p-2 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
+              <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center">
+                <Users className="h-3 w-3 text-white" />
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium text-sm text-gray-900 dark:text-white" data-testid="text-co-regional-director">
+                  His Grace Padmanetra Das
+                </h3>
+                <p className="text-xs text-emerald-700 dark:text-emerald-300">Co-Regional Director</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Devotee Leadership Section */}
