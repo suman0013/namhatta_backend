@@ -57,7 +57,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <img 
                   src={namhattaLogo} 
                   alt="Namhatta Logo" 
-                  className="w-10 sm:w-12 lg:w-16 h-10 sm:h-12 lg:h-16 object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300"
+                  className="w-16 sm:w-20 lg:w-24 h-16 sm:h-20 lg:h-24 object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300"
                 />
                 <div className="block">
                   <h1 className="text-sm sm:text-base lg:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">Namhatta</h1>
