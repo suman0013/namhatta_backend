@@ -41,7 +41,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="flex flex-col min-h-screen relative z-10">
         {/* Combined Header and Navigation */}
         <div className="glass-card border-0 border-b border-white/20 dark:border-slate-700/50">
-          <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 py-1.5 lg:py-2">
+          <div className="flex items-center justify-between px-2 sm:px-4 lg:px-6 h-14 lg:h-16">
             {/* Mobile Menu Button and Logo */}
             <div className="flex items-center space-x-2 lg:space-x-3">
               <button
@@ -54,11 +54,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </button>
               
               <div className="flex items-center space-x-2">
-                <img 
-                  src={namhattaLogo} 
-                  alt="Namhatta Logo" 
-                  className="w-12 sm:w-14 lg:w-20 h-12 sm:h-14 lg:h-20 object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300"
-                />
+                <div className="h-full overflow-visible">
+                  <img 
+                    src={namhattaLogo} 
+                    alt="Namhatta Logo" 
+                    className="h-full w-auto object-contain drop-shadow-lg hover:scale-105 transition-transform duration-300 scale-110"
+                  />
+                </div>
                 <div className="block">
                   <h1 className="text-sm sm:text-base lg:text-xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">Namhatta</h1>
                   <p className="text-xs font-medium bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Management System</p>
