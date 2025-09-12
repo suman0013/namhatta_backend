@@ -83,6 +83,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-4xl font-bold gradient-text">Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Welcome to your spiritual organization management center</p>
+          <p className="text-lg font-semibold text-orange-700 dark:text-orange-300 mt-3">International Society for Krishna Consciousness</p>
         </div>
 
       </div>
