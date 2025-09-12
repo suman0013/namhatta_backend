@@ -385,11 +385,11 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
 
   // Grid View (default)
   return (
-    <div className="h-[280px]">
+    <div className="h-[220px]">
       <Link href={`/namhattas/${namhatta.id}`} data-testid={`link-namhatta-${namhatta.id}`}>
         <Card className="glass-card hover-lift group cursor-pointer h-full">
-          <CardContent className="p-4 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-2">
+          <CardContent className="p-2 h-full flex flex-col">
+            <div className="flex items-center justify-between">
               <img 
                 src={namhattaLogo} 
                 alt="Namhatta Logo" 
@@ -398,13 +398,13 @@ function NamhattaCard({ namhatta, viewMode = 'grid' }: { namhatta: Namhatta; vie
               {getStatusBadge(namhatta.status)}
             </div>
             
-            <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
+            <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
               {namhatta.name}
             </h3>
             
             <div className="flex-grow">
               {namhatta.address && (
-                <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-3">
+                <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-1">
                   <MapPin className="mr-1 h-3 w-3 flex-shrink-0" />
                   <span className="line-clamp-2">
                     {[
