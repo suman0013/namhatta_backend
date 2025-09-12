@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import iskconLogo from "@assets/iskcon_logo_1757664366067.png";
-import namhattaLogo from "@assets/namhatta_logo_1757664366060.png";
+import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
+import namhattaLogo from "@assets/namhatta_logo_1757665218139.png";
 
 interface Leader {
   id: number;
@@ -48,7 +48,7 @@ export default function Leadership() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-2">
           <h1 className="text-4xl md:text-6xl font-bold text-purple-300" data-testid="text-header">
             Leadership Hierarchy
           </h1>
@@ -59,7 +59,7 @@ export default function Leadership() {
 
         {/* Founder Acharya Card - Full Width */}
         {hierarchy.founder.map((founder) => (
-          <Card key={founder.id} className="bg-slate-800/50 border-orange-500/30 shadow-2xl" data-testid="card-founder-acharya">
+          <Card key={founder.id} className="bg-slate-800/50 border-orange-500/30 shadow-2xl w-full" data-testid="card-founder-acharya">
             <CardContent className="p-8">
               <div className="flex items-center justify-center gap-6">
                 <div className="flex-shrink-0">
@@ -74,7 +74,7 @@ export default function Leadership() {
                 </div>
                 <div className="text-center">
                   <h2 className="text-2xl md:text-3xl font-bold text-orange-400 mb-2" data-testid="text-founder-title">
-                    ISKCON Founder Acharya
+                    Founder Acharya
                   </h2>
                   <div className="space-y-1">
                     <p className="text-lg md:text-xl font-semibold text-orange-200" data-testid="text-founder-name">
@@ -90,7 +90,7 @@ export default function Leadership() {
           </Card>
         ))}
 
-        {/* Leadership Cards Grid */}
+        {/* Three Cards in a Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* GBC Card */}
           <Card className="bg-slate-800/50 border-purple-500/30 shadow-xl" data-testid="card-gbc">
