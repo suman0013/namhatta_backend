@@ -704,10 +704,10 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                                 : districtSupervisors.length === 0 
                                 ? "No supervisors available for this district"
                                 : selectedDistrictSupervisor 
-                                ? districtSupervisors.find(s => {
+                                ? (districtSupervisors.find(s => {
                                     const sId = typeof s.id === 'string' ? parseInt(s.id) : s.id;
                                     return sId === selectedDistrictSupervisor;
-                                  })?.name || "Select District Supervisor"
+                                  }) as any)?.fullName || "Select District Supervisor"
                                 : "Select District Supervisor"
                             } />
                           </SelectTrigger>
@@ -722,7 +722,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                                 return (
                                   <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
                                     <div className="flex items-center justify-between w-full">
-                                      <span>{supervisor.name}</span>
+                                      <span>{(supervisor as any).fullName}</span>
                                       {isDefault && (
                                         <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded ml-2">
                                           Default
