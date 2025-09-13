@@ -168,24 +168,30 @@ export default function NamhattaForm({
   const { data: user } = useQuery({
     queryKey: ["/api/auth/verify"],
     staleTime: 5 * 60 * 1000,
-  });
+  }) as { data: { id: number; username: string; role: 'ADMIN' | 'OFFICE' | 'DISTRICT_SUPERVISOR'; districts: string[] } | undefined };
 
   // Query user's address defaults if they're a District Supervisor
   const { data: userAddressDefaults } = useQuery({
     queryKey: ["/api/user/address-defaults"],
     enabled: user?.role === 'DISTRICT_SUPERVISOR'
-  });
+  }) as { data: { country?: string; state?: string; district?: string; readonly: string[] } | undefined };
 
   // Query devotees for leadership role selection
   const { data: devotees = [], isLoading: devoteesLoading } = useQuery({
     queryKey: ["/api/devotees"],
-    select: (data) => data?.data || []
+    select: (data: any) => data?.data || []
   });
 
   // Query district supervisors based on selected district
   const { data: districtSupervisors = [], isLoading: supervisorsLoading } = useQuery({
     queryKey: ["/api/district-supervisors", address.district],
-    enabled: !!address.district && user?.role !== 'DISTRICT_SUPERVISOR'
+    enabled: !!address.district && user?.role !== 'DISTRICT_SUPERVISOR',
+    queryFn: async () => {
+      const params = new URLSearchParams({ district: address.district || "" });
+      const response = await fetch(`/api/district-supervisors?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch district supervisors');
+      return response.json() as Promise<Array<{ id: number; username: string; fullName?: string; email: string }>>;
+    }
   });
 
   // Effect for user defaults
@@ -225,8 +231,10 @@ export default function NamhattaForm({
       setCodeValidation({ isChecking: true, isValid: null, message: "Checking availability..." });
       
       try {
-        const response = await apiRequest(`/api/namhattas/check-code/${currentCode.toUpperCase()}`) as { available: boolean };
-        if (response.available) {
+        const response = await fetch(`/api/namhattas/check-code/${encodeURIComponent(currentCode.toUpperCase())}`);
+        if (!response.ok) throw new Error('Failed to check code availability');
+        const data = await response.json() as { exists: boolean };
+        if (!data.exists) {
           setCodeValidation({
             isChecking: false,
             isValid: true,
@@ -383,7 +391,7 @@ export default function NamhattaForm({
 
   // Validate Mala Senapoti district match with confirmation
   const validateMalaSenapotiDistrict = (devoteeId: number) => {
-    const devotee = devotees.find(d => d.id === devoteeId);
+    const devotee = devotees.find((d: any) => d.id === devoteeId);
     if (devotee?.presentAddress && address.district) {
       const devoteeDistrict = devotee.presentAddress.district;
       if (devoteeDistrict !== address.district) {
@@ -551,7 +559,7 @@ export default function NamhattaForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
-              {filteredDevotees.map(devotee => (
+              {filteredDevotees.map((devotee: any) => (
                 <SelectItem key={devotee.id} value={devotee.id.toString()}>
                   {devotee.name || devotee.legalName} ({devotee.legalName})
                 </SelectItem>
@@ -561,7 +569,7 @@ export default function NamhattaForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => openCreateDevoteeModal(role, getHierarchySetup(role).reportingToDevoteeId)}
+            onClick={() => openCreateDevoteeModal(role, getHierarchySetup(role).reportingToDevoteeId || undefined)}
             className="flex items-center gap-1 whitespace-nowrap"
             data-testid={`button-create-${role.toLowerCase()}`}
           >
