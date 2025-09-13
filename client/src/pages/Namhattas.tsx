@@ -311,19 +311,18 @@ export default function Namhattas() {
       )}
 
       {/* Form Modal */}
-      {(showForm || editingNamhatta) && (
-        <NamhattaForm
-          namhatta={editingNamhatta}
-          onClose={() => {
-            setShowForm(false);
-            setEditingNamhatta(undefined);
-          }}
-          onSuccess={() => {
-            setShowForm(false);
-            setEditingNamhatta(undefined);
-          }}
-        />
-      )}
+      <NamhattaForm
+        isOpen={showForm || !!editingNamhatta}
+        namhatta={editingNamhatta}
+        onClose={() => {
+          setShowForm(false);
+          setEditingNamhatta(undefined);
+        }}
+        onSuccess={() => {
+          setShowForm(false);
+          setEditingNamhatta(undefined);
+        }}
+      />
     </div>
   );
 }

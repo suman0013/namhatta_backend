@@ -31,7 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { Namhatta, Address, Devotee, Leader } from "@shared/schema";
+import type { Namhatta, Address, Devotee } from "@/lib/types";
 import AddressSection from "@/components/ui/AddressSection";
 import EnhancedDevoteeForm from "./EnhancedDevoteeForm";
 import { AlertCircle, CheckCircle, Users, MapPin, Lock, Plus } from "lucide-react";
