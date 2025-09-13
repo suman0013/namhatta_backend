@@ -33,6 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Namhatta, Address, Devotee } from "@/lib/types";
 import AddressSection from "@/components/ui/AddressSection";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import EnhancedDevoteeForm from "./EnhancedDevoteeForm";
 import { AlertCircle, CheckCircle, Users, MapPin, Lock, Plus } from "lucide-react";
 
@@ -72,7 +73,8 @@ interface FormData {
   secretaryId?: number | null;
   presidentId?: number | null;
   accountantId?: number | null;
-  districtSupervisorId: number;
+  districtSupervisorId: number | null;
+  shraddhakutirId?: number | null;
 }
 
 export default function NamhattaForm({
@@ -99,10 +101,11 @@ export default function NamhattaForm({
         mahaChakraSenapotiId: z.number().nullable().optional(),
         chakraSenapotiId: z.number().nullable().optional(),
         upaChakraSenapotiId: z.number().nullable().optional(),
-        secretaryId: z.number({ required_error: "Secretary is required" }),
+        secretaryId: z.number().nullable().optional(),
         presidentId: z.number().nullable().optional(),
         accountantId: z.number().nullable().optional(),
-        districtSupervisorId: z.number({ required_error: "District Supervisor is required" }),
+        districtSupervisorId: z.number().nullable().optional(),
+        shraddhakutirId: z.number().nullable().optional(),
       })
     ),
     defaultValues: {
@@ -117,7 +120,8 @@ export default function NamhattaForm({
       secretaryId: null,
       presidentId: null,
       accountantId: null,
-      districtSupervisorId: 0,
+      districtSupervisorId: null,
+      shraddhakutirId: null,
     },
   });
 
@@ -191,6 +195,18 @@ export default function NamhattaForm({
       const response = await fetch(`/api/district-supervisors?${params}`);
       if (!response.ok) throw new Error('Failed to fetch district supervisors');
       return response.json() as Promise<Array<{ id: number; username: string; fullName?: string; email: string }>>;
+    }
+  });
+
+  // Query shraddhakutirs based on selected district
+  const { data: shraddhakutirs = [], isLoading: shraddhakutirsLoading } = useQuery({
+    queryKey: ["/api/shraddhakutirs", address.district],
+    enabled: !!address.district,
+    queryFn: async () => {
+      const params = new URLSearchParams({ district: address.district || "" });
+      const response = await fetch(`/api/shraddhakutirs?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch shraddhakutirs');
+      return response.json() as Promise<Array<{ id: number; name: string; districtCode: string }>>;
     }
   });
 
@@ -274,7 +290,8 @@ export default function NamhattaForm({
         secretaryId: namhatta.secretaryId || null,
         presidentId: namhatta.presidentId || null,
         accountantId: namhatta.accountantId || null,
-        districtSupervisorId: namhatta.districtSupervisorId || 0,
+        districtSupervisorId: namhatta.districtSupervisorId || null,
+        shraddhakutirId: namhatta.shraddhakutirId || null,
       });
 
       // For existing namhattas, try to load address information if available
@@ -304,7 +321,7 @@ export default function NamhattaForm({
     // Reset district supervisor selection when district changes
     if (field === 'district' && user?.role !== 'DISTRICT_SUPERVISOR') {
       setSelectedDistrictSupervisor(null);
-      setValue("districtSupervisorId", 0);
+      setValue("districtSupervisorId", null);
     }
   };
 
@@ -360,15 +377,17 @@ export default function NamhattaForm({
   // Helper function to get filtered devotees based on role type
   const getFilteredDevotees = (roleType: 'senapoti' | 'other') => {
     if (roleType === 'senapoti') {
-      // Filter devotees who have senapoti roles or can be assigned senapoti roles
+      // Filter devotees who are available for senapoti assignment
+      // Only show devotees who have NO leadership role at all
       return devotees.filter((devotee: Devotee) => 
-        !devotee.leadershipRole || 
-        ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
+        !devotee.leadershipRole || devotee.leadershipRole === null
       );
     } else {
       // Filter devotees who can be assigned other leadership roles (Secretary, President, Accountant)
+      // Show devotees who have no leadership role OR who don't have senapoti roles
       return devotees.filter((devotee: Devotee) => 
         !devotee.leadershipRole || 
+        devotee.leadershipRole === null ||
         !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
       );
     }
@@ -475,10 +494,20 @@ export default function NamhattaForm({
     }
 
     // Validate district supervisor selection
-    if (!selectedDistrictSupervisor) {
+    if (!selectedDistrictSupervisor || !data.districtSupervisorId) {
       toast({
         title: "Validation Error",
         description: "Please select a District Supervisor",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate required Secretary selection  
+    if (!data.secretaryId) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a Secretary - this role is required",
         variant: "destructive",
       });
       return;
@@ -753,6 +782,33 @@ export default function NamhattaForm({
                   </p>
                 )}
               </div>
+              
+              {/* Shraddhakutir Selection - Part of District Supervisor Step */}
+              {address.district && (
+                <div className="mt-6">
+                  <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
+                  <SearchableSelect
+                    options={(shraddhakutirs || []).map((sk) => `${sk.name} - ${sk.id}`)}
+                    value={
+                      shraddhakutirs?.find(sk => sk.id === watch("shraddhakutirId"))
+                        ? `${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.name} - ${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.id}`
+                        : ""
+                    }
+                    onValueChange={(value: string) => {
+                      const selectedShraddhakutir = shraddhakutirs?.find(sk => `${sk.name} - ${sk.id}` === value);
+                      setValue("shraddhakutirId", selectedShraddhakutir?.id);
+                    }}
+                    placeholder={shraddhakutirsLoading ? "Loading shraddhakutirs..." : "Search Shraddhakutir..."}
+                    disabled={!address.district || shraddhakutirsLoading}
+                    data-testid="select-shraddhakutir"
+                  />
+                  {!address.district && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Please complete the address information to select a Shraddhakutir
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
