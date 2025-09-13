@@ -51,14 +51,14 @@ export const namhattas = pgTable("namhattas", {
   meetingDay: text("meeting_day"),
   meetingTime: text("meeting_time"),
   // Remove inline address JSON field - use normalized address tables instead
-  // Leadership positions stored as text (devotee names) - matches current database schema
-  malaSenapoti: text("mala_senapoti"),
-  mahaChakraSenapoti: text("maha_chakra_senapoti"),
-  chakraSenapoti: text("chakra_senapoti"),
-  upaChakraSenapoti: text("upa_chakra_senapoti"),
-  secretary: text("secretary"),
-  president: text("president"),
-  accountant: text("accountant"),
+  // Leadership positions as foreign keys to devotees table
+  malaSenapotiId: integer("mala_senapoti_id").references(() => devotees.id),
+  mahaChakraSenapotiId: integer("maha_chakra_senapoti_id").references(() => devotees.id),
+  chakraSenapotiId: integer("chakra_senapoti_id").references(() => devotees.id),
+  upaChakraSenapotiId: integer("upa_chakra_senapoti_id").references(() => devotees.id),
+  secretaryId: integer("secretary_id").references(() => devotees.id),
+  presidentId: integer("president_id").references(() => devotees.id),
+  accountantId: integer("accountant_id").references(() => devotees.id),
   districtSupervisorId: integer("district_supervisor_id").notNull(),
   status: text("status").notNull().default("PENDING_APPROVAL"), // PENDING_APPROVAL, APPROVED, REJECTED
   registrationNo: text("registration_no").unique(),

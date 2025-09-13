@@ -582,20 +582,20 @@ export class DatabaseStorage implements IStorage {
         name: namhattas.name,
         meetingDay: namhattas.meetingDay,
         meetingTime: namhattas.meetingTime,
-        malaSenapoti: namhattas.malaSenapoti,
-        mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
-        chakraSenapoti: namhattas.chakraSenapoti,
-        upaChakraSenapoti: namhattas.upaChakraSenapoti,
-        secretary: namhattas.secretary,
-        president: namhattas.president,
-        accountant: namhattas.accountant,
+        malaSenapotiId: namhattas.malaSenapotiId,
+        mahaChakraSenapotiId: namhattas.mahaChakraSenapotiId,
+        chakraSenapotiId: namhattas.chakraSenapotiId,
+        upaChakraSenapotiId: namhattas.upaChakraSenapotiId,
+        secretaryId: namhattas.secretaryId,
+        presidentId: namhattas.presidentId,
+        accountantId: namhattas.accountantId,
         districtSupervisorId: namhattas.districtSupervisorId,
         status: namhattas.status,
         registrationNo: namhattas.registrationNo,
         registrationDate: namhattas.registrationDate,
         createdAt: namhattas.createdAt,
         updatedAt: namhattas.updatedAt,
-        devoteeCount: count(devotees.id),
+        devoteeCount: count(namhattas.id),
         // Include address information in main query to avoid N+1
         addressCountry: addresses.country,
         addressState: addresses.stateNameEnglish,
@@ -603,36 +603,58 @@ export class DatabaseStorage implements IStorage {
         addressSubDistrict: addresses.subdistrictNameEnglish,
         addressVillage: addresses.villageNameEnglish,
         addressPostalCode: addresses.pincode,
-        addressLandmark: namhattaAddresses.landmark
+        addressLandmark: namhattaAddresses.landmark,
+        // Include devotee names for leadership positions for backward compatibility
+        malaSenapotiName: sql`mala_devotee.name`,
+        mahaChakraSenapotiName: sql`maha_chakra_devotee.name`,
+        chakraSenapotiName: sql`chakra_devotee.name`,
+        upaChakraSenapotiName: sql`upa_chakra_devotee.name`,
+        secretaryName: sql`secretary_devotee.name`,
+        presidentName: sql`president_devotee.name`,
+        accountantName: sql`accountant_devotee.name`
       }).from(namhattas)
-        .leftJoin(devotees, eq(namhattas.id, devotees.namhattaId))
         .leftJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
         .leftJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+        .leftJoin(sql`${devotees} as mala_devotee`, eq(namhattas.malaSenapotiId, sql`mala_devotee.id`))
+        .leftJoin(sql`${devotees} as maha_chakra_devotee`, eq(namhattas.mahaChakraSenapotiId, sql`maha_chakra_devotee.id`))
+        .leftJoin(sql`${devotees} as chakra_devotee`, eq(namhattas.chakraSenapotiId, sql`chakra_devotee.id`))
+        .leftJoin(sql`${devotees} as upa_chakra_devotee`, eq(namhattas.upaChakraSenapotiId, sql`upa_chakra_devotee.id`))
+        .leftJoin(sql`${devotees} as secretary_devotee`, eq(namhattas.secretaryId, sql`secretary_devotee.id`))
+        .leftJoin(sql`${devotees} as president_devotee`, eq(namhattas.presidentId, sql`president_devotee.id`))
+        .leftJoin(sql`${devotees} as accountant_devotee`, eq(namhattas.accountantId, sql`accountant_devotee.id`))
         .where(whereClause)
-        .groupBy(namhattas.id, addresses.id, namhattaAddresses.id)
+        .groupBy(namhattas.id, addresses.id, namhattaAddresses.id, sql`mala_devotee.name`, sql`maha_chakra_devotee.name`, sql`chakra_devotee.name`, sql`upa_chakra_devotee.name`, sql`secretary_devotee.name`, sql`president_devotee.name`, sql`accountant_devotee.name`)
         .limit(size)
         .offset(offset)
         .orderBy(orderBy),
       db.select({ count: count() }).from(namhattas).where(whereClause)
     ]);
 
-    // Transform the data to include address as nested object
+    // Transform the data to include address as nested object and leadership names
     const namhattasWithAddresses = data.map((namhatta) => ({
       id: namhatta.id,
       code: namhatta.code,
       name: namhatta.name,
       meetingDay: namhatta.meetingDay,
       meetingTime: namhatta.meetingTime,
-      malaSenapoti: namhatta.malaSenapoti,
-      mahaChakraSenapoti: namhatta.mahaChakraSenapoti,
-      chakraSenapoti: namhatta.chakraSenapoti,
-      upaChakraSenapoti: namhatta.upaChakraSenapoti,
-      secretary: namhatta.secretary,
-      president: namhatta.president,
-      accountant: namhatta.accountant,
+      // Include both FK IDs and names for backward compatibility
+      malaSenapotiId: namhatta.malaSenapotiId,
+      malaSenapoti: namhatta.malaSenapotiName || null,
+      mahaChakraSenapotiId: namhatta.mahaChakraSenapotiId,
+      mahaChakraSenapoti: namhatta.mahaChakraSenapotiName || null,
+      chakraSenapotiId: namhatta.chakraSenapotiId,
+      chakraSenapoti: namhatta.chakraSenapotiName || null,
+      upaChakraSenapotiId: namhatta.upaChakraSenapotiId,
+      upaChakraSenapoti: namhatta.upaChakraSenapotiName || null,
+      secretaryId: namhatta.secretaryId,
+      secretary: namhatta.secretaryName || null,
+      presidentId: namhatta.presidentId,
+      president: namhatta.presidentName || null,
+      accountantId: namhatta.accountantId,
+      accountant: namhatta.accountantName || null,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status,
-      registrationNo: namhatta.registrationNo || undefined,
+      registrationNo: namhatta.registrationNo || null,
       registrationDate: namhatta.registrationDate || undefined,
       createdAt: namhatta.createdAt,
       updatedAt: namhatta.updatedAt,
@@ -661,20 +683,37 @@ export class DatabaseStorage implements IStorage {
       name: namhattas.name,
       meetingDay: namhattas.meetingDay,
       meetingTime: namhattas.meetingTime,
-      malaSenapoti: namhattas.malaSenapoti,
-      mahaChakraSenapoti: namhattas.mahaChakraSenapoti,
-      chakraSenapoti: namhattas.chakraSenapoti,
-      upaChakraSenapoti: namhattas.upaChakraSenapoti,
-      secretary: namhattas.secretary,
-      president: namhattas.president,
-      accountant: namhattas.accountant,
+      malaSenapotiId: namhattas.malaSenapotiId,
+      mahaChakraSenapotiId: namhattas.mahaChakraSenapotiId,
+      chakraSenapotiId: namhattas.chakraSenapotiId,
+      upaChakraSenapotiId: namhattas.upaChakraSenapotiId,
+      secretaryId: namhattas.secretaryId,
+      presidentId: namhattas.presidentId,
+      accountantId: namhattas.accountantId,
       districtSupervisorId: namhattas.districtSupervisorId,
       status: namhattas.status,
       registrationNo: namhattas.registrationNo,
       registrationDate: namhattas.registrationDate,
       createdAt: namhattas.createdAt,
-      updatedAt: namhattas.updatedAt
-    }).from(namhattas).where(eq(namhattas.id, id)).limit(1);
+      updatedAt: namhattas.updatedAt,
+      // Include devotee names for leadership positions for backward compatibility
+      malaSenapotiName: sql`mala_devotee.name`,
+      mahaChakraSenapotiName: sql`maha_chakra_devotee.name`,
+      chakraSenapotiName: sql`chakra_devotee.name`,
+      upaChakraSenapotiName: sql`upa_chakra_devotee.name`,
+      secretaryName: sql`secretary_devotee.name`,
+      presidentName: sql`president_devotee.name`,
+      accountantName: sql`accountant_devotee.name`
+    }).from(namhattas)
+      .leftJoin(sql`${devotees} as mala_devotee`, eq(namhattas.malaSenapotiId, sql`mala_devotee.id`))
+      .leftJoin(sql`${devotees} as maha_chakra_devotee`, eq(namhattas.mahaChakraSenapotiId, sql`maha_chakra_devotee.id`))
+      .leftJoin(sql`${devotees} as chakra_devotee`, eq(namhattas.chakraSenapotiId, sql`chakra_devotee.id`))
+      .leftJoin(sql`${devotees} as upa_chakra_devotee`, eq(namhattas.upaChakraSenapotiId, sql`upa_chakra_devotee.id`))
+      .leftJoin(sql`${devotees} as secretary_devotee`, eq(namhattas.secretaryId, sql`secretary_devotee.id`))
+      .leftJoin(sql`${devotees} as president_devotee`, eq(namhattas.presidentId, sql`president_devotee.id`))
+      .leftJoin(sql`${devotees} as accountant_devotee`, eq(namhattas.accountantId, sql`accountant_devotee.id`))
+      .where(eq(namhattas.id, id))
+      .limit(1);
     if (!result[0]) return undefined;
     
     // Fetch address information from normalized tables
@@ -694,8 +733,37 @@ export class DatabaseStorage implements IStorage {
       .where(eq(namhattaAddresses.namhattaId, id))
       .limit(1);
     
+    // Transform the data to include both FK IDs and names for backward compatibility
+    let namhatta = {
+      id: result[0].id,
+      code: result[0].code,
+      name: result[0].name,
+      meetingDay: result[0].meetingDay,
+      meetingTime: result[0].meetingTime,
+      // Include both FK IDs and names for backward compatibility
+      malaSenapotiId: result[0].malaSenapotiId,
+      malaSenapoti: result[0].malaSenapotiName || null,
+      mahaChakraSenapotiId: result[0].mahaChakraSenapotiId,
+      mahaChakraSenapoti: result[0].mahaChakraSenapotiName || null,
+      chakraSenapotiId: result[0].chakraSenapotiId,
+      chakraSenapoti: result[0].chakraSenapotiName || null,
+      upaChakraSenapotiId: result[0].upaChakraSenapotiId,
+      upaChakraSenapoti: result[0].upaChakraSenapotiName || null,
+      secretaryId: result[0].secretaryId,
+      secretary: result[0].secretaryName || null,
+      presidentId: result[0].presidentId,
+      president: result[0].presidentName || null,
+      accountantId: result[0].accountantId,
+      accountant: result[0].accountantName || null,
+      districtSupervisorId: result[0].districtSupervisorId,
+      status: result[0].status,
+      registrationNo: result[0].registrationNo,
+      registrationDate: result[0].registrationDate,
+      createdAt: result[0].createdAt,
+      updatedAt: result[0].updatedAt
+    } as any;
+    
     // Add address information to the namhatta object
-    let namhatta = result[0] as any;
     if (addressResults[0]) {
       namhatta.address = {
         country: addressResults[0].country,
@@ -707,9 +775,6 @@ export class DatabaseStorage implements IStorage {
         landmark: addressResults[0].landmark
       };
     }
-    
-    // Enrich with devotee IDs for form editing
-    namhatta = await this.enrichNamhattaWithDevoteeIds(namhatta);
     
     return namhatta;
   }
@@ -846,7 +911,7 @@ export class DatabaseStorage implements IStorage {
       // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
       return {
         ...namhatta,
-        registrationNo: namhatta.registrationNo || undefined,
+        registrationNo: namhatta.registrationNo || null,
         registrationDate: namhatta.registrationDate || undefined
       } as Namhatta;
     } catch (error: any) {
@@ -895,7 +960,7 @@ export class DatabaseStorage implements IStorage {
     // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
     return {
       ...namhatta,
-      registrationNo: namhatta.registrationNo || undefined,
+      registrationNo: namhatta.registrationNo || null,
       registrationDate: namhatta.registrationDate || undefined
     } as Namhatta;
   }
