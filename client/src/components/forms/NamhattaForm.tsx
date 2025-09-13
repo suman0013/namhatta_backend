@@ -1,437 +1,603 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { api } from "@/services/api";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { Save, X, AlertCircle, CheckCircle, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { Namhatta, Address, Devotee, Leader } from "@shared/schema";
 import AddressSection from "@/components/ui/AddressSection";
-import type { Namhatta, Address } from "@/lib/types";
+import EnhancedDevoteeForm from "./EnhancedDevoteeForm";
+import { AlertCircle, CheckCircle, Users, MapPin, Lock, Plus } from "lucide-react";
 
-interface NamhattaFormProps {
-  namhatta?: Namhatta;
-  onClose: () => void;
-  onSuccess?: () => void;
+// Step definition for the workflow
+const steps = [
+  "Basic Info",
+  "Address", 
+  "District Supervisor",
+  "Senapoti Hierarchy",
+  "Other Positions"
+];
+
+// Interface for creating devotee modal state
+interface CreateDevoteeModal {
+  isOpen: boolean;
+  role: 'MALA_SENAPOTI' | 'MAHA_CHAKRA_SENAPOTI' | 'CHAKRA_SENAPOTI' | 'UPA_CHAKRA_SENAPOTI' | 'SECRETARY' | 'PRESIDENT' | 'ACCOUNTANT';
+  reportingToDevoteeId?: number;
 }
 
+interface NamhattaFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  namhatta?: Namhatta;
+}
+
+// Form data interface matching the new FK structure
 interface FormData {
-  code: string;
   name: string;
-  meetingDay: string;
-  meetingTime: string;
-  address: Address;
-  malaSenapotiId: number | null;
-  mahaChakraSenapotiId: number | null;
-  chakraSenapotiId: number | null;
-  upaChakraSenapotiId: number | null;
-  secretaryId: number | null;
-  presidentId: number | null;
-  accountantId: number | null;
+  code: string;
+  meetingDay?: string;
+  meetingTime?: string;
+  malaSenapotiId?: number | null;
+  mahaChakraSenapotiId?: number | null;
+  chakraSenapotiId?: number | null;
+  upaChakraSenapotiId?: number | null;
+  secretaryId?: number | null;
+  presidentId?: number | null;
+  accountantId?: number | null;
   districtSupervisorId: number;
 }
 
-export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaFormProps) {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
+export default function NamhattaForm({
+  isOpen,
+  onClose,
+  onSuccess,
+  namhatta,
+}: NamhattaFormProps) {
   const isEditing = !!namhatta;
+  const { toast } = useToast();
+  
+  // Step management for new creation workflow
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+  // Form setup
+  const form = useForm<FormData>({
+    resolver: zodResolver(
+      z.object({
+        name: z.string().min(1, "Name is required"),
+        code: z.string().min(1, "Code is required"),
+        meetingDay: z.string().optional(),
+        meetingTime: z.string().optional(),
+        malaSenapotiId: z.number().nullable().optional(),
+        mahaChakraSenapotiId: z.number().nullable().optional(),
+        chakraSenapotiId: z.number().nullable().optional(),
+        upaChakraSenapotiId: z.number().nullable().optional(),
+        secretaryId: z.number({ required_error: "Secretary is required" }),
+        presidentId: z.number().nullable().optional(),
+        accountantId: z.number().nullable().optional(),
+        districtSupervisorId: z.number({ required_error: "District Supervisor is required" }),
+      })
+    ),
     defaultValues: {
-      code: namhatta?.code || "",
-      name: namhatta?.name || "",
-      meetingDay: namhatta?.meetingDay || "",
-      meetingTime: namhatta?.meetingTime || "",
-      address: namhatta?.address || {},
-      malaSenapotiId: null, // Will be set from namhatta data lookup
-      mahaChakraSenapotiId: null, // Will be set from namhatta data lookup
-      chakraSenapotiId: null, // Will be set from namhatta data lookup
-      upaChakraSenapotiId: null, // Will be set from namhatta data lookup
-      secretaryId: null, // Will be set from namhatta data lookup
-      presidentId: null, // Will be set from namhatta data lookup
-      accountantId: null, // Will be set from namhatta data lookup
-      districtSupervisorId: namhatta?.districtSupervisorId || 0,
-    }
+      name: "",
+      code: "",
+      meetingDay: "",
+      meetingTime: "",
+      malaSenapotiId: null,
+      mahaChakraSenapotiId: null,
+      chakraSenapotiId: null,
+      upaChakraSenapotiId: null,
+      secretaryId: null,
+      presidentId: null,
+      accountantId: null,
+      districtSupervisorId: 0,
+    },
   });
 
-  const [address, setAddress] = useState<Address>(namhatta?.address || {});
+  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = form;
+
+  // States
+  const [address, setAddress] = useState<Address>({
+    country: "",
+    state: "",
+    district: "",
+    subDistrict: "",
+    village: "",
+    pincode: "",
+  });
+
   const [showAddressValidation, setShowAddressValidation] = useState(false);
+  const [selectedDistrictSupervisor, setSelectedDistrictSupervisor] = useState<number | null>(null);
+  const [createDevoteeModal, setCreateDevoteeModal] = useState<CreateDevoteeModal>({
+    isOpen: false,
+    role: 'SECRETARY'
+  });
+
+  // Code validation state
   const [codeValidation, setCodeValidation] = useState<{
     isChecking: boolean;
     isValid: boolean | null;
     message: string;
-  }>({ isChecking: false, isValid: null, message: "" });
-  
-  const [selectedDistrictSupervisor, setSelectedDistrictSupervisor] = useState<number>(
-    namhatta?.districtSupervisorId || 0
-  );
+  }>({
+    isChecking: false,
+    isValid: null,
+    message: ""
+  });
+
+  // Current code being watched for validation
+  const currentCode = watch("code");
+
+  // Address defaults for role-based auto-filling
   const [addressDefaults, setAddressDefaults] = useState<{
     country?: string;
-    state?: string;
+    state?: string; 
     district?: string;
     readonly: string[];
-  }>({ readonly: [] });
+  }>({
+    readonly: []
+  });
 
-  const currentCode = watch("code");
-  const watchedAddress = watch("address");
+  // Query current user info
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/verify"],
+    staleTime: 5 * 60 * 1000,
+  });
 
-  // Fetch address defaults for current user
+  // Query user's address defaults if they're a District Supervisor
   const { data: userAddressDefaults } = useQuery({
     queryKey: ["/api/user/address-defaults"],
-    queryFn: () => api.getUserAddressDefaults(),
-    enabled: !!user && user.role === 'DISTRICT_SUPERVISOR',
+    enabled: user?.role === 'DISTRICT_SUPERVISOR'
   });
 
-  // Fetch district supervisors for selected district
+  // Query devotees for leadership role selection
+  const { data: devotees = [], isLoading: devoteesLoading } = useQuery({
+    queryKey: ["/api/devotees"],
+    select: (data) => data?.data || []
+  });
+
+  // Query district supervisors based on selected district
   const { data: districtSupervisors = [], isLoading: supervisorsLoading } = useQuery({
-    queryKey: ["/api/district-supervisors", watchedAddress?.district],
-    queryFn: () => api.getDistrictSupervisors(watchedAddress?.district || ""),
-    enabled: !!watchedAddress?.district && (user?.role === 'ADMIN' || user?.role === 'OFFICE'),
+    queryKey: ["/api/district-supervisors", address.district],
+    enabled: !!address.district && user?.role !== 'DISTRICT_SUPERVISOR'
   });
 
-  // Fetch devotees for leadership dropdowns - show all devotees for now
-  const { data: devoteesData, isLoading: devoteesLoading } = useQuery({
-    queryKey: ["/api/devotees", "leadership"],
-    queryFn: () => api.getDevotees(1, 1000), // Get a large number for dropdown
-    enabled: true,
-  });
-
-  const devotees = devoteesData?.data || [];
-
-  // Initialize leadership dropdowns for editing
+  // Effect for user defaults
   useEffect(() => {
-    if (isEditing && namhatta && devotees.length > 0) {
-      // Map existing leadership names to devotee IDs
-      const findDevoteeByName = (name: string | undefined) => {
-        if (!name) return null;
-        const devotee = devotees.find(d => 
-          (d.name === name) || (d.legalName === name) ||
-          (d.name && d.name.toLowerCase() === name.toLowerCase()) ||
-          (d.legalName && d.legalName.toLowerCase() === name.toLowerCase())
-        );
-        return devotee ? devotee.id : null;
+    if (user?.role === 'DISTRICT_SUPERVISOR' && userAddressDefaults) {
+      const defaults = {
+        country: userAddressDefaults.country,
+        state: userAddressDefaults.state,
+        district: userAddressDefaults.district,
+        readonly: ['country', 'state', 'district']
       };
-
-      // Set form values from existing namhatta data
-      setValue("malaSenapotiId", findDevoteeByName(namhatta.malaSenapoti));
-      setValue("mahaChakraSenapotiId", findDevoteeByName(namhatta.mahaChakraSenapoti));  
-      setValue("chakraSenapotiId", findDevoteeByName(namhatta.chakraSenapoti));
-      setValue("upaChakraSenapotiId", findDevoteeByName(namhatta.upaChakraSenapoti));
-      setValue("secretaryId", findDevoteeByName(namhatta.secretary));
-      setValue("presidentId", findDevoteeByName(namhatta.president));
-      setValue("accountantId", findDevoteeByName(namhatta.accountant));
-    }
-  }, [isEditing, namhatta, devotees, setValue]);
-
-  // Address pre-filling effect
-  useEffect(() => {
-    if (userAddressDefaults && user?.role === 'DISTRICT_SUPERVISOR') {
-      setAddressDefaults(userAddressDefaults);
-      // Pre-fill address fields if they're empty
+      
+      setAddressDefaults(defaults);
       setAddress(prev => ({
         ...prev,
-        country: prev.country || userAddressDefaults.country,
-        state: prev.state || userAddressDefaults.state,
-        district: prev.district || userAddressDefaults.district,
+        country: userAddressDefaults.country || "",
+        state: userAddressDefaults.state || "",
+        district: userAddressDefaults.district || ""
       }));
-      setValue("address", {
-        ...address,
-        country: address.country || userAddressDefaults.country,
-        state: address.state || userAddressDefaults.state,
-        district: address.district || userAddressDefaults.district,
-      });
-    }
-  }, [userAddressDefaults, user?.role, setValue]);
 
-  // Auto-assign district supervisor for DISTRICT_SUPERVISOR users (only when not editing)
-  useEffect(() => {
-    if (!isEditing && user?.role === 'DISTRICT_SUPERVISOR' && user.districts && user.districts.length > 0) {
-      // For district supervisors, auto-assign themselves
-      setSelectedDistrictSupervisor(user.id);
-      setValue("districtSupervisorId", user.id);
-    }
-  }, [user, setValue, isEditing]);
-
-  // Auto-select district supervisor when supervisors are loaded
-  useEffect(() => {
-    // Only auto-select for ADMIN and OFFICE users when not editing
-    if ((user?.role === 'ADMIN' || user?.role === 'OFFICE') && districtSupervisors.length > 0 && !selectedDistrictSupervisor && !isEditing) {
-      let selectedSupervisor;
-      
-      if (districtSupervisors.length === 1) {
-        // If only 1 supervisor available, auto-select it
-        selectedSupervisor = districtSupervisors[0];
-      } else {
-        // If multiple supervisors, first look for default supervisor
-        const defaultSupervisor = districtSupervisors.find(s => (s as any).isDefault === true);
-        selectedSupervisor = defaultSupervisor || districtSupervisors[0];
+      // Auto-assign district supervisor (the current user)
+      if (user.id) {
+        setSelectedDistrictSupervisor(user.id);
+        setValue("districtSupervisorId", user.id);
       }
-      
-      // Ensure ID is converted to number for consistency
-      const supervisorIdNum = typeof selectedSupervisor.id === 'string' ? parseInt(selectedSupervisor.id) : selectedSupervisor.id;
-      setSelectedDistrictSupervisor(supervisorIdNum);
-      setValue("districtSupervisorId", supervisorIdNum);
     }
-  }, [districtSupervisors, selectedDistrictSupervisor, user?.role, isEditing, setValue]);
+  }, [user, userAddressDefaults, setValue]);
 
-  // Reset district supervisor when district changes
+  // Effect for code validation
   useEffect(() => {
-    if (watchedAddress?.district && (user?.role === 'ADMIN' || user?.role === 'OFFICE') && !isEditing) {
-      // Reset selected supervisor when district changes
-      setSelectedDistrictSupervisor(0);
-      setValue("districtSupervisorId", 0);
+    if (!currentCode || currentCode.length < 2 || isEditing) {
+      setCodeValidation({ isChecking: false, isValid: null, message: "" });
+      return;
     }
-  }, [watchedAddress?.district, user?.role, isEditing, setValue]);
-
-  // Debounced code validation
-  useEffect(() => {
-    if (!currentCode || isEditing) return;
 
     const timeoutId = setTimeout(async () => {
-      if (currentCode.length < 2) {
-        setCodeValidation({ isChecking: false, isValid: null, message: "" });
-        return;
-      }
-
-      setCodeValidation({ isChecking: true, isValid: null, message: "Checking..." });
-
+      setCodeValidation({ isChecking: true, isValid: null, message: "Checking availability..." });
+      
       try {
-        const result = await api.checkNamhattaCodeExists(currentCode);
-        if (result.exists) {
-          setCodeValidation({ 
-            isChecking: false, 
-            isValid: false, 
-            message: "This code already exists. Please choose a unique code." 
+        const response = await apiRequest(`/api/namhattas/check-code/${currentCode.toUpperCase()}`);
+        if (response.available) {
+          setCodeValidation({
+            isChecking: false,
+            isValid: true,
+            message: "Code is available"
           });
         } else {
-          setCodeValidation({ 
-            isChecking: false, 
-            isValid: true, 
-            message: "Code is available!" 
+          setCodeValidation({
+            isChecking: false,
+            isValid: false,
+            message: "Code is already taken"
           });
         }
       } catch (error) {
-        setCodeValidation({ 
-          isChecking: false, 
-          isValid: null, 
-          message: "Error checking code" 
+        setCodeValidation({
+          isChecking: false,
+          isValid: false,
+          message: "Error checking code availability"
         });
       }
-    }, 500); // 500ms debounce
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [currentCode, isEditing]);
 
+  // Initialize form with existing namhatta data
+  useEffect(() => {
+    if (namhatta && isEditing) {
+      reset({
+        name: namhatta.name || "",
+        code: namhatta.code || "",
+        meetingDay: namhatta.meetingDay || "",
+        meetingTime: namhatta.meetingTime || "",
+        malaSenapotiId: namhatta.malaSenapotiId || null,
+        mahaChakraSenapotiId: namhatta.mahaChakraSenapotiId || null,
+        chakraSenapotiId: namhatta.chakraSenapotiId || null,
+        upaChakraSenapotiId: namhatta.upaChakraSenapotiId || null,
+        secretaryId: namhatta.secretaryId || null,
+        presidentId: namhatta.presidentId || null,
+        accountantId: namhatta.accountantId || null,
+        districtSupervisorId: namhatta.districtSupervisorId || 0,
+      });
 
+      if (namhatta.address) {
+        setAddress({
+          country: namhatta.address.country || "",
+          state: namhatta.address.stateNameEnglish || "",
+          district: namhatta.address.districtNameEnglish || "",
+          subDistrict: namhatta.address.subdistrictNameEnglish || "",
+          village: namhatta.address.villageNameEnglish || "",
+          pincode: namhatta.address.pincode || "",
+        });
+      }
 
-  // Mutations
+      if (namhatta.districtSupervisorId) {
+        setSelectedDistrictSupervisor(namhatta.districtSupervisorId);
+      }
+    }
+  }, [namhatta, isEditing, reset]);
+
+  // Handle address changes
+  const handleAddressChange = (field: keyof Address, value: string) => {
+    console.log("Namhatta address change:", field, "->", value, "New address:", { ...address, [field]: value });
+    setAddress(prev => ({ ...prev, [field]: value }));
+    
+    // Reset district supervisor selection when district changes
+    if (field === 'district' && user?.role !== 'DISTRICT_SUPERVISOR') {
+      setSelectedDistrictSupervisor(null);
+      setValue("districtSupervisorId", 0);
+    }
+  };
+
+  const handleBatchAddressChange = (newAddressFields: Partial<Address>) => {
+    setAddress(prev => ({ ...prev, ...newAddressFields }));
+  };
+
+  // Enhanced devotee modal management
+  const openCreateDevoteeModal = (role: CreateDevoteeModal['role'], reportingToDevoteeId?: number) => {
+    setCreateDevoteeModal({
+      isOpen: true,
+      role,
+      reportingToDevoteeId
+    });
+  };
+
+  const closeCreateDevoteeModal = () => {
+    setCreateDevoteeModal({
+      isOpen: false,
+      role: 'SECRETARY'
+    });
+  };
+
+  const handleDevoteeCreated = (newDevotee: Devotee) => {
+    // Refresh devotees list
+    queryClient.invalidateQueries({ queryKey: ["/api/devotees"] });
+    
+    // Auto-assign the newly created devotee to the appropriate role
+    const role = createDevoteeModal.role;
+    const fieldMap: Record<typeof role, keyof FormData> = {
+      'MALA_SENAPOTI': 'malaSenapotiId',
+      'MAHA_CHAKRA_SENAPOTI': 'mahaChakraSenapotiId', 
+      'CHAKRA_SENAPOTI': 'chakraSenapotiId',
+      'UPA_CHAKRA_SENAPOTI': 'upaChakraSenapotiId',
+      'SECRETARY': 'secretaryId',
+      'PRESIDENT': 'presidentId',
+      'ACCOUNTANT': 'accountantId'
+    };
+
+    const fieldName = fieldMap[role];
+    if (fieldName) {
+      setValue(fieldName, newDevotee.id);
+    }
+
+    toast({
+      title: "Success",
+      description: `${role.replace('_', ' ').toLowerCase()} created and assigned successfully`,
+    });
+
+    closeCreateDevoteeModal();
+  };
+
+  // Helper function to get filtered devotees based on role type
+  const getFilteredDevotees = (roleType: 'senapoti' | 'other') => {
+    if (roleType === 'senapoti') {
+      // Filter devotees who have senapoti roles or can be assigned senapoti roles
+      return devotees.filter(devotee => 
+        !devotee.leadershipRole || 
+        ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
+      );
+    } else {
+      // Filter devotees who can be assigned other leadership roles (Secretary, President, Accountant)
+      return devotees.filter(devotee => 
+        !devotee.leadershipRole || 
+        !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
+      );
+    }
+  };
+
+  // Helper function to set up hierarchy relationships
+  const getHierarchySetup = (role: CreateDevoteeModal['role']) => {
+    const hierarchyMap = {
+      'MALA_SENAPOTI': { reportingToDevoteeId: selectedDistrictSupervisor },
+      'MAHA_CHAKRA_SENAPOTI': { reportingToDevoteeId: watch('malaSenapotiId') },
+      'CHAKRA_SENAPOTI': { reportingToDevoteeId: watch('mahaChakraSenapotiId') },
+      'UPA_CHAKRA_SENAPOTI': { reportingToDevoteeId: watch('chakraSenapotiId') },
+      'SECRETARY': { reportingToDevoteeId: selectedDistrictSupervisor },
+      'PRESIDENT': { reportingToDevoteeId: selectedDistrictSupervisor },
+      'ACCOUNTANT': { reportingToDevoteeId: selectedDistrictSupervisor }
+    };
+
+    return hierarchyMap[role] || {};
+  };
+
+  // Validate Mala Senapoti district match with confirmation
+  const validateMalaSenapotiDistrict = (devoteeId: number) => {
+    const devotee = devotees.find(d => d.id === devoteeId);
+    if (devotee?.presentAddress && address.district) {
+      const devoteeDistrict = devotee.presentAddress.districtNameEnglish;
+      if (devoteeDistrict !== address.district) {
+        const proceed = window.confirm(
+          `District Mismatch: This Mala Senapoti is from ${devoteeDistrict} district, but the Namhatta is in ${address.district} district. Are you sure you want to assign them?`
+        );
+        if (!proceed) {
+          setValue('malaSenapotiId', null);
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  // Mutations for create/update
   const createMutation = useMutation({
-    mutationFn: (data: Partial<Namhatta>) => api.createNamhatta(data),
+    mutationFn: async (data: FormData) => {
+      const payload = {
+        ...data,
+        address,
+      };
+      return apiRequest("/api/namhattas", "POST", payload);
+    },
     onSuccess: () => {
-      // Invalidate namhatta queries
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
-      // Invalidate map data queries to refresh geographic counts
-      queryClient.invalidateQueries({ queryKey: ["/api/map/countries"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/states"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/districts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/sub-districts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/villages"] });
-      // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       toast({
         title: "Success",
         description: "Namhatta created successfully",
       });
-      onSuccess?.();
+      onSuccess();
       onClose();
     },
     onError: (error: any) => {
-      const errorMessage = error?.message || "Failed to create namhatta";
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error.message || "Failed to create namhatta",
         variant: "destructive",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<Namhatta>) => api.updateNamhatta(namhatta!.id, data),
+    mutationFn: async (data: FormData) => {
+      const payload = {
+        ...data,
+        address,
+      };
+      return apiRequest(`/api/namhattas/${namhatta!.id}`, "PUT", payload);
+    },
     onSuccess: () => {
-      // Invalidate namhatta queries
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/namhattas/${namhatta!.id}`] });
-      // Invalidate map data queries to refresh geographic counts
-      queryClient.invalidateQueries({ queryKey: ["/api/map/countries"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/states"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/districts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/sub-districts"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/map/villages"] });
-      // Invalidate dashboard data
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
       toast({
         title: "Success",
         description: "Namhatta updated successfully",
       });
-      onSuccess?.();
+      onSuccess();
       onClose();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to update namhatta",
+        description: error.message || "Failed to update namhatta",
         variant: "destructive",
       });
     },
   });
 
-  // Handle address changes
-  const handleAddressChange = (field: keyof Address, value: string) => {
-    const newAddress = { ...address, [field]: value };
-    
-    // Reset dependent fields only for manual changes, not pincode auto-population
-    if (field === "country") {
-      newAddress.state = "";
-      newAddress.district = "";
-      newAddress.subDistrict = "";
-      newAddress.village = "";
-    } else if (field === "state" && address.postalCode === "") {
-      // Only reset if no pincode is set (manual state change)
-      newAddress.district = "";
-      newAddress.subDistrict = "";
-      newAddress.village = "";
-    } else if (field === "district" && address.postalCode === "") {
-      // Only reset if no pincode is set (manual district change)
-      newAddress.subDistrict = "";
-      newAddress.village = "";
-    } else if (field === "subDistrict") {
-      newAddress.village = "";
-    }
-    
-    console.log("Namhatta address change:", field, "->", value, "New address:", newAddress);
-    setAddress(newAddress);
-    setValue("address", newAddress);
-    
-    // Clear validation errors when user starts fixing them
-    if (showAddressValidation && value) {
-      setShowAddressValidation(false);
-    }
-  };
-
-  // Handle batch address changes (for pincode auto-population)
-  const handleBatchAddressChange = (newAddressFields: Partial<Address>) => {
-    const newAddress = { ...address, ...newAddressFields };
-    console.log("Namhatta batch address change:", newAddressFields, "New address:", newAddress);
-    setAddress(newAddress);
-    setValue("address", newAddress);
-    
-    // Clear validation errors when batch changes happen (pincode auto-population)
-    if (showAddressValidation) {
-      setShowAddressValidation(false);
-    }
-  };
-
   const onSubmit = (data: FormData) => {
-    // Prevent submission if code validation failed (for new namhattas)
-    if (!isEditing && codeValidation.isValid === false) {
-      toast({
-        title: "Validation Error",
-        description: "Please choose a unique code before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate district supervisor selection is mandatory
-    if (!data.districtSupervisorId || data.districtSupervisorId === 0) {
-      toast({
-        title: "Error",
-        description: "District Supervisor selection is mandatory",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate secretary selection is mandatory
-    if (!data.secretaryId) {
-      toast({
-        title: "Error",
-        description: "Secretary selection is mandatory",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate required address fields
-    const requiredAddressFields = ['country', 'postalCode', 'state', 'district', 'subDistrict', 'village'];
-    const missingFields = requiredAddressFields.filter(field => !address[field as keyof Address]);
-    
-    if (missingFields.length > 0) {
-      const fieldNames = missingFields.map(field => {
-        switch (field) {
-          case 'postalCode': return 'Postal Code';
-          case 'subDistrict': return 'Sub-District';
-          default: return field.charAt(0).toUpperCase() + field.slice(1);
-        }
-      });
-      
-      toast({
-        title: "Validation Error",
-        description: `Please fill in all required address fields: ${fieldNames.join(', ')}`,
-        variant: "destructive",
-      });
+    // Validate address completion
+    if (!address.country || !address.state || !address.district) {
       setShowAddressValidation(true);
+      toast({
+        title: "Validation Error",
+        description: "Please complete the address information",
+        variant: "destructive",
+      });
       return;
     }
 
-    const submitData = {
-      ...data,
-      address,
-      // Convert null to undefined for API compatibility
-      malaSenapotiId: data.malaSenapotiId || undefined,
-      mahaChakraSenapotiId: data.mahaChakraSenapotiId || undefined,
-      chakraSenapotiId: data.chakraSenapotiId || undefined,
-      upaChakraSenapotiId: data.upaChakraSenapotiId || undefined,
-      secretaryId: data.secretaryId || undefined,
-      presidentId: data.presidentId || undefined,
-      accountantId: data.accountantId || undefined,
-    };
+    // Validate district supervisor selection
+    if (!selectedDistrictSupervisor) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a District Supervisor",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (isEditing) {
-      updateMutation.mutate(submitData);
+      updateMutation.mutate(data);
     } else {
-      createMutation.mutate(submitData);
+      createMutation.mutate(data);
     }
   };
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
+  // Render step indicator
+  const renderStepIndicator = () => (
+    <div className="flex items-center justify-between mb-6">
+      {steps.map((step, index) => (
+        <div key={index} className="flex items-center">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            index === currentStep ? 'bg-blue-500 text-white' : 
+            index < currentStep ? 'bg-green-500 text-white' : 
+            'bg-gray-200 text-gray-600'
+          }`}>
+            {index + 1}
+          </div>
+          <span className={`ml-2 text-sm ${
+            index === currentStep ? 'text-blue-600 font-medium' : 
+            index < currentStep ? 'text-green-600' : 
+            'text-gray-500'
+          }`}>
+            {step}
+          </span>
+          {index < steps.length - 1 && (
+            <div className={`w-8 h-0.5 mx-4 ${
+              index < currentStep ? 'bg-green-500' : 'bg-gray-200'
+            }`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Helper to render leadership role select with "Create New" button
+  const renderRoleSelect = (
+    role: CreateDevoteeModal['role'], 
+    fieldName: keyof FormData,
+    label: string,
+    required: boolean = false
+  ) => {
+    const currentValue = watch(fieldName);
+    const filteredDevotees = getFilteredDevotees(
+      ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(role) 
+        ? 'senapoti' : 'other'
+    );
+
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={fieldName}>
+          {label} {required && <span className="text-red-500">*</span>}
+        </Label>
+        <div className="flex gap-2">
+          <Select
+            value={currentValue?.toString() || ""}
+            onValueChange={(value) => {
+              setValue(fieldName, value && value !== "none" ? parseInt(value) : null);
+              // Validate district match for Mala Senapoti
+              if (role === 'MALA_SENAPOTI' && value && value !== "none") {
+                if (!validateMalaSenapotiDistrict(parseInt(value))) {
+                  return; // Don't set the value if validation fails
+                }
+              }
+            }}
+            disabled={devoteesLoading}
+          >
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder={devoteesLoading ? "Loading..." : `Select ${label}`} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None</SelectItem>
+              {filteredDevotees.map(devotee => (
+                <SelectItem key={devotee.id} value={devotee.id.toString()}>
+                  {devotee.name || devotee.legalName} ({devotee.legalName})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => openCreateDevoteeModal(role, getHierarchySetup(role).reportingToDevoteeId)}
+            className="flex items-center gap-1 whitespace-nowrap"
+            data-testid={`button-create-${role.toLowerCase()}`}
+          >
+            <Plus className="h-4 w-4" />
+            Create New
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Namhatta" : "Add New Namhatta"}</DialogTitle>
           <DialogDescription>
-            {isEditing ? "Update Namhatta information" : "Create a new Namhatta center with address and leadership details"}
+            {isEditing ? "Update Namhatta information" : "Create a new Namhatta center following the step-by-step workflow"}
           </DialogDescription>
         </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information */}
+        
+        {!isEditing && renderStepIndicator()}
+        
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Step 0: Basic Information */}
+          {(isEditing || currentStep === 0) && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Basic Information</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">Basic Information</h3>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Namhatta Name *</Label>
                   <Input
                     {...register("name", { required: "Name is required" })}
                     placeholder="Enter namhatta name"
+                    data-testid="input-name"
                   />
                   {errors.name && (
                     <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
@@ -454,6 +620,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                           ? "border-green-500 focus:border-green-500" 
                           : ""
                       }`}
+                      data-testid="input-code"
                     />
                     {!isEditing && currentCode && currentCode.length >= 2 && (
                       <div className="absolute right-3 top-3">
@@ -488,7 +655,7 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                     value={watch("meetingDay")}
                     onValueChange={(value) => setValue("meetingDay", value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger data-testid="select-meeting-day">
                       <SelectValue placeholder="Select meeting day" />
                     </SelectTrigger>
                     <SelectContent>
@@ -508,287 +675,212 @@ export default function NamhattaForm({ namhatta, onClose, onSuccess }: NamhattaF
                     {...register("meetingTime")}
                     type="time"
                     placeholder="Select meeting time"
+                    data-testid="input-meeting-time"
                   />
                 </div>
               </div>
-              
-              {/* Leadership Roles */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="malaSenapotiId">Mala Senapoti</Label>
-                  <Select
-                    value={watch("malaSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("malaSenapotiId", value && value !== "none" ? parseInt(value) : null)}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Mala Senapoti"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="mahaChakraSenapotiId">Maha Chakra Senapoti</Label>
-                  <Select
-                    value={watch("mahaChakraSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("mahaChakraSenapotiId", value && value !== "none" ? parseInt(value) : null)}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Maha Chakra Senapoti"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="chakraSenapotiId">Chakra Senapoti</Label>
-                  <Select
-                    value={watch("chakraSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("chakraSenapotiId", value && value !== "none" ? parseInt(value) : null)}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Chakra Senapoti"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="upaChakraSenapotiId">Upa Chakra Senapoti</Label>
-                  <Select
-                    value={watch("upaChakraSenapotiId")?.toString() || ""}
-                    onValueChange={(value) => setValue("upaChakraSenapotiId", value && value !== "none" ? parseInt(value) : null)}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Upa Chakra Senapoti"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="secretaryId">Secretary *</Label>
-                  <Select
-                    value={watch("secretaryId")?.toString() || ""}
-                    onValueChange={(value) => setValue("secretaryId", value ? parseInt(value) : null, { shouldValidate: true })}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Secretary"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {/* Remove "None" option for required field */}
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.secretaryId && (
-                    <p className="text-sm text-red-500 mt-1">{errors.secretaryId.message}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="presidentId">President</Label>
-                  <Select
-                    value={watch("presidentId")?.toString() || ""}
-                    onValueChange={(value) => setValue("presidentId", value && value !== "none" ? parseInt(value) : null)}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select President"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="accountantId">Accountant</Label>
-                  <Select
-                    value={watch("accountantId")?.toString() || ""}
-                    onValueChange={(value) => setValue("accountantId", value && value !== "none" ? parseInt(value) : null)}
-                    disabled={devoteesLoading}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={devoteesLoading ? "Loading devotees..." : "Select Accountant"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {devotees.map(devotee => (
-                        <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                          {devotee.name || devotee.legalName} ({devotee.legalName})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+            </div>
+          )}
 
-              {/* District Supervisor Assignment - Mandatory */}
-              <div className="space-y-4">
-                <h4 className="text-md font-semibold flex items-center">
-                  District Supervisor Assignment *
-                  {addressDefaults.readonly.includes('district') && (
-                    <Lock className="h-4 w-4 ml-2 text-gray-500" />
-                  )}
-                </h4>
-                
-                {user?.role === 'DISTRICT_SUPERVISOR' ? (
-                  // Auto-assigned for District Supervisors
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-                    <div className="flex items-center">
-                      <Lock className="h-4 w-4 mr-2 text-blue-600 dark:text-blue-400" />
-                      <span className="font-medium text-blue-800 dark:text-blue-200">{user.username}</span>
-                      <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">(Auto-assigned)</span>
-                    </div>
-                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                      You are automatically assigned as the District Supervisor for this Namhatta 
-                      since it's in your district ({address.district || 'your assigned district'}).
-                    </p>
-                    <input type="hidden" {...register("districtSupervisorId")} />
-                  </div>
-                ) : (
-                  // Manual selection for Admin/Office users
-                  <div>
-                    <Label htmlFor="districtSupervisorId">District Supervisor *</Label>
-                    {watchedAddress?.district ? (
-                      <div>
-                        <Select
-                          value={selectedDistrictSupervisor?.toString() || ""}
-                          onValueChange={(value) => {
-                            const supervisorId = parseInt(value);
-                            setSelectedDistrictSupervisor(supervisorId);
-                            setValue("districtSupervisorId", supervisorId);
-                          }}
-                          disabled={supervisorsLoading || districtSupervisors.length === 0}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder={
-                              supervisorsLoading 
-                                ? "Loading supervisors..." 
-                                : districtSupervisors.length === 0 
-                                ? "No supervisors available for this district"
-                                : selectedDistrictSupervisor 
-                                ? (districtSupervisors.find(s => {
-                                    const sId = typeof s.id === 'string' ? parseInt(s.id) : s.id;
-                                    return sId === selectedDistrictSupervisor;
-                                  }) as any)?.fullName || "Select District Supervisor"
-                                : "Select District Supervisor"
-                            } />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {districtSupervisors.length === 0 ? (
-                              <SelectItem value="no-supervisors" disabled>
-                                No supervisors available for {watchedAddress.district}
-                              </SelectItem>
-                            ) : (
-                              districtSupervisors.map((supervisor) => {
-                                const isDefault = (supervisor as any).isDefault === true;
-                                return (
-                                  <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
-                                    <div className="flex items-center justify-between w-full">
-                                      <span>{(supervisor as any).fullName}</span>
-                                      {isDefault && (
-                                        <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded ml-2">
-                                          Default
-                                        </span>
-                                      )}
-                                    </div>
-                                  </SelectItem>
-                                );
-                              })
-                            )}
-                          </SelectContent>
-                        </Select>
-                        {districtSupervisors.length === 0 && !supervisorsLoading && (
-                          <p className="text-sm text-amber-600 dark:text-amber-500 mt-1">
-                            No District Supervisors found for {watchedAddress.district}. 
-                            Please contact admin to assign a supervisor to this district.
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      // No district selected
-                      <div>
-                        <Select disabled>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Please select a district first to see available supervisors" />
-                          </SelectTrigger>
-                        </Select>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          Please fill in the district address field to see available district supervisors.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+          {/* Step 1: Address */}
+          {(isEditing || currentStep === 1) && (
+            <div className="space-y-4">
+              <Separator />
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">Address Information</h3>
+              </div>
+              <AddressSection
+                title="Namhatta Address"
+                address={address}
+                onAddressChange={handleAddressChange}
+                onBatchAddressChange={handleBatchAddressChange}
+                showValidation={showAddressValidation}
+                disabled={false}
+              />
+            </div>
+          )}
+
+          {/* Step 2: District Supervisor */}
+          {(isEditing || currentStep === 2) && address.district && (
+            <div className="space-y-4">
+              <Separator />
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">District Supervisor</h3>
+              </div>
+              <div>
+                <Label htmlFor="districtSupervisorId">District Supervisor *</Label>
+                <Select
+                  value={selectedDistrictSupervisor ? selectedDistrictSupervisor.toString() : ""}
+                  onValueChange={(value) => {
+                    const supervisorId = parseInt(value);
+                    setSelectedDistrictSupervisor(supervisorId);
+                    setValue("districtSupervisorId", supervisorId);
+                  }}
+                  disabled={supervisorsLoading || (user?.role === 'DISTRICT_SUPERVISOR')}
+                >
+                  <SelectTrigger data-testid="select-district-supervisor">
+                    <SelectValue placeholder={
+                      supervisorsLoading ? "Loading supervisors..." : 
+                      user?.role === 'DISTRICT_SUPERVISOR' ? "Auto-assigned (You)" :
+                      "Select District Supervisor"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {districtSupervisors.map(supervisor => (
+                      <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
+                        {supervisor.name || `Leader ${supervisor.id}`}
+                        {supervisor.id === user?.id && " (You)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {user?.role === 'DISTRICT_SUPERVISOR' && (
+                  <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                    <Lock className="h-4 w-4" />
+                    You are automatically assigned as the District Supervisor for your district
+                  </p>
                 )}
               </div>
             </div>
+          )}
 
-            <Separator />
-
-            {/* Address */}
-            <AddressSection
-              title="Address"
-              address={address}
-              onAddressChange={handleAddressChange}
-              onBatchAddressChange={handleBatchAddressChange}
-              required={true}
-              showValidation={showAddressValidation}
-            />
-
-            <Separator />
-
-            {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isLoading || (!isEditing && codeValidation.isValid === false)}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {isLoading ? "Saving..." : (isEditing ? "Update Namhatta" : "Create Namhatta")}
-              </Button>
+          {/* Step 3: Senapotis (Hierarchy Roles) */}
+          {(isEditing || currentStep === 3) && selectedDistrictSupervisor && (
+            <div className="space-y-4">
+              <Separator />
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">Senapoti Hierarchy</h3>
+                <p className="text-sm text-gray-600 ml-2">(Optional - create from top to bottom)</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {renderRoleSelect('MALA_SENAPOTI', 'malaSenapotiId', 'Mala Senapoti')}
+                {renderRoleSelect('MAHA_CHAKRA_SENAPOTI', 'mahaChakraSenapotiId', 'Maha Chakra Senapoti')}
+                {renderRoleSelect('CHAKRA_SENAPOTI', 'chakraSenapotiId', 'Chakra Senapoti')}
+                {renderRoleSelect('UPA_CHAKRA_SENAPOTI', 'upaChakraSenapotiId', 'Upa Chakra Senapoti')}
+              </div>
             </div>
+          )}
+
+          {/* Step 4: Other Leadership Positions */}
+          {(isEditing || currentStep === 4) && (
+            <div className="space-y-4">
+              <Separator />
+              <div className="flex items-center gap-2 mb-4">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-lg font-semibold">Other Leadership Positions</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {renderRoleSelect('SECRETARY', 'secretaryId', 'Secretary', true)}
+                {renderRoleSelect('PRESIDENT', 'presidentId', 'President')}
+                {renderRoleSelect('ACCOUNTANT', 'accountantId', 'Accountant')}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation Buttons */}
+          {!isEditing && (
+            <div className="flex justify-between pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                disabled={currentStep === 0}
+                data-testid="button-previous"
+              >
+                Previous
+              </Button>
+              
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    // Validate current step before proceeding
+                    if (currentStep === 0 && (!watch("name") || !watch("code"))) {
+                      toast({
+                        title: "Validation Error",
+                        description: "Please fill in the required fields before proceeding",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    if (currentStep === 1 && !address.district) {
+                      toast({
+                        title: "Validation Error", 
+                        description: "Please complete the address information before proceeding",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    if (currentStep === 2 && !selectedDistrictSupervisor) {
+                      toast({
+                        title: "Validation Error",
+                        description: "Please select a District Supervisor before proceeding", 
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setCurrentStep(Math.min(steps.length - 1, currentStep + 1));
+                  }}
+                  data-testid="button-next"
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  data-testid="button-submit"
+                >
+                  {isLoading ? "Creating..." : "Create Namhatta"}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Submit button for editing mode */}
+          {isEditing && (
+            <div className="flex justify-end pt-4">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  data-testid="button-cancel"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  data-testid="button-submit"
+                >
+                  {isLoading ? "Updating..." : "Update Namhatta"}
+                </Button>
+              </div>
+            </div>
+          )}
         </form>
-        </DialogContent>
-      </Dialog>
+
+        {/* Enhanced Devotee Form Modal */}
+        {createDevoteeModal.isOpen && (
+          <EnhancedDevoteeForm
+            onClose={closeCreateDevoteeModal}
+            onSuccess={handleDevoteeCreated}
+            preAssignedRole={createDevoteeModal.role}
+            reportingToDevoteeId={createDevoteeModal.reportingToDevoteeId}
+            districtInfo={address.district ? {
+              country: address.country,
+              state: address.state, 
+              district: address.district
+            } : undefined}
+            isModal={true}
+            modalTitle={`Create New ${createDevoteeModal.role.replace('_', ' ')}`}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
