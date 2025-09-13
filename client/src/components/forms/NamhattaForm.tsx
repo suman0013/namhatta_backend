@@ -130,7 +130,7 @@ export default function NamhattaForm({
     district: "",
     subDistrict: "",
     village: "",
-    pincode: "",
+    zipcode: "",
   });
 
   const [showAddressValidation, setShowAddressValidation] = useState(false);
@@ -225,7 +225,7 @@ export default function NamhattaForm({
       setCodeValidation({ isChecking: true, isValid: null, message: "Checking availability..." });
       
       try {
-        const response = await apiRequest(`/api/namhattas/check-code/${currentCode.toUpperCase()}`);
+        const response = await apiRequest(`/api/namhattas/check-code/${currentCode.toUpperCase()}`) as { available: boolean };
         if (response.available) {
           setCodeValidation({
             isChecking: false,
@@ -269,14 +269,16 @@ export default function NamhattaForm({
         districtSupervisorId: namhatta.districtSupervisorId || 0,
       });
 
+      // For existing namhattas, try to load address information if available
+      // This prevents data loss when editing existing namhattas
       if (namhatta.address) {
         setAddress({
           country: namhatta.address.country || "",
-          state: namhatta.address.stateNameEnglish || "",
-          district: namhatta.address.districtNameEnglish || "",
-          subDistrict: namhatta.address.subdistrictNameEnglish || "",
-          village: namhatta.address.villageNameEnglish || "",
-          pincode: namhatta.address.pincode || "",
+          state: namhatta.address.state || "",
+          district: namhatta.address.district || "",
+          subDistrict: namhatta.address.subDistrict || "",
+          village: namhatta.address.village || "",
+          zipcode: namhatta.address.zipcode || namhatta.address.postalCode || "",
         });
       }
 
@@ -351,13 +353,13 @@ export default function NamhattaForm({
   const getFilteredDevotees = (roleType: 'senapoti' | 'other') => {
     if (roleType === 'senapoti') {
       // Filter devotees who have senapoti roles or can be assigned senapoti roles
-      return devotees.filter(devotee => 
+      return devotees.filter((devotee: Devotee) => 
         !devotee.leadershipRole || 
         ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
       );
     } else {
       // Filter devotees who can be assigned other leadership roles (Secretary, President, Accountant)
-      return devotees.filter(devotee => 
+      return devotees.filter((devotee: Devotee) => 
         !devotee.leadershipRole || 
         !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
       );
@@ -383,7 +385,7 @@ export default function NamhattaForm({
   const validateMalaSenapotiDistrict = (devoteeId: number) => {
     const devotee = devotees.find(d => d.id === devoteeId);
     if (devotee?.presentAddress && address.district) {
-      const devoteeDistrict = devotee.presentAddress.districtNameEnglish;
+      const devoteeDistrict = devotee.presentAddress.district;
       if (devoteeDistrict !== address.district) {
         const proceed = window.confirm(
           `District Mismatch: This Mala Senapoti is from ${devoteeDistrict} district, but the Namhatta is in ${address.district} district. Are you sure you want to assign them?`
@@ -728,9 +730,9 @@ export default function NamhattaForm({
                     } />
                   </SelectTrigger>
                   <SelectContent>
-                    {districtSupervisors.map(supervisor => (
+                    {districtSupervisors.map((supervisor: any) => (
                       <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
-                        {supervisor.name || `Leader ${supervisor.id}`}
+                        {supervisor.fullName || supervisor.username || `Leader ${supervisor.id}`}
                         {supervisor.id === user?.id && " (You)"}
                       </SelectItem>
                     ))}
