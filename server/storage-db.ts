@@ -951,27 +951,41 @@ export class DatabaseStorage implements IStorage {
       const devoteeUpdates: Array<{ devoteeId: number; updates: { namhattaId: number; leadershipRole: string; updatedAt: Date } }> = [];
       
       // Helper function to add devotee update if ID exists
-      const addDevoteeUpdate = (devoteeId: number | null, leadershipRole: string) => {
+      // Only update devotee table if they're not already assigned to another namhatta
+      const addDevoteeUpdate = async (devoteeId: number | null, leadershipRole: string) => {
         if (devoteeId) {
-          devoteeUpdates.push({
-            devoteeId,
-            updates: {
-              namhattaId: namhatta.id,
-              leadershipRole,
-              updatedAt: new Date()
-            }
-          });
+          // Check if devotee is already assigned to another namhatta
+          const existingDevotee = await db.select({ namhattaId: devotees.namhattaId })
+            .from(devotees)
+            .where(eq(devotees.id, devoteeId))
+            .limit(1);
+          
+          // Only add update if devotee is not already assigned to another namhatta
+          if (existingDevotee.length === 0 || !existingDevotee[0].namhattaId) {
+            devoteeUpdates.push({
+              devoteeId,
+              updates: {
+                namhattaId: namhatta.id,
+                leadershipRole,
+                updatedAt: new Date()
+              }
+            });
+          } else {
+            console.log(`🔒 Devotee ${devoteeId} already assigned to namhatta ${existingDevotee[0].namhattaId}, skipping devotee table update`);
+          }
+          // Note: The namhatta table itself will always have the role assignment
+          // regardless of whether the devotee is assigned or not
         }
       };
       
       // Add leadership position updates using original IDs (before name mapping)
-      addDevoteeUpdate(originalDevoteeIds.malaSenapotiId, 'MALA_SENAPOTI');
-      addDevoteeUpdate(originalDevoteeIds.mahaChakraSenapotiId, 'MAHA_CHAKRA_SENAPOTI');
-      addDevoteeUpdate(originalDevoteeIds.chakraSenapotiId, 'CHAKRA_SENAPOTI');
-      addDevoteeUpdate(originalDevoteeIds.upaChakraSenapotiId, 'UPA_CHAKRA_SENAPOTI');
-      addDevoteeUpdate(originalDevoteeIds.secretaryId, 'SECRETARY');
-      addDevoteeUpdate(originalDevoteeIds.presidentId, 'PRESIDENT');
-      addDevoteeUpdate(originalDevoteeIds.accountantId, 'ACCOUNTANT');
+      await addDevoteeUpdate(originalDevoteeIds.malaSenapotiId, 'MALA_SENAPOTI');
+      await addDevoteeUpdate(originalDevoteeIds.mahaChakraSenapotiId, 'MAHA_CHAKRA_SENAPOTI');
+      await addDevoteeUpdate(originalDevoteeIds.chakraSenapotiId, 'CHAKRA_SENAPOTI');
+      await addDevoteeUpdate(originalDevoteeIds.upaChakraSenapotiId, 'UPA_CHAKRA_SENAPOTI');
+      await addDevoteeUpdate(originalDevoteeIds.secretaryId, 'SECRETARY');
+      await addDevoteeUpdate(originalDevoteeIds.presidentId, 'PRESIDENT');
+      await addDevoteeUpdate(originalDevoteeIds.accountantId, 'ACCOUNTANT');
       
       // Execute all devotee updates sequentially
       console.log('👥 Step 3: Processing devotee role assignments...');
