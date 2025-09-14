@@ -13,6 +13,9 @@ if (!JWT_SECRET) {
   console.error('Please add JWT_SECRET to your environment variables.');
   process.exit(1);
 }
+
+// Type assertion after null check - we know JWT_SECRET is defined here
+const jwtSecret: string = JWT_SECRET;
 const JWT_EXPIRES_IN = '1h'; // 1 hour
 
 export interface JWTPayload {
@@ -27,14 +30,18 @@ export interface JWTPayload {
 
 // Generate JWT token
 export function generateToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(payload, jwtSecret, { expiresIn: JWT_EXPIRES_IN });
 }
 
 // Verify JWT token
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    return decoded;
+    const decoded = jwt.verify(token, jwtSecret);
+    // Ensure the decoded token has the expected shape
+    if (typeof decoded === 'object' && decoded !== null && 'userId' in decoded) {
+      return decoded as JWTPayload;
+    }
+    return null;
   } catch (error) {
     return null;
   }

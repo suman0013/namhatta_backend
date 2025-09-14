@@ -218,6 +218,38 @@ export const jwtBlacklist = pgTable("jwt_blacklist", {
 export const insertDevoteeSchema = createInsertSchema(devotees).omit({
   id: true,
   createdAt: true,
+}).extend({
+  // Add proper type coercion for numeric fields that might come as strings from forms
+  reportingToDevoteeId: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return undefined;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? undefined : num;
+  }),
+  devotionalStatusId: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return undefined;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? undefined : num;
+  }),
+  harinamInitiationGurudevId: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return undefined;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? undefined : num;
+  }),
+  pancharatrikInitiationGurudevId: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return undefined;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? undefined : num;
+  }),
+  shraddhakutirId: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return undefined;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? undefined : num;
+  }),
+  namhattaId: z.union([z.string(), z.number()]).optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return undefined;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? undefined : num;
+  })
 });
 
 export const insertNamhattaSchema = createInsertSchema(namhattas).omit({
