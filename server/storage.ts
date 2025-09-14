@@ -273,13 +273,19 @@ export class MemStorage implements IStorage {
     this.namhattas.push(newNamhatta);
     
     // Update devotees assigned to leadership positions to link them to this namhatta
+    // Only update the devotee table if they are not already tagged to another namhatta
     const updateDevotee = (devoteeId: number | null, leadershipRole: string) => {
       if (devoteeId) {
         const devotee = this.devotees.find(d => d.id === devoteeId);
         if (devotee) {
-          devotee.namhattaId = newNamhatta.id;
-          devotee.leadershipRole = leadershipRole;
-          devotee.updatedAt = new Date();
+          // Only assign to the new namhatta if devotee is not already assigned to another namhatta
+          if (!devotee.namhattaId) {
+            devotee.namhattaId = newNamhatta.id;
+            devotee.leadershipRole = leadershipRole;
+            devotee.updatedAt = new Date();
+          }
+          // Note: The namhatta table itself will always have the role assignment
+          // regardless of whether the devotee is assigned or not
         }
       }
     };
