@@ -520,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const result = await storage.assignLeadershipRole(devoteeId, {
         leadershipRole,
-        reportingToDevoteeId: reportingToDevoteeId || null,
+        reportingToDevoteeId: reportingToDevoteeId || undefined,
         hasSystemAccess,
         appointedBy: req.user!.id, // Store user ID who made the appointment
         appointedDate: new Date().toISOString()
