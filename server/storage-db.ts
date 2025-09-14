@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs, users, userDistricts } from "@shared/schema";
 import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser } from "@shared/schema";
-import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull } from "drizzle-orm";
+import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull, isNull, not } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
 
@@ -2104,23 +2104,24 @@ export class DatabaseStorage implements IStorage {
 
       // Filter devotees who are available for officer positions
       const senapotiRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'];
+      const assignedIdsArray = Array.from(assignedDevoteeIds);
       
       const availableDevoteesResult = await db
         .select()
         .from(devotees)
         .where(and(
-          // Not assigned to any namhatta as a regular member
-          isNotNull(devotees.namhattaId) ? sql`FALSE` : sql`TRUE`,
+          // Not assigned to any namhatta as a regular member (namhattaId should be null)
+          isNull(devotees.namhattaId),
           // Don't have any senapoti leadership roles
-          devotees.leadershipRole ? 
-            sql`${devotees.leadershipRole} NOT IN (${senapotiRoles.map(() => '?').join(',')})` : 
-            sql`TRUE`
+          or(
+            isNull(devotees.leadershipRole),
+            not(inArray(devotees.leadershipRole, senapotiRoles))
+          ),
+          // Not currently assigned as Secretary, President, or Accountant
+          assignedIdsArray.length > 0 ? not(inArray(devotees.id, assignedIdsArray)) : sql`TRUE`
         ));
 
-      // Filter out devotees who are currently assigned as officers
-      return availableDevoteesResult.filter(devotee => 
-        !assignedDevoteeIds.has(devotee.id)
-      );
+      return availableDevoteesResult;
     } catch (error) {
       console.error('Error in getAvailableDevoteesForOfficerPositions:', error);
       throw error;
