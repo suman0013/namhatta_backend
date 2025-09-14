@@ -131,7 +131,7 @@ export default function NamhattaForm({
     district: "",
     subDistrict: "",
     village: "",
-    zipcode: "",
+    postalCode: "",
   });
 
   const [showAddressValidation, setShowAddressValidation] = useState(false);
@@ -380,13 +380,49 @@ export default function NamhattaForm({
     closeCreateDevoteeModal();
   };
 
-  // Helper function to get filtered devotees based on specific role
+  // Helper function to get filtered devotees based on specific role and hierarchy
   const getFilteredDevotees = (specificRole: string) => {
     if (['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(specificRole)) {
-      // For senapoti roles, show devotees who have that specific leadership role
-      return devotees.filter((devotee: Devotee) => 
+      // For senapoti roles, implement hierarchical filtering
+      const baseFilter = devotees.filter((devotee: Devotee) => 
         devotee.leadershipRole === specificRole
       );
+
+      switch (specificRole) {
+        case 'MALA_SENAPOTI':
+          // Show Mala Senapotis that report to the selected district supervisor
+          if (!selectedDistrictSupervisor) return [];
+          return baseFilter.filter((devotee: Devotee) => 
+            devotee.reportingToDevoteeId === selectedDistrictSupervisor
+          );
+
+        case 'MAHA_CHAKRA_SENAPOTI':
+          // Show Maha Chakra Senapotis that report to the selected Mala Senapoti
+          const selectedMalaSenapoti = watch('malaSenapotiId');
+          if (!selectedMalaSenapoti) return [];
+          return baseFilter.filter((devotee: Devotee) => 
+            devotee.reportingToDevoteeId === selectedMalaSenapoti
+          );
+
+        case 'CHAKRA_SENAPOTI':
+          // Show Chakra Senapotis that report to the selected Maha Chakra Senapoti
+          const selectedMahaChakraSenapoti = watch('mahaChakraSenapotiId');
+          if (!selectedMahaChakraSenapoti) return [];
+          return baseFilter.filter((devotee: Devotee) => 
+            devotee.reportingToDevoteeId === selectedMahaChakraSenapoti
+          );
+
+        case 'UPA_CHAKRA_SENAPOTI':
+          // Show Upa Chakra Senapotis that report to the selected Chakra Senapoti
+          const selectedChakraSenapoti = watch('chakraSenapotiId');
+          if (!selectedChakraSenapoti) return [];
+          return baseFilter.filter((devotee: Devotee) => 
+            devotee.reportingToDevoteeId === selectedChakraSenapoti
+          );
+
+        default:
+          return baseFilter;
+      }
     } else {
       // For other leadership roles (Secretary, President, Accountant)
       // Show devotees who have no leadership role OR who don't have senapoti roles
