@@ -575,7 +575,10 @@ export default function NamhattaForm({
         return false;
       
       case 1: // Address step
-        return !address.district;
+        // All address fields are required except landmark
+        const hasPostal = !!(address.zipcode && address.zipcode.trim()) || !!(address.postalCode && address.postalCode.trim());
+        return !address.country || !hasPostal || !address.state || 
+               !address.district || !address.subDistrict || !address.village;
       
       case 2: // District Supervisor step
         return !selectedDistrictSupervisor;
