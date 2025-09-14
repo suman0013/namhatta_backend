@@ -103,7 +103,7 @@ export default function NamhattaForm({
         secretaryId: z.number().nullable().optional(),
         presidentId: z.number().nullable().optional(),
         accountantId: z.number().nullable().optional(),
-        districtSupervisorId: z.number().nullable().optional(),
+        districtSupervisorId: z.number().nullable(),
       })
     ),
     defaultValues: {
@@ -222,13 +222,15 @@ export default function NamhattaForm({
   });
 
   // Query available devotees for officer positions (Secretary, President, Accountant)
+  // Only call this API when user reaches step 4 (Other Leadership Positions) or when editing
   const { data: availableOfficerDevotees = [], isLoading: availableOfficersLoading } = useQuery({
     queryKey: ["/api/devotees/available-officers"],
     queryFn: async () => {
       const response = await fetch('/api/devotees/available-officers');
       if (!response.ok) throw new Error('Failed to fetch available officers');
       return response.json();
-    }
+    },
+    enabled: isEditing || currentStep === 4 // Only call when in editing mode or on step 4 (Other Positions)
   });
 
   // Query district supervisors based on selected district
@@ -264,8 +266,9 @@ export default function NamhattaForm({
 
       // Auto-assign district supervisor (the current user)
       if (user.id) {
-        setSelectedDistrictSupervisor(user.id);
-        setValue("districtSupervisorId", user.id);
+        const supervisorId = typeof user.id === 'string' ? parseInt(user.id) : user.id;
+        setSelectedDistrictSupervisor(supervisorId);
+        setValue("districtSupervisorId", supervisorId, { shouldValidate: true });
       }
     }
   }, [user, userAddressDefaults, setValue]);
@@ -320,13 +323,15 @@ export default function NamhattaForm({
     // If there's only one district supervisor, auto-select them
     if (districtSupervisors.length === 1) {
       const supervisor = districtSupervisors[0];
-      setSelectedDistrictSupervisor(supervisor.id);
-      setValue("districtSupervisorId", supervisor.id);
+      const supervisorId = typeof supervisor.id === 'string' ? parseInt(supervisor.id) : supervisor.id;
+      setSelectedDistrictSupervisor(supervisorId);
+      setValue("districtSupervisorId", supervisorId, { shouldValidate: true });
     } else if (districtSupervisors.length > 1) {
       // If there are multiple, try to find the default supervisor, otherwise select the first one
       const defaultSupervisor = districtSupervisors.find(s => s.isDefault) || districtSupervisors[0];
-      setSelectedDistrictSupervisor(defaultSupervisor.id);
-      setValue("districtSupervisorId", defaultSupervisor.id);
+      const supervisorId = typeof defaultSupervisor.id === 'string' ? parseInt(defaultSupervisor.id) : defaultSupervisor.id;
+      setSelectedDistrictSupervisor(supervisorId);
+      setValue("districtSupervisorId", supervisorId, { shouldValidate: true });
     }
   }, [districtSupervisors, address.district, user?.role, isEditing, setValue]);
 
@@ -449,7 +454,8 @@ export default function NamhattaForm({
   };
 
   // Helper function to get devotees based on specific role using dynamic data
-  const getDevoteesByRole = (specificRole: string) => {
+  // For officer positions, filter out already selected officers to prevent duplicate assignments
+  const getDevoteesByRole = (specificRole: string, excludeCurrentField?: string) => {
     switch (specificRole) {
       case 'MALA_SENAPOTI':
         return malaSenapotis;
@@ -461,7 +467,38 @@ export default function NamhattaForm({
         return upaChakraSenapotis;
       default:
         // For other leadership roles (Secretary, President, Accountant)
-        return availableOfficerDevotees;
+        let devotees = [...availableOfficerDevotees];
+        
+        // In editing mode, merge currently selected officers into the list
+        // This ensures that currently assigned officers appear in the dropdown even if they're not "available"
+        if (isEditing && namhatta) {
+          const currentOfficers = [
+            namhatta.secretaryId && { field: 'secretaryId', devotee: { id: namhatta.secretaryId, legalName: namhatta.secretary || 'Unknown', initiatedName: '' }},
+            namhatta.presidentId && { field: 'presidentId', devotee: { id: namhatta.presidentId, legalName: namhatta.president || 'Unknown', initiatedName: '' }},
+            namhatta.accountantId && { field: 'accountantId', devotee: { id: namhatta.accountantId, legalName: namhatta.accountant || 'Unknown', initiatedName: '' }}
+          ].filter(Boolean);
+          
+          // Add missing current officers to the list
+          currentOfficers.forEach(officer => {
+            if (officer && !devotees.find(d => d.id === officer.devotee.id)) {
+              devotees.push(officer.devotee);
+            }
+          });
+        }
+        
+        // Filter out devotees that are already selected in other officer positions
+        const currentSecretaryId = watch('secretaryId');
+        const currentPresidentId = watch('presidentId');
+        const currentAccountantId = watch('accountantId');
+        
+        const selectedOfficerIds = new Set();
+        if (excludeCurrentField !== 'secretaryId' && currentSecretaryId) selectedOfficerIds.add(currentSecretaryId);
+        if (excludeCurrentField !== 'presidentId' && currentPresidentId) selectedOfficerIds.add(currentPresidentId);
+        if (excludeCurrentField !== 'accountantId' && currentAccountantId) selectedOfficerIds.add(currentAccountantId);
+        
+        return devotees.filter((devotee: any) => 
+          !selectedOfficerIds.has(devotee.id)
+        );
     }
   };
 
@@ -521,7 +558,7 @@ export default function NamhattaForm({
         ...data,
         address,
       };
-      return apiRequest("/api/namhattas", "POST", payload);
+      return apiRequest("POST", "/api/namhattas", payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
@@ -548,7 +585,7 @@ export default function NamhattaForm({
         ...data,
         address,
       };
-      return apiRequest(`/api/namhattas/${namhatta!.id}`, "PUT", payload);
+      return apiRequest("PUT", `/api/namhattas/${namhatta!.id}`, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/namhattas"] });
@@ -570,8 +607,14 @@ export default function NamhattaForm({
   });
 
   const onSubmit = (data: FormData) => {
+    console.log("Form submission started with data:", data);
+    console.log("Address:", address);
+    console.log("Selected district supervisor:", selectedDistrictSupervisor);
+    console.log("Form errors:", errors);
+
     // Validate address completion
     if (!address.country || !address.state || !address.district) {
+      console.log("Address validation failed");
       setShowAddressValidation(true);
       toast({
         title: "Validation Error",
@@ -583,6 +626,7 @@ export default function NamhattaForm({
 
     // Validate district supervisor selection
     if (!selectedDistrictSupervisor || !data.districtSupervisorId) {
+      console.log("District supervisor validation failed");
       toast({
         title: "Validation Error",
         description: "Please select a District Supervisor",
@@ -593,6 +637,7 @@ export default function NamhattaForm({
 
     // Validate required Secretary selection  
     if (!data.secretaryId) {
+      console.log("Secretary validation failed");
       toast({
         title: "Validation Error",
         description: "Please select a Secretary - this role is required",
@@ -601,6 +646,7 @@ export default function NamhattaForm({
       return;
     }
 
+    console.log("All validations passed, submitting...");
     if (isEditing) {
       updateMutation.mutate(data);
     } else {
@@ -678,7 +724,7 @@ export default function NamhattaForm({
     required: boolean = false
   ) => {
     const currentValue = watch(fieldName);
-    const filteredDevotees = getDevoteesByRole(role);
+    const filteredDevotees = getDevoteesByRole(role, fieldName.toString());
 
     return (
       <div className="space-y-2">
@@ -696,7 +742,8 @@ export default function NamhattaForm({
                 }
               }
               
-              setValue(fieldName, value && value !== "none" ? parseInt(value) : null);
+              const numericValue = value && value !== "none" ? parseInt(value) : null;
+              setValue(fieldName, numericValue, { shouldValidate: true });
               
               // Cascade clearing: Clear dependent senapoti selections when parent changes
               if (role === 'MALA_SENAPOTI') {
@@ -885,7 +932,7 @@ export default function NamhattaForm({
                   onValueChange={(value) => {
                     const supervisorId = parseInt(value);
                     setSelectedDistrictSupervisor(supervisorId);
-                    setValue("districtSupervisorId", supervisorId);
+                    setValue("districtSupervisorId", supervisorId, { shouldValidate: true });
                   }}
                   disabled={supervisorsLoading || (user?.role === 'DISTRICT_SUPERVISOR')}
                 >
@@ -1003,6 +1050,13 @@ export default function NamhattaForm({
                   type="submit"
                   disabled={isLoading}
                   data-testid="button-submit"
+                  onClick={() => {
+                    console.log("Create Namhatta button clicked!");
+                    console.log("Form errors:", errors);
+                    console.log("Form values:", watch());
+                    console.log("Address:", address);
+                    console.log("District supervisor:", selectedDistrictSupervisor);
+                  }}
                 >
                   {isLoading ? "Creating..." : "Create Namhatta"}
                 </Button>
