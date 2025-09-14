@@ -385,6 +385,27 @@ export default function EnhancedDevoteeForm({
     }
   };
 
+  const handleBatchAddressChange = (addressFields: Partial<Address>, isPresent: boolean) => {
+    if (isPresent) {
+      const newAddress = { ...presentAddress, ...addressFields };
+      setPresentAddress(newAddress);
+      setValue("presentAddress", newAddress);
+      
+      if (sameAsPresentAddress) {
+        setPermanentAddress(newAddress);
+        setValue("permanentAddress", newAddress);
+      }
+    } else {
+      const newAddress = { ...permanentAddress, ...addressFields };
+      setPermanentAddress(newAddress);
+      setValue("permanentAddress", newAddress);
+    }
+    
+    if (showValidation) {
+      validateAddresses();
+    }
+  };
+
   const addDevotionalCourse = () => {
     setDevotionalCourses([...devotionalCourses, { name: "", date: "", institute: "" }]);
   };
@@ -629,6 +650,7 @@ export default function EnhancedDevoteeForm({
               title="Present Address"
               address={presentAddress}
               onAddressChange={(field, value) => handleAddressChange(field, value, true)}
+              onBatchAddressChange={(addressFields) => handleBatchAddressChange(addressFields, true)}
               required={true}
               showValidation={showValidation}
             />
@@ -660,6 +682,7 @@ export default function EnhancedDevoteeForm({
               title="Permanent Address"
               address={permanentAddress}
               onAddressChange={(field, value) => handleAddressChange(field, value, false)}
+              onBatchAddressChange={(addressFields) => handleBatchAddressChange(addressFields, false)}
               required={true}
               showValidation={showValidation}
               disabled={sameAsPresentAddress}
