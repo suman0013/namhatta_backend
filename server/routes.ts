@@ -491,6 +491,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get senapotis by type and reporting devotee ID (dynamic fetching for efficiency)
+  app.get("/api/senapoti/:type/:reportingId", authenticateJWT, async (req, res) => {
+    try {
+      const { type, reportingId } = req.params;
+      
+      // Validate type parameter (senapoti roles)
+      const validSenapotiTypes = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'];
+      if (!validSenapotiTypes.includes(type)) {
+        return res.status(400).json({ 
+          error: 'Invalid senapoti type', 
+          details: `Type must be one of: ${validSenapotiTypes.join(', ')}` 
+        });
+      }
+      
+      // Validate reportingId parameter
+      const reportingDevoteeId = parseInt(reportingId);
+      if (isNaN(reportingDevoteeId) || reportingDevoteeId <= 0) {
+        return res.status(400).json({ error: "Invalid reporting devotee ID" });
+      }
+      
+      const senapotis = await storage.getSenapotisByTypeAndReporting(type, reportingDevoteeId);
+      res.json(senapotis);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Assign leadership role to devotee (Admin/Office only)
   app.post("/api/devotees/:id/assign-role", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'OFFICE']), async (req, res) => {
     try {
