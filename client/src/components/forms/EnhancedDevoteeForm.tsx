@@ -135,14 +135,18 @@ export default function EnhancedDevoteeForm({
   // Pre-fill district information for Mala Senapoti
   useEffect(() => {
     if (preAssignedRole === 'MALA_SENAPOTI' && districtInfo) {
-      const newPresentAddress = { ...presentAddress, ...districtInfo };
-      const newPermanentAddress = { ...permanentAddress, ...districtInfo };
-      setPresentAddress(newPresentAddress);
-      setPermanentAddress(newPermanentAddress);
-      setValue("presentAddress", newPresentAddress);
-      setValue("permanentAddress", newPermanentAddress);
+      // Only update if the current addresses don't already have the district info
+      const needsUpdate = !presentAddress.country || !presentAddress.state || !presentAddress.district;
+      if (needsUpdate) {
+        const newPresentAddress = { ...presentAddress, ...districtInfo };
+        const newPermanentAddress = { ...permanentAddress, ...districtInfo };
+        setPresentAddress(newPresentAddress);
+        setPermanentAddress(newPermanentAddress);
+        setValue("presentAddress", newPresentAddress);
+        setValue("permanentAddress", newPermanentAddress);
+      }
     }
-  }, [preAssignedRole, districtInfo, setValue, presentAddress, permanentAddress]);
+  }, [preAssignedRole, districtInfo, setValue]);
 
   // Data queries
   const { data: statuses } = useQuery({
@@ -663,7 +667,7 @@ export default function EnhancedDevoteeForm({
               <Label htmlFor="devotionalStatusId">Devotional Status</Label>
               <Select 
                 value={watch("devotionalStatusId")?.toString() || ""} 
-                onValueChange={(value) => setValue("devotionalStatusId", value ? parseInt(value) : undefined)}
+                onValueChange={(value) => setValue("devotionalStatusId", value && value !== "none" ? parseInt(value) : undefined)}
               >
                 <SelectTrigger data-testid="select-devotional-status">
                   <SelectValue placeholder="Select status" />
@@ -685,7 +689,88 @@ export default function EnhancedDevoteeForm({
                 id="initiatedName"
                 data-testid="input-initiated-name"
                 {...register("initiatedName")}
+                placeholder="Enter initiated name"
               />
+            </div>
+
+            <div>
+              <Label htmlFor="harinamInitiationGurudevId">Harinama Initiation Gurudev</Label>
+              <Select 
+                value={watch("harinamInitiationGurudevId")?.toString() || ""} 
+                onValueChange={(value) => setValue("harinamInitiationGurudevId", value && value !== "none" ? parseInt(value) : undefined)}
+              >
+                <SelectTrigger data-testid="select-harinama-gurudev">
+                  <SelectValue placeholder="Select Harinama Gurudev" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {gurudevs?.map((gurudev) => (
+                    <SelectItem key={gurudev.id} value={gurudev.id.toString()}>
+                      {gurudev.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="harinamDate">Harinama Date</Label>
+              <Input
+                id="harinamDate"
+                data-testid="input-harinama-date"
+                type="date"
+                {...register("harinamDate")}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="pancharatrikInitiationGurudevId">Pancharatrik Initiation Gurudev</Label>
+              <Select 
+                value={watch("pancharatrikInitiationGurudevId")?.toString() || ""} 
+                onValueChange={(value) => setValue("pancharatrikInitiationGurudevId", value && value !== "none" ? parseInt(value) : undefined)}
+              >
+                <SelectTrigger data-testid="select-pancharatrik-gurudev">
+                  <SelectValue placeholder="Select Pancharatrik Gurudev" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {gurudevs?.map((gurudev) => (
+                    <SelectItem key={gurudev.id} value={gurudev.id.toString()}>
+                      {gurudev.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="pancharatrikDate">Pancharatrik Date</Label>
+              <Input
+                id="pancharatrikDate"
+                data-testid="input-pancharatrik-date"
+                type="date"
+                {...register("pancharatrikDate")}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
+              <Select 
+                value={watch("shraddhakutirId")?.toString() || ""} 
+                onValueChange={(value) => setValue("shraddhakutirId", value && value !== "none" ? parseInt(value) : undefined)}
+              >
+                <SelectTrigger data-testid="select-shraddhakutir">
+                  <SelectValue placeholder="Select Shraddhakutir" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {shraddhakutirs?.map((shraddhakutir) => (
+                    <SelectItem key={shraddhakutir.id} value={shraddhakutir.id.toString()}>
+                      {shraddhakutir.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
