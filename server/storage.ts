@@ -271,6 +271,28 @@ export class MemStorage implements IStorage {
       updatedAt: new Date()
     } as Namhatta;
     this.namhattas.push(newNamhatta);
+    
+    // Update devotees assigned to leadership positions to link them to this namhatta
+    const updateDevotee = (devoteeId: number | null, leadershipRole: string) => {
+      if (devoteeId) {
+        const devotee = this.devotees.find(d => d.id === devoteeId);
+        if (devotee) {
+          devotee.namhattaId = newNamhatta.id;
+          devotee.leadershipRole = leadershipRole;
+          devotee.updatedAt = new Date();
+        }
+      }
+    };
+    
+    // Update all assigned devotees
+    updateDevotee(namhatta.malaSenapotiId, 'MALA_SENAPOTI');
+    updateDevotee(namhatta.mahaChakraSenapotiId, 'MAHA_CHAKRA_SENAPOTI');
+    updateDevotee(namhatta.chakraSenapotiId, 'CHAKRA_SENAPOTI');
+    updateDevotee(namhatta.upaChakraSenapotiId, 'UPA_CHAKRA_SENAPOTI');
+    updateDevotee(namhatta.secretaryId, 'SECRETARY');
+    updateDevotee(namhatta.presidentId, 'PRESIDENT');
+    updateDevotee(namhatta.accountantId, 'ACCOUNTANT');
+    
     return newNamhatta;
   }
 

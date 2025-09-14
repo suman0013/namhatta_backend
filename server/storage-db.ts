@@ -908,6 +908,39 @@ export class DatabaseStorage implements IStorage {
         });
       }
       
+      // Update devotees assigned to leadership positions to link them to this namhatta
+      const devoteeUpdates: Array<{ devoteeId: number; updates: { namhattaId: number; leadershipRole: string; updatedAt: Date } }> = [];
+      
+      // Helper function to add devotee update if ID exists
+      const addDevoteeUpdate = (devoteeId: number | null, leadershipRole: string) => {
+        if (devoteeId) {
+          devoteeUpdates.push({
+            devoteeId,
+            updates: {
+              namhattaId: namhatta.id,
+              leadershipRole,
+              updatedAt: new Date()
+            }
+          });
+        }
+      };
+      
+      // Add leadership position updates
+      addDevoteeUpdate(inputData.malaSenapotiId, 'MALA_SENAPOTI');
+      addDevoteeUpdate(inputData.mahaChakraSenapotiId, 'MAHA_CHAKRA_SENAPOTI');
+      addDevoteeUpdate(inputData.chakraSenapotiId, 'CHAKRA_SENAPOTI');
+      addDevoteeUpdate(inputData.upaChakraSenapotiId, 'UPA_CHAKRA_SENAPOTI');
+      addDevoteeUpdate(inputData.secretaryId, 'SECRETARY');
+      addDevoteeUpdate(inputData.presidentId, 'PRESIDENT');
+      addDevoteeUpdate(inputData.accountantId, 'ACCOUNTANT');
+      
+      // Execute all devotee updates
+      for (const update of devoteeUpdates) {
+        await db.update(devotees)
+          .set(update.updates)
+          .where(eq(devotees.id, update.devoteeId));
+      }
+      
       // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
       return {
         ...namhatta,
