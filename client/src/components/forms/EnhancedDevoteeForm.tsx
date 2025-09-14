@@ -631,7 +631,6 @@ export default function EnhancedDevoteeForm({
               onAddressChange={(field, value) => handleAddressChange(field, value, true)}
               required={true}
               showValidation={showValidation}
-              disabled={preAssignedRole === 'MALA_SENAPOTI' && !!districtInfo}
             />
           </div>
 
@@ -663,7 +662,7 @@ export default function EnhancedDevoteeForm({
               onAddressChange={(field, value) => handleAddressChange(field, value, false)}
               required={true}
               showValidation={showValidation}
-              disabled={sameAsPresentAddress || (preAssignedRole === 'MALA_SENAPOTI' && !!districtInfo)}
+              disabled={sameAsPresentAddress}
             />
           </div>
         </CardContent>
