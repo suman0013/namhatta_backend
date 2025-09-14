@@ -697,13 +697,14 @@ export class DatabaseStorage implements IStorage {
       createdAt: namhattas.createdAt,
       updatedAt: namhattas.updatedAt,
       // Include devotee names for leadership positions for backward compatibility
-      malaSenapotiName: sql`mala_devotee.name`,
-      mahaChakraSenapotiName: sql`maha_chakra_devotee.name`,
-      chakraSenapotiName: sql`chakra_devotee.name`,
-      upaChakraSenapotiName: sql`upa_chakra_devotee.name`,
-      secretaryName: sql`secretary_devotee.name`,
-      presidentName: sql`president_devotee.name`,
-      accountantName: sql`accountant_devotee.name`
+      // Use COALESCE to prefer spiritual name but fallback to legal name if null
+      malaSenapotiName: sql`COALESCE(mala_devotee.name, mala_devotee.legal_name)`,
+      mahaChakraSenapotiName: sql`COALESCE(maha_chakra_devotee.name, maha_chakra_devotee.legal_name)`,
+      chakraSenapotiName: sql`COALESCE(chakra_devotee.name, chakra_devotee.legal_name)`,
+      upaChakraSenapotiName: sql`COALESCE(upa_chakra_devotee.name, upa_chakra_devotee.legal_name)`,
+      secretaryName: sql`COALESCE(secretary_devotee.name, secretary_devotee.legal_name)`,
+      presidentName: sql`COALESCE(president_devotee.name, president_devotee.legal_name)`,
+      accountantName: sql`COALESCE(accountant_devotee.name, accountant_devotee.legal_name)`
     }).from(namhattas)
       .leftJoin(sql`${devotees} as mala_devotee`, eq(namhattas.malaSenapotiId, sql`mala_devotee.id`))
       .leftJoin(sql`${devotees} as maha_chakra_devotee`, eq(namhattas.mahaChakraSenapotiId, sql`maha_chakra_devotee.id`))
