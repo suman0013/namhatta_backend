@@ -362,6 +362,16 @@ export default function DevoteeForm({ devotee, onClose, onSuccess, namhattaId }:
       errors.push("Devotional Status");
     }
     
+    if (!data.dob) {
+      setError("dob", { type: "required", message: "Date of Birth is required" });
+      errors.push("Date of Birth");
+    }
+    
+    if (!data.gender) {
+      setError("gender", { type: "required", message: "Gender is required" });
+      errors.push("Gender");
+    }
+    
     // Check present address
     if (!presentAddress.country) {
       newAddressErrors["presentAddress.country"] = "Country is required";

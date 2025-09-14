@@ -131,6 +131,10 @@ export default function EnhancedDevoteeForm({
   const [sameAsPresentAddress, setSameAsPresentAddress] = useState(false);
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
   const [showValidation, setShowValidation] = useState(false);
+  const [showShraddhakutirForm, setShowShraddhakutirForm] = useState(false);
+  const [newShraddhakutir, setNewShraddhakutir] = useState({
+    name: ""
+  });
 
   // Pre-fill district information for Mala Senapoti
   useEffect(() => {
@@ -234,6 +238,56 @@ export default function EnhancedDevoteeForm({
     },
   });
 
+  const createShraddhakutirMutation = useMutation({
+    mutationFn: (data: any) => api.createShraddhakutir(data),
+    onSuccess: (newShraddhakutir) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shraddhakutirs", permanentAddress.district] });
+      setValue("shraddhakutirId", newShraddhakutir.id);
+      setShowShraddhakutirForm(false);
+      setNewShraddhakutir({ name: "" });
+      toast({
+        title: "Success",
+        description: "Shraddhakutir created successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create Shraddhakutir",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateShraddhakutir = () => {
+    if (!newShraddhakutir.name) {
+      toast({
+        title: "Error",
+        description: "Please enter a name for the Shraddhakutir",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const permanentDistrict = permanentAddress.district;
+    if (!permanentDistrict) {
+      toast({
+        title: "Error",
+        description: "Please select permanent address district first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const shraddhakutirData = {
+      name: newShraddhakutir.name,
+      districtCode: permanentDistrict
+    };
+    
+    createShraddhakutirMutation.mutate(shraddhakutirData);
+  };
+
   const validateAddresses = () => {
     const errors: Record<string, string> = {};
     
@@ -251,11 +305,41 @@ export default function EnhancedDevoteeForm({
 
   const onSubmit = async (data: FormData) => {
     setShowValidation(true);
+    
+    // Clear previous errors
+    clearErrors();
+    
+    // Validate required fields
+    let hasErrors = false;
+    
+    if (!data.legalName?.trim()) {
+      setError("legalName", { type: "required", message: "Legal name is required" });
+      hasErrors = true;
+    }
+    
+    if (!data.dob) {
+      setError("dob", { type: "required", message: "Date of Birth is required" });
+      hasErrors = true;
+    }
+    
+    if (!data.gender) {
+      setError("gender", { type: "required", message: "Gender is required" });
+      hasErrors = true;
+    }
+    
+    if (!data.devotionalStatusId) {
+      setError("devotionalStatusId", { type: "required", message: "Devotional Status is required" });
+      hasErrors = true;
+    }
 
     if (!validateAddresses()) {
+      hasErrors = true;
+    }
+    
+    if (hasErrors) {
       toast({
         title: "Error",
-        description: "Please fill in all required address fields",
+        description: "Please fill in all required fields",
         variant: "destructive",
         duration: 3000,
       });
@@ -356,30 +440,31 @@ export default function EnhancedDevoteeForm({
               )}
             </div>
 
-            <div>
-              <Label htmlFor="name">Spiritual Name</Label>
-              <Input
-                id="name"
-                data-testid="input-spiritual-name"
-                {...register("name")}
-                placeholder="Initiated or spiritual name"
-              />
-            </div>
 
             <div>
-              <Label htmlFor="dob">Date of Birth</Label>
+              <Label htmlFor="dob">Date of Birth *</Label>
               <Input
                 id="dob"
                 data-testid="input-dob"
                 type="date"
-                {...register("dob")}
+                {...register("dob", { required: "Date of Birth is required" })}
+                className={errors.dob ? "border-red-500" : ""}
               />
+              {errors.dob && (
+                <span className="text-red-500 text-sm">{errors.dob.message}</span>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="gender">Gender</Label>
-              <Select value={watch("gender")} onValueChange={(value) => setValue("gender", value)}>
-                <SelectTrigger data-testid="select-gender">
+              <Label htmlFor="gender">Gender *</Label>
+              <Select 
+                value={watch("gender")} 
+                onValueChange={(value) => {
+                  setValue("gender", value);
+                  clearErrors("gender");
+                }}
+              >
+                <SelectTrigger data-testid="select-gender" className={errors.gender ? "border-red-500" : ""}>
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,6 +473,9 @@ export default function EnhancedDevoteeForm({
                   <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.gender && (
+                <span className="text-red-500 text-sm">{errors.gender.message}</span>
+              )}
             </div>
 
             <div>
@@ -407,6 +495,25 @@ export default function EnhancedDevoteeForm({
                 data-testid="input-phone"
                 {...register("phone")}
               />
+            </div>
+            
+            <div>
+              <Label htmlFor="bloodGroup">Blood Group</Label>
+              <Select value={watch("bloodGroup")} onValueChange={(value) => setValue("bloodGroup", value)}>
+                <SelectTrigger data-testid="select-blood-group">
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A+">A+</SelectItem>
+                  <SelectItem value="A-">A-</SelectItem>
+                  <SelectItem value="B+">B+</SelectItem>
+                  <SelectItem value="B-">B-</SelectItem>
+                  <SelectItem value="AB+">AB+</SelectItem>
+                  <SelectItem value="AB-">AB-</SelectItem>
+                  <SelectItem value="O+">O+</SelectItem>
+                  <SelectItem value="O-">O-</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>
@@ -462,25 +569,6 @@ export default function EnhancedDevoteeForm({
                 placeholder="Enter husband's name (if applicable)"
               />
             </div>
-
-            <div>
-              <Label htmlFor="bloodGroup">Blood Group</Label>
-              <Select value={watch("bloodGroup")} onValueChange={(value) => setValue("bloodGroup", value)}>
-                <SelectTrigger data-testid="select-blood-group">
-                  <SelectValue placeholder="Select blood group" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="A+">A+</SelectItem>
-                  <SelectItem value="A-">A-</SelectItem>
-                  <SelectItem value="B+">B+</SelectItem>
-                  <SelectItem value="B-">B-</SelectItem>
-                  <SelectItem value="AB+">AB+</SelectItem>
-                  <SelectItem value="AB-">AB-</SelectItem>
-                  <SelectItem value="O+">O+</SelectItem>
-                  <SelectItem value="O-">O-</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -512,25 +600,21 @@ export default function EnhancedDevoteeForm({
               />
             </div>
           </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <Label htmlFor="additionalComments">Additional Comments</Label>
+              <textarea
+                id="additionalComments"
+                data-testid="textarea-additional-comments"
+                {...register("additionalComments")}
+                placeholder="Enter any additional comments or notes"
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical min-h-[80px]"
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Additional Comments */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Additional Comments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Label htmlFor="additionalComments">Comments</Label>
-          <textarea
-            id="additionalComments"
-            data-testid="textarea-additional-comments"
-            {...register("additionalComments")}
-            placeholder="Enter any additional comments or notes"
-            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical min-h-[100px]"
-          />
-        </CardContent>
-      </Card>
 
       {/* Address Information */}
       <Card>
@@ -545,6 +629,7 @@ export default function EnhancedDevoteeForm({
               title="Present Address"
               address={presentAddress}
               onAddressChange={(field, value) => handleAddressChange(field, value, true)}
+              required={true}
               showValidation={showValidation}
               disabled={preAssignedRole === 'MALA_SENAPOTI' && !!districtInfo}
             />
@@ -576,6 +661,7 @@ export default function EnhancedDevoteeForm({
               title="Permanent Address"
               address={permanentAddress}
               onAddressChange={(field, value) => handleAddressChange(field, value, false)}
+              required={true}
               showValidation={showValidation}
               disabled={sameAsPresentAddress || (preAssignedRole === 'MALA_SENAPOTI' && !!districtInfo)}
             />
@@ -664,12 +750,15 @@ export default function EnhancedDevoteeForm({
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="devotionalStatusId">Devotional Status</Label>
+              <Label htmlFor="devotionalStatusId">Devotional Status *</Label>
               <Select 
                 value={watch("devotionalStatusId")?.toString() || ""} 
-                onValueChange={(value) => setValue("devotionalStatusId", value && value !== "none" ? parseInt(value) : undefined)}
+                onValueChange={(value) => {
+                  setValue("devotionalStatusId", value && value !== "none" ? parseInt(value) : undefined);
+                  clearErrors("devotionalStatusId");
+                }}
               >
-                <SelectTrigger data-testid="select-devotional-status">
+                <SelectTrigger data-testid="select-devotional-status" className={errors.devotionalStatusId ? "border-red-500" : ""}>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -681,6 +770,9 @@ export default function EnhancedDevoteeForm({
                   ))}
                 </SelectContent>
               </Select>
+              {errors.devotionalStatusId && (
+                <span className="text-red-500 text-sm">{errors.devotionalStatusId.message}</span>
+              )}
             </div>
 
             <div>
@@ -755,22 +847,54 @@ export default function EnhancedDevoteeForm({
 
             <div>
               <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
-              <Select 
-                value={watch("shraddhakutirId")?.toString() || ""} 
-                onValueChange={(value) => setValue("shraddhakutirId", value && value !== "none" ? parseInt(value) : undefined)}
-              >
-                <SelectTrigger data-testid="select-shraddhakutir">
-                  <SelectValue placeholder="Select Shraddhakutir" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {shraddhakutirs?.map((shraddhakutir) => (
-                    <SelectItem key={shraddhakutir.id} value={shraddhakutir.id.toString()}>
-                      {shraddhakutir.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select 
+                  value={watch("shraddhakutirId")?.toString() || ""} 
+                  onValueChange={(value) => setValue("shraddhakutirId", value && value !== "none" ? parseInt(value) : undefined)}
+                >
+                  <SelectTrigger data-testid="select-shraddhakutir" className="flex-1">
+                    <SelectValue placeholder="Select Shraddhakutir" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {shraddhakutirs?.map((shraddhakutir) => (
+                      <SelectItem key={shraddhakutir.id} value={shraddhakutir.id.toString()}>
+                        {shraddhakutir.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {permanentAddress.district ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowShraddhakutirForm(true)}
+                    className="shrink-0"
+                    title="Add new Shraddhakutir"
+                    data-testid="button-create-shraddhakutir"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="shrink-0"
+                    title="Please fill permanent address district first"
+                    data-testid="button-create-shraddhakutir-disabled"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              {!permanentAddress.district && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Fill permanent address district to add new Shraddhakutir
+                </p>
+              )}
             </div>
           </div>
         </CardContent>
@@ -801,21 +925,125 @@ export default function EnhancedDevoteeForm({
 
   if (isModal) {
     return (
-      <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{modalTitle}</DialogTitle>
-            {preAssignedRole && (
+      <>
+        <Dialog open={true} onOpenChange={onClose}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{modalTitle}</DialogTitle>
+              {preAssignedRole && (
+                <DialogDescription>
+                  Creating a new devotee for the {preAssignedRole.replace('_', ' ')} role
+                </DialogDescription>
+              )}
+            </DialogHeader>
+            <FormContent />
+          </DialogContent>
+        </Dialog>
+
+        {/* Add New Shraddhakutir Dialog */}
+        <Dialog open={showShraddhakutirForm} onOpenChange={setShowShraddhakutirForm}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Shraddhakutir</DialogTitle>
               <DialogDescription>
-                Creating a new devotee for the {preAssignedRole.replace('_', ' ')} role
+                Create a new Shraddhakutir to assign to this devotee. The region will be automatically set based on the permanent address district.
               </DialogDescription>
-            )}
-          </DialogHeader>
-          <FormContent />
-        </DialogContent>
-      </Dialog>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="shraddhakutir-name">Name *</Label>
+                <Input
+                  id="shraddhakutir-name"
+                  value={newShraddhakutir.name}
+                  onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, name: e.target.value })}
+                  placeholder="Enter Shraddhakutir name"
+                  data-testid="input-new-shraddhakutir-name"
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                District: <strong>{permanentAddress.district}</strong>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowShraddhakutirForm(false);
+                    setNewShraddhakutir({ name: "" });
+                  }}
+                  disabled={createShraddhakutirMutation.isPending}
+                  data-testid="button-cancel-new-shraddhakutir"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleCreateShraddhakutir}
+                  disabled={createShraddhakutirMutation.isPending}
+                  data-testid="button-save-new-shraddhakutir"
+                >
+                  {createShraddhakutirMutation.isPending ? "Creating..." : "Create Shraddhakutir"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
-  return <FormContent />;
+  return (
+    <>
+      <FormContent />
+      
+      {/* Add New Shraddhakutir Dialog */}
+      <Dialog open={showShraddhakutirForm} onOpenChange={setShowShraddhakutirForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Shraddhakutir</DialogTitle>
+            <DialogDescription>
+              Create a new Shraddhakutir to assign to this devotee. The region will be automatically set based on the permanent address district.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="shraddhakutir-name">Name *</Label>
+              <Input
+                id="shraddhakutir-name"
+                value={newShraddhakutir.name}
+                onChange={(e) => setNewShraddhakutir({ ...newShraddhakutir, name: e.target.value })}
+                placeholder="Enter Shraddhakutir name"
+                data-testid="input-new-shraddhakutir-name"
+              />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              District: <strong>{permanentAddress.district}</strong>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowShraddhakutirForm(false);
+                  setNewShraddhakutir({ name: "" });
+                }}
+                disabled={createShraddhakutirMutation.isPending}
+                data-testid="button-cancel-new-shraddhakutir"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleCreateShraddhakutir}
+                disabled={createShraddhakutirMutation.isPending}
+                data-testid="button-save-new-shraddhakutir"
+              >
+                {createShraddhakutirMutation.isPending ? "Creating..." : "Create Shraddhakutir"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 }
