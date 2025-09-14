@@ -723,7 +723,7 @@ export default function NamhattaForm({
               <SelectItem value="none">None</SelectItem>
               {filteredDevotees.map((devotee: any) => (
                 <SelectItem key={devotee.id} value={devotee.id.toString()}>
-                  {devotee.name || devotee.legalName} ({devotee.legalName})
+                  {devotee.initiatedName ? `${devotee.legalName}::${devotee.initiatedName}` : devotee.legalName}
                 </SelectItem>
               ))}
             </SelectContent>
