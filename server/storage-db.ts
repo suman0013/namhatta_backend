@@ -872,6 +872,11 @@ export class DatabaseStorage implements IStorage {
     // Extract address information from the request data
     const { address, landmark, ...inputData } = namhattaData;
     
+    // Validate required field
+    if (!inputData.districtSupervisorId) {
+      throw new Error('districtSupervisorId is required for namhatta creation');
+    }
+    
     // Store original devotee IDs before mapping to names
     const originalDevoteeIds = {
       malaSenapotiId: inputData.malaSenapotiId,
@@ -884,6 +889,7 @@ export class DatabaseStorage implements IStorage {
     };
     
     console.log('Creating namhatta with devotee IDs:', originalDevoteeIds);
+    console.log('districtSupervisorId:', inputData.districtSupervisorId);
     
     // Use the input data directly since database schema expects ID fields, not names
     const namhattaDetails = inputData;
@@ -896,10 +902,22 @@ export class DatabaseStorage implements IStorage {
       }
     }
     
-    try {
-      // Create the namhatta record first
-      const result = await db.insert(namhattas).values(namhattaDetails).returning();
-      const namhatta = result[0];
+    // Wrap everything in a transaction for atomic operation
+    return await db.transaction(async (tx) => {
+      try {
+        // Debug: Log what's being inserted into namhatta table
+        console.log('namhattaDetails being inserted into database:', namhattaDetails);
+        console.log('namhattaDetails type and structure:', typeof namhattaDetails, Object.keys(namhattaDetails || {}));
+        
+        // Create the namhatta record first
+        const result = await tx.insert(namhattas).values(namhattaDetails).returning();
+        console.log('Database insert result:', result);
+        const namhatta = result[0];
+        console.log('Created namhatta record:', namhatta);
+        
+        if (!namhatta) {
+          throw new Error('Failed to create namhatta record');
+        }
       
       // If address information is provided, store it in normalized tables
       if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
@@ -914,7 +932,7 @@ export class DatabaseStorage implements IStorage {
         });
         
         // Link namhatta to address with landmark
-        await db.insert(namhattaAddresses).values({
+        await tx.insert(namhattaAddresses).values({
           namhattaId: namhatta.id,
           addressId: addressId,
           landmark: landmark || address.landmark
@@ -947,11 +965,11 @@ export class DatabaseStorage implements IStorage {
       addDevoteeUpdate(originalDevoteeIds.presidentId, 'PRESIDENT');
       addDevoteeUpdate(originalDevoteeIds.accountantId, 'ACCOUNTANT');
       
-      // Execute all devotee updates
+      // Execute all devotee updates within the transaction
       console.log('Devotee updates to execute:', devoteeUpdates);
       for (const update of devoteeUpdates) {
         console.log(`Updating devotee ${update.devoteeId} with role ${update.updates.leadershipRole} for namhatta ${update.updates.namhattaId}`);
-        const result = await db.update(devotees)
+        const result = await tx.update(devotees)
           .set(update.updates)
           .where(eq(devotees.id, update.devoteeId))
           .returning({ id: devotees.id, leadershipRole: devotees.leadershipRole, namhattaId: devotees.namhattaId });
@@ -964,13 +982,15 @@ export class DatabaseStorage implements IStorage {
         registrationNo: namhatta.registrationNo || null,
         registrationDate: namhatta.registrationDate || undefined
       } as Namhatta;
-    } catch (error: any) {
-      // Handle database unique constraint violation
-      if (error.message && error.message.includes('unique constraint') && error.message.includes('code')) {
-        throw new Error(`Namhatta code '${namhattaDetails.code}' already exists. Please choose a unique code.`);
+      } catch (error: any) {
+        console.error('Error in namhatta creation transaction:', error.message, error.stack);
+        // Handle database unique constraint violation
+        if (error.message && error.message.includes('unique constraint') && error.message.includes('code')) {
+          throw new Error(`Namhatta code '${namhattaDetails.code}' already exists. Please choose a unique code.`);
+        }
+        throw error;
       }
-      throw error;
-    }
+    });
   }
 
   async updateNamhatta(id: number, namhattaData: any): Promise<Namhatta> {
