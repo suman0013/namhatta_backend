@@ -319,6 +319,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
+  // Get available devotees for officer positions (Secretary, President, Accountant)
+  app.get("/api/devotees/available-officers", authenticateJWT, async (req, res) => {
+    try {
+      const availableDevotees = await storage.getAvailableDevoteesForOfficerPositions();
+      res.json(availableDevotees);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.get("/api/devotees/:id", authenticateJWT, async (req, res) => {
     const id = parseInt(req.params.id);
     const devotee = await storage.getDevotee(id);
@@ -490,6 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
 
   // Get senapotis by type and reporting devotee ID (dynamic fetching for efficiency)
   app.get("/api/senapoti/:type/:reportingId", sanitizeInput, apiRateLimit, authenticateJWT, validateDistrictAccess, async (req, res) => {

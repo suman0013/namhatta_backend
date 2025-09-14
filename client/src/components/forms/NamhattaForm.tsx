@@ -221,17 +221,13 @@ export default function NamhattaForm({
     }
   });
 
-  // Query all devotees only for non-senapoti roles (Secretary, President, Accountant)
-  const { data: nonSenapotiDevotees = [], isLoading: nonSenapotiDevoteesLoading } = useQuery({
-    queryKey: ["/api/devotees"],
-    select: (data: any) => {
-      const allDevotees = data?.data || [];
-      // Filter out devotees with senapoti leadership roles for other positions
-      return allDevotees.filter((devotee: Devotee) => 
-        !devotee.leadershipRole || 
-        devotee.leadershipRole === null ||
-        !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
-      );
+  // Query available devotees for officer positions (Secretary, President, Accountant)
+  const { data: availableOfficerDevotees = [], isLoading: availableOfficersLoading } = useQuery({
+    queryKey: ["/api/devotees/available-officers"],
+    queryFn: async () => {
+      const response = await fetch('/api/devotees/available-officers');
+      if (!response.ok) throw new Error('Failed to fetch available officers');
+      return response.json();
     }
   });
 
@@ -465,7 +461,7 @@ export default function NamhattaForm({
         return upaChakraSenapotis;
       default:
         // For other leadership roles (Secretary, President, Accountant)
-        return nonSenapotiDevotees;
+        return availableOfficerDevotees;
     }
   };
 
@@ -481,7 +477,7 @@ export default function NamhattaForm({
       case 'UPA_CHAKRA_SENAPOTI':
         return upaChakraSenapotisLoading;
       default:
-        return nonSenapotiDevoteesLoading;
+        return availableOfficersLoading;
     }
   };
 

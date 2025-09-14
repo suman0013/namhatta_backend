@@ -256,13 +256,13 @@ export class MemStorage implements IStorage {
       code: namhatta.code,
       meetingDay: namhatta.meetingDay || null,
       meetingTime: namhatta.meetingTime || null,
-      malaSenapoti: namhatta.malaSenapoti || null,
-      mahaChakraSenapoti: namhatta.mahaChakraSenapoti || null,
-      chakraSenapoti: namhatta.chakraSenapoti || null,
-      upaChakraSenapoti: namhatta.upaChakraSenapoti || null,
-      secretary: namhatta.secretary || null,
-      president: namhatta.president || null,
-      accountant: namhatta.accountant || null,
+      malaSenapotiId: namhatta.malaSenapotiId || null,
+      mahaChakraSenapotiId: namhatta.mahaChakraSenapotiId || null,
+      chakraSenapotiId: namhatta.chakraSenapotiId || null,
+      upaChakraSenapotiId: namhatta.upaChakraSenapotiId || null,
+      secretaryId: namhatta.secretaryId || null,
+      presidentId: namhatta.presidentId || null,
+      accountantId: namhatta.accountantId || null,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status || "PENDING_APPROVAL",
       registrationNo: namhatta.registrationNo || null,
@@ -766,6 +766,28 @@ export class MemStorage implements IStorage {
     });
 
     return roots;
+  }
+
+  async getAvailableDevoteesForOfficerPositions(): Promise<Devotee[]> {
+    // Get all devotee IDs that are currently assigned as Secretary, President, or Accountant
+    const assignedDevoteeIds = new Set<number>();
+    this.namhattas.forEach(namhatta => {
+      if (namhatta.secretaryId) assignedDevoteeIds.add(namhatta.secretaryId);
+      if (namhatta.presidentId) assignedDevoteeIds.add(namhatta.presidentId);
+      if (namhatta.accountantId) assignedDevoteeIds.add(namhatta.accountantId);
+    });
+
+    // Filter devotees who are available for officer positions
+    const senapotiRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'];
+    
+    return this.devotees.filter(devotee => 
+      // Not assigned to any namhatta as a regular member
+      !devotee.namhattaId &&
+      // Don't have any senapoti leadership roles
+      (!devotee.leadershipRole || !senapotiRoles.includes(devotee.leadershipRole)) &&
+      // Not currently assigned as Secretary, President, or Accountant in any namhatta
+      !assignedDevoteeIds.has(devotee.id)
+    );
   }
 
   async getEligibleLeaders(): Promise<Devotee[]> {

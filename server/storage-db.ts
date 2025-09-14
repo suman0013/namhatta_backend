@@ -2084,6 +2084,49 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAvailableDevoteesForOfficerPositions(): Promise<Devotee[]> {
+    try {
+      // Get all devotee IDs that are currently assigned as Secretary, President, or Accountant
+      const assignedDevoteeIdsResult = await db
+        .select({
+          secretaryId: namhattas.secretaryId,
+          presidentId: namhattas.presidentId,
+          accountantId: namhattas.accountantId
+        })
+        .from(namhattas);
+
+      const assignedDevoteeIds = new Set<number>();
+      assignedDevoteeIdsResult.forEach(namhatta => {
+        if (namhatta.secretaryId) assignedDevoteeIds.add(namhatta.secretaryId);
+        if (namhatta.presidentId) assignedDevoteeIds.add(namhatta.presidentId);
+        if (namhatta.accountantId) assignedDevoteeIds.add(namhatta.accountantId);
+      });
+
+      // Filter devotees who are available for officer positions
+      const senapotiRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'];
+      
+      const availableDevoteesResult = await db
+        .select()
+        .from(devotees)
+        .where(and(
+          // Not assigned to any namhatta as a regular member
+          isNotNull(devotees.namhattaId) ? sql`FALSE` : sql`TRUE`,
+          // Don't have any senapoti leadership roles
+          devotees.leadershipRole ? 
+            sql`${devotees.leadershipRole} NOT IN (${senapotiRoles.map(() => '?').join(',')})` : 
+            sql`TRUE`
+        ));
+
+      // Filter out devotees who are currently assigned as officers
+      return availableDevoteesResult.filter(devotee => 
+        !assignedDevoteeIds.has(devotee.id)
+      );
+    } catch (error) {
+      console.error('Error in getAvailableDevoteesForOfficerPositions:', error);
+      throw error;
+    }
+  }
+
   async assignLeadershipRole(devoteeId: number, data: {
     leadershipRole: string;
     reportingToDevoteeId?: number;
