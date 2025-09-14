@@ -404,12 +404,13 @@ export default function NamhattaForm({
         devotee.leadershipRole === specificRole
       );
 
+
       switch (specificRole) {
         case 'MALA_SENAPOTI':
           // Show Mala Senapotis that report to the selected district supervisor
           if (!selectedDistrictSupervisor) return [];
           return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === selectedDistrictSupervisor
+            devotee.reportingToDevoteeId === Number(selectedDistrictSupervisor)
           );
 
         case 'MAHA_CHAKRA_SENAPOTI':
@@ -417,7 +418,7 @@ export default function NamhattaForm({
           const selectedMalaSenapoti = watch('malaSenapotiId');
           if (!selectedMalaSenapoti) return [];
           return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === selectedMalaSenapoti
+            devotee.reportingToDevoteeId === Number(selectedMalaSenapoti)
           );
 
         case 'CHAKRA_SENAPOTI':
@@ -425,7 +426,7 @@ export default function NamhattaForm({
           const selectedMahaChakraSenapoti = watch('mahaChakraSenapotiId');
           if (!selectedMahaChakraSenapoti) return [];
           return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === selectedMahaChakraSenapoti
+            devotee.reportingToDevoteeId === Number(selectedMahaChakraSenapoti)
           );
 
         case 'UPA_CHAKRA_SENAPOTI':
@@ -433,7 +434,7 @@ export default function NamhattaForm({
           const selectedChakraSenapoti = watch('chakraSenapotiId');
           if (!selectedChakraSenapoti) return [];
           return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === selectedChakraSenapoti
+            devotee.reportingToDevoteeId === Number(selectedChakraSenapoti)
           );
 
         default:
