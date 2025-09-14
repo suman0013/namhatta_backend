@@ -74,7 +74,6 @@ interface FormData {
   presidentId?: number | null;
   accountantId?: number | null;
   districtSupervisorId: number | null;
-  shraddhakutirId?: number | null;
 }
 
 export default function NamhattaForm({
@@ -105,7 +104,6 @@ export default function NamhattaForm({
         presidentId: z.number().nullable().optional(),
         accountantId: z.number().nullable().optional(),
         districtSupervisorId: z.number().nullable().optional(),
-        shraddhakutirId: z.number().nullable().optional(),
       })
     ),
     defaultValues: {
@@ -121,7 +119,6 @@ export default function NamhattaForm({
       presidentId: null,
       accountantId: null,
       districtSupervisorId: null,
-      shraddhakutirId: null,
     },
   });
 
@@ -194,21 +191,10 @@ export default function NamhattaForm({
       const params = new URLSearchParams({ district: address.district || "" });
       const response = await fetch(`/api/district-supervisors?${params}`);
       if (!response.ok) throw new Error('Failed to fetch district supervisors');
-      return response.json() as Promise<Array<{ id: number; username: string; fullName?: string; email: string }>>;
+      return response.json() as Promise<Array<{ id: number; username: string; fullName?: string; email: string; isDefault: boolean }>>;
     }
   });
 
-  // Query shraddhakutirs based on selected district
-  const { data: shraddhakutirs = [], isLoading: shraddhakutirsLoading } = useQuery({
-    queryKey: ["/api/shraddhakutirs", address.district],
-    enabled: !!address.district,
-    queryFn: async () => {
-      const params = new URLSearchParams({ district: address.district || "" });
-      const response = await fetch(`/api/shraddhakutirs?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch shraddhakutirs');
-      return response.json() as Promise<Array<{ id: number; name: string; districtCode: string }>>;
-    }
-  });
 
   // Effect for user defaults
   useEffect(() => {
@@ -275,6 +261,27 @@ export default function NamhattaForm({
     return () => clearTimeout(timeoutId);
   }, [currentCode, isEditing]);
 
+  // Effect for district supervisor auto-selection
+  useEffect(() => {
+    // Skip auto-selection if user is a district supervisor (they're already auto-assigned)
+    // or if we're editing an existing namhatta or if no district is selected
+    if (user?.role === 'DISTRICT_SUPERVISOR' || isEditing || !address.district || !districtSupervisors.length) {
+      return;
+    }
+
+    // If there's only one district supervisor, auto-select them
+    if (districtSupervisors.length === 1) {
+      const supervisor = districtSupervisors[0];
+      setSelectedDistrictSupervisor(supervisor.id);
+      setValue("districtSupervisorId", supervisor.id);
+    } else if (districtSupervisors.length > 1) {
+      // If there are multiple, try to find the default supervisor, otherwise select the first one
+      const defaultSupervisor = districtSupervisors.find(s => s.isDefault) || districtSupervisors[0];
+      setSelectedDistrictSupervisor(defaultSupervisor.id);
+      setValue("districtSupervisorId", defaultSupervisor.id);
+    }
+  }, [districtSupervisors, address.district, user?.role, isEditing, setValue]);
+
   // Initialize form with existing namhatta data
   useEffect(() => {
     if (namhatta && isEditing) {
@@ -291,7 +298,6 @@ export default function NamhattaForm({
         presidentId: namhatta.presidentId || null,
         accountantId: namhatta.accountantId || null,
         districtSupervisorId: namhatta.districtSupervisorId || null,
-        shraddhakutirId: namhatta.shraddhakutirId || null,
       });
 
       // For existing namhattas, try to load address information if available
@@ -782,33 +788,6 @@ export default function NamhattaForm({
                   </p>
                 )}
               </div>
-              
-              {/* Shraddhakutir Selection - Part of District Supervisor Step */}
-              {address.district && (
-                <div className="mt-6">
-                  <Label htmlFor="shraddhakutirId">Shraddhakutir</Label>
-                  <SearchableSelect
-                    options={(shraddhakutirs || []).map((sk) => `${sk.name} - ${sk.id}`)}
-                    value={
-                      shraddhakutirs?.find(sk => sk.id === watch("shraddhakutirId"))
-                        ? `${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.name} - ${shraddhakutirs.find(sk => sk.id === watch("shraddhakutirId"))!.id}`
-                        : ""
-                    }
-                    onValueChange={(value: string) => {
-                      const selectedShraddhakutir = shraddhakutirs?.find(sk => `${sk.name} - ${sk.id}` === value);
-                      setValue("shraddhakutirId", selectedShraddhakutir?.id);
-                    }}
-                    placeholder={shraddhakutirsLoading ? "Loading shraddhakutirs..." : "Search Shraddhakutir..."}
-                    disabled={!address.district || shraddhakutirsLoading}
-                    data-testid="select-shraddhakutir"
-                  />
-                  {!address.district && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Please complete the address information to select a Shraddhakutir
-                    </p>
-                  )}
-                </div>
-              )}
             </div>
           )}
 
