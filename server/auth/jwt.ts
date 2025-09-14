@@ -4,7 +4,15 @@ import { db } from '../db';
 import { jwtBlacklist } from '@shared/schema';
 import { eq, lt } from 'drizzle-orm';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'namhatta-jwt-secret-key-2025-secure-random-string-for-development';
+// Get JWT secret from environment variables - critical for security
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Fail fast if JWT_SECRET is not configured in production
+if (!JWT_SECRET) {
+  console.error('🚨 SECURITY ERROR: JWT_SECRET environment variable not configured!');
+  console.error('Please add JWT_SECRET to your environment variables.');
+  process.exit(1);
+}
 const JWT_EXPIRES_IN = '1h'; // 1 hour
 
 export interface JWTPayload {

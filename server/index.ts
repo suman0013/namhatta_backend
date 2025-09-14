@@ -18,29 +18,37 @@ app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? (origin, callback) => {
         // In production, be strict about origins
-        const allowedOrigins = [
-          process.env.REPLIT_DOMAINS || 'https://*.replit.app',
-          process.env.ALLOWED_ORIGINS || ''
-        ].filter(Boolean);
-        
-        if (!origin) return callback(null, true); // Allow requests with no origin
-        
-        const isAllowed = allowedOrigins.some(allowed => 
-          allowed.includes('*') ? 
-            origin.match(allowed.replace('*', '.*')) : 
-            origin === allowed
-        );
-        
-        if (isAllowed) {
+        if (!origin) {
+          // Allow requests with no origin (mobile apps, Postman, etc.)
           return callback(null, true);
         }
         
+        // Allow same-origin requests
+        if (origin === `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`) {
+          return callback(null, true);
+        }
+        
+        // Allow explicitly configured additional origins
+        const additionalOrigins = process.env.ALLOWED_ORIGINS ? 
+          process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [];
+        
+        if (additionalOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        
+        // Secure pattern matching for *.replit.app domains only
+        const replitAppPattern = /^https:\/\/[a-zA-Z0-9\-]+\.replit\.app$/;
+        if (replitAppPattern.test(origin)) {
+          return callback(null, true);
+        }
+        
+        console.warn(`CORS blocked origin: ${origin}`);
         return callback(new Error('Not allowed by CORS'), false);
       }
     : true, // In development, allow all origins
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cache-Control'],
   maxAge: 86400 // Cache preflight response for 24 hours
 }));
 
@@ -49,23 +57,41 @@ app.use(helmet({
   contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Needed for React dev
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      scriptSrc: ["'self'"], // Remove unsafe-inline and unsafe-eval in production
+      styleSrc: ["'self'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "https://api.replit.com"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
-      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
+      upgradeInsecureRequests: [],
+      baseUri: ["'self'"],
+      formAction: ["'self'"]
     }
-  } : false,
+  } : {
+    // Development CSP - more relaxed for Vite HMR and debugging
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow for Vite HMR
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "ws:", "wss:", "https://api.replit.com"], // Allow WebSocket for HMR
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"]
+    }
+  },
   crossOriginEmbedderPolicy: process.env.NODE_ENV === 'production',
   hsts: process.env.NODE_ENV === 'production' ? {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
-  } : false
+  } : false,
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 
 // Request size limits to prevent DoS attacks
