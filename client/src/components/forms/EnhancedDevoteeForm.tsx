@@ -475,7 +475,7 @@ export default function EnhancedDevoteeForm({
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {statuses?.map((status) => (
                     <SelectItem key={status.id} value={status.id.toString()}>
                       {status.name}
