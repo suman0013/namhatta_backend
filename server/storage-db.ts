@@ -885,8 +885,8 @@ export class DatabaseStorage implements IStorage {
     
     console.log('Creating namhatta with devotee IDs:', originalDevoteeIds);
     
-    // Map devotee IDs to names for database storage
-    const namhattaDetails = await this.mapDevoteeIdsToNames(inputData);
+    // Use the input data directly since database schema expects ID fields, not names
+    const namhattaDetails = inputData;
     
     // Check if code already exists
     if (namhattaDetails.code) {
@@ -977,8 +977,8 @@ export class DatabaseStorage implements IStorage {
     // Extract address information from the request data
     const { address, landmark, ...inputData } = namhattaData;
     
-    // Map devotee IDs to names for database storage
-    const namhattaDetails = await this.mapDevoteeIdsToNames(inputData);
+    // Use the input data directly since database schema expects ID fields, not names
+    const namhattaDetails = inputData;
     
     // Update the namhatta record first
     const result = await db.update(namhattas).set(namhattaDetails).where(eq(namhattas.id, id)).returning();
