@@ -380,16 +380,15 @@ export default function NamhattaForm({
     closeCreateDevoteeModal();
   };
 
-  // Helper function to get filtered devotees based on role type
-  const getFilteredDevotees = (roleType: 'senapoti' | 'other') => {
-    if (roleType === 'senapoti') {
-      // Filter devotees who are available for senapoti assignment
-      // Only show devotees who have NO leadership role at all
+  // Helper function to get filtered devotees based on specific role
+  const getFilteredDevotees = (specificRole: string) => {
+    if (['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(specificRole)) {
+      // For senapoti roles, show devotees who have that specific leadership role
       return devotees.filter((devotee: Devotee) => 
-        !devotee.leadershipRole || devotee.leadershipRole === null
+        devotee.leadershipRole === specificRole
       );
     } else {
-      // Filter devotees who can be assigned other leadership roles (Secretary, President, Accountant)
+      // For other leadership roles (Secretary, President, Accountant)
       // Show devotees who have no leadership role OR who don't have senapoti roles
       return devotees.filter((devotee: Devotee) => 
         !devotee.leadershipRole || 
@@ -596,10 +595,7 @@ export default function NamhattaForm({
     required: boolean = false
   ) => {
     const currentValue = watch(fieldName);
-    const filteredDevotees = getFilteredDevotees(
-      ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(role) 
-        ? 'senapoti' : 'other'
-    );
+    const filteredDevotees = getFilteredDevotees(role);
 
     return (
       <div className="space-y-2">
