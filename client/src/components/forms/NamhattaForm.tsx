@@ -557,6 +557,34 @@ export default function NamhattaForm({
     </div>
   );
 
+  // Helper function to determine if Next button should be disabled
+  const isNextButtonDisabled = () => {
+    const currentName = watch("name");
+    const currentCode = watch("code");
+    
+    switch (currentStep) {
+      case 0: // Basic Information step
+        // Required fields: name and code
+        if (!currentName || !currentCode) {
+          return true;
+        }
+        // Code validation must be complete and valid
+        if (codeValidation.isChecking || codeValidation.isValid === false) {
+          return true;
+        }
+        return false;
+      
+      case 1: // Address step
+        return !address.district;
+      
+      case 2: // District Supervisor step
+        return !selectedDistrictSupervisor;
+      
+      default:
+        return false;
+    }
+  };
+
   // Helper to render leadership role select with "Create New" button
   const renderRoleSelect = (
     role: CreateDevoteeModal['role'], 
@@ -841,8 +869,9 @@ export default function NamhattaForm({
               {currentStep < steps.length - 1 ? (
                 <Button
                   type="button"
+                  disabled={isNextButtonDisabled()}
                   onClick={() => {
-                    // Validate current step before proceeding
+                    // Additional validation checks (these should now be redundant due to disabled state)
                     if (currentStep === 0 && (!watch("name") || !watch("code"))) {
                       toast({
                         title: "Validation Error",
