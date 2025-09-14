@@ -10,8 +10,9 @@ dotenv.config({ path: ['.env.local', '.env'] });
 
 const app = express();
 
-// Trust proxy for Replit environment to fix rate limiting
-app.set('trust proxy', true);
+// Trust proxy configuration for Replit environment - be specific for security
+// Trust only the first proxy (Replit's proxy) to prevent bypass of IP-based rate limiting
+app.set('trust proxy', 1);
 
 // CORS configuration - restrict cross-origin requests
 app.use(cors({
