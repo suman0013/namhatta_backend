@@ -224,17 +224,6 @@ export default function AddressSection({
           </div>
         </div>
 
-        {/* Landmark field - full width */}
-        <div className="space-y-2">
-          <Label htmlFor="landmark" className="text-sm font-medium">Landmark</Label>
-          <Textarea
-            value={address.landmark || ""}
-            onChange={(e) => onAddressChange("landmark", e.target.value)}
-            placeholder="Enter landmark or additional details"
-            disabled={disabled}
-            className="min-h-[80px]"
-          />
-        </div>
       </CardContent>
     </Card>
   );
