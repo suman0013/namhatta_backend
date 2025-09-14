@@ -177,10 +177,62 @@ export default function NamhattaForm({
     enabled: user?.role === 'DISTRICT_SUPERVISOR'
   }) as { data: { country?: string; state?: string; district?: string; readonly: string[] } | undefined };
 
-  // Query devotees for leadership role selection
-  const { data: devotees = [], isLoading: devoteesLoading } = useQuery({
+  // Dynamic queries for senapoti types based on hierarchy
+  const { data: malaSenapotis = [], isLoading: malaSenapotisLoading } = useQuery({
+    queryKey: ["/api/senapoti/MALA_SENAPOTI", selectedDistrictSupervisor],
+    enabled: !!selectedDistrictSupervisor,
+    queryFn: async () => {
+      const response = await fetch(`/api/senapoti/MALA_SENAPOTI/${selectedDistrictSupervisor}`);
+      if (!response.ok) throw new Error('Failed to fetch Mala Senapotis');
+      return response.json();
+    }
+  });
+
+  const selectedMalaSenapoti = watch('malaSenapotiId');
+  const { data: mahaChakraSenapotis = [], isLoading: mahaChakraSenapotisLoading } = useQuery({
+    queryKey: ["/api/senapoti/MAHA_CHAKRA_SENAPOTI", selectedMalaSenapoti],
+    enabled: !!selectedMalaSenapoti,
+    queryFn: async () => {
+      const response = await fetch(`/api/senapoti/MAHA_CHAKRA_SENAPOTI/${selectedMalaSenapoti}`);
+      if (!response.ok) throw new Error('Failed to fetch Maha Chakra Senapotis');
+      return response.json();
+    }
+  });
+
+  const selectedMahaChakraSenapoti = watch('mahaChakraSenapotiId');
+  const { data: chakraSenapotis = [], isLoading: chakraSenapotisLoading } = useQuery({
+    queryKey: ["/api/senapoti/CHAKRA_SENAPOTI", selectedMahaChakraSenapoti],
+    enabled: !!selectedMahaChakraSenapoti,
+    queryFn: async () => {
+      const response = await fetch(`/api/senapoti/CHAKRA_SENAPOTI/${selectedMahaChakraSenapoti}`);
+      if (!response.ok) throw new Error('Failed to fetch Chakra Senapotis');
+      return response.json();
+    }
+  });
+
+  const selectedChakraSenapoti = watch('chakraSenapotiId');
+  const { data: upaChakraSenapotis = [], isLoading: upaChakraSenapotisLoading } = useQuery({
+    queryKey: ["/api/senapoti/UPA_CHAKRA_SENAPOTI", selectedChakraSenapoti],
+    enabled: !!selectedChakraSenapoti,
+    queryFn: async () => {
+      const response = await fetch(`/api/senapoti/UPA_CHAKRA_SENAPOTI/${selectedChakraSenapoti}`);
+      if (!response.ok) throw new Error('Failed to fetch Upa Chakra Senapotis');
+      return response.json();
+    }
+  });
+
+  // Query all devotees only for non-senapoti roles (Secretary, President, Accountant)
+  const { data: nonSenapotiDevotees = [], isLoading: nonSenapotiDevoteesLoading } = useQuery({
     queryKey: ["/api/devotees"],
-    select: (data: any) => data?.data || []
+    select: (data: any) => {
+      const allDevotees = data?.data || [];
+      // Filter out devotees with senapoti leadership roles for other positions
+      return allDevotees.filter((devotee: Devotee) => 
+        !devotee.leadershipRole || 
+        devotee.leadershipRole === null ||
+        !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
+      );
+    }
   });
 
   // Query district supervisors based on selected district
@@ -368,12 +420,16 @@ export default function NamhattaForm({
   };
 
   const handleDevoteeCreated = (newDevotee: Devotee) => {
-    // Refresh devotees list
-    queryClient.invalidateQueries({ queryKey: ["/api/devotees"] });
+    // Refresh appropriate devotee lists based on role
+    const devoteeRole = createDevoteeModal.role;
+    if (['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devoteeRole)) {
+      queryClient.invalidateQueries({ queryKey: ["/api/senapoti"] });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["/api/devotees"] });
+    }
     
     // Auto-assign the newly created devotee to the appropriate role
-    const role = createDevoteeModal.role;
-    const fieldMap: Record<typeof role, keyof FormData> = {
+    const fieldMap: Record<typeof devoteeRole, keyof FormData> = {
       'MALA_SENAPOTI': 'malaSenapotiId',
       'MAHA_CHAKRA_SENAPOTI': 'mahaChakraSenapotiId', 
       'CHAKRA_SENAPOTI': 'chakraSenapotiId',
@@ -383,71 +439,49 @@ export default function NamhattaForm({
       'ACCOUNTANT': 'accountantId'
     };
 
-    const fieldName = fieldMap[role];
+    const fieldName = fieldMap[devoteeRole];
     if (fieldName) {
       setValue(fieldName, newDevotee.id);
     }
 
     toast({
       title: "Success",
-      description: `${role.replace('_', ' ').toLowerCase()} created and assigned successfully`,
+      description: `${devoteeRole.replace('_', ' ').toLowerCase()} created and assigned successfully`,
     });
 
     closeCreateDevoteeModal();
   };
 
-  // Helper function to get filtered devotees based on specific role and hierarchy
-  const getFilteredDevotees = (specificRole: string) => {
-    if (['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(specificRole)) {
-      // For senapoti roles, implement hierarchical filtering
-      const baseFilter = devotees.filter((devotee: Devotee) => 
-        devotee.leadershipRole === specificRole
-      );
+  // Helper function to get devotees based on specific role using dynamic data
+  const getDevoteesByRole = (specificRole: string) => {
+    switch (specificRole) {
+      case 'MALA_SENAPOTI':
+        return malaSenapotis;
+      case 'MAHA_CHAKRA_SENAPOTI':
+        return mahaChakraSenapotis;
+      case 'CHAKRA_SENAPOTI':
+        return chakraSenapotis;
+      case 'UPA_CHAKRA_SENAPOTI':
+        return upaChakraSenapotis;
+      default:
+        // For other leadership roles (Secretary, President, Accountant)
+        return nonSenapotiDevotees;
+    }
+  };
 
-
-      switch (specificRole) {
-        case 'MALA_SENAPOTI':
-          // Show Mala Senapotis that report to the selected district supervisor
-          if (!selectedDistrictSupervisor) return [];
-          return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === Number(selectedDistrictSupervisor)
-          );
-
-        case 'MAHA_CHAKRA_SENAPOTI':
-          // Show Maha Chakra Senapotis that report to the selected Mala Senapoti
-          const selectedMalaSenapoti = watch('malaSenapotiId');
-          if (!selectedMalaSenapoti) return [];
-          return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === Number(selectedMalaSenapoti)
-          );
-
-        case 'CHAKRA_SENAPOTI':
-          // Show Chakra Senapotis that report to the selected Maha Chakra Senapoti
-          const selectedMahaChakraSenapoti = watch('mahaChakraSenapotiId');
-          if (!selectedMahaChakraSenapoti) return [];
-          return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === Number(selectedMahaChakraSenapoti)
-          );
-
-        case 'UPA_CHAKRA_SENAPOTI':
-          // Show Upa Chakra Senapotis that report to the selected Chakra Senapoti
-          const selectedChakraSenapoti = watch('chakraSenapotiId');
-          if (!selectedChakraSenapoti) return [];
-          return baseFilter.filter((devotee: Devotee) => 
-            devotee.reportingToDevoteeId === Number(selectedChakraSenapoti)
-          );
-
-        default:
-          return baseFilter;
-      }
-    } else {
-      // For other leadership roles (Secretary, President, Accountant)
-      // Show devotees who have no leadership role OR who don't have senapoti roles
-      return devotees.filter((devotee: Devotee) => 
-        !devotee.leadershipRole || 
-        devotee.leadershipRole === null ||
-        !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'].includes(devotee.leadershipRole)
-      );
+  // Helper function to check if devotees are loading for a specific role
+  const isRoleLoading = (specificRole: string) => {
+    switch (specificRole) {
+      case 'MALA_SENAPOTI':
+        return malaSenapotisLoading;
+      case 'MAHA_CHAKRA_SENAPOTI':
+        return mahaChakraSenapotisLoading;
+      case 'CHAKRA_SENAPOTI':
+        return chakraSenapotisLoading;
+      case 'UPA_CHAKRA_SENAPOTI':
+        return upaChakraSenapotisLoading;
+      default:
+        return nonSenapotiDevoteesLoading;
     }
   };
 
@@ -468,7 +502,7 @@ export default function NamhattaForm({
 
   // Validate Mala Senapoti district match with confirmation
   const validateMalaSenapotiDistrict = (devoteeId: number) => {
-    const devotee = devotees.find((d: any) => d.id === devoteeId);
+    const devotee = malaSenapotis.find((d: any) => d.id === devoteeId);
     if (devotee?.presentAddress && address.district) {
       const devoteeDistrict = devotee.presentAddress.district;
       if (devoteeDistrict !== address.district) {
@@ -648,7 +682,7 @@ export default function NamhattaForm({
     required: boolean = false
   ) => {
     const currentValue = watch(fieldName);
-    const filteredDevotees = getFilteredDevotees(role);
+    const filteredDevotees = getDevoteesByRole(role);
 
     return (
       <div className="space-y-2">
@@ -680,10 +714,10 @@ export default function NamhattaForm({
                 setValue('upaChakraSenapotiId', null);
               }
             }}
-            disabled={devoteesLoading}
+            disabled={isRoleLoading(role)}
           >
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder={devoteesLoading ? "Loading..." : `Select ${label}`} />
+              <SelectValue placeholder={isRoleLoading(role) ? "Loading..." : `Select ${label}`} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
