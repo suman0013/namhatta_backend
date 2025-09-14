@@ -872,6 +872,19 @@ export class DatabaseStorage implements IStorage {
     // Extract address information from the request data
     const { address, landmark, ...inputData } = namhattaData;
     
+    // Store original devotee IDs before mapping to names
+    const originalDevoteeIds = {
+      malaSenapotiId: inputData.malaSenapotiId,
+      mahaChakraSenapotiId: inputData.mahaChakraSenapotiId,
+      chakraSenapotiId: inputData.chakraSenapotiId,
+      upaChakraSenapotiId: inputData.upaChakraSenapotiId,
+      secretaryId: inputData.secretaryId,
+      presidentId: inputData.presidentId,
+      accountantId: inputData.accountantId
+    };
+    
+    console.log('Creating namhatta with devotee IDs:', originalDevoteeIds);
+    
     // Map devotee IDs to names for database storage
     const namhattaDetails = await this.mapDevoteeIdsToNames(inputData);
     
@@ -925,20 +938,24 @@ export class DatabaseStorage implements IStorage {
         }
       };
       
-      // Add leadership position updates
-      addDevoteeUpdate(inputData.malaSenapotiId, 'MALA_SENAPOTI');
-      addDevoteeUpdate(inputData.mahaChakraSenapotiId, 'MAHA_CHAKRA_SENAPOTI');
-      addDevoteeUpdate(inputData.chakraSenapotiId, 'CHAKRA_SENAPOTI');
-      addDevoteeUpdate(inputData.upaChakraSenapotiId, 'UPA_CHAKRA_SENAPOTI');
-      addDevoteeUpdate(inputData.secretaryId, 'SECRETARY');
-      addDevoteeUpdate(inputData.presidentId, 'PRESIDENT');
-      addDevoteeUpdate(inputData.accountantId, 'ACCOUNTANT');
+      // Add leadership position updates using original IDs (before name mapping)
+      addDevoteeUpdate(originalDevoteeIds.malaSenapotiId, 'MALA_SENAPOTI');
+      addDevoteeUpdate(originalDevoteeIds.mahaChakraSenapotiId, 'MAHA_CHAKRA_SENAPOTI');
+      addDevoteeUpdate(originalDevoteeIds.chakraSenapotiId, 'CHAKRA_SENAPOTI');
+      addDevoteeUpdate(originalDevoteeIds.upaChakraSenapotiId, 'UPA_CHAKRA_SENAPOTI');
+      addDevoteeUpdate(originalDevoteeIds.secretaryId, 'SECRETARY');
+      addDevoteeUpdate(originalDevoteeIds.presidentId, 'PRESIDENT');
+      addDevoteeUpdate(originalDevoteeIds.accountantId, 'ACCOUNTANT');
       
       // Execute all devotee updates
+      console.log('Devotee updates to execute:', devoteeUpdates);
       for (const update of devoteeUpdates) {
-        await db.update(devotees)
+        console.log(`Updating devotee ${update.devoteeId} with role ${update.updates.leadershipRole} for namhatta ${update.updates.namhattaId}`);
+        const result = await db.update(devotees)
           .set(update.updates)
-          .where(eq(devotees.id, update.devoteeId));
+          .where(eq(devotees.id, update.devoteeId))
+          .returning({ id: devotees.id, leadershipRole: devotees.leadershipRole, namhattaId: devotees.namhattaId });
+        console.log('Update result:', result);
       }
       
       // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
