@@ -620,7 +620,7 @@ export default function NamhattaForm({
               <SelectValue placeholder={devoteesLoading ? "Loading..." : `Select ${label}`} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               {filteredDevotees.map((devotee: any) => (
                 <SelectItem key={devotee.id} value={devotee.id.toString()}>
                   {devotee.name || devotee.legalName} ({devotee.legalName})
