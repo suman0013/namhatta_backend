@@ -282,6 +282,17 @@ export default function NamhattaForm({
     }
   }, [districtSupervisors, address.district, user?.role, isEditing, setValue]);
 
+  // Clear senapoti hierarchy when district supervisor changes
+  useEffect(() => {
+    if (!isEditing && selectedDistrictSupervisor) {
+      // Clear all senapoti selections when district supervisor changes
+      setValue('malaSenapotiId', null);
+      setValue('mahaChakraSenapotiId', null);
+      setValue('chakraSenapotiId', null);
+      setValue('upaChakraSenapotiId', null);
+    }
+  }, [selectedDistrictSupervisor, isEditing, setValue]);
+
   // Initialize form with existing namhatta data
   useEffect(() => {
     if (namhatta && isEditing) {
@@ -328,6 +339,11 @@ export default function NamhattaForm({
     if (field === 'district' && user?.role !== 'DISTRICT_SUPERVISOR') {
       setSelectedDistrictSupervisor(null);
       setValue("districtSupervisorId", null);
+      // Clear all senapoti selections when district changes
+      setValue('malaSenapotiId', null);
+      setValue('mahaChakraSenapotiId', null);
+      setValue('chakraSenapotiId', null);
+      setValue('upaChakraSenapotiId', null);
     }
   };
 
@@ -642,12 +658,25 @@ export default function NamhattaForm({
           <Select
             value={currentValue?.toString() || ""}
             onValueChange={(value) => {
-              setValue(fieldName, value && value !== "none" ? parseInt(value) : null);
-              // Validate district match for Mala Senapoti
+              // Validate district match for Mala Senapoti BEFORE setting value
               if (role === 'MALA_SENAPOTI' && value && value !== "none") {
                 if (!validateMalaSenapotiDistrict(parseInt(value))) {
                   return; // Don't set the value if validation fails
                 }
+              }
+              
+              setValue(fieldName, value && value !== "none" ? parseInt(value) : null);
+              
+              // Cascade clearing: Clear dependent senapoti selections when parent changes
+              if (role === 'MALA_SENAPOTI') {
+                setValue('mahaChakraSenapotiId', null);
+                setValue('chakraSenapotiId', null);
+                setValue('upaChakraSenapotiId', null);
+              } else if (role === 'MAHA_CHAKRA_SENAPOTI') {
+                setValue('chakraSenapotiId', null);
+                setValue('upaChakraSenapotiId', null);
+              } else if (role === 'CHAKRA_SENAPOTI') {
+                setValue('upaChakraSenapotiId', null);
               }
             }}
             disabled={devoteesLoading}
