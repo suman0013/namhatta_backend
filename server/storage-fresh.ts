@@ -114,6 +114,7 @@ export interface IStorage {
   // Leadership Management
   getDevoteeLeaders(page?: number, size?: number, filters?: any): Promise<{ data: Array<Devotee & { reportingToName?: string }>, total: number }>;
   getDevoteesByRole(role: string): Promise<Array<Devotee & { reportingToName?: string }>>;
+  getSenapotisByTypeAndReporting(type: string, reportingId: number): Promise<Array<Devotee & { reportingToName?: string }>>;
   assignLeadershipRole(devoteeId: number, data: {
     leadershipRole: string;
     reportingToDevoteeId?: number;

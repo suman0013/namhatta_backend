@@ -2048,6 +2048,42 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getSenapotisByTypeAndReporting(type: string, reportingId: number): Promise<Array<Devotee & { reportingToName?: string }>> {
+    try {
+      const devoteeResults = await db
+        .select({ id: devotees.id })
+        .from(devotees)
+        .where(and(
+          eq(devotees.leadershipRole, type),
+          eq(devotees.reportingToDevoteeId, reportingId)
+        ))
+        .orderBy(asc(devotees.legalName));
+
+      const devoteeData = await Promise.all(
+        devoteeResults.map(async ({ id }) => {
+          const devotee = await this.getDevotee(id);
+          if (!devotee) return null;
+
+          let reportingToName = undefined;
+          if (devotee.reportingToDevoteeId) {
+            const reportingTo = await this.getDevotee(devotee.reportingToDevoteeId);
+            reportingToName = reportingTo?.legalName || reportingTo?.name;
+          }
+
+          return {
+            ...devotee,
+            reportingToName
+          };
+        })
+      );
+
+      return devoteeData.filter(Boolean) as Array<Devotee & { reportingToName?: string }>;
+    } catch (error) {
+      console.error('Error in getSenapotisByTypeAndReporting:', error);
+      throw error;
+    }
+  }
+
   async assignLeadershipRole(devoteeId: number, data: {
     leadershipRole: string;
     reportingToDevoteeId?: number;
