@@ -830,10 +830,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       // Return appropriate error status based on error type
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('❌ Namhatta creation error:', error);
+      console.error('❌ Error message:', errorMessage);
+      
       if (errorMessage.includes('already exists')) {
         res.status(409).json({ message: errorMessage });
       } else {
-        res.status(400).json({ message: "Invalid namhatta data", error: errorMessage });
+        // Surface the actual error message instead of masking it
+        res.status(400).json({ message: errorMessage, error: errorMessage });
       }
     }
   });

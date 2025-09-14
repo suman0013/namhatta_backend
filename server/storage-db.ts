@@ -894,12 +894,15 @@ export class DatabaseStorage implements IStorage {
     // Use the input data directly since database schema expects ID fields, not names
     const namhattaDetails = inputData;
     
-    // Check if code already exists
+    // Check if code already exists (CRITICAL: prevents partial write issues)
     if (namhattaDetails.code) {
+      console.log(`🔍 Checking for existing namhatta with code: '${namhattaDetails.code}'`);
       const codeExists = await this.checkNamhattaCodeExists(namhattaDetails.code);
       if (codeExists) {
+        console.log(`❌ Found existing namhatta with code '${namhattaDetails.code}' - this is likely from a previous partial write`);
         throw new Error(`Namhatta code '${namhattaDetails.code}' already exists. Please choose a unique code.`);
       }
+      console.log(`✅ Code '${namhattaDetails.code}' is available`);
     }
     
     // Handle operations sequentially without transactions (neon-http doesn't support transactions)
@@ -909,10 +912,11 @@ export class DatabaseStorage implements IStorage {
       console.log('namhattaDetails type and structure:', typeof namhattaDetails, Object.keys(namhattaDetails || {}));
       
       // Create the namhatta record first
+      console.log('📝 Step 1: Creating namhatta record...');
       const result = await db.insert(namhattas).values(namhattaDetails).returning();
-      console.log('Database insert result:', result);
+      console.log('✅ Step 1 complete - Database insert result:', result);
       const namhatta = result[0];
-      console.log('Created namhatta record:', namhatta);
+      console.log('✅ Created namhatta record with ID:', namhatta?.id);
       
       if (!namhatta) {
         throw new Error('Failed to create namhatta record');
@@ -920,6 +924,7 @@ export class DatabaseStorage implements IStorage {
     
       // If address information is provided, store it in normalized tables
       if (address && (address.country || address.state || address.district || address.subDistrict || address.village || address.postalCode)) {
+        console.log('📍 Step 2: Processing address information...');
         // Use findOrCreateAddress method instead of directly creating
         const addressId = await this.findOrCreateAddress({
           country: address.country,
@@ -929,6 +934,7 @@ export class DatabaseStorage implements IStorage {
           village: address.village,
           postalCode: address.postalCode
         });
+        console.log('📍 Step 2a: Found/created address with ID:', addressId);
         
         // Link namhatta to address with landmark
         await db.insert(namhattaAddresses).values({
@@ -936,6 +942,9 @@ export class DatabaseStorage implements IStorage {
           addressId: addressId,
           landmark: landmark || address.landmark
         });
+        console.log('✅ Step 2 complete - Linked namhatta to address');
+      } else {
+        console.log('⏭️ Step 2: Skipped (no address information provided)');
       }
       
       // Update devotees assigned to leadership positions to link them to this namhatta
@@ -965,15 +974,24 @@ export class DatabaseStorage implements IStorage {
       addDevoteeUpdate(originalDevoteeIds.accountantId, 'ACCOUNTANT');
       
       // Execute all devotee updates sequentially
+      console.log('👥 Step 3: Processing devotee role assignments...');
       console.log('Devotee updates to execute:', devoteeUpdates);
-      for (const update of devoteeUpdates) {
-        console.log(`Updating devotee ${update.devoteeId} with role ${update.updates.leadershipRole} for namhatta ${update.updates.namhattaId}`);
-        const result = await db.update(devotees)
-          .set(update.updates)
-          .where(eq(devotees.id, update.devoteeId))
-          .returning({ id: devotees.id, leadershipRole: devotees.leadershipRole, namhattaId: devotees.namhattaId });
-        console.log('Update result:', result);
+      
+      for (let i = 0; i < devoteeUpdates.length; i++) {
+        const update = devoteeUpdates[i];
+        console.log(`👥 Step 3.${i+1}: Updating devotee ${update.devoteeId} with role ${update.updates.leadershipRole} for namhatta ${update.updates.namhattaId}`);
+        try {
+          const result = await db.update(devotees)
+            .set(update.updates)
+            .where(eq(devotees.id, update.devoteeId))
+            .returning({ id: devotees.id, leadershipRole: devotees.leadershipRole, namhattaId: devotees.namhattaId });
+          console.log(`✅ Step 3.${i+1} complete - Update result:`, result);
+        } catch (updateError: any) {
+          console.error(`❌ Step 3.${i+1} failed - Error updating devotee ${update.devoteeId}:`, updateError.message);
+          throw updateError;
+        }
       }
+      console.log('✅ Step 3 complete - All devotee role assignments processed');
       
       // Convert null to undefined for registrationNo and registrationDate to match Namhatta type
       return {
