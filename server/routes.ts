@@ -492,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get senapotis by type and reporting devotee ID (dynamic fetching for efficiency)
-  app.get("/api/senapoti/:type/:reportingId", authenticateJWT, async (req, res) => {
+  app.get("/api/senapoti/:type/:reportingId", sanitizeInput, apiRateLimit, authenticateJWT, validateDistrictAccess, async (req, res) => {
     try {
       const { type, reportingId } = req.params;
       
