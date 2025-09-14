@@ -768,6 +768,7 @@ export default function NamhattaForm({
                 address={address}
                 onAddressChange={handleAddressChange}
                 onBatchAddressChange={handleBatchAddressChange}
+                required={true}
                 showValidation={showAddressValidation}
                 disabled={false}
               />

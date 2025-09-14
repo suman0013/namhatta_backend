@@ -226,9 +226,7 @@ export default function AddressSection({
 
         {/* Landmark field - full width */}
         <div className="space-y-2">
-          <Label htmlFor="landmark" className="text-sm font-medium">
-            Landmark {required && <span className="text-red-500">*</span>}
-          </Label>
+          <Label htmlFor="landmark" className="text-sm font-medium">Landmark</Label>
           <Textarea
             value={address.landmark || ""}
             onChange={(e) => onAddressChange("landmark", e.target.value)}
