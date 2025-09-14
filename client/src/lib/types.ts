@@ -62,7 +62,6 @@ export interface Address {
   district?: string;
   subDistrict?: string;
   village?: string;
-  zipcode?: string;
   postalCode?: string;
   landmark?: string;
 }

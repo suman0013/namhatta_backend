@@ -309,7 +309,7 @@ export default function NamhattaForm({
           district: namhatta.address.district || "",
           subDistrict: namhatta.address.subDistrict || "",
           village: namhatta.address.village || "",
-          zipcode: namhatta.address.zipcode || namhatta.address.postalCode || "",
+          postalCode: namhatta.address.postalCode || "",
         });
       }
 
@@ -575,7 +575,7 @@ export default function NamhattaForm({
       
       case 1: // Address step
         // All address fields are required except landmark
-        const hasPostal = !!(address.zipcode && address.zipcode.trim()) || !!(address.postalCode && address.postalCode.trim());
+        const hasPostal = !!(address.postalCode && address.postalCode.trim());
         return !address.country || !hasPostal || !address.state || 
                !address.district || !address.subDistrict || !address.village;
       

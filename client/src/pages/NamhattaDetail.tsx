@@ -35,7 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import NamhattaForm from "@/components/forms/NamhattaForm";
 import NamhattaUpdateForm from "@/components/forms/NamhattaUpdateForm";
-import DevoteeForm from "@/components/forms/DevoteeForm";
+import EnhancedDevoteeForm from "@/components/forms/EnhancedDevoteeForm";
 import NamhattaUpdateCard from "@/components/NamhattaUpdateCard";
 import { 
   Home, 
@@ -748,13 +748,14 @@ export default function NamhattaDetail() {
 
       {/* Devotee Form Modal */}
       {showDevoteeForm && (
-        <DevoteeForm
+        <EnhancedDevoteeForm
           onClose={() => setShowDevoteeForm(false)}
           onSuccess={() => {
             setShowDevoteeForm(false);
             queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id, "devotees"] });
           }}
           namhattaId={parseInt(id!)}
+          isModal={true}
         />
       )}
 
