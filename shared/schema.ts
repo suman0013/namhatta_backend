@@ -255,6 +255,51 @@ export const insertDevoteeSchema = createInsertSchema(devotees).omit({
 export const insertNamhattaSchema = createInsertSchema(namhattas).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
+}).extend({
+  // Explicit validation for senapoti ID fields with proper type coercion
+  malaSenapotiId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  mahaChakraSenapotiId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  chakraSenapotiId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  upaChakraSenapotiId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  // Explicit validation for officer ID fields with proper type coercion
+  secretaryId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  presidentId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  accountantId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === '') return null;
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    return isNaN(num) ? null : num;
+  }),
+  // District supervisor ID is required
+  districtSupervisorId: z.union([z.string(), z.number()]).transform((val) => {
+    const num = typeof val === 'string' ? parseInt(val, 10) : val;
+    if (isNaN(num)) throw new Error('districtSupervisorId must be a valid number');
+    return num;
+  })
 });
 
 export const insertDevotionalStatusSchema = createInsertSchema(devotionalStatuses).omit({
