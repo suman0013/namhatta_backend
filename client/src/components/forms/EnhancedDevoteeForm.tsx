@@ -262,10 +262,11 @@ export default function EnhancedDevoteeForm({
       ...data,
       gender: data.gender as "MALE" | "FEMALE" | "OTHER" | undefined,
       maritalStatus: data.maritalStatus as "MARRIED" | "UNMARRIED" | "WIDOWED" | undefined,
+      leadershipRole: data.leadershipRole as "MALA_SENAPOTI" | "MAHA_CHAKRA_SENAPOTI" | "CHAKRA_SENAPOTI" | "UPA_CHAKRA_SENAPOTI" | undefined,
       presentAddress,
       permanentAddress,
       devotionalCourses,
-      namhattaId: namhattaId || null
+      namhattaId: namhattaId || undefined
     };
 
     if (isEditing) {
@@ -407,6 +408,126 @@ export default function EnhancedDevoteeForm({
         </CardContent>
       </Card>
 
+      {/* Family Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Family Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="fatherName">Father's Name</Label>
+              <Input
+                id="fatherName"
+                data-testid="input-father-name"
+                {...register("fatherName")}
+                placeholder="Enter father's name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="motherName">Mother's Name</Label>
+              <Input
+                id="motherName"
+                data-testid="input-mother-name"
+                {...register("motherName")}
+                placeholder="Enter mother's name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="maritalStatus">Marital Status</Label>
+              <Select value={watch("maritalStatus")} onValueChange={(value) => setValue("maritalStatus", value)}>
+                <SelectTrigger data-testid="select-marital-status">
+                  <SelectValue placeholder="Select marital status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UNMARRIED">Unmarried</SelectItem>
+                  <SelectItem value="MARRIED">Married</SelectItem>
+                  <SelectItem value="WIDOWED">Widowed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="husbandName">Husband's Name (if applicable)</Label>
+              <Input
+                id="husbandName"
+                data-testid="input-husband-name"
+                {...register("husbandName")}
+                placeholder="Enter husband's name (if applicable)"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="bloodGroup">Blood Group</Label>
+              <Select value={watch("bloodGroup")} onValueChange={(value) => setValue("bloodGroup", value)}>
+                <SelectTrigger data-testid="select-blood-group">
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A+">A+</SelectItem>
+                  <SelectItem value="A-">A-</SelectItem>
+                  <SelectItem value="B+">B+</SelectItem>
+                  <SelectItem value="B-">B-</SelectItem>
+                  <SelectItem value="AB+">AB+</SelectItem>
+                  <SelectItem value="AB-">AB-</SelectItem>
+                  <SelectItem value="O+">O+</SelectItem>
+                  <SelectItem value="O-">O-</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Personal Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="education">Education</Label>
+              <Input
+                id="education"
+                data-testid="input-education"
+                {...register("education")}
+                placeholder="Enter education details"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="occupation">Occupation</Label>
+              <Input
+                id="occupation"
+                data-testid="input-occupation"
+                {...register("occupation")}
+                placeholder="Enter occupation"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Additional Comments */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Additional Comments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Label htmlFor="additionalComments">Comments</Label>
+          <textarea
+            id="additionalComments"
+            data-testid="textarea-additional-comments"
+            {...register("additionalComments")}
+            placeholder="Enter any additional comments or notes"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical min-h-[100px]"
+          />
+        </CardContent>
+      </Card>
+
       {/* Address Information */}
       <Card>
         <CardHeader>
@@ -455,6 +576,79 @@ export default function EnhancedDevoteeForm({
               disabled={sameAsPresentAddress || (preAssignedRole === 'MALA_SENAPOTI' && !!districtInfo)}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Devotional Courses */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            Devotional Courses
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addDevotionalCourse}
+              data-testid="button-add-course"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Course
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {devotionalCourses.length === 0 ? (
+            <p className="text-gray-500 text-sm">No courses added yet. Click "Add Course" to get started.</p>
+          ) : (
+            devotionalCourses.map((course, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm">Course {index + 1}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeDevotionalCourse(index)}
+                    data-testid={`button-remove-course-${index}`}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor={`course-name-${index}`}>Course Name</Label>
+                    <Input
+                      id={`course-name-${index}`}
+                      value={course.name}
+                      onChange={(e) => updateDevotionalCourse(index, 'name', e.target.value)}
+                      placeholder="Enter course name"
+                      data-testid={`input-course-name-${index}`}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`course-date-${index}`}>Date</Label>
+                    <Input
+                      id={`course-date-${index}`}
+                      type="date"
+                      value={course.date}
+                      onChange={(e) => updateDevotionalCourse(index, 'date', e.target.value)}
+                      data-testid={`input-course-date-${index}`}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`course-institute-${index}`}>Institute</Label>
+                    <Input
+                      id={`course-institute-${index}`}
+                      value={course.institute}
+                      onChange={(e) => updateDevotionalCourse(index, 'institute', e.target.value)}
+                      placeholder="Enter institute name"
+                      data-testid={`input-course-institute-${index}`}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 
