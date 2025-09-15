@@ -726,16 +726,15 @@ export default function NamhattaDetail() {
       </Tabs>
 
       {/* Edit Form Modal */}
-      {showEditForm && (
-        <NamhattaForm
-          namhatta={namhatta}
-          onClose={() => setShowEditForm(false)}
-          onSuccess={() => {
-            setShowEditForm(false);
-            queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id] });
-          }}
-        />
-      )}
+      <NamhattaForm
+        isOpen={showEditForm}
+        namhatta={namhatta}
+        onClose={() => setShowEditForm(false)}
+        onSuccess={() => {
+          setShowEditForm(false);
+          queryClient.invalidateQueries({ queryKey: ["/api/namhattas", id] });
+        }}
+      />
 
       {/* Update Form Modal */}
       {namhatta && (
