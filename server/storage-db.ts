@@ -2058,7 +2058,7 @@ export class DatabaseStorage implements IStorage {
     });
 
     // For each state, get district-level data
-    for (const [, stateData] of stateMap) {
+    for (const stateData of Array.from(stateMap.values())) {
       const districts = await this.getDistrictsForState(stateData.name, filters);
       stateData.districts = districts;
     }
@@ -2130,7 +2130,7 @@ export class DatabaseStorage implements IStorage {
     });
 
     // For each district, get sub-district and village data
-    for (const [, districtData] of districtMap) {
+    for (const districtData of Array.from(districtMap.values())) {
       const subDistricts = await this.getSubDistrictsForDistrict(districtData.name, stateName, filters);
       districtData.subDistricts = subDistricts;
     }
@@ -2201,7 +2201,7 @@ export class DatabaseStorage implements IStorage {
     });
 
     // For each sub-district, get village data
-    for (const [, subDistrictData] of subDistrictMap) {
+    for (const subDistrictData of Array.from(subDistrictMap.values())) {
       const villages = await this.getVillagesForSubDistrict(subDistrictData.name, districtName, stateName, filters);
       subDistrictData.villages = villages;
     }
@@ -3095,13 +3095,11 @@ export class DatabaseStorage implements IStorage {
     devoteeCount: number;
   }>> {
     // Build the where condition for states query
-    let statesWhereCondition = isNotNull(addresses.stateNameEnglish);
-    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
-      statesWhereCondition = and(
-        isNotNull(addresses.stateNameEnglish),
-        inArray(addresses.districtNameEnglish, filters.allowedDistricts)
-      );
-    }
+    const statesConditions = [
+      isNotNull(addresses.stateNameEnglish),
+      filters?.allowedDistricts && filters.allowedDistricts.length > 0 ? inArray(addresses.districtNameEnglish, filters.allowedDistricts) : undefined
+    ].filter(Boolean) as any[];
+    const statesWhereCondition = and(...statesConditions);
 
     // Get all unique states from addresses table
     const allStates = await db
@@ -3112,53 +3110,42 @@ export class DatabaseStorage implements IStorage {
       .from(addresses)
       .where(statesWhereCondition);
 
+      // Build namhatta counts where condition
+    const namhattaConditions = [
+      isNotNull(addresses.stateNameEnglish),
+      ne(namhattas.status, 'Rejected'),
+      filters?.allowedDistricts && filters.allowedDistricts.length > 0 ? inArray(addresses.districtNameEnglish, filters.allowedDistricts) : undefined
+    ].filter(Boolean) as any[];
+    const namhattaWhereCondition = and(...namhattaConditions);
+
     // Get namhatta counts by state
-    const namhattaCountsQuery = db.select({
+    const namhattaCounts = await db.select({
       state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
-      .where(and(
-        isNotNull(addresses.stateNameEnglish),
-        ne(namhattas.status, 'Rejected')
-      ))
+      .where(namhattaWhereCondition)
       .groupBy(addresses.stateNameEnglish, addresses.country);
 
-    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
-      namhattaCountsQuery.where(
-        and(
-          isNotNull(addresses.stateNameEnglish),
-          ne(namhattas.status, 'Rejected'),
-          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
-        )
-      );
-    }
-
-    const namhattaCounts = await namhattaCountsQuery;
+    // Build devotee counts where condition
+    const devoteeConditions = [
+      isNotNull(addresses.stateNameEnglish),
+      filters?.allowedDistricts && filters.allowedDistricts.length > 0 ? inArray(addresses.districtNameEnglish, filters.allowedDistricts) : undefined
+    ].filter(Boolean) as any[];
+    const devoteeWhereCondition = and(...devoteeConditions);
 
     // Get devotee counts by state
-    const devoteeCountsQuery = db.select({
+    const devoteeCounts = await db.select({
       state: addresses.stateNameEnglish,
       country: addresses.country,
       count: count()
     }).from(devoteeAddresses)
       .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
       .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
-      .where(isNotNull(addresses.stateNameEnglish))
+      .where(devoteeWhereCondition)
       .groupBy(addresses.stateNameEnglish, addresses.country);
-
-    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
-      devoteeCountsQuery.where(
-        and(
-          isNotNull(addresses.stateNameEnglish),
-          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
-        )
-      );
-    }
-
-    const devoteeCounts = await devoteeCountsQuery;
 
     // Create maps for quick lookup
     const namhattaMap = new Map<string, number>();
@@ -3192,82 +3179,59 @@ export class DatabaseStorage implements IStorage {
     namhattaCount: number;
     devoteeCount: number;
   }>> {
+    // Build where condition for districts query
+    const districtQueryConditions = [
+      eq(addresses.stateNameEnglish, state),
+      isNotNull(addresses.districtNameEnglish),
+      filters?.allowedDistricts && filters.allowedDistricts.length > 0 ? inArray(addresses.districtNameEnglish, filters.allowedDistricts) : undefined
+    ].filter(Boolean) as any[];
+    const districtQueryWhere = and(...districtQueryConditions);
+
     // Get all unique districts for the state from addresses table
-    const allDistrictsQuery = db
+    const allDistricts = await db
       .selectDistinct({
         district: addresses.districtNameEnglish,
         state: addresses.stateNameEnglish
       })
       .from(addresses)
-      .where(and(
-        eq(addresses.stateNameEnglish, state),
-        isNotNull(addresses.districtNameEnglish)
-      ));
+      .where(districtQueryWhere);
 
-    // Apply district filtering if specified
-    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
-      allDistrictsQuery.where(
-        and(
-          eq(addresses.stateNameEnglish, state),
-          isNotNull(addresses.districtNameEnglish),
-          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
-        )
-      );
-    }
-
-    const allDistricts = await allDistrictsQuery;
+    // Build namhatta counts where condition for districts
+    const namhattaDistrictConditions = [
+      eq(addresses.stateNameEnglish, state),
+      isNotNull(addresses.districtNameEnglish),
+      ne(namhattas.status, 'Rejected'),
+      filters?.allowedDistricts && filters.allowedDistricts.length > 0 ? inArray(addresses.districtNameEnglish, filters.allowedDistricts) : undefined
+    ].filter(Boolean) as any[];
+    const namhattaDistrictWhere = and(...namhattaDistrictConditions);
 
     // Get namhatta counts by district
-    const namhattaCountsQuery = db.select({
+    const namhattaCounts = await db.select({
       district: addresses.districtNameEnglish,
       count: count()
     }).from(namhattaAddresses)
       .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
       .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
-      .where(and(
-        eq(addresses.stateNameEnglish, state),
-        isNotNull(addresses.districtNameEnglish),
-        ne(namhattas.status, 'Rejected')
-      ))
+      .where(namhattaDistrictWhere)
       .groupBy(addresses.districtNameEnglish);
 
-    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
-      namhattaCountsQuery.where(
-        and(
-          eq(addresses.stateNameEnglish, state),
-          isNotNull(addresses.districtNameEnglish),
-          ne(namhattas.status, 'Rejected'),
-          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
-        )
-      );
-    }
-
-    const namhattaCounts = await namhattaCountsQuery;
+    // Build devotee counts where condition for districts
+    const devoteeDistrictConditions = [
+      eq(addresses.stateNameEnglish, state),
+      isNotNull(addresses.districtNameEnglish),
+      filters?.allowedDistricts && filters.allowedDistricts.length > 0 ? inArray(addresses.districtNameEnglish, filters.allowedDistricts) : undefined
+    ].filter(Boolean) as any[];
+    const devoteeDistrictWhere = and(...devoteeDistrictConditions);
 
     // Get devotee counts by district
-    const devoteeCountsQuery = db.select({
+    const devoteeCounts = await db.select({
       district: addresses.districtNameEnglish,
       count: count()
     }).from(devoteeAddresses)
       .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
       .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
-      .where(and(
-        eq(addresses.stateNameEnglish, state),
-        isNotNull(addresses.districtNameEnglish)
-      ))
+      .where(devoteeDistrictWhere)
       .groupBy(addresses.districtNameEnglish);
-
-    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
-      devoteeCountsQuery.where(
-        and(
-          eq(addresses.stateNameEnglish, state),
-          isNotNull(addresses.districtNameEnglish),
-          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
-        )
-      );
-    }
-
-    const devoteeCounts = await devoteeCountsQuery;
 
     // Create maps for quick lookup
     const namhattaMap = new Map<string, number>();
