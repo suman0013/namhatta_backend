@@ -2,7 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import { z } from "zod";
-import { storage } from "./storage-fresh";
+import { DatabaseStorage } from "./storage-db";
+
+const storage = new DatabaseStorage();
 import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema, insertGurudevSchema } from "@shared/schema";
 import { authRoutes } from "./auth/routes";
 import { authenticateJWT, authorize, validateDistrictAccess, loginRateLimit, sanitizeInput } from "./auth/middleware";
@@ -279,6 +281,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.user?.role === 'DISTRICT_SUPERVISOR') {
         filters.allowedDistricts = req.user.districts;
       }
+      
+      // Disable caching to ensure fresh data
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       
       // Get real data from storage
       const reports = await storage.getHierarchicalReports(filters);
