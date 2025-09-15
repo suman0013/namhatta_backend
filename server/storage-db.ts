@@ -741,28 +741,38 @@ export class DatabaseStorage implements IStorage {
       .where(eq(namhattaAddresses.namhattaId, id))
       .limit(1);
     
-    // Transform the data to include both FK IDs and full devotee objects
+    // Helper function to get display name (prefers spiritual name, fallback to legal name)
+    const getDisplayName = (devotee: any) => devotee ? (devotee.name || devotee.legalName) : null;
+    
+    // Transform the data to include both FK IDs, full devotee objects, and name fields for backward compatibility
     let namhatta = {
       id: namhattaData.id,
       code: namhattaData.code,
       name: namhattaData.name,
       meetingDay: namhattaData.meetingDay,
       meetingTime: namhattaData.meetingTime,
-      // Include both FK IDs and full devotee objects
+      // Include FK IDs, full devotee objects, and name fields for backward compatibility
       malaSenapotiId: namhattaData.malaSenapotiId,
       malaSenapoti: namhattaData.malaSenapotiId ? devoteeMap.get(namhattaData.malaSenapotiId) || null : null,
+      malaSenapotiName: namhattaData.malaSenapotiId ? getDisplayName(devoteeMap.get(namhattaData.malaSenapotiId)) : null,
       mahaChakraSenapotiId: namhattaData.mahaChakraSenapotiId,
       mahaChakraSenapoti: namhattaData.mahaChakraSenapotiId ? devoteeMap.get(namhattaData.mahaChakraSenapotiId) || null : null,
+      mahaChakraSenapotiName: namhattaData.mahaChakraSenapotiId ? getDisplayName(devoteeMap.get(namhattaData.mahaChakraSenapotiId)) : null,
       chakraSenapotiId: namhattaData.chakraSenapotiId,
       chakraSenapoti: namhattaData.chakraSenapotiId ? devoteeMap.get(namhattaData.chakraSenapotiId) || null : null,
+      chakraSenapotiName: namhattaData.chakraSenapotiId ? getDisplayName(devoteeMap.get(namhattaData.chakraSenapotiId)) : null,
       upaChakraSenapotiId: namhattaData.upaChakraSenapotiId,
       upaChakraSenapoti: namhattaData.upaChakraSenapotiId ? devoteeMap.get(namhattaData.upaChakraSenapotiId) || null : null,
+      upaChakraSenapotiName: namhattaData.upaChakraSenapotiId ? getDisplayName(devoteeMap.get(namhattaData.upaChakraSenapotiId)) : null,
       secretaryId: namhattaData.secretaryId,
       secretary: namhattaData.secretaryId ? devoteeMap.get(namhattaData.secretaryId) || null : null,
+      secretaryName: namhattaData.secretaryId ? getDisplayName(devoteeMap.get(namhattaData.secretaryId)) : null,
       presidentId: namhattaData.presidentId,
       president: namhattaData.presidentId ? devoteeMap.get(namhattaData.presidentId) || null : null,
+      presidentName: namhattaData.presidentId ? getDisplayName(devoteeMap.get(namhattaData.presidentId)) : null,
       accountantId: namhattaData.accountantId,
       accountant: namhattaData.accountantId ? devoteeMap.get(namhattaData.accountantId) || null : null,
+      accountantName: namhattaData.accountantId ? getDisplayName(devoteeMap.get(namhattaData.accountantId)) : null,
       districtSupervisorId: namhattaData.districtSupervisorId,
       status: namhattaData.status,
       registrationNo: namhattaData.registrationNo,
