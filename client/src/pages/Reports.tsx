@@ -5,13 +5,20 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight, MapPin, Users, Home, BarChart3, RefreshCw } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Users, Home, BarChart3, RefreshCw, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { queryClient } from "@/lib/queryClient";
 
-interface VillageData {
+interface StateData {
   name: string;
-  subDistrict: string;
+  country: string;
+  namhattaCount: number;
+  devoteeCount: number;
+}
+
+interface DistrictData {
+  name: string;
+  state: string;
   namhattaCount: number;
   devoteeCount: number;
 }
@@ -21,27 +28,13 @@ interface SubDistrictData {
   district: string;
   namhattaCount: number;
   devoteeCount: number;
-  villages: VillageData[];
 }
 
-interface DistrictData {
+interface VillageData {
   name: string;
-  state: string;
+  subDistrict: string;
   namhattaCount: number;
   devoteeCount: number;
-  subDistricts: SubDistrictData[];
-}
-
-interface StateData {
-  name: string;
-  country: string;
-  namhattaCount: number;
-  devoteeCount: number;
-  districts: DistrictData[];
-}
-
-interface HierarchicalReportsData {
-  states: StateData[];
 }
 
 export default function Reports() {
@@ -50,16 +43,20 @@ export default function Reports() {
   const [openDistricts, setOpenDistricts] = useState<Set<string>>(new Set());
   const [openSubDistricts, setOpenSubDistricts] = useState<Set<string>>(new Set());
 
-  const { data: reportsData, isLoading, error, refetch, isFetching } = useQuery<HierarchicalReportsData>({
-    queryKey: ["/api/reports/hierarchical"],
-    staleTime: 0, // Override global settings to always consider data stale
-    refetchOnWindowFocus: true, // Override global settings to refetch on focus
+  // Query to fetch all states
+  const { data: statesData, isLoading: statesLoading, error: statesError, refetch: refetchStates, isFetching: statesFetching } = useQuery<StateData[]>({
+    queryKey: ["/api/reports/states"],
+    staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const handleRefresh = async () => {
-    // Invalidate the cache and trigger a fresh fetch
-    await queryClient.invalidateQueries({ queryKey: ["/api/reports/hierarchical"] });
-    refetch();
+    // Invalidate all cached data and refetch states
+    await queryClient.invalidateQueries({ queryKey: ["/api/reports/states"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/reports/districts"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/reports/sub-districts"] });
+    await queryClient.invalidateQueries({ queryKey: ["/api/reports/villages"] });
+    refetchStates();
   };
 
   const toggleState = (stateName: string) => {
@@ -92,7 +89,7 @@ export default function Reports() {
     setOpenSubDistricts(newOpenSubDistricts);
   };
 
-  if (isLoading) {
+  if (statesLoading) {
     return (
       <div className="container mx-auto p-6" data-testid="reports-loading">
         <div className="space-y-6">
@@ -120,7 +117,7 @@ export default function Reports() {
     );
   }
 
-  if (error) {
+  if (statesError) {
     return (
       <div className="container mx-auto p-6" data-testid="reports-error">
         <Card className="border-destructive">
@@ -135,8 +132,8 @@ export default function Reports() {
     );
   }
 
-  const totalNamhattas = reportsData?.states.reduce((sum, state) => sum + state.namhattaCount, 0) || 0;
-  const totalDevotees = reportsData?.states.reduce((sum, state) => sum + state.devoteeCount, 0) || 0;
+  const totalNamhattas = statesData?.reduce((sum, state) => sum + state.namhattaCount, 0) || 0;
+  const totalDevotees = statesData?.reduce((sum, state) => sum + state.devoteeCount, 0) || 0;
 
   return (
     <div className="container mx-auto p-6" data-testid="reports-page">
@@ -149,7 +146,7 @@ export default function Reports() {
               Hierarchical Reports
             </h1>
             <p className="text-muted-foreground">
-              Geographic breakdown of Namhattas and Devotees
+              Geographic breakdown of Namhattas and Devotees (with lazy loading)
               {user?.role === 'DISTRICT_SUPERVISOR' && (
                 <span className="ml-2 text-sm text-orange-600 dark:text-orange-400">
                   (Filtered to your assigned districts)
@@ -157,9 +154,9 @@ export default function Reports() {
               )}
             </p>
           </div>
-          <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2" disabled={isFetching} data-testid="refresh-reports">
-            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-            {isFetching ? 'Refreshing...' : 'Refresh Data'}
+          <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2" disabled={statesFetching} data-testid="refresh-reports">
+            <RefreshCw className={`h-4 w-4 ${statesFetching ? 'animate-spin' : ''}`} />
+            {statesFetching ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
 
@@ -171,7 +168,7 @@ export default function Reports() {
               <MapPin className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold" data-testid="total-states">{reportsData?.states.length || 0}</div>
+              <div className="text-2xl font-bold" data-testid="total-states">{statesData?.length || 0}</div>
             </CardContent>
           </Card>
           
@@ -198,176 +195,26 @@ export default function Reports() {
 
         {/* States List */}
         <div className="space-y-4">
-          {reportsData?.states.map((state) => {
+          {statesData?.map((state) => {
             const stateKey = `${state.name}_${state.country}`;
             const isStateOpen = openStates.has(stateKey);
             
             return (
-              <Card key={stateKey} className="overflow-hidden">
-                <Collapsible open={isStateOpen} onOpenChange={() => toggleState(stateKey)}>
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="hover:bg-muted/50 cursor-pointer transition-colors" data-testid={`state-header-${state.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Button variant="ghost" size="sm" className="p-0 h-auto">
-                            {isStateOpen ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <div>
-                            <CardTitle className="text-lg">{state.name}</CardTitle>
-                            <p className="text-sm text-muted-foreground">{state.country}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-4">
-                          <div className="text-center">
-                            <Badge variant="secondary" className="mb-1">
-                              <Home className="h-3 w-3 mr-1" />
-                              {state.namhattaCount}
-                            </Badge>
-                            <p className="text-xs text-muted-foreground">Namhattas</p>
-                          </div>
-                          <div className="text-center">
-                            <Badge variant="outline" className="mb-1">
-                              <Users className="h-3 w-3 mr-1" />
-                              {state.devoteeCount}
-                            </Badge>
-                            <p className="text-xs text-muted-foreground">Devotees</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      <div className="space-y-3 ml-6">
-                        {state.districts.map((district) => {
-                          const districtKey = `${district.name}_${district.state}`;
-                          const isDistrictOpen = openDistricts.has(districtKey);
-                          
-                          return (
-                            <Card key={districtKey} className="border-l-4 border-l-primary/20">
-                              <Collapsible open={isDistrictOpen} onOpenChange={() => toggleDistrict(districtKey)}>
-                                <CollapsibleTrigger asChild>
-                                  <CardHeader className="hover:bg-muted/50 cursor-pointer transition-colors py-3" data-testid={`district-header-${district.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-3">
-                                        <Button variant="ghost" size="sm" className="p-0 h-auto">
-                                          {isDistrictOpen ? (
-                                            <ChevronDown className="h-4 w-4" />
-                                          ) : (
-                                            <ChevronRight className="h-4 w-4" />
-                                          )}
-                                        </Button>
-                                        <div>
-                                          <CardTitle className="text-base">{district.name}</CardTitle>
-                                          <p className="text-xs text-muted-foreground">District</p>
-                                        </div>
-                                      </div>
-                                      <div className="flex gap-3">
-                                        <Badge variant="secondary" className="text-xs">
-                                          <Home className="h-3 w-3 mr-1" />
-                                          {district.namhattaCount}
-                                        </Badge>
-                                        <Badge variant="outline" className="text-xs">
-                                          <Users className="h-3 w-3 mr-1" />
-                                          {district.devoteeCount}
-                                        </Badge>
-                                      </div>
-                                    </div>
-                                  </CardHeader>
-                                </CollapsibleTrigger>
-                                
-                                <CollapsibleContent>
-                                  <CardContent className="pt-0">
-                                    <div className="space-y-2 ml-6">
-                                      {district.subDistricts.map((subDistrict) => {
-                                        const subDistrictKey = `${subDistrict.name}_${subDistrict.district}`;
-                                        const isSubDistrictOpen = openSubDistricts.has(subDistrictKey);
-                                        
-                                        return (
-                                          <Card key={subDistrictKey} className="border-l-4 border-l-secondary/30">
-                                            <Collapsible open={isSubDistrictOpen} onOpenChange={() => toggleSubDistrict(subDistrictKey)}>
-                                              <CollapsibleTrigger asChild>
-                                                <CardHeader className="hover:bg-muted/50 cursor-pointer transition-colors py-2" data-testid={`subdistrict-header-${subDistrict.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                                                  <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                      <Button variant="ghost" size="sm" className="p-0 h-auto">
-                                                        {isSubDistrictOpen ? (
-                                                          <ChevronDown className="h-3 w-3" />
-                                                        ) : (
-                                                          <ChevronRight className="h-3 w-3" />
-                                                        )}
-                                                      </Button>
-                                                      <div>
-                                                        <CardTitle className="text-sm">{subDistrict.name}</CardTitle>
-                                                        <p className="text-xs text-muted-foreground">Sub-District</p>
-                                                      </div>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                      <Badge variant="secondary" className="text-xs">
-                                                        <Home className="h-2 w-2 mr-1" />
-                                                        {subDistrict.namhattaCount}
-                                                      </Badge>
-                                                      <Badge variant="outline" className="text-xs">
-                                                        <Users className="h-2 w-2 mr-1" />
-                                                        {subDistrict.devoteeCount}
-                                                      </Badge>
-                                                    </div>
-                                                  </div>
-                                                </CardHeader>
-                                              </CollapsibleTrigger>
-                                              
-                                              <CollapsibleContent>
-                                                <CardContent className="pt-0">
-                                                  <div className="space-y-1 ml-6">
-                                                    {subDistrict.villages.map((village) => (
-                                                      <div key={`${village.name}_${village.subDistrict}`} 
-                                                           className="flex items-center justify-between p-2 rounded border bg-muted/30"
-                                                           data-testid={`village-item-${village.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                                                        <div>
-                                                          <p className="text-sm font-medium">{village.name}</p>
-                                                          <p className="text-xs text-muted-foreground">Village</p>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                          <Badge variant="secondary" className="text-xs">
-                                                            <Home className="h-2 w-2 mr-1" />
-                                                            {village.namhattaCount}
-                                                          </Badge>
-                                                          <Badge variant="outline" className="text-xs">
-                                                            <Users className="h-2 w-2 mr-1" />
-                                                            {village.devoteeCount}
-                                                          </Badge>
-                                                        </div>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                </CardContent>
-                                              </CollapsibleContent>
-                                            </Collapsible>
-                                          </Card>
-                                        );
-                                      })}
-                                    </div>
-                                  </CardContent>
-                                </CollapsibleContent>
-                              </Collapsible>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
+              <StateCard 
+                key={stateKey}
+                state={state}
+                isOpen={isStateOpen}
+                onToggle={() => toggleState(stateKey)}
+                openDistricts={openDistricts}
+                onToggleDistrict={toggleDistrict}
+                openSubDistricts={openSubDistricts}
+                onToggleSubDistrict={toggleSubDistrict}
+              />
             );
           })}
         </div>
 
-        {(!reportsData?.states || reportsData.states.length === 0) && (
+        {(!statesData || statesData.length === 0) && (
           <Card>
             <CardContent className="text-center py-8">
               <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -380,5 +227,280 @@ export default function Reports() {
         )}
       </div>
     </div>
+  );
+}
+
+// State Card Component with lazy loading for districts
+function StateCard({ 
+  state, 
+  isOpen, 
+  onToggle, 
+  openDistricts, 
+  onToggleDistrict,
+  openSubDistricts,
+  onToggleSubDistrict 
+}: {
+  state: StateData;
+  isOpen: boolean;
+  onToggle: () => void;
+  openDistricts: Set<string>;
+  onToggleDistrict: (key: string) => void;
+  openSubDistricts: Set<string>;
+  onToggleSubDistrict: (key: string) => void;
+}) {
+  // Only fetch districts when state is opened
+  const { data: districtsData, isLoading: districtsLoading } = useQuery<DistrictData[]>({
+    queryKey: ["/api/reports/districts", state.name],
+    enabled: isOpen, // Only fetch when state is expanded
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  return (
+    <Card className="overflow-hidden">
+      <Collapsible open={isOpen} onOpenChange={onToggle}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="hover:bg-muted/50 cursor-pointer transition-colors" data-testid={`state-header-${state.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="sm" className="p-0 h-auto">
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+                <div>
+                  <CardTitle className="text-lg">{state.name}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{state.country}</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="text-center">
+                  <Badge variant="secondary" className="mb-1">
+                    <Home className="h-3 w-3 mr-1" />
+                    {state.namhattaCount}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground">Namhattas</p>
+                </div>
+                <div className="text-center">
+                  <Badge variant="outline" className="mb-1">
+                    <Users className="h-3 w-3 mr-1" />
+                    {state.devoteeCount}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground">Devotees</p>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            <div className="space-y-3 ml-6">
+              {districtsLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Loading districts...</span>
+                </div>
+              ) : districtsData?.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <p>No districts found for {state.name}</p>
+                </div>
+              ) : (
+                districtsData?.map((district) => (
+                  <DistrictCard 
+                    key={`${district.name}_${district.state}`}
+                    district={district}
+                    isOpen={openDistricts.has(`${district.name}_${district.state}`)}
+                    onToggle={() => onToggleDistrict(`${district.name}_${district.state}`)}
+                    openSubDistricts={openSubDistricts}
+                    onToggleSubDistrict={onToggleSubDistrict}
+                  />
+                ))
+              )}
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
+  );
+}
+
+// District Card Component with lazy loading for sub-districts  
+function DistrictCard({ 
+  district, 
+  isOpen, 
+  onToggle,
+  openSubDistricts,
+  onToggleSubDistrict 
+}: {
+  district: DistrictData;
+  isOpen: boolean;
+  onToggle: () => void;
+  openSubDistricts: Set<string>;
+  onToggleSubDistrict: (key: string) => void;
+}) {
+  // Only fetch sub-districts when district is opened
+  const { data: subDistrictsData, isLoading: subDistrictsLoading } = useQuery<SubDistrictData[]>({
+    queryKey: ["/api/reports/sub-districts", district.state, district.name],
+    enabled: isOpen, // Only fetch when district is expanded
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  return (
+    <Card className="border-l-4 border-l-primary/20">
+      <Collapsible open={isOpen} onOpenChange={onToggle}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="hover:bg-muted/50 cursor-pointer transition-colors py-3" data-testid={`district-header-${district.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="sm" className="p-0 h-auto">
+                  {isOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+                <div>
+                  <CardTitle className="text-base">{district.name}</CardTitle>
+                  <p className="text-xs text-muted-foreground">District</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Badge variant="secondary" className="text-xs">
+                  <Home className="h-3 w-3 mr-1" />
+                  {district.namhattaCount}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <Users className="h-3 w-3 mr-1" />
+                  {district.devoteeCount}
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            <div className="space-y-2 ml-6">
+              {subDistrictsLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Loading sub-districts...</span>
+                </div>
+              ) : subDistrictsData?.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <p>No sub-districts found for {district.name}</p>
+                </div>
+              ) : (
+                subDistrictsData?.map((subDistrict) => (
+                  <SubDistrictCard 
+                    key={`${subDistrict.name}_${subDistrict.district}`}
+                    subDistrict={subDistrict}
+                    isOpen={openSubDistricts.has(`${subDistrict.name}_${subDistrict.district}`)}
+                    onToggle={() => onToggleSubDistrict(`${subDistrict.name}_${subDistrict.district}`)}
+                    districtState={district.state}
+                  />
+                ))
+              )}
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
+  );
+}
+
+// Sub-District Card Component with lazy loading for villages
+function SubDistrictCard({ 
+  subDistrict, 
+  isOpen, 
+  onToggle,
+  districtState 
+}: {
+  subDistrict: SubDistrictData;
+  isOpen: boolean;
+  onToggle: () => void;
+  districtState: string;
+}) {
+  // Only fetch villages when sub-district is opened
+  const { data: villagesData, isLoading: villagesLoading } = useQuery<VillageData[]>({
+    queryKey: ["/api/reports/villages", districtState, subDistrict.district, subDistrict.name],
+    enabled: isOpen, // Only fetch when sub-district is expanded
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  return (
+    <Card className="border-l-4 border-l-secondary/30">
+      <Collapsible open={isOpen} onOpenChange={onToggle}>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="hover:bg-muted/50 cursor-pointer transition-colors py-2" data-testid={`subdistrict-header-${subDistrict.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="sm" className="p-0 h-auto">
+                  {isOpen ? (
+                    <ChevronDown className="h-3 w-3" />
+                  ) : (
+                    <ChevronRight className="h-3 w-3" />
+                  )}
+                </Button>
+                <div>
+                  <CardTitle className="text-sm">{subDistrict.name}</CardTitle>
+                  <p className="text-xs text-muted-foreground">Sub-District</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  <Home className="h-2 w-2 mr-1" />
+                  {subDistrict.namhattaCount}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <Users className="h-2 w-2 mr-1" />
+                  {subDistrict.devoteeCount}
+                </Badge>
+              </div>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent>
+          <CardContent className="pt-0">
+            <div className="space-y-1 ml-6">
+              {villagesLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Loading villages...</span>
+                </div>
+              ) : villagesData?.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <p>No villages found for {subDistrict.name}</p>
+                </div>
+              ) : (
+                villagesData?.map((village) => (
+                  <div key={`${village.name}_${village.subDistrict}`} 
+                       className="flex items-center justify-between p-2 rounded border bg-muted/30"
+                       data-testid={`village-item-${village.name.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <div>
+                      <p className="text-sm font-medium">{village.name}</p>
+                      <p className="text-xs text-muted-foreground">Village</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant="secondary" className="text-xs">
+                        <Home className="h-2 w-2 mr-1" />
+                        {village.namhattaCount}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        <Users className="h-2 w-2 mr-1" />
+                        {village.devoteeCount}
+                      </Badge>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
   );
 }
