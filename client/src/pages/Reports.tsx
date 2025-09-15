@@ -250,7 +250,7 @@ function StateCard({
 }) {
   // Only fetch districts when state is opened
   const { data: districtsData, isLoading: districtsLoading } = useQuery<DistrictData[]>({
-    queryKey: ["/api/reports/districts", state.name],
+    queryKey: [`/api/reports/districts/${encodeURIComponent(state.name)}`],
     enabled: isOpen, // Only fetch when state is expanded
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -342,7 +342,7 @@ function DistrictCard({
 }) {
   // Only fetch sub-districts when district is opened
   const { data: subDistrictsData, isLoading: subDistrictsLoading } = useQuery<SubDistrictData[]>({
-    queryKey: ["/api/reports/sub-districts", district.state, district.name],
+    queryKey: [`/api/reports/sub-districts/${encodeURIComponent(district.state)}/${encodeURIComponent(district.name)}`],
     enabled: isOpen, // Only fetch when district is expanded
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -425,7 +425,7 @@ function SubDistrictCard({
 }) {
   // Only fetch villages when sub-district is opened
   const { data: villagesData, isLoading: villagesLoading } = useQuery<VillageData[]>({
-    queryKey: ["/api/reports/villages", districtState, subDistrict.district, subDistrict.name],
+    queryKey: [`/api/reports/villages/${encodeURIComponent(districtState)}/${encodeURIComponent(subDistrict.district)}/${encodeURIComponent(subDistrict.name)}`],
     enabled: isOpen, // Only fetch when sub-district is expanded
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
