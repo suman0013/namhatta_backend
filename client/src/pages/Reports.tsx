@@ -91,41 +91,14 @@ export default function Reports() {
 
   if (statesLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20" data-testid="reports-loading">
-        <div className="container mx-auto p-4 lg:p-8">
-          <div className="space-y-8">
-            {/* Header Skeleton */}
-            <div className="text-center space-y-4">
-              <Skeleton className="h-12 w-64 mx-auto" />
-              <Skeleton className="h-4 w-96 mx-auto" />
-            </div>
-            
-            {/* Stats Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
-                  <CardHeader className="pb-3">
-                    <Skeleton className="h-5 w-24" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-8 w-16" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            {/* List Skeleton */}
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="border-0 shadow-lg">
-                  <CardHeader>
-                    <Skeleton className="h-6 w-1/3" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-4 w-full" />
-                  </CardContent>
-                </Card>
-              ))}
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 text-white" data-testid="reports-loading">
+        <div className="container mx-auto p-4">
+          <div className="space-y-4">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400 mx-auto mb-3"></div>
+                <p className="text-purple-200">Loading Reports...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -135,23 +108,19 @@ export default function Reports() {
 
   if (statesError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20" data-testid="reports-error">
-        <div className="container mx-auto p-4 lg:p-8">
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-red-200 dark:border-red-800">
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="h-8 w-8 text-red-600 dark:text-red-400" />
-              </div>
-              <CardTitle className="text-red-800 dark:text-red-200 text-xl">Error Loading Reports</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-red-700 dark:text-red-300">Failed to load hierarchical reports. Please try again later.</p>
-              <Button onClick={handleRefresh} className="mt-4" variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Try Again
-              </Button>
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 text-white" data-testid="reports-error">
+        <div className="container mx-auto p-4">
+          <div className="text-center py-12">
+            <div className="text-red-400 mb-4">
+              <BarChart3 className="h-12 w-12 mx-auto" />
+            </div>
+            <h2 className="text-xl font-bold text-red-300 mb-2">Error Loading Reports</h2>
+            <p className="text-red-200 mb-4">Failed to load data. Please try again.</p>
+            <Button onClick={handleRefresh} variant="outline" className="bg-red-600 hover:bg-red-700 border-red-500">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -161,133 +130,63 @@ export default function Reports() {
   const totalDevotees = statesData?.reduce((sum, state) => sum + state.devoteeCount, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20" data-testid="reports-page">
-      <div className="container mx-auto p-4 lg:p-8">
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg mb-6">
-              <BarChart3 className="h-10 w-10 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 text-white" data-testid="reports-page">
+      <div className="container mx-auto p-4">
+        <div className="space-y-4">
+          {/* Compact Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <BarChart3 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Hierarchical Reports</h1>
+                <p className="text-purple-200 text-sm">
+                  Geographic breakdown • {statesData?.length || 0} states • {totalNamhattas} centers • {totalDevotees} devotees
+                  {user?.role === 'DISTRICT_SUPERVISOR' && <span className="ml-2 text-orange-300">🔒 District-filtered</span>}
+                </p>
+              </div>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Hierarchical Reports
-            </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive geographic breakdown of Namhattas and Devotees with intelligent lazy loading
-              {user?.role === 'DISTRICT_SUPERVISOR' && (
-                <span className="block mt-2 text-sm px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full inline-block">
-                  🔒 Filtered to your assigned districts
-                </span>
-              )}
-            </p>
-            <div className="flex justify-center">
-              <Button 
-                onClick={handleRefresh} 
-                variant="outline" 
-                size="lg"
-                className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 hover:bg-white dark:hover:bg-gray-800 transition-all duration-300 shadow-lg" 
-                disabled={statesFetching} 
-                data-testid="refresh-reports"
-              >
-                <RefreshCw className={`h-5 w-5 ${statesFetching ? 'animate-spin' : ''}`} />
-                {statesFetching ? 'Refreshing...' : 'Refresh Data'}
-              </Button>
-            </div>
+            <Button 
+              onClick={handleRefresh} 
+              variant="outline" 
+              size="sm"
+              className="bg-purple-700/50 border-purple-500 hover:bg-purple-600 text-white" 
+              disabled={statesFetching} 
+              data-testid="refresh-reports"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${statesFetching ? 'animate-spin' : ''}`} />
+              {statesFetching ? 'Refreshing...' : 'Refresh'}
+            </Button>
           </div>
 
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white group hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-blue-100">Total States</CardTitle>
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Globe className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold mb-1" data-testid="total-states">{statesData?.length || 0}</div>
-                <p className="text-blue-100 text-sm flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  Geographic regions
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white group hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-green-100">Total Namhattas</CardTitle>
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Building2 className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold mb-1" data-testid="total-namhattas">{totalNamhattas}</div>
-                <p className="text-green-100 text-sm flex items-center gap-1">
-                  <Home className="h-3 w-3" />
-                  Active centers
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white group hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                <CardTitle className="text-sm font-medium text-purple-100">Total Devotees</CardTitle>
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Users className="h-5 w-5 text-white" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold mb-1" data-testid="total-devotees">{totalDevotees}</div>
-                <p className="text-purple-100 text-sm flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  Community members
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* States List */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-              <MapPin className="h-6 w-6 text-blue-600" />
-              Geographic Breakdown
-            </h2>
-            <div className="space-y-4">
-              {statesData?.map((state) => {
-                const stateKey = `${state.name}_${state.country}`;
-                const isStateOpen = openStates.has(stateKey);
-                
-                return (
-                  <StateCard 
-                    key={stateKey}
-                    state={state}
-                    isOpen={isStateOpen}
-                    onToggle={() => toggleState(stateKey)}
-                    openDistricts={openDistricts}
-                    onToggleDistrict={toggleDistrict}
-                    openSubDistricts={openSubDistricts}
-                    onToggleSubDistrict={toggleSubDistrict}
-                  />
-                );
-              })}
-            </div>
+          {/* Compact States List */}
+          <div className="space-y-2">
+            {statesData?.map((state) => {
+              const stateKey = `${state.name}_${state.country}`;
+              const isStateOpen = openStates.has(stateKey);
+              
+              return (
+                <StateCard 
+                  key={stateKey}
+                  state={state}
+                  isOpen={isStateOpen}
+                  onToggle={() => toggleState(stateKey)}
+                  openDistricts={openDistricts}
+                  onToggleDistrict={toggleDistrict}
+                  openSubDistricts={openSubDistricts}
+                  onToggleSubDistrict={toggleSubDistrict}
+                />
+              );
+            })}
           </div>
 
           {(!statesData || statesData.length === 0) && (
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
-              <CardContent className="text-center py-12">
-                <div className="w-24 h-24 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <MapPin className="h-12 w-12 text-gray-500 dark:text-gray-400" />
-                </div>
-                <h3 className="text-xl font-bold mb-3 text-gray-800 dark:text-gray-200">No Data Available</h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                  No geographic data found for your access level. Contact your administrator for access to more regions.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="text-center py-8">
+              <MapPin className="h-16 w-16 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-purple-200 mb-2">No Data Available</h3>
+              <p className="text-purple-300 text-sm">No geographic data found for your access level.</p>
+            </div>
           )}
         </div>
       </div>
@@ -321,81 +220,56 @@ function StateCard({
   });
 
   return (
-    <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+    <div className="border-l-4 border-purple-500 bg-slate-800/50 backdrop-blur-sm rounded-r-lg hover:bg-slate-800/70 transition-all">
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 cursor-pointer transition-all duration-300" data-testid={`state-header-${state.name.toLowerCase().replace(/\s+/g, '-')}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-md">
-                  {isOpen ? (
-                    <ChevronDown className="h-5 w-5 text-white" />
-                  ) : (
-                    <ChevronRight className="h-5 w-5 text-white" />
-                  )}
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">{state.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <Globe className="h-3 w-3" />
-                    {state.country}
-                  </p>
-                </div>
+          <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-slate-700/50 transition-colors" data-testid={`state-header-${state.name.toLowerCase().replace(/\s+/g, '-')}`}>
+            <div className="flex items-center gap-3">
+              <div className="text-purple-400">
+                {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </div>
-              <div className="flex gap-6">
-                <div className="text-center">
-                  <Badge className="mb-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white border-0 px-3 py-1">
-                    <Building2 className="h-3 w-3 mr-1" />
-                    {state.namhattaCount}
-                  </Badge>
-                  <p className="text-xs font-medium text-muted-foreground">Namhattas</p>
-                </div>
-                <div className="text-center">
-                  <Badge variant="outline" className="mb-2 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 px-3 py-1">
-                    <Users className="h-3 w-3 mr-1" />
-                    {state.devoteeCount}
-                  </Badge>
-                  <p className="text-xs font-medium text-muted-foreground">Devotees</p>
-                </div>
+              <Globe className="h-4 w-4 text-purple-400" />
+              <span className="text-white font-semibold">{state.name}</span>
+              <span className="text-purple-300 text-sm">({state.country})</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1 text-green-400">
+                <Building2 className="h-3 w-3" />
+                <span className="text-sm font-medium">{state.namhattaCount}</span>
+              </div>
+              <div className="flex items-center gap-1 text-blue-400">
+                <Users className="h-3 w-3" />
+                <span className="text-sm font-medium">{state.devoteeCount}</span>
               </div>
             </div>
-          </CardHeader>
+          </div>
         </CollapsibleTrigger>
         
         <CollapsibleContent>
-          <CardContent className="pt-0 border-t border-gray-100 dark:border-gray-700 bg-gradient-to-br from-gray-50/50 to-blue-50/50 dark:from-gray-800/50 dark:to-blue-900/10">
-            <div className="space-y-3 p-4">
-              {districtsLoading ? (
-                <div className="flex items-center justify-center gap-3 py-8">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 text-white animate-spin" />
-                  </div>
-                  <span className="text-gray-600 dark:text-gray-300 font-medium">Loading districts...</span>
-                </div>
-              ) : districtsData?.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MapPin className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400">No districts found for {state.name}</p>
-                </div>
-              ) : (
-                districtsData?.map((district) => (
-                  <DistrictCard 
-                    key={`${district.name}_${district.state}`}
-                    district={district}
-                    isOpen={openDistricts.has(`${district.name}_${district.state}`)}
-                    onToggle={() => onToggleDistrict(`${district.name}_${district.state}`)}
-                    openSubDistricts={openSubDistricts}
-                    onToggleSubDistrict={onToggleSubDistrict}
-                  />
-                ))
-              )}
-            </div>
-          </CardContent>
+          <div className="pl-8 pb-2">
+            {districtsLoading ? (
+              <div className="flex items-center gap-2 py-3 text-purple-300">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                <span className="text-sm">Loading...</span>
+              </div>
+            ) : districtsData?.length === 0 ? (
+              <div className="text-purple-400 text-sm py-2">No districts found</div>
+            ) : (
+              districtsData?.map((district) => (
+                <DistrictCard 
+                  key={`${district.name}_${district.state}`}
+                  district={district}
+                  isOpen={openDistricts.has(`${district.name}_${district.state}`)}
+                  onToggle={() => onToggleDistrict(`${district.name}_${district.state}`)}
+                  openSubDistricts={openSubDistricts}
+                  onToggleSubDistrict={onToggleSubDistrict}
+                />
+              ))
+            )}
+          </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </div>
   );
 }
 
