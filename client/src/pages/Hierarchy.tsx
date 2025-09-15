@@ -30,6 +30,12 @@ export default function Hierarchy() {
   const [isDistrictSupervisorsOpen, setIsDistrictSupervisorsOpen] = useState(false);
   const [isAdditionalLeadersOpen, setIsAdditionalLeadersOpen] = useState(false);
   
+  // State for hierarchical navigation
+  const [selectedDistrictSupervisor, setSelectedDistrictSupervisor] = useState<number | null>(null);
+  const [selectedMalaSenapoti, setSelectedMalaSenapoti] = useState<number | null>(null);
+  const [selectedMahaChakraSenapoti, setSelectedMahaChakraSenapoti] = useState<number | null>(null);
+  const [selectedChakraSenapoti, setSelectedChakraSenapoti] = useState<number | null>(null);
+  
   const { data: hierarchy, isLoading, error } = useQuery<HierarchyData>({
     queryKey: ["/api/hierarchy"],
   });
