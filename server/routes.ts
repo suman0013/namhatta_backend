@@ -299,6 +299,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Lazy Loading Reports API Endpoints
+  app.get("/api/reports/states", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
+    try {
+      const filters: { allowedDistricts?: string[] } = {};
+      
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        filters.allowedDistricts = req.user.districts;
+      }
+      
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      const states = await storage.getAllStatesWithCounts(filters);
+      res.json(states);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get("/api/reports/districts/:state", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
+    try {
+      const { state } = req.params;
+      const filters: { allowedDistricts?: string[] } = {};
+      
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        filters.allowedDistricts = req.user.districts;
+      }
+      
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      const districts = await storage.getAllDistrictsWithCounts(state, filters);
+      res.json(districts);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get("/api/reports/sub-districts/:state/:district", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
+    try {
+      const { state, district } = req.params;
+      const filters: { allowedDistricts?: string[] } = {};
+      
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        filters.allowedDistricts = req.user.districts;
+      }
+      
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      const subDistricts = await storage.getAllSubDistrictsWithCounts(state, district, filters);
+      res.json(subDistricts);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  app.get("/api/reports/villages/:state/:district/:subdistrict", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
+    try {
+      const { state, district, subdistrict } = req.params;
+      const filters: { allowedDistricts?: string[] } = {};
+      
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        filters.allowedDistricts = req.user.districts;
+      }
+      
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
+      const villages = await storage.getAllVillagesWithCounts(state, district, subdistrict, filters);
+      res.json(villages);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Dashboard (requires authentication)
   app.get("/api/dashboard", authenticateJWT, async (req, res) => {
     const summary = await storage.getDashboardSummary();

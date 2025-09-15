@@ -3086,4 +3086,358 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+
+  // Lazy loading methods for hierarchical reports (includes ALL locations, even with 0 counts)
+  async getAllStatesWithCounts(filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    country: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>> {
+    // Build the where condition for states query
+    let statesWhereCondition = isNotNull(addresses.stateNameEnglish);
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      statesWhereCondition = and(
+        isNotNull(addresses.stateNameEnglish),
+        inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+      );
+    }
+
+    // Get all unique states from addresses table
+    const allStates = await db
+      .selectDistinct({
+        state: addresses.stateNameEnglish,
+        country: addresses.country
+      })
+      .from(addresses)
+      .where(statesWhereCondition);
+
+    // Get namhatta counts by state
+    const namhattaCountsQuery = db.select({
+      state: addresses.stateNameEnglish,
+      country: addresses.country,
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        isNotNull(addresses.stateNameEnglish),
+        ne(namhattas.status, 'Rejected')
+      ))
+      .groupBy(addresses.stateNameEnglish, addresses.country);
+
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      namhattaCountsQuery.where(
+        and(
+          isNotNull(addresses.stateNameEnglish),
+          ne(namhattas.status, 'Rejected'),
+          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+        )
+      );
+    }
+
+    const namhattaCounts = await namhattaCountsQuery;
+
+    // Get devotee counts by state
+    const devoteeCountsQuery = db.select({
+      state: addresses.stateNameEnglish,
+      country: addresses.country,
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(isNotNull(addresses.stateNameEnglish))
+      .groupBy(addresses.stateNameEnglish, addresses.country);
+
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      devoteeCountsQuery.where(
+        and(
+          isNotNull(addresses.stateNameEnglish),
+          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+        )
+      );
+    }
+
+    const devoteeCounts = await devoteeCountsQuery;
+
+    // Create maps for quick lookup
+    const namhattaMap = new Map<string, number>();
+    const devoteeMap = new Map<string, number>();
+
+    namhattaCounts.forEach(result => {
+      const key = `${result.state}_${result.country}`;
+      namhattaMap.set(key, result.count);
+    });
+
+    devoteeCounts.forEach(result => {
+      const key = `${result.state}_${result.country}`;
+      devoteeMap.set(key, result.count);
+    });
+
+    // Combine all states with their counts (0 if not found)
+    return allStates.map(state => {
+      const key = `${state.state}_${state.country}`;
+      return {
+        name: state.state || 'Unknown',
+        country: state.country || 'Unknown',
+        namhattaCount: namhattaMap.get(key) || 0,
+        devoteeCount: devoteeMap.get(key) || 0
+      };
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async getAllDistrictsWithCounts(state: string, filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    state: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>> {
+    // Get all unique districts for the state from addresses table
+    const allDistrictsQuery = db
+      .selectDistinct({
+        district: addresses.districtNameEnglish,
+        state: addresses.stateNameEnglish
+      })
+      .from(addresses)
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        isNotNull(addresses.districtNameEnglish)
+      ));
+
+    // Apply district filtering if specified
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      allDistrictsQuery.where(
+        and(
+          eq(addresses.stateNameEnglish, state),
+          isNotNull(addresses.districtNameEnglish),
+          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+        )
+      );
+    }
+
+    const allDistricts = await allDistrictsQuery;
+
+    // Get namhatta counts by district
+    const namhattaCountsQuery = db.select({
+      district: addresses.districtNameEnglish,
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        isNotNull(addresses.districtNameEnglish),
+        ne(namhattas.status, 'Rejected')
+      ))
+      .groupBy(addresses.districtNameEnglish);
+
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      namhattaCountsQuery.where(
+        and(
+          eq(addresses.stateNameEnglish, state),
+          isNotNull(addresses.districtNameEnglish),
+          ne(namhattas.status, 'Rejected'),
+          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+        )
+      );
+    }
+
+    const namhattaCounts = await namhattaCountsQuery;
+
+    // Get devotee counts by district
+    const devoteeCountsQuery = db.select({
+      district: addresses.districtNameEnglish,
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        isNotNull(addresses.districtNameEnglish)
+      ))
+      .groupBy(addresses.districtNameEnglish);
+
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      devoteeCountsQuery.where(
+        and(
+          eq(addresses.stateNameEnglish, state),
+          isNotNull(addresses.districtNameEnglish),
+          inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+        )
+      );
+    }
+
+    const devoteeCounts = await devoteeCountsQuery;
+
+    // Create maps for quick lookup
+    const namhattaMap = new Map<string, number>();
+    const devoteeMap = new Map<string, number>();
+
+    namhattaCounts.forEach(result => {
+      namhattaMap.set(result.district!, result.count);
+    });
+
+    devoteeCounts.forEach(result => {
+      devoteeMap.set(result.district!, result.count);
+    });
+
+    // Combine all districts with their counts (0 if not found)
+    return allDistricts.map(district => ({
+      name: district.district || 'Unknown',
+      state: district.state || 'Unknown',
+      namhattaCount: namhattaMap.get(district.district!) || 0,
+      devoteeCount: devoteeMap.get(district.district!) || 0
+    })).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async getAllSubDistrictsWithCounts(state: string, district: string, filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    district: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>> {
+    // Check if we have access to this district
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0 && !filters.allowedDistricts.includes(district)) {
+      return [];
+    }
+
+    // Get all unique sub-districts for the district from addresses table
+    const allSubDistricts = await db
+      .selectDistinct({
+        subDistrict: addresses.subdistrictNameEnglish,
+        district: addresses.districtNameEnglish
+      })
+      .from(addresses)
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        eq(addresses.districtNameEnglish, district),
+        isNotNull(addresses.subdistrictNameEnglish)
+      ));
+
+    // Get namhatta counts by sub-district
+    const namhattaCounts = await db.select({
+      subDistrict: addresses.subdistrictNameEnglish,
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        eq(addresses.districtNameEnglish, district),
+        isNotNull(addresses.subdistrictNameEnglish),
+        ne(namhattas.status, 'Rejected')
+      ))
+      .groupBy(addresses.subdistrictNameEnglish);
+
+    // Get devotee counts by sub-district
+    const devoteeCounts = await db.select({
+      subDistrict: addresses.subdistrictNameEnglish,
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        eq(addresses.districtNameEnglish, district),
+        isNotNull(addresses.subdistrictNameEnglish)
+      ))
+      .groupBy(addresses.subdistrictNameEnglish);
+
+    // Create maps for quick lookup
+    const namhattaMap = new Map<string, number>();
+    const devoteeMap = new Map<string, number>();
+
+    namhattaCounts.forEach(result => {
+      namhattaMap.set(result.subDistrict!, result.count);
+    });
+
+    devoteeCounts.forEach(result => {
+      devoteeMap.set(result.subDistrict!, result.count);
+    });
+
+    // Combine all sub-districts with their counts (0 if not found)
+    return allSubDistricts.map(subDistrict => ({
+      name: subDistrict.subDistrict || 'Unknown',
+      district: subDistrict.district || 'Unknown',
+      namhattaCount: namhattaMap.get(subDistrict.subDistrict!) || 0,
+      devoteeCount: devoteeMap.get(subDistrict.subDistrict!) || 0
+    })).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async getAllVillagesWithCounts(state: string, district: string, subDistrict: string, filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    subDistrict: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>> {
+    // Check if we have access to this district
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0 && !filters.allowedDistricts.includes(district)) {
+      return [];
+    }
+
+    // Get all unique villages for the sub-district from addresses table
+    const allVillages = await db
+      .selectDistinct({
+        village: addresses.villageNameEnglish,
+        subDistrict: addresses.subdistrictNameEnglish
+      })
+      .from(addresses)
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        eq(addresses.districtNameEnglish, district),
+        eq(addresses.subdistrictNameEnglish, subDistrict),
+        isNotNull(addresses.villageNameEnglish)
+      ));
+
+    // Get namhatta counts by village
+    const namhattaCounts = await db.select({
+      village: addresses.villageNameEnglish,
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        eq(addresses.districtNameEnglish, district),
+        eq(addresses.subdistrictNameEnglish, subDistrict),
+        isNotNull(addresses.villageNameEnglish),
+        ne(namhattas.status, 'Rejected')
+      ))
+      .groupBy(addresses.villageNameEnglish);
+
+    // Get devotee counts by village
+    const devoteeCounts = await db.select({
+      village: addresses.villageNameEnglish,
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(and(
+        eq(addresses.stateNameEnglish, state),
+        eq(addresses.districtNameEnglish, district),
+        eq(addresses.subdistrictNameEnglish, subDistrict),
+        isNotNull(addresses.villageNameEnglish)
+      ))
+      .groupBy(addresses.villageNameEnglish);
+
+    // Create maps for quick lookup
+    const namhattaMap = new Map<string, number>();
+    const devoteeMap = new Map<string, number>();
+
+    namhattaCounts.forEach(result => {
+      namhattaMap.set(result.village!, result.count);
+    });
+
+    devoteeCounts.forEach(result => {
+      devoteeMap.set(result.village!, result.count);
+    });
+
+    // Combine all villages with their counts (0 if not found)
+    return allVillages.map(village => ({
+      name: village.village || 'Unknown',
+      subDistrict: village.subDistrict || 'Unknown',
+      namhattaCount: namhattaMap.get(village.village!) || 0,
+      devoteeCount: devoteeMap.get(village.village!) || 0
+    })).sort((a, b) => a.name.localeCompare(b.name));
+  }
 }

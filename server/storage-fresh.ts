@@ -145,6 +145,32 @@ export interface IStorage {
     }>;
   }>;
 
+  // Lazy loading methods for hierarchical reports (includes ALL locations, even with 0 counts)
+  getAllStatesWithCounts(filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    country: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>>;
+  getAllDistrictsWithCounts(state: string, filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    state: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>>;
+  getAllSubDistrictsWithCounts(state: string, district: string, filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    district: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>>;
+  getAllVillagesWithCounts(state: string, district: string, subDistrict: string, filters?: { allowedDistricts?: string[] }): Promise<Array<{
+    name: string;
+    subDistrict: string;
+    namhattaCount: number;
+    devoteeCount: number;
+  }>>;
+
   // Leadership Management
   getDevoteeLeaders(page?: number, size?: number, filters?: any): Promise<{ data: Array<Devotee & { reportingToName?: string }>, total: number }>;
   getDevoteesByRole(role: string): Promise<Array<Devotee & { reportingToName?: string }>>;
