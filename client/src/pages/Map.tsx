@@ -103,7 +103,7 @@ export default function Map() {
       if (!response.ok) throw new Error('Failed to fetch namhattas');
       return response.json();
     },
-    enabled: !!selectedLocation && selectedLocation.count <= 5,
+    enabled: !!selectedLocation,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -518,7 +518,7 @@ export default function Map() {
               Level: ${currentLevel.replace('_', ' ')}
             </p>
             <p style="margin: 8px 0 0 0; color: #6366f1; font-size: 12px; cursor: pointer;">
-              ${data.count <= 5 ? 'Click to view namhattas →' : 'Click to zoom in →'}
+              Click to view namhattas →
             </p>
           </div>
         `);
@@ -548,74 +548,44 @@ export default function Map() {
   const handleMarkerClick = (data: MapData) => {
     console.log('Marker clicked:', data.name, 'Level:', data.level, 'Count:', data.count);
     
-    // If count is 5 or less, show namhatta list instead of zooming
-    if (data.count <= 5) {
-      console.log('Showing namhatta list for:', data.name);
-      setSelectedLocation(data);
-      
-      // Calculate panel position based on marker coordinates
-      if (mapRef.current && data.coordinates) {
-        const [lng, lat] = data.coordinates;
-        const point = mapRef.current.latLngToContainerPoint([lat, lng]);
-        
-        // Get map container dimensions
-        const mapContainer = document.getElementById('leaflet-map');
-        if (mapContainer) {
-          const containerRect = mapContainer.getBoundingClientRect();
-          
-          // Panel dimensions (approximate)
-          const panelWidth = 320; // 80 * 4 (w-80 = 320px)
-          const panelHeight = 400; // approximate max height
-          
-          // Calculate position with boundary checks
-          let x = point.x + 20; // 20px offset from marker
-          let y = point.y - panelHeight / 2; // Center vertically on marker
-          
-          // Keep panel within map bounds
-          if (x + panelWidth > containerRect.width) {
-            x = point.x - panelWidth - 20; // Show on left side
-          }
-          if (y < 0) {
-            y = 10; // Top margin
-          }
-          if (y + panelHeight > containerRect.height) {
-            y = containerRect.height - panelHeight - 10; // Bottom margin
-          }
-          
-          setPanelPosition({ x, y });
-        }
-      }
-      
-      setShowNamhattaList(true);
-      return;
-    }
+    // Always show namhatta list when clicking on markers
+    console.log('Showing namhatta list for:', data.name);
+    setSelectedLocation(data);
     
-    // Otherwise, zoom in as before
+    // Calculate panel position based on marker coordinates
     if (mapRef.current && data.coordinates) {
       const [lng, lat] = data.coordinates;
+      const point = mapRef.current.latLngToContainerPoint([lat, lng]);
       
-      // Determine appropriate zoom level for drilling down to next level
-      let targetZoom: number;
-      switch (data.level) {
-        case 'COUNTRY':
-          targetZoom = 6; // Zoom to state level
-          break;
-        case 'STATE':
-          targetZoom = 9; // Zoom to district level
-          break;
-        case 'DISTRICT':
-          targetZoom = 11; // Zoom to sub-district level
-          break;
-        case 'SUB_DISTRICT':
-          targetZoom = 13; // Zoom to village level
-          break;
-        default:
-          targetZoom = Math.min(mapRef.current.getZoom() + 2, 15);
+      // Get map container dimensions
+      const mapContainer = document.getElementById('leaflet-map');
+      if (mapContainer) {
+        const containerRect = mapContainer.getBoundingClientRect();
+        
+        // Panel dimensions (approximate)
+        const panelWidth = 320; // 80 * 4 (w-80 = 320px)
+        const panelHeight = 400; // approximate max height
+        
+        // Calculate position with boundary checks
+        let x = point.x + 20; // 20px offset from marker
+        let y = point.y - panelHeight / 2; // Center vertically on marker
+        
+        // Keep panel within map bounds
+        if (x + panelWidth > containerRect.width) {
+          x = point.x - panelWidth - 20; // Show on left side
+        }
+        if (y < 0) {
+          y = 10; // Top margin
+        }
+        if (y + panelHeight > containerRect.height) {
+          y = containerRect.height - panelHeight - 10; // Bottom margin
+        }
+        
+        setPanelPosition({ x, y });
       }
-      
-      console.log(`Zooming to [${lat}, ${lng}] at zoom ${targetZoom} for ${data.level} -> next level`);
-      mapRef.current.setView([lat, lng], targetZoom);
     }
+    
+    setShowNamhattaList(true);
   };
 
   // Build query params for namhatta API based on location level
