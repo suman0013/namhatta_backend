@@ -695,27 +695,34 @@ export class DatabaseStorage implements IStorage {
       registrationNo: namhattas.registrationNo,
       registrationDate: namhattas.registrationDate,
       createdAt: namhattas.createdAt,
-      updatedAt: namhattas.updatedAt,
-      // Include devotee names for leadership positions for backward compatibility
-      // Use COALESCE to prefer spiritual name but fallback to legal name if null
-      malaSenapotiName: sql`COALESCE(mala_devotee.name, mala_devotee.legal_name)`,
-      mahaChakraSenapotiName: sql`COALESCE(maha_chakra_devotee.name, maha_chakra_devotee.legal_name)`,
-      chakraSenapotiName: sql`COALESCE(chakra_devotee.name, chakra_devotee.legal_name)`,
-      upaChakraSenapotiName: sql`COALESCE(upa_chakra_devotee.name, upa_chakra_devotee.legal_name)`,
-      secretaryName: sql`COALESCE(secretary_devotee.name, secretary_devotee.legal_name)`,
-      presidentName: sql`COALESCE(president_devotee.name, president_devotee.legal_name)`,
-      accountantName: sql`COALESCE(accountant_devotee.name, accountant_devotee.legal_name)`
+      updatedAt: namhattas.updatedAt
     }).from(namhattas)
-      .leftJoin(sql`${devotees} as mala_devotee`, eq(namhattas.malaSenapotiId, sql`mala_devotee.id`))
-      .leftJoin(sql`${devotees} as maha_chakra_devotee`, eq(namhattas.mahaChakraSenapotiId, sql`maha_chakra_devotee.id`))
-      .leftJoin(sql`${devotees} as chakra_devotee`, eq(namhattas.chakraSenapotiId, sql`chakra_devotee.id`))
-      .leftJoin(sql`${devotees} as upa_chakra_devotee`, eq(namhattas.upaChakraSenapotiId, sql`upa_chakra_devotee.id`))
-      .leftJoin(sql`${devotees} as secretary_devotee`, eq(namhattas.secretaryId, sql`secretary_devotee.id`))
-      .leftJoin(sql`${devotees} as president_devotee`, eq(namhattas.presidentId, sql`president_devotee.id`))
-      .leftJoin(sql`${devotees} as accountant_devotee`, eq(namhattas.accountantId, sql`accountant_devotee.id`))
       .where(eq(namhattas.id, id))
       .limit(1);
+    
     if (!result[0]) return undefined;
+    
+    const namhattaData = result[0];
+    
+    // Fetch full devotee objects for leadership roles
+    const devoteeIds = [
+      namhattaData.malaSenapotiId,
+      namhattaData.mahaChakraSenapotiId,
+      namhattaData.chakraSenapotiId,
+      namhattaData.upaChakraSenapotiId,
+      namhattaData.secretaryId,
+      namhattaData.presidentId,
+      namhattaData.accountantId
+    ].filter(id => id !== null);
+    
+    const devoteeObjects = devoteeIds.length > 0 ? await db
+      .select()
+      .from(devotees)
+      .where(inArray(devotees.id, devoteeIds))
+    : [];
+    
+    // Create a map for quick lookup
+    const devoteeMap = new Map(devoteeObjects.map(d => [d.id, d]));
     
     // Fetch address information from normalized tables
     const addressResults = await db.select({
@@ -734,34 +741,34 @@ export class DatabaseStorage implements IStorage {
       .where(eq(namhattaAddresses.namhattaId, id))
       .limit(1);
     
-    // Transform the data to include both FK IDs and names for backward compatibility
+    // Transform the data to include both FK IDs and full devotee objects
     let namhatta = {
-      id: result[0].id,
-      code: result[0].code,
-      name: result[0].name,
-      meetingDay: result[0].meetingDay,
-      meetingTime: result[0].meetingTime,
-      // Include both FK IDs and names for backward compatibility
-      malaSenapotiId: result[0].malaSenapotiId,
-      malaSenapoti: result[0].malaSenapotiName || null,
-      mahaChakraSenapotiId: result[0].mahaChakraSenapotiId,
-      mahaChakraSenapoti: result[0].mahaChakraSenapotiName || null,
-      chakraSenapotiId: result[0].chakraSenapotiId,
-      chakraSenapoti: result[0].chakraSenapotiName || null,
-      upaChakraSenapotiId: result[0].upaChakraSenapotiId,
-      upaChakraSenapoti: result[0].upaChakraSenapotiName || null,
-      secretaryId: result[0].secretaryId,
-      secretary: result[0].secretaryName || null,
-      presidentId: result[0].presidentId,
-      president: result[0].presidentName || null,
-      accountantId: result[0].accountantId,
-      accountant: result[0].accountantName || null,
-      districtSupervisorId: result[0].districtSupervisorId,
-      status: result[0].status,
-      registrationNo: result[0].registrationNo,
-      registrationDate: result[0].registrationDate,
-      createdAt: result[0].createdAt,
-      updatedAt: result[0].updatedAt
+      id: namhattaData.id,
+      code: namhattaData.code,
+      name: namhattaData.name,
+      meetingDay: namhattaData.meetingDay,
+      meetingTime: namhattaData.meetingTime,
+      // Include both FK IDs and full devotee objects
+      malaSenapotiId: namhattaData.malaSenapotiId,
+      malaSenapoti: namhattaData.malaSenapotiId ? devoteeMap.get(namhattaData.malaSenapotiId) || null : null,
+      mahaChakraSenapotiId: namhattaData.mahaChakraSenapotiId,
+      mahaChakraSenapoti: namhattaData.mahaChakraSenapotiId ? devoteeMap.get(namhattaData.mahaChakraSenapotiId) || null : null,
+      chakraSenapotiId: namhattaData.chakraSenapotiId,
+      chakraSenapoti: namhattaData.chakraSenapotiId ? devoteeMap.get(namhattaData.chakraSenapotiId) || null : null,
+      upaChakraSenapotiId: namhattaData.upaChakraSenapotiId,
+      upaChakraSenapoti: namhattaData.upaChakraSenapotiId ? devoteeMap.get(namhattaData.upaChakraSenapotiId) || null : null,
+      secretaryId: namhattaData.secretaryId,
+      secretary: namhattaData.secretaryId ? devoteeMap.get(namhattaData.secretaryId) || null : null,
+      presidentId: namhattaData.presidentId,
+      president: namhattaData.presidentId ? devoteeMap.get(namhattaData.presidentId) || null : null,
+      accountantId: namhattaData.accountantId,
+      accountant: namhattaData.accountantId ? devoteeMap.get(namhattaData.accountantId) || null : null,
+      districtSupervisorId: namhattaData.districtSupervisorId,
+      status: namhattaData.status,
+      registrationNo: namhattaData.registrationNo,
+      registrationDate: namhattaData.registrationDate,
+      createdAt: namhattaData.createdAt,
+      updatedAt: namhattaData.updatedAt
     } as any;
     
     // Add address information to the namhatta object
