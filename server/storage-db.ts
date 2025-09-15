@@ -654,7 +654,7 @@ export class DatabaseStorage implements IStorage {
       accountant: namhatta.accountantName || null,
       districtSupervisorId: namhatta.districtSupervisorId,
       status: namhatta.status,
-      registrationNo: namhatta.registrationNo || null,
+      registrationNo: namhatta.registrationNo || undefined,
       registrationDate: namhatta.registrationDate || undefined,
       createdAt: namhatta.createdAt,
       updatedAt: namhatta.updatedAt,
@@ -668,7 +668,7 @@ export class DatabaseStorage implements IStorage {
         postalCode: namhatta.addressPostalCode,
         landmark: namhatta.addressLandmark
       } : null
-    }));
+    })) as Namhatta[];
 
     return {
       data: namhattasWithAddresses,
@@ -1012,7 +1012,7 @@ export class DatabaseStorage implements IStorage {
       return {
         ...namhatta,
         registrationNo: namhatta.registrationNo || null,
-        registrationDate: namhatta.registrationDate || undefined
+        registrationDate: namhatta.registrationDate || null
       } as Namhatta;
     } catch (error: any) {
       console.error('Error in namhatta creation:', error.message, error.stack);
@@ -1212,7 +1212,7 @@ export class DatabaseStorage implements IStorage {
 
   // Updates
   async createNamhattaUpdate(update: InsertNamhattaUpdate): Promise<NamhattaUpdate> {
-    const result = await db.insert(namhattaUpdates).values([update]).returning();
+    const result = await db.insert(namhattaUpdates).values(update as any).returning();
     return result[0];
   }
 
@@ -2438,7 +2438,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Get the linked devotee
-      return await this.getDevotee(user.devoteeId);
+      return (await this.getDevotee(user.devoteeId)) ?? null;
     } catch (error) {
       console.error('Error in getUserLinkedDevotee:', error);
       throw error;
@@ -2620,7 +2620,7 @@ export class DatabaseStorage implements IStorage {
         role: userData.role,
         devoteeId: devoteeId,
         isActive: true,
-        createdBy: userData.createdBy
+        // Note: createdBy field doesn't exist in users schema
       });
 
       return {
