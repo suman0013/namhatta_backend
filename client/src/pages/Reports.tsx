@@ -5,8 +5,9 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronRight, MapPin, Users, Home, BarChart3 } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Users, Home, BarChart3, RefreshCw } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { queryClient } from "@/lib/queryClient";
 
 interface VillageData {
   name: string;
@@ -49,9 +50,17 @@ export default function Reports() {
   const [openDistricts, setOpenDistricts] = useState<Set<string>>(new Set());
   const [openSubDistricts, setOpenSubDistricts] = useState<Set<string>>(new Set());
 
-  const { data: reportsData, isLoading, error } = useQuery<HierarchicalReportsData>({
+  const { data: reportsData, isLoading, error, refetch, isFetching } = useQuery<HierarchicalReportsData>({
     queryKey: ["/api/reports/hierarchical"],
+    staleTime: 0, // Override global settings to always consider data stale
+    refetchOnWindowFocus: true, // Override global settings to refetch on focus
   });
+
+  const handleRefresh = async () => {
+    // Invalidate the cache and trigger a fresh fetch
+    await queryClient.invalidateQueries({ queryKey: ["/api/reports/hierarchical"] });
+    refetch();
+  };
 
   const toggleState = (stateName: string) => {
     const newOpenStates = new Set(openStates);
@@ -148,6 +157,10 @@ export default function Reports() {
               )}
             </p>
           </div>
+          <Button onClick={handleRefresh} variant="outline" className="flex items-center gap-2" disabled={isFetching} data-testid="refresh-reports">
+            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            {isFetching ? 'Refreshing...' : 'Refresh Data'}
+          </Button>
         </div>
 
         {/* Summary Cards */}
