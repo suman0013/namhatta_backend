@@ -44,6 +44,77 @@ export default function Hierarchy() {
     queryKey: ["/api/district-supervisors/all"],
   });
 
+  // Dynamic queries for hierarchical data based on selections
+  const { data: malaSenapotis } = useQuery({
+    queryKey: ["/api/senapoti/MALA_SENAPOTI", selectedDistrictSupervisor],
+    queryFn: async () => {
+      if (!selectedDistrictSupervisor) return [];
+      const response = await fetch(`/api/senapoti/MALA_SENAPOTI/${selectedDistrictSupervisor}`);
+      if (!response.ok) throw new Error('Failed to fetch Mala Senapotis');
+      return response.json();
+    },
+    enabled: !!selectedDistrictSupervisor,
+  });
+
+  const { data: mahaChakraSenapotis } = useQuery({
+    queryKey: ["/api/senapoti/MAHA_CHAKRA_SENAPOTI", selectedMalaSenapoti],
+    queryFn: async () => {
+      if (!selectedMalaSenapoti) return [];
+      const response = await fetch(`/api/senapoti/MAHA_CHAKRA_SENAPOTI/${selectedMalaSenapoti}`);
+      if (!response.ok) throw new Error('Failed to fetch Maha Chakra Senapotis');
+      return response.json();
+    },
+    enabled: !!selectedMalaSenapoti,
+  });
+
+  const { data: chakraSenapotis } = useQuery({
+    queryKey: ["/api/senapoti/CHAKRA_SENAPOTI", selectedMahaChakraSenapoti],
+    queryFn: async () => {
+      if (!selectedMahaChakraSenapoti) return [];
+      const response = await fetch(`/api/senapoti/CHAKRA_SENAPOTI/${selectedMahaChakraSenapoti}`);
+      if (!response.ok) throw new Error('Failed to fetch Chakra Senapotis');
+      return response.json();
+    },
+    enabled: !!selectedMahaChakraSenapoti,
+  });
+
+  const { data: upaChakraSenapotis } = useQuery({
+    queryKey: ["/api/senapoti/UPA_CHAKRA_SENAPOTI", selectedChakraSenapoti],
+    queryFn: async () => {
+      if (!selectedChakraSenapoti) return [];
+      const response = await fetch(`/api/senapoti/UPA_CHAKRA_SENAPOTI/${selectedChakraSenapoti}`);
+      if (!response.ok) throw new Error('Failed to fetch Upa Chakra Senapotis');
+      return response.json();
+    },
+    enabled: !!selectedChakraSenapoti,
+  });
+
+  // Handler functions for clicking on each level
+  const handleDistrictSupervisorClick = (supervisorId: number) => {
+    setSelectedDistrictSupervisor(supervisorId);
+    // Reset lower levels when selecting a district supervisor
+    setSelectedMalaSenapoti(null);
+    setSelectedMahaChakraSenapoti(null);
+    setSelectedChakraSenapoti(null);
+  };
+
+  const handleMalaSenapotiClick = (malaSenapotiId: number) => {
+    setSelectedMalaSenapoti(malaSenapotiId);
+    // Reset lower levels when selecting a mala senapoti
+    setSelectedMahaChakraSenapoti(null);
+    setSelectedChakraSenapoti(null);
+  };
+
+  const handleMahaChakraSenapotiClick = (mahaChakraSenapotiId: number) => {
+    setSelectedMahaChakraSenapoti(mahaChakraSenapotiId);
+    // Reset lower levels when selecting a maha chakra senapoti
+    setSelectedChakraSenapoti(null);
+  };
+
+  const handleChakraSenapotiClick = (chakraSenapotiId: number) => {
+    setSelectedChakraSenapoti(chakraSenapotiId);
+  };
+
   if (isLoading || isLoadingDistrictSupervisors) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100 to-slate-100 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 text-black dark:text-white flex items-center justify-center">
@@ -368,7 +439,14 @@ export default function Hierarchy() {
             <CollapsibleContent className="mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
                 {(districtSupervisors as any[]).map((supervisor: any) => (
-                  <Card key={supervisor.id} className="bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-lg" data-testid={`card-district-supervisor-${supervisor.id}`}>
+                  <Card 
+                    key={supervisor.id} 
+                    className={`bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-105 ${
+                      selectedDistrictSupervisor === supervisor.id ? 'ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-900/20' : ''
+                    }`}
+                    data-testid={`card-district-supervisor-${supervisor.id}`}
+                    onClick={() => handleDistrictSupervisorClick(supervisor.id)}
+                  >
                     <CardContent className="p-4">
                       <div className="text-center space-y-2">
                         <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center mx-auto">
@@ -402,6 +480,186 @@ export default function Hierarchy() {
               </div>
             </CollapsibleContent>
           </Collapsible>
+        )}
+
+        {/* Mala Senapotis Section - Show when district supervisor is selected */}
+        {selectedDistrictSupervisor && malaSenapotis && malaSenapotis.length > 0 && (
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-red-300 dark:border-red-500/30 shadow-xl">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-red-700 dark:text-red-300 flex items-center">
+                  <Crown className="mr-2 h-5 w-5" />
+                  Mala Senapotis under Selected District Supervisor
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Click on any Mala Senapoti to see their Maha Chakra Senapotis</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {malaSenapotis.map((mala: any) => (
+                  <Card
+                    key={mala.id}
+                    className={`bg-white/80 dark:bg-slate-800/50 border-red-200 dark:border-red-600/30 shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-105 ${
+                      selectedMalaSenapoti === mala.id ? 'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/20' : ''
+                    }`}
+                    onClick={() => handleMalaSenapotiClick(mala.id)}
+                    data-testid={`card-mala-senapoti-${mala.id}`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-2">
+                        <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center mx-auto">
+                          <Crown className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-red-800 dark:text-red-200 truncate" title={mala.legalName}>
+                            {mala.legalName}
+                          </h4>
+                          {mala.initiatedName && (
+                            <p className="text-xs text-red-600 dark:text-red-400 truncate" title={mala.initiatedName}>
+                              {mala.initiatedName}
+                            </p>
+                          )}
+                          <p className="text-xs text-red-600 dark:text-red-400">Mala Senapoti</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Maha Chakra Senapotis Section - Show when mala senapoti is selected */}
+        {selectedMalaSenapoti && mahaChakraSenapotis && mahaChakraSenapotis.length > 0 && (
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-indigo-300 dark:border-indigo-500/30 shadow-xl">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-indigo-700 dark:text-indigo-300 flex items-center">
+                  <UserCheck className="mr-2 h-5 w-5" />
+                  Maha Chakra Senapotis under Selected Mala Senapoti
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Click on any Maha Chakra Senapoti to see their Chakra Senapotis</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {mahaChakraSenapotis.map((maha: any) => (
+                  <Card
+                    key={maha.id}
+                    className={`bg-white/80 dark:bg-slate-800/50 border-indigo-200 dark:border-indigo-600/30 shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-105 ${
+                      selectedMahaChakraSenapoti === maha.id ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : ''
+                    }`}
+                    onClick={() => handleMahaChakraSenapotiClick(maha.id)}
+                    data-testid={`card-maha-chakra-senapoti-${maha.id}`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-2">
+                        <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center mx-auto">
+                          <UserCheck className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-indigo-800 dark:text-indigo-200 truncate" title={maha.legalName}>
+                            {maha.legalName}
+                          </h4>
+                          {maha.initiatedName && (
+                            <p className="text-xs text-indigo-600 dark:text-indigo-400 truncate" title={maha.initiatedName}>
+                              {maha.initiatedName}
+                            </p>
+                          )}
+                          <p className="text-xs text-indigo-600 dark:text-indigo-400">Maha Chakra Senapoti</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Chakra Senapotis Section - Show when maha chakra senapoti is selected */}
+        {selectedMahaChakraSenapoti && chakraSenapotis && chakraSenapotis.length > 0 && (
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-green-300 dark:border-green-500/30 shadow-xl">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-green-700 dark:text-green-300 flex items-center">
+                  <Users className="mr-2 h-5 w-5" />
+                  Chakra Senapotis under Selected Maha Chakra Senapoti
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Click on any Chakra Senapoti to see their Upa Chakra Senapotis</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {chakraSenapotis.map((chakra: any) => (
+                  <Card
+                    key={chakra.id}
+                    className={`bg-white/80 dark:bg-slate-800/50 border-green-200 dark:border-green-600/30 shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-105 ${
+                      selectedChakraSenapoti === chakra.id ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/20' : ''
+                    }`}
+                    onClick={() => handleChakraSenapotiClick(chakra.id)}
+                    data-testid={`card-chakra-senapoti-${chakra.id}`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-2">
+                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mx-auto">
+                          <Users className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-green-800 dark:text-green-200 truncate" title={chakra.legalName}>
+                            {chakra.legalName}
+                          </h4>
+                          {chakra.initiatedName && (
+                            <p className="text-xs text-green-600 dark:text-green-400 truncate" title={chakra.initiatedName}>
+                              {chakra.initiatedName}
+                            </p>
+                          )}
+                          <p className="text-xs text-green-600 dark:text-green-400">Chakra Senapoti</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Upa Chakra Senapotis Section - Show when chakra senapoti is selected */}
+        {selectedChakraSenapoti && upaChakraSenapotis && upaChakraSenapotis.length > 0 && (
+          <Card className="bg-white/80 dark:bg-slate-800/50 border-yellow-300 dark:border-yellow-500/30 shadow-xl">
+            <CardContent className="p-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-yellow-700 dark:text-yellow-300 flex items-center">
+                  <MapPin className="mr-2 h-5 w-5" />
+                  Upa Chakra Senapotis under Selected Chakra Senapoti
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {upaChakraSenapotis.map((upa: any) => (
+                  <Card
+                    key={upa.id}
+                    className="bg-white/80 dark:bg-slate-800/50 border-yellow-200 dark:border-yellow-600/30 shadow-lg"
+                    data-testid={`card-upa-chakra-senapoti-${upa.id}`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="text-center space-y-2">
+                        <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center mx-auto">
+                          <MapPin className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 truncate" title={upa.legalName}>
+                            {upa.legalName}
+                          </h4>
+                          {upa.initiatedName && (
+                            <p className="text-xs text-yellow-600 dark:text-yellow-400 truncate" title={upa.initiatedName}>
+                              {upa.initiatedName}
+                            </p>
+                          )}
+                          <p className="text-xs text-yellow-600 dark:text-yellow-400">Upa Chakra Senapoti</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
