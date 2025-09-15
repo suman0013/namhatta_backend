@@ -1836,6 +1836,443 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  // Devotee counts by geography
+  async getDevoteeCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>> {
+    let whereConditions = [
+      sql`${addresses.stateNameEnglish} IS NOT NULL`
+    ];
+    
+    if (country) {
+      whereConditions.push(eq(addresses.country, country));
+    }
+    
+    const results = await db.select({
+      state: addresses.stateNameEnglish,
+      country: addresses.country,
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(and(...whereConditions))
+      .groupBy(addresses.stateNameEnglish, addresses.country);
+
+    return results.map(result => ({
+      state: result.state || 'Unknown',
+      country: result.country || 'Unknown',
+      count: result.count
+    }));
+  }
+
+  async getDevoteeCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>> {
+    let whereConditions: any[] = [];
+    
+    if (state) {
+      whereConditions.push(eq(addresses.stateNameEnglish, state));
+    }
+    
+    const results = await db.select({
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      state: sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`.as('state'),
+      country: sql`COALESCE(${addresses.country}, 'Unknown Country')`.as('country'),
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .groupBy(
+        sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
+        sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`, 
+        sql`COALESCE(${addresses.country}, 'Unknown Country')`
+      );
+
+    return results.map(result => ({
+      district: (result.district as string) || 'Unknown District',
+      state: (result.state as string) || 'Unknown State',
+      country: (result.country as string) || 'Unknown Country',
+      count: result.count
+    }));
+  }
+
+  async getDevoteeCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>> {
+    let whereConditions: any[] = [];
+    
+    if (district) {
+      whereConditions.push(sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District') = ${district}`);
+    }
+    
+    const results = await db.select({
+      subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      state: sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`.as('state'),
+      country: sql`COALESCE(${addresses.country}, 'Unknown Country')`.as('country'),
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .groupBy(
+        sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`,
+        sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
+        sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`, 
+        sql`COALESCE(${addresses.country}, 'Unknown Country')`
+      );
+
+    return results.map(result => ({
+      subDistrict: (result.subDistrict as string) || 'Unknown Sub-District',
+      district: (result.district as string) || 'Unknown District',
+      state: (result.state as string) || 'Unknown State',
+      country: (result.country as string) || 'Unknown Country',
+      count: result.count
+    }));
+  }
+
+  async getDevoteeCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>> {
+    let whereConditions: any[] = [];
+    
+    if (subDistrict) {
+      whereConditions.push(sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District') = ${subDistrict}`);
+    }
+    
+    const results = await db.select({
+      village: sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`.as('village'),
+      subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      state: sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`.as('state'),
+      country: sql`COALESCE(${addresses.country}, 'Unknown Country')`.as('country'),
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .groupBy(
+        sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`,
+        sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`, 
+        sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`, 
+        sql`COALESCE(${addresses.stateNameEnglish}, 'Unknown State')`, 
+        sql`COALESCE(${addresses.country}, 'Unknown Country')`
+      );
+
+    return results.map(result => ({
+      village: (result.village as string) || 'Unknown Village',
+      subDistrict: (result.subDistrict as string) || 'Unknown Sub-District',
+      district: (result.district as string) || 'Unknown District',
+      state: (result.state as string) || 'Unknown State',
+      country: (result.country as string) || 'Unknown Country',
+      count: result.count
+    }));
+  }
+
+  // Hierarchical reports with role-based filtering
+  async getHierarchicalReports(filters?: { allowedDistricts?: string[] }): Promise<{
+    states: Array<{
+      name: string;
+      country: string;
+      namhattaCount: number;
+      devoteeCount: number;
+      districts: Array<{
+        name: string;
+        state: string;
+        namhattaCount: number;
+        devoteeCount: number;
+        subDistricts: Array<{
+          name: string;
+          district: string;
+          namhattaCount: number;
+          devoteeCount: number;
+          villages: Array<{
+            name: string;
+            subDistrict: string;
+            namhattaCount: number;
+            devoteeCount: number;
+          }>;
+        }>;
+      }>;
+    }>;
+  }> {
+    // Build district filter condition for role-based access
+    let districtFilter: any = undefined;
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      districtFilter = inArray(addresses.districtNameEnglish, filters.allowedDistricts);
+    }
+
+    // Get namhatta counts by state
+    const namhattaStateResults = await db.select({
+      state: addresses.stateNameEnglish,
+      country: addresses.country,
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        sql`${addresses.stateNameEnglish} IS NOT NULL`,
+        ne(namhattas.status, 'Rejected'),
+        districtFilter
+      ))
+      .groupBy(addresses.stateNameEnglish, addresses.country);
+
+    // Get devotee counts by state
+    const devoteeStateResults = await db.select({
+      state: addresses.stateNameEnglish,
+      country: addresses.country,
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(and(
+        sql`${addresses.stateNameEnglish} IS NOT NULL`,
+        districtFilter
+      ))
+      .groupBy(addresses.stateNameEnglish, addresses.country);
+
+    // Create state-level data structure
+    const stateMap = new Map<string, any>();
+    
+    // Process namhatta counts
+    namhattaStateResults.forEach(result => {
+      const stateKey = `${result.state}_${result.country}`;
+      if (!stateMap.has(stateKey)) {
+        stateMap.set(stateKey, {
+          name: result.state || 'Unknown',
+          country: result.country || 'Unknown',
+          namhattaCount: 0,
+          devoteeCount: 0,
+          districts: []
+        });
+      }
+      stateMap.get(stateKey).namhattaCount = result.count;
+    });
+
+    // Process devotee counts
+    devoteeStateResults.forEach(result => {
+      const stateKey = `${result.state}_${result.country}`;
+      if (!stateMap.has(stateKey)) {
+        stateMap.set(stateKey, {
+          name: result.state || 'Unknown',
+          country: result.country || 'Unknown',
+          namhattaCount: 0,
+          devoteeCount: 0,
+          districts: []
+        });
+      }
+      stateMap.get(stateKey).devoteeCount = result.count;
+    });
+
+    // For each state, get district-level data
+    for (const [, stateData] of stateMap) {
+      const districts = await this.getDistrictsForState(stateData.name, filters);
+      stateData.districts = districts;
+    }
+
+    return {
+      states: Array.from(stateMap.values()).sort((a, b) => a.name.localeCompare(b.name))
+    };
+  }
+
+  private async getDistrictsForState(stateName: string, filters?: { allowedDistricts?: string[] }) {
+    let districtFilter: any = eq(addresses.stateNameEnglish, stateName);
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      districtFilter = and(
+        eq(addresses.stateNameEnglish, stateName),
+        inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+      );
+    }
+
+    // Get namhatta counts by district
+    const namhattaDistrictResults = await db.select({
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(
+        districtFilter,
+        ne(namhattas.status, 'Rejected')
+      ))
+      .groupBy(sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`);
+
+    // Get devotee counts by district
+    const devoteeDistrictResults = await db.select({
+      district: sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`.as('district'),
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(districtFilter)
+      .groupBy(sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District')`);
+
+    // Combine district data
+    const districtMap = new Map<string, any>();
+    
+    namhattaDistrictResults.forEach(result => {
+      const district = result.district as string;
+      districtMap.set(district, {
+        name: district,
+        state: stateName,
+        namhattaCount: result.count,
+        devoteeCount: 0,
+        subDistricts: []
+      });
+    });
+
+    devoteeDistrictResults.forEach(result => {
+      const district = result.district as string;
+      if (!districtMap.has(district)) {
+        districtMap.set(district, {
+          name: district,
+          state: stateName,
+          namhattaCount: 0,
+          devoteeCount: result.count,
+          subDistricts: []
+        });
+      } else {
+        districtMap.get(district).devoteeCount = result.count;
+      }
+    });
+
+    // For each district, get sub-district and village data
+    for (const [, districtData] of districtMap) {
+      const subDistricts = await this.getSubDistrictsForDistrict(districtData.name, stateName, filters);
+      districtData.subDistricts = subDistricts;
+    }
+
+    return Array.from(districtMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private async getSubDistrictsForDistrict(districtName: string, stateName: string, filters?: { allowedDistricts?: string[] }) {
+    let whereConditions = and(
+      eq(addresses.stateNameEnglish, stateName),
+      sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District') = ${districtName}`
+    );
+
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      whereConditions = and(
+        whereConditions,
+        inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+      );
+    }
+
+    // Get namhatta counts by sub-district
+    const namhattaSubDistrictResults = await db.select({
+      subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(whereConditions, ne(namhattas.status, 'Rejected')))
+      .groupBy(sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`);
+
+    // Get devotee counts by sub-district
+    const devoteeSubDistrictResults = await db.select({
+      subDistrict: sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`.as('subDistrict'),
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(whereConditions)
+      .groupBy(sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District')`);
+
+    // Combine sub-district data
+    const subDistrictMap = new Map<string, any>();
+    
+    namhattaSubDistrictResults.forEach(result => {
+      const subDistrict = result.subDistrict as string;
+      subDistrictMap.set(subDistrict, {
+        name: subDistrict,
+        district: districtName,
+        namhattaCount: result.count,
+        devoteeCount: 0,
+        villages: []
+      });
+    });
+
+    devoteeSubDistrictResults.forEach(result => {
+      const subDistrict = result.subDistrict as string;
+      if (!subDistrictMap.has(subDistrict)) {
+        subDistrictMap.set(subDistrict, {
+          name: subDistrict,
+          district: districtName,
+          namhattaCount: 0,
+          devoteeCount: result.count,
+          villages: []
+        });
+      } else {
+        subDistrictMap.get(subDistrict).devoteeCount = result.count;
+      }
+    });
+
+    // For each sub-district, get village data
+    for (const [, subDistrictData] of subDistrictMap) {
+      const villages = await this.getVillagesForSubDistrict(subDistrictData.name, districtName, stateName, filters);
+      subDistrictData.villages = villages;
+    }
+
+    return Array.from(subDistrictMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private async getVillagesForSubDistrict(subDistrictName: string, districtName: string, stateName: string, filters?: { allowedDistricts?: string[] }) {
+    let whereConditions = and(
+      eq(addresses.stateNameEnglish, stateName),
+      sql`COALESCE(${addresses.districtNameEnglish}, 'Unknown District') = ${districtName}`,
+      sql`COALESCE(${addresses.subdistrictNameEnglish}, 'Unknown Sub-District') = ${subDistrictName}`
+    );
+
+    if (filters?.allowedDistricts && filters.allowedDistricts.length > 0) {
+      whereConditions = and(
+        whereConditions,
+        inArray(addresses.districtNameEnglish, filters.allowedDistricts)
+      );
+    }
+
+    // Get namhatta counts by village
+    const namhattaVillageResults = await db.select({
+      village: sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`.as('village'),
+      count: count()
+    }).from(namhattaAddresses)
+      .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+      .innerJoin(namhattas, eq(namhattaAddresses.namhattaId, namhattas.id))
+      .where(and(whereConditions, ne(namhattas.status, 'Rejected')))
+      .groupBy(sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`);
+
+    // Get devotee counts by village
+    const devoteeVillageResults = await db.select({
+      village: sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`.as('village'),
+      count: count()
+    }).from(devoteeAddresses)
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .innerJoin(devotees, eq(devoteeAddresses.devoteeId, devotees.id))
+      .where(whereConditions)
+      .groupBy(sql`COALESCE(${addresses.villageNameEnglish}, 'Unknown Village')`);
+
+    // Combine village data
+    const villageMap = new Map<string, any>();
+    
+    namhattaVillageResults.forEach(result => {
+      const village = result.village as string;
+      villageMap.set(village, {
+        name: village,
+        subDistrict: subDistrictName,
+        namhattaCount: result.count,
+        devoteeCount: 0
+      });
+    });
+
+    devoteeVillageResults.forEach(result => {
+      const village = result.village as string;
+      if (!villageMap.has(village)) {
+        villageMap.set(village, {
+          name: village,
+          subDistrict: subDistrictName,
+          namhattaCount: 0,
+          devoteeCount: result.count
+        });
+      } else {
+        villageMap.get(village).devoteeCount = result.count;
+      }
+    });
+
+    return Array.from(villageMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   async getAddressByPincode(pincode: string): Promise<{
     country: string;
     state: string;

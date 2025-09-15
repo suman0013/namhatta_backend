@@ -270,6 +270,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(data);
   });
 
+  // Hierarchical Reports (requires authentication with role-based filtering)
+  app.get("/api/reports/hierarchical", authenticateJWT, authorize(['ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR']), validateDistrictAccess, async (req, res) => {
+    try {
+      const filters: { allowedDistricts?: string[] } = {};
+      
+      // For district supervisors, apply district filtering
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        filters.allowedDistricts = req.user.districts;
+      }
+      
+      const reports = await storage.getHierarchicalReports(filters);
+      res.json(reports);
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   // Dashboard (requires authentication)
   app.get("/api/dashboard", authenticateJWT, async (req, res) => {
     const summary = await storage.getDashboardSummary();

@@ -111,6 +111,40 @@ export interface IStorage {
   getNamhattaCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
   getNamhattaCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
 
+  // Devotee counts by geography
+  getDevoteeCountsByState(country?: string): Promise<Array<{ state: string; country: string; count: number }>>;
+  getDevoteeCountsByDistrict(state?: string): Promise<Array<{ district: string; state: string; country: string; count: number }>>;
+  getDevoteeCountsBySubDistrict(district?: string): Promise<Array<{ subDistrict: string; district: string; state: string; country: string; count: number }>>;
+  getDevoteeCountsByVillage(subDistrict?: string): Promise<Array<{ village: string; subDistrict: string; district: string; state: string; country: string; count: number }>>;
+
+  // Hierarchical reports with role-based filtering
+  getHierarchicalReports(filters?: { allowedDistricts?: string[] }): Promise<{
+    states: Array<{
+      name: string;
+      country: string;
+      namhattaCount: number;
+      devoteeCount: number;
+      districts: Array<{
+        name: string;
+        state: string;
+        namhattaCount: number;
+        devoteeCount: number;
+        subDistricts: Array<{
+          name: string;
+          district: string;
+          namhattaCount: number;
+          devoteeCount: number;
+          villages: Array<{
+            name: string;
+            subDistrict: string;
+            namhattaCount: number;
+            devoteeCount: number;
+          }>;
+        }>;
+      }>;
+    }>;
+  }>;
+
   // Leadership Management
   getDevoteeLeaders(page?: number, size?: number, filters?: any): Promise<{ data: Array<Devotee & { reportingToName?: string }>, total: number }>;
   getDevoteesByRole(role: string): Promise<Array<Devotee & { reportingToName?: string }>>;
