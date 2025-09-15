@@ -289,7 +289,7 @@ export default function NamhattaDetail() {
         </div>
         <div className="flex space-x-3">
           {/* Approval buttons - only show for ADMIN and OFFICE users */}
-          {(namhatta.status === "PENDING_APPROVAL" || namhatta.status === "pending") && canApprove && (
+          {namhatta.status === "PENDING_APPROVAL" && canApprove && (
             <>
               <Button
                 onClick={() => setShowApprovalDialog(true)}
@@ -618,7 +618,7 @@ export default function NamhattaDetail() {
             ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             : "grid grid-cols-1 md:grid-cols-2 gap-3"
           }>
-            {devotees?.data?.map((devotee) => (
+            {devotees?.data?.map((devotee: any) => (
               <DevoteeCard key={devotee.id} devotee={devotee} statuses={statuses} namhattaId={namhatta.id} viewMode={viewMode} />
             ))}
           </div>
@@ -706,7 +706,7 @@ export default function NamhattaDetail() {
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-gray-900 dark:text-white">{status}</span>
                           <span className="text-sm text-gray-600 dark:text-gray-400">
-                            {count} ({percentage}%)
+                            {String(count)} ({percentage}%)
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
