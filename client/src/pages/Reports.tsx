@@ -404,17 +404,17 @@ function SubDistrictCard({
             ) : villagesData?.length === 0 ? (
               <div className="text-slate-500 dark:text-purple-400 text-xs py-0.5">No villages found</div>
             ) : (
-              <div className="space-y-0.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mt-2">
                 {villagesData?.map((village) => (
                   <div key={`${village.name}_${village.subDistrict}`} 
-                       className="flex items-center justify-between py-0.5 px-2 hover:bg-slate-50 dark:hover:bg-slate-700/20 rounded transition-colors"
+                       className="bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 rounded-lg p-2 hover:shadow-sm hover:border-yellow-300 dark:hover:border-yellow-600 transition-all"
                        data-testid={`village-item-${village.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
-                      <Home className="h-3 w-3 text-yellow-500 dark:text-yellow-400" />
-                      <span className="text-slate-700 dark:text-white text-xs">{village.name}</span>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full flex-shrink-0"></div>
+                      <Home className="h-3 w-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                      <span className="text-slate-700 dark:text-white text-xs font-medium truncate" title={village.name}>{village.name}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                         <Building2 className="h-2 w-2" />
                         <span className="text-xs">{village.namhattaCount}</span>
