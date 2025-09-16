@@ -6,6 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronDown, ChevronRight, MapPin, Users, Home, BarChart3, RefreshCw, Loader2, TrendingUp, Building2, Globe } from "lucide-react";
+
+// Helper function to get card background color based on counts
+function getCardBackground(namhattaCount: number, devoteeCount: number): string {
+  if (namhattaCount === 0 && devoteeCount === 0) {
+    return "bg-gray-100 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700"; // No activity
+  }
+  if (namhattaCount === 0) {
+    return "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"; // No namhattas
+  }
+  if (devoteeCount === 0) {
+    return "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"; // No devotees
+  }
+  return "bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"; // Has both
+}
 import { useAuth } from "@/contexts/AuthContext";
 import { queryClient } from "@/lib/queryClient";
 
@@ -219,8 +233,10 @@ function StateCard({
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
+  const cardBg = getCardBackground(state.namhattaCount, state.devoteeCount);
+  
   return (
-    <div className="border-l-4 border-purple-500 bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-r-lg hover:bg-purple-50 dark:hover:bg-slate-800/70 transition-all">
+    <div className={`border-l-4 border-purple-500 ${cardBg} backdrop-blur-sm rounded-r-lg hover:bg-purple-50 dark:hover:bg-slate-800/70 transition-all`}>
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-purple-100/50 dark:hover:bg-slate-700/50 transition-colors" data-testid={`state-header-${state.name.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -296,8 +312,10 @@ function DistrictCard({
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
+  const cardBg = getCardBackground(district.namhattaCount, district.devoteeCount);
+  
   return (
-    <div className="border-l-2 border-green-400 ml-4 my-1 bg-white/50 dark:bg-transparent rounded-r">
+    <div className={`border-l-2 border-green-400 ml-4 my-1 ${cardBg} rounded-r`}>
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between py-1.5 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/30 rounded-r transition-colors" data-testid={`district-header-${district.name.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -369,8 +387,10 @@ function SubDistrictCard({
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
+  const cardBg = getCardBackground(subDistrict.namhattaCount, subDistrict.devoteeCount);
+  
   return (
-    <div className="border-l-2 border-orange-400 ml-4 my-0.5">
+    <div className={`border-l-2 border-orange-400 ml-4 my-0.5 ${cardBg} rounded-r`}>
       <Collapsible open={isOpen} onOpenChange={onToggle}>
         <CollapsibleTrigger asChild>
           <div className="flex items-center justify-between py-1 px-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/30 rounded-r transition-colors" data-testid={`subdistrict-header-${subDistrict.name.toLowerCase().replace(/\s+/g, '-')}`}>
@@ -407,7 +427,7 @@ function SubDistrictCard({
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mt-2">
                 {villagesData?.map((village) => (
                   <div key={`${village.name}_${village.subDistrict}`} 
-                       className="bg-white dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700 rounded-lg p-2 hover:shadow-sm hover:border-yellow-300 dark:hover:border-yellow-600 transition-all"
+                       className={`${getCardBackground(village.namhattaCount, village.devoteeCount)} border rounded-lg p-2 hover:shadow-sm hover:border-yellow-300 dark:hover:border-yellow-600 transition-all`}
                        data-testid={`village-item-${village.name.toLowerCase().replace(/\s+/g, '-')}`}>
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full flex-shrink-0"></div>
