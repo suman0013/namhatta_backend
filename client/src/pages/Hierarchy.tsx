@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
 import namhattaLogo from "@assets/namhatta_logo_1757673165218.png";
 import prabhupadaImage from "@assets/PRAVUPADA_1757698417419.jpg";
@@ -139,148 +140,180 @@ export default function Hierarchy() {
   if (!hierarchy) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100 to-slate-100 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 text-black dark:text-white">
-      <div className="container mx-auto p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100 to-slate-100 dark:from-slate-900 dark:via-purple-900 dark:to-slate-900 text-black dark:text-white overflow-x-auto">
+      <div className="container mx-auto p-6">
         {/* Header */}
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-purple-700 dark:text-purple-300" data-testid="text-header">
-            Leadership Hierarchy
+            Leadership Hierarchy Tree
           </h1>
           <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300" data-testid="text-organization">
             International Society for Krishna Consciousness
           </p>
         </div>
 
-        {/* Founder Acharya Card - Full Width */}
-        {hierarchy.founder && hierarchy.founder.map((founder) => (
-          <Card key={founder.id} className="bg-white/80 dark:bg-slate-800/50 border-orange-300 dark:border-orange-500/30 shadow-2xl w-full" data-testid="card-founder-acharya">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-center">
-                <div className="flex items-center gap-4">
-                  <div className="w-[4.8rem] h-[4.8rem] bg-orange-500 rounded-full flex items-center justify-center">
-                    <img 
-                      src={iskconLogo} 
-                      alt="ISKCON Logo" 
-                      className="w-[3.6rem] h-[3.6rem] object-contain filter brightness-0 invert"
-                      data-testid="img-founder-logo"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2" data-testid="text-founder-title">
-                      ISKCON Founder Acharya
-                    </h2>
-                    <div className="space-y-1">
-                      <p className="text-lg md:text-xl font-semibold text-orange-700 dark:text-orange-200" data-testid="text-founder-name">
+        {/* Tree Container */}
+        <div className="relative min-w-[800px] mx-auto">
+
+          {/* Level 1: Founder Acharya - Root of the tree */}
+          <div className="flex justify-center mb-8">
+            {hierarchy.founder && hierarchy.founder.map((founder) => (
+              <motion.div
+                key={founder.id}
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="relative"
+              >
+                <Card className="bg-gradient-to-br from-orange-400 to-orange-600 border-orange-300 dark:border-orange-500/30 shadow-2xl w-80" data-testid="card-founder-acharya">
+                  <CardContent className="p-6">
+                    <div className="text-center text-white">
+                      <div className="flex items-center justify-center gap-4 mb-4">
+                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                          <img 
+                            src={iskconLogo} 
+                            alt="ISKCON Logo" 
+                            className="w-12 h-12 object-contain filter brightness-0 invert"
+                            data-testid="img-founder-logo"
+                          />
+                        </div>
+                        <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg ring-4 ring-white/30">
+                          <img 
+                            src={prabhupadaImage} 
+                            alt="Srila Prabhupada" 
+                            className="w-16 h-16 object-cover"
+                            data-testid="img-founder-prabhupada"
+                          />
+                        </div>
+                      </div>
+                      <h2 className="text-xl font-bold mb-2" data-testid="text-founder-title">
+                        ISKCON Founder Acharya
+                      </h2>
+                      <p className="text-lg font-semibold" data-testid="text-founder-name">
                         {founder.name}
                       </p>
                     </div>
-                  </div>
-                  <div className="w-[4.8rem] h-[4.8rem] rounded-full overflow-hidden shadow-lg">
-                    <img 
-                      src={prabhupadaImage} 
-                      alt="Srila Prabhupada" 
-                      className="w-[4.8rem] h-[4.8rem] object-cover"
-                      data-testid="img-founder-prabhupada"
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  </CardContent>
+                </Card>
+                {/* Connecting line down */}
+                <div className="absolute top-full left-1/2 w-px h-12 bg-gradient-to-b from-orange-400 to-purple-400 transform -translate-x-1/2"></div>
+              </motion.div>
+            ))}
+          </div>
 
-        {/* Three Cards in a Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* GBC Card */}
-          <Card className="bg-white/80 dark:bg-slate-800/50 border-purple-300 dark:border-purple-500/30 shadow-xl" data-testid="card-gbc">
-            <CardContent className="p-6">
-              <div className="text-center space-y-4">
-                <div className="w-[3.6rem] h-[3.6rem] bg-purple-500 rounded-full flex items-center justify-center mx-auto">
-                  <img 
-                    src={iskconLogo} 
-                    alt="ISKCON Logo" 
-                    className="w-[2.4rem] h-[2.4rem] object-contain filter brightness-0 invert"
-                    data-testid="img-gbc-logo"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-purple-700 dark:text-purple-300 mb-2" data-testid="text-gbc-title">
-                    ISKCON GBC & Namhatta Preaching Minister
-                  </h3>
-                  <div className="space-y-2">
-                    {hierarchy.gbc && hierarchy.gbc.map((gbcMember, index) => (
-                      <div key={gbcMember.id}>
-                        <p className="text-lg font-semibold text-purple-800 dark:text-purple-200" data-testid={`text-gbc-name-${index}`}>
-                          {gbcMember.name}
-                        </p>
+          {/* Level 2: GBC, Regional Directors, Co-Regional Directors - First branches */}
+          <div className="relative mb-12">
+            {/* Horizontal connecting line */}
+            <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-purple-400 via-blue-400 to-teal-400"></div>
+            {/* Vertical connecting lines */}
+            <div className="absolute top-0 left-1/4 w-px h-4 bg-purple-400 transform -translate-x-1/2"></div>
+            <div className="absolute top-0 left-1/2 w-px h-4 bg-blue-400 transform -translate-x-1/2"></div>
+            <div className="absolute top-0 right-1/4 w-px h-4 bg-teal-400 transform translate-x-1/2"></div>
+            
+            <div className="grid grid-cols-3 gap-8 pt-4">
+              {/* GBC Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <Card className="bg-gradient-to-br from-purple-400 to-purple-600 border-purple-300 dark:border-purple-500/30 shadow-xl" data-testid="card-gbc">
+                  <CardContent className="p-6">
+                    <div className="text-center text-white">
+                      <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <img 
+                          src={iskconLogo} 
+                          alt="ISKCON Logo" 
+                          className="w-10 h-10 object-contain filter brightness-0 invert"
+                          data-testid="img-gbc-logo"
+                        />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                      <h3 className="text-lg font-bold mb-2" data-testid="text-gbc-title">
+                        GBC & Namhatta Minister
+                      </h3>
+                      <div className="space-y-1">
+                        {hierarchy.gbc && hierarchy.gbc.map((gbcMember, index) => (
+                          <div key={gbcMember.id}>
+                            <p className="text-sm font-semibold" data-testid={`text-gbc-name-${index}`}>
+                              {gbcMember.name}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-          {/* Regional Director Card */}
-          <Card className="bg-white/80 dark:bg-slate-800/50 border-blue-300 dark:border-blue-500/30 shadow-xl" data-testid="card-regional-director">
-            <CardContent className="p-6">
-              <div className="text-center space-y-4">
-                <div className="w-[3.6rem] h-[3.6rem] bg-blue-500 rounded-full flex items-center justify-center mx-auto">
-                  <img 
-                    src={iskconLogo} 
-                    alt="ISKCON Logo" 
-                    className="w-[2.4rem] h-[2.4rem] object-contain filter brightness-0 invert"
-                    data-testid="img-regional-director-logo"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-blue-700 dark:text-blue-300 mb-2" data-testid="text-regional-director-title">
-                    ISKCON Namhatta Regional Director
-                  </h3>
-                  <div className="space-y-2">
-                    {hierarchy.regionalDirectors && hierarchy.regionalDirectors.map((director, index) => (
-                      <div key={director.id}>
-                        <p className="text-lg font-semibold text-blue-800 dark:text-blue-200" data-testid={`text-regional-director-name-${index}`}>
-                          {director.name}
-                        </p>
+              {/* Regional Director Card */}
+              <motion.div
+                initial={{ opacity: 0, y: -100 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <Card className="bg-gradient-to-br from-blue-400 to-blue-600 border-blue-300 dark:border-blue-500/30 shadow-xl" data-testid="card-regional-director">
+                  <CardContent className="p-6">
+                    <div className="text-center text-white">
+                      <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <img 
+                          src={iskconLogo} 
+                          alt="ISKCON Logo" 
+                          className="w-10 h-10 object-contain filter brightness-0 invert"
+                          data-testid="img-regional-director-logo"
+                        />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                      <h3 className="text-lg font-bold mb-2" data-testid="text-regional-director-title">
+                        Regional Director
+                      </h3>
+                      <div className="space-y-1">
+                        {hierarchy.regionalDirectors && hierarchy.regionalDirectors.map((director, index) => (
+                          <div key={director.id}>
+                            <p className="text-sm font-semibold" data-testid={`text-regional-director-name-${index}`}>
+                              {director.name}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-          {/* Co-Regional Director Card */}
-          <Card className="bg-white/80 dark:bg-slate-800/50 border-teal-300 dark:border-teal-500/30 shadow-xl" data-testid="card-co-regional-director">
-            <CardContent className="p-6">
-              <div className="text-center space-y-4">
-                <div className="w-[3.6rem] h-[3.6rem] bg-teal-500 rounded-full flex items-center justify-center mx-auto">
-                  <img 
-                    src={iskconLogo} 
-                    alt="ISKCON Logo" 
-                    className="w-[2.4rem] h-[2.4rem] object-contain filter brightness-0 invert"
-                    data-testid="img-co-regional-director-logo"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-teal-700 dark:text-teal-300 mb-2" data-testid="text-co-regional-director-title">
-                    ISKCON Namhatta Co-Regional Director
-                  </h3>
-                  <div className="space-y-2">
-                    {hierarchy.coRegionalDirectors && hierarchy.coRegionalDirectors.map((coDirector, index) => (
-                      <div key={coDirector.id}>
-                        <p className="text-lg font-semibold text-teal-800 dark:text-teal-200" data-testid={`text-co-regional-director-name-${index}`}>
-                          {coDirector.name}
-                        </p>
+              {/* Co-Regional Director Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <Card className="bg-gradient-to-br from-teal-400 to-teal-600 border-teal-300 dark:border-teal-500/30 shadow-xl" data-testid="card-co-regional-director">
+                  <CardContent className="p-6">
+                    <div className="text-center text-white">
+                      <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <img 
+                          src={iskconLogo} 
+                          alt="ISKCON Logo" 
+                          className="w-10 h-10 object-contain filter brightness-0 invert"
+                          data-testid="img-co-regional-director-logo"
+                        />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                      <h3 className="text-lg font-bold mb-2" data-testid="text-co-regional-director-title">
+                        Co-Regional Director
+                      </h3>
+                      <div className="space-y-1">
+                        {hierarchy.coRegionalDirectors && hierarchy.coRegionalDirectors.map((coDirector, index) => (
+                          <div key={coDirector.id}>
+                            <p className="text-sm font-semibold" data-testid={`text-co-regional-director-name-${index}`}>
+                              {coDirector.name}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </div>
 
         {/* Additional Leadership Roles - Collapsible */}
         {((hierarchy.malaSenapotis && hierarchy.malaSenapotis.length > 0) ||
@@ -661,6 +694,8 @@ export default function Hierarchy() {
             </CardContent>
           </Card>
         )}
+        
+        </div> {/* Close Tree Container */}
       </div>
     </div>
   );
