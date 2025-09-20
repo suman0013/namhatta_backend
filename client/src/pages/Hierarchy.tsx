@@ -463,18 +463,23 @@ export default function Hierarchy() {
                   <CollapsibleTrigger asChild>
                     <Button 
                       variant="ghost" 
-                      className="w-full justify-between p-4 h-auto bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 border-2 border-orange-300 dark:border-orange-500/50 hover:from-orange-200 hover:to-orange-300 dark:hover:from-orange-800/40 dark:hover:to-orange-700/40 text-black dark:text-white rounded-lg shadow-xl transition-all hover:shadow-2xl"
+                      className="w-full justify-between p-6 h-auto bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-teal-500/10 dark:from-purple-500/20 dark:via-blue-500/20 dark:to-teal-500/20 backdrop-blur-sm border border-white/20 dark:border-white/10 hover:bg-gradient-to-r hover:from-purple-500/20 hover:via-blue-500/20 hover:to-teal-500/20 text-gray-800 dark:text-white rounded-2xl shadow-lg backdrop-blur transition-all hover:shadow-2xl hover:scale-[1.02]"
                       data-testid="button-district-supervisors-toggle"
                     >
                       <div className="flex items-center">
-                        <Shield className="mr-3 h-6 w-6 text-orange-600 dark:text-orange-400" />
-                        <span className="text-xl font-bold">District Supervisors</span>
-                        <span className="ml-2 text-sm text-orange-600 dark:text-orange-400 bg-orange-200/50 dark:bg-orange-900/50 px-2 py-1 rounded-full">({(districtSupervisors as any[]).length})</span>
+                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                          <Shield className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">District Supervisors</span>
+                          <div className="text-sm text-gray-600 dark:text-gray-400">Click to explore hierarchy</div>
+                        </div>
+                        <span className="ml-auto mr-4 text-sm font-semibold bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1.5 rounded-full shadow-md">({(districtSupervisors as any[]).length})</span>
                       </div>
                       {isDistrictSupervisorsOpen ? (
-                        <ChevronDown className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                        <ChevronDown className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                       ) : (
-                        <ChevronRight className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                        <ChevronRight className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                       )}
                     </Button>
                   </CollapsibleTrigger>
@@ -505,37 +510,41 @@ export default function Hierarchy() {
                                 <div className="absolute -top-8 left-1/2 w-px h-8 bg-orange-400 transform -translate-x-1/2"></div>
                                 
                                 <Card 
-                                  className={`bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/50 dark:to-orange-800/50 border-2 border-orange-300 dark:border-orange-500/50 shadow-xl cursor-pointer transition-all hover:shadow-2xl hover:scale-105 transform ${
-                                    selectedDistrictSupervisor === supervisor.id ? 'ring-4 ring-orange-500 shadow-orange-300 dark:shadow-orange-900/50 scale-105' : ''
+                                  className={`group bg-gradient-to-br from-white/80 to-gray-50/80 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur-sm border border-white/20 dark:border-white/10 shadow-lg cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:-translate-y-2 rounded-2xl ${
+                                    selectedDistrictSupervisor === supervisor.id ? 'ring-2 ring-purple-500/50 shadow-purple-500/20 scale-105 -translate-y-2' : ''
                                   }`}
                                   data-testid={`card-district-supervisor-${supervisor.id}`}
                                   onClick={() => handleDistrictSupervisorClick(supervisor.id)}
                                 >
-                                  <CardContent className="p-4">
-                                    <div className="text-center space-y-2">
-                                      <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                                        <Shield className="h-6 w-6 text-white" />
+                                  <CardContent className="p-6">
+                                    <div className="text-center space-y-4">
+                                      <div className="relative">
+                                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 via-blue-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl transform group-hover:rotate-12 transition-transform duration-300">
+                                          <Shield className="h-8 w-8 text-white" />
+                                        </div>
+                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                          <span className="text-xs font-bold text-white">{supervisor.districts?.length || 1}</span>
+                                        </div>
                                       </div>
                                       <div>
-                                        <h4 className="text-sm font-bold text-orange-800 dark:text-orange-200 truncate" title={supervisor.fullName}>
+                                        <h4 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent truncate" title={supervisor.fullName}>
                                           {supervisor.fullName}
                                         </h4>
-                                        <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">District Supervisor</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">District Supervisor</p>
                                       </div>
                                       {supervisor.districts && supervisor.districts.length > 0 && (
-                                        <div className="mt-2">
-                                          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mb-1">Districts:</p>
+                                        <div className="space-y-2">
                                           <div className="flex flex-wrap gap-1 justify-center">
                                             {supervisor.districts.slice(0, 2).map((district: string, index: number) => (
                                               <span 
                                                 key={index}
-                                                className="inline-block px-2 py-0.5 text-xs bg-orange-300/70 dark:bg-orange-700/50 text-orange-900 dark:text-orange-100 rounded-full font-medium"
+                                                className="inline-block px-3 py-1 text-xs bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-700 dark:text-purple-300 rounded-full font-medium border border-purple-200 dark:border-purple-700"
                                               >
                                                 {district}
                                               </span>
                                             ))}
                                             {supervisor.districts.length > 2 && (
-                                              <span className="inline-block px-2 py-0.5 text-xs bg-orange-300/50 dark:bg-orange-700/30 text-orange-800 dark:text-orange-200 rounded-full">+{supervisor.districts.length - 2}</span>
+                                              <span className="inline-block px-3 py-1 text-xs bg-gradient-to-r from-gray-500/20 to-gray-600/20 text-gray-700 dark:text-gray-300 rounded-full border border-gray-200 dark:border-gray-700">+{supervisor.districts.length - 2}</span>
                                             )}
                                           </div>
                                         </div>
@@ -560,37 +569,41 @@ export default function Hierarchy() {
             </div>
           )}
 
-          {/* Level 4: Mala Senapotis - Compact cards */}
+          {/* Level 4: Mala Senapotis - Modern floating cards */}
           {selectedDistrictSupervisor && malaSenapotis && malaSenapotis.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className="relative mb-6"
+              className="relative mb-8"
             >
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+              <div className="flex flex-wrap justify-center gap-4">
                 {malaSenapotis.map((mala: any, index: number) => (
                   <motion.div
                     key={mala.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.1, y: -5 }}
                     className="relative"
                   >
                     <Card
-                      className={`bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-600/50 shadow-md cursor-pointer transition-all hover:scale-110 hover:shadow-lg ${
-                        selectedMalaSenapoti === mala.id ? 'ring-2 ring-red-500 bg-red-200 dark:bg-red-800/60' : ''
+                      className={`group bg-gradient-to-br from-pink-100/80 to-red-100/80 dark:from-pink-900/40 dark:to-red-900/40 backdrop-blur-sm border border-pink-200/50 dark:border-pink-700/50 shadow-lg cursor-pointer transition-all duration-300 hover:shadow-xl rounded-xl ${
+                        selectedMalaSenapoti === mala.id ? 'ring-2 ring-pink-400/60 shadow-pink-400/30 scale-110 -translate-y-1' : ''
                       }`}
                       onClick={() => handleMalaSenapotiClick(mala.id)}
                       data-testid={`card-mala-senapoti-${mala.id}`}
                     >
-                      <CardContent className="p-2">
-                        <div className="text-center space-y-1">
-                          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mx-auto">
-                            <Crown className="h-4 w-4 text-white" />
+                      <CardContent className="p-4">
+                        <div className="text-center space-y-2">
+                          <div className="relative">
+                            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-red-500 rounded-xl flex items-center justify-center mx-auto shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                              <Crown className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full"></div>
                           </div>
-                          <h4 className="text-xs font-semibold text-red-800 dark:text-red-200 truncate" title={mala.legalName}>
-                            {mala.legalName}
+                          <h4 className="text-sm font-bold bg-gradient-to-r from-pink-600 to-red-600 bg-clip-text text-transparent truncate" title={mala.legalName}>
+                            {mala.legalName.split(' ')[0]}
                           </h4>
                         </div>
                       </CardContent>
@@ -601,7 +614,7 @@ export default function Hierarchy() {
             </motion.div>
           )}
 
-          {/* Level 5: Maha Chakra Senapotis - Compact */}
+          {/* Level 5: Maha Chakra Senapotis - Sleek circular design */}
           {selectedMalaSenapoti && mahaChakraSenapotis && mahaChakraSenapotis.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -609,109 +622,92 @@ export default function Hierarchy() {
               transition={{ duration: 0.4 }}
               className="relative mb-6"
             >
-              <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+              <div className="flex flex-wrap justify-center gap-3">
                 {mahaChakraSenapotis.map((maha: any, index: number) => (
                   <motion.div
                     key={maha.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
+                    initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    whileHover={{ scale: 1.2 }}
+                    className="relative"
                   >
-                    <Card
-                      className={`bg-indigo-100 dark:bg-indigo-900/40 border border-indigo-300 dark:border-indigo-600/50 shadow-md cursor-pointer transition-all hover:scale-110 ${
-                        selectedMahaChakraSenapoti === maha.id ? 'ring-2 ring-indigo-500 bg-indigo-200 dark:bg-indigo-800/60' : ''
+                    <div
+                      className={`group w-16 h-16 bg-gradient-to-br from-blue-400/80 to-indigo-500/80 backdrop-blur-sm rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:shadow-xl shadow-lg border border-blue-200/50 dark:border-blue-700/50 ${
+                        selectedMahaChakraSenapoti === maha.id ? 'ring-2 ring-blue-400 shadow-blue-400/50 scale-125' : ''
                       }`}
                       onClick={() => handleMahaChakraSenapotiClick(maha.id)}
                       data-testid={`card-maha-chakra-senapoti-${maha.id}`}
+                      title={maha.legalName}
                     >
-                      <CardContent className="p-1.5">
-                        <div className="text-center space-y-1">
-                          <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center mx-auto">
-                            <UserCheck className="h-3 w-3 text-white" />
-                          </div>
-                          <h4 className="text-xs font-medium text-indigo-800 dark:text-indigo-200 truncate" title={maha.legalName}>
-                            {maha.legalName}
-                          </h4>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      <UserCheck className="h-6 w-6 text-white group-hover:scale-110 transition-transform duration-300" />
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-2 py-0.5 rounded-full shadow-md">
+                        <span className="text-xs font-medium text-blue-600 dark:text-blue-400">{maha.legalName.split(' ')[0]}</span>
+                      </div>
+                    </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
           )}
 
-          {/* Level 6: Chakra Senapotis - Minimal cards */}
+          {/* Level 6: Chakra Senapotis - Elegant dots */}
           {selectedMahaChakraSenapoti && chakraSenapotis && chakraSenapotis.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="relative mb-4"
+              transition={{ duration: 0.3 }}
+              className="relative mb-6"
             >
-              <div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
                 {chakraSenapotis.map((chakra: any, index: number) => (
                   <motion.div
                     key={chakra.id}
-                    initial={{ opacity: 0, scale: 0.7 }}
+                    initial={{ opacity: 0, scale: 0.3 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    whileHover={{ scale: 1.3 }}
                   >
-                    <Card
-                      className={`bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-600/50 shadow-sm cursor-pointer transition-all hover:scale-110 ${
-                        selectedChakraSenapoti === chakra.id ? 'ring-2 ring-green-500 bg-green-200 dark:bg-green-800/60' : ''
+                    <div
+                      className={`group relative w-12 h-12 bg-gradient-to-br from-emerald-400/80 to-green-500/80 backdrop-blur-sm rounded-xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:shadow-lg shadow-md border border-emerald-200/50 dark:border-emerald-700/50 ${
+                        selectedChakraSenapoti === chakra.id ? 'ring-2 ring-emerald-400 shadow-emerald-400/50 scale-125' : ''
                       }`}
                       onClick={() => handleChakraSenapotiClick(chakra.id)}
                       data-testid={`card-chakra-senapoti-${chakra.id}`}
+                      title={chakra.legalName}
                     >
-                      <CardContent className="p-1">
-                        <div className="text-center space-y-0.5">
-                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center mx-auto">
-                            <Users className="h-2.5 w-2.5 text-white" />
-                          </div>
-                          <h4 className="text-xs font-medium text-green-800 dark:text-green-200 truncate" title={chakra.legalName}>
-                            {chakra.legalName.split(' ')[0]}
-                          </h4>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      <Users className="h-4 w-4 text-white group-hover:scale-110 transition-transform duration-300" />
+                    </div>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
           )}
 
-          {/* Level 7: Upa Chakra Senapotis - Tiny final cards */}
+          {/* Level 7: Upa Chakra Senapotis - Minimal glowing dots */}
           {selectedChakraSenapoti && upaChakraSenapotis && upaChakraSenapotis.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="relative mb-4"
+              transition={{ duration: 0.3 }}
+              className="relative mb-6"
             >
-              <div className="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-16 gap-1.5">
+              <div className="flex flex-wrap justify-center gap-1.5">
                 {upaChakraSenapotis.map((upa: any, index: number) => (
                   <motion.div
                     key={upa.id}
-                    initial={{ opacity: 0, scale: 0.6 }}
+                    initial={{ opacity: 0, scale: 0.2 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.3, delay: index * 0.01 }}
+                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                    whileHover={{ scale: 1.4 }}
                   >
-                    <Card
-                      className="bg-yellow-100 dark:bg-yellow-900/40 border border-yellow-300 dark:border-yellow-600/50 shadow-sm transition-all hover:scale-110"
+                    <div
+                      className="w-8 h-8 bg-gradient-to-br from-amber-400/80 to-yellow-500/80 backdrop-blur-sm rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:shadow-lg shadow-sm border border-amber-200/50 dark:border-amber-700/50 hover:shadow-amber-400/50"
                       data-testid={`card-upa-chakra-senapoti-${upa.id}`}
+                      title={upa.legalName}
                     >
-                      <CardContent className="p-1">
-                        <div className="text-center">
-                          <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-0.5">
-                            <MapPin className="h-2 w-2 text-white" />
-                          </div>
-                          <h4 className="text-xs font-medium text-yellow-800 dark:text-yellow-200 truncate" title={upa.legalName}>
-                            {upa.legalName.split(' ')[0]}
-                          </h4>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
                   </motion.div>
                 ))}
               </div>
