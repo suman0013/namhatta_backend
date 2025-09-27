@@ -27,6 +27,7 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 ## IMPLEMENTATION TASKS
 
 **Instructions for Replit Agent:**
+- Run the SQL queries provided separately to create the role history table
 - Pick tasks in the exact order listed below
 - Complete all subtasks within a task before moving to the next task
 - Update status as you progress: NOT_STARTED → IN_PROGRESS → COMPLETED
@@ -34,23 +35,17 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 1: Database Schema Extensions** - Status: NOT_STARTED
+### **TASK 1: Update Schema Types** - Status: NOT_STARTED
 
-#### Subtask 1.1: Create Role Change History Table - Status: NOT_STARTED
-- Add new table `senapotiRoleHistory` to track all role changes
-- Fields: id, devoteeId, previousRole, newRole, previousReportingTo, newReportingTo, changeType, reason, changedBy, changedAt
-- Add corresponding insert schema and types
-- Update shared/schema.ts
+#### Subtask 1.1: Add Role History Schema to shared/schema.ts - Status: NOT_STARTED
+- Add `senapotiRoleHistory` table definition to match the SQL table created
+- Add corresponding insert schema and types for TypeScript support
+- Add fields: id, devoteeId, previousRole, newRole, previousReportingTo, newReportingTo, changeType, reason, changedBy, changedAt
 
-#### Subtask 1.2: Add Role Change Validation Fields - Status: NOT_STARTED
-- Add `lastRoleChangeDate` to devotees table
-- Add `roleChangeReason` text field for audit purposes
-- Update devotee insert schema and types
-
-#### Subtask 1.3: Database Migration - Status: NOT_STARTED
-- Run `npm run db:push` to apply schema changes
-- Verify all tables are created correctly
-- Test schema with sample data
+#### Subtask 1.2: Update Devotee Schema - Status: NOT_STARTED
+- Add `lastRoleChangeDate` and `roleChangeReason` fields to devotee schema
+- Update `insertDevoteeSchema` and types
+- Ensure proper type coercion for new fields
 
 ---
 
@@ -276,4 +271,4 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 - COMPLETED: Task finished and tested
 
 **Agent Instructions:**
-Pick Task 1 and work through all its subtasks before moving to Task 2. Update status as you progress. Each task builds on the previous ones, so maintain the order strictly.
+Pick Task 1 and work through all its subtasks before moving to Task 2. Update status as you progress. Each task builds on the previous ones, so maintain the order strictly. The plan contains 10 tasks total (Task 1 through Task 10).
