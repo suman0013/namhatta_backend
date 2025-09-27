@@ -130,10 +130,6 @@ export default function Reports() {
             </div>
             <h2 className="text-xl font-bold text-red-600 dark:text-red-300 mb-2">Error Loading Reports</h2>
             <p className="text-red-500 dark:text-red-200 mb-4">Failed to load data. Please try again.</p>
-            <Button onClick={handleRefresh} variant="outline" className="bg-red-100 dark:bg-red-600 hover:bg-red-200 dark:hover:bg-red-700 border-red-300 dark:border-red-500 text-red-700 dark:text-white">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
           </div>
         </div>
       </div>
@@ -154,24 +150,13 @@ export default function Reports() {
                 <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Hierarchical Reports</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Namhatta Preaching Report</h1>
                 <p className="text-slate-600 dark:text-purple-200 text-sm">
                   Geographic breakdown • {statesData?.length || 0} states • {totalNamhattas} centers • {totalDevotees} devotees
                   {user?.role === 'DISTRICT_SUPERVISOR' && <span className="ml-2 text-orange-600 dark:text-orange-300">🔒 District-filtered</span>}
                 </p>
               </div>
             </div>
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              size="sm"
-              className="bg-purple-100 dark:bg-purple-700/50 border-purple-300 dark:border-purple-500 hover:bg-purple-200 dark:hover:bg-purple-600 text-purple-700 dark:text-white" 
-              disabled={statesFetching} 
-              data-testid="refresh-reports"
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${statesFetching ? 'animate-spin' : ''}`} />
-              {statesFetching ? 'Refreshing...' : 'Refresh'}
-            </Button>
           </div>
 
           {/* Compact States List */}
@@ -245,17 +230,17 @@ function StateCard({
                 {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </div>
               <Globe className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              <span className="text-slate-900 dark:text-white font-semibold">{state.name}</span>
-              <span className="text-slate-600 dark:text-purple-300 text-sm">({state.country})</span>
+              <span className="text-slate-900 dark:text-white font-semibold text-lg">{state.name}</span>
+              <span className="text-slate-600 dark:text-purple-300 text-base">({state.country})</span>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <Building2 className="h-3 w-3" />
-                <span className="text-sm font-medium">{state.namhattaCount}</span>
+                <span className="text-base font-medium">{state.namhattaCount}</span>
               </div>
               <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                 <Users className="h-3 w-3" />
-                <span className="text-sm font-medium">{state.devoteeCount}</span>
+                <span className="text-base font-medium">{state.devoteeCount}</span>
               </div>
             </div>
           </div>
@@ -324,16 +309,16 @@ function DistrictCard({
                 {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               </div>
               <MapPin className="h-3 w-3 text-green-500 dark:text-green-400" />
-              <span className="text-slate-800 dark:text-white text-sm font-medium">{district.name}</span>
+              <span className="text-slate-800 dark:text-white text-base font-medium">{district.name}</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <Building2 className="h-3 w-3" />
-                <span className="text-xs">{district.namhattaCount}</span>
+                <span className="text-sm">{district.namhattaCount}</span>
               </div>
               <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                 <Users className="h-3 w-3" />
-                <span className="text-xs">{district.devoteeCount}</span>
+                <span className="text-sm">{district.devoteeCount}</span>
               </div>
             </div>
           </div>
@@ -399,16 +384,16 @@ function SubDistrictCard({
                 {isOpen ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
               </div>
               <Building2 className="h-3 w-3 text-orange-500 dark:text-orange-400" />
-              <span className="text-slate-800 dark:text-white text-sm">{subDistrict.name}</span>
+              <span className="text-slate-800 dark:text-white text-base">{subDistrict.name}</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <Home className="h-3 w-3" />
-                <span className="text-xs">{subDistrict.namhattaCount}</span>
+                <span className="text-sm">{subDistrict.namhattaCount}</span>
               </div>
               <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                 <Users className="h-3 w-3" />
-                <span className="text-xs">{subDistrict.devoteeCount}</span>
+                <span className="text-sm">{subDistrict.devoteeCount}</span>
               </div>
             </div>
           </div>
@@ -432,16 +417,16 @@ function SubDistrictCard({
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full flex-shrink-0"></div>
                       <Home className="h-3 w-3 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
-                      <span className="text-slate-700 dark:text-white text-xs font-medium truncate" title={village.name}>{village.name}</span>
+                      <span className="text-slate-700 dark:text-white text-sm font-medium truncate" title={village.name}>{village.name}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                         <Building2 className="h-2 w-2" />
-                        <span className="text-xs">{village.namhattaCount}</span>
+                        <span className="text-sm">{village.namhattaCount}</span>
                       </div>
                       <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
                         <Users className="h-2 w-2" />
-                        <span className="text-xs">{village.devoteeCount}</span>
+                        <span className="text-sm">{village.devoteeCount}</span>
                       </div>
                     </div>
                   </div>
