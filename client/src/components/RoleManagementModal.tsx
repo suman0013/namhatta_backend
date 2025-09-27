@@ -423,7 +423,7 @@ export default function RoleManagementModal({
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Loading available supervisors...
                       </div>
-                    ) : availableSupervisors?.length === 0 ? (
+                    ) : !Array.isArray(availableSupervisors) || availableSupervisors.length === 0 ? (
                       <Alert>
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription>
@@ -436,14 +436,14 @@ export default function RoleManagementModal({
                           <SelectValue placeholder="Select supervisor" />
                         </SelectTrigger>
                         <SelectContent>
-                          {availableSupervisors?.map((supervisor: any) => (
+                          {Array.isArray(availableSupervisors) ? availableSupervisors.map((supervisor: any) => (
                             <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
                               <div>
                                 <div className="font-medium">{supervisor.legalName}</div>
                                 <div className="text-sm text-muted-foreground">{supervisor.leadershipRole}</div>
                               </div>
                             </SelectItem>
-                          ))}
+                          )) : null}
                         </SelectContent>
                       </Select>
                     )}
