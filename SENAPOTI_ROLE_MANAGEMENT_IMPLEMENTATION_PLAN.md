@@ -127,13 +127,13 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 - Add reason input field for audit trail ✓
 - Show preview of changes before confirmation ✓
 
-#### Subtask 5.2: Supervisor Selection Component - Status: IN_PROGRESS
-- Create district-filtered supervisor selection
-- Show hierarchy context for better decision making
-- Include subordinate count and workload information
-- Add search and filter capabilities
+#### Subtask 5.2: Supervisor Selection Component - Status: COMPLETED
+- Create district-filtered supervisor selection ✓
+- Show hierarchy context for better decision making ✓
+- Include subordinate count and workload information ✓
+- Add search and filter capabilities ✓
 
-#### Subtask 5.3: Subordinate Transfer Interface - Status: NOT_STARTED
+#### Subtask 5.3: Subordinate Transfer Interface - Status: IN_PROGRESS
 - Create bulk subordinate transfer component
 - Show all affected subordinates before transfer
 - Allow individual or bulk supervisor assignment
