@@ -40,9 +40,9 @@ const createUserForDevoteeSchema = z.object({
 });
 
 // Role parameter validation schema
-const validLeadershipRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'] as const;
+const validLeadershipRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI', 'DISTRICT_SUPERVISOR'] as const;
 const roleParamSchema = z.enum(validLeadershipRoles, {
-  errorMap: () => ({ message: 'Invalid role parameter. Must be one of: MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI' })
+  errorMap: () => ({ message: 'Invalid role parameter. Must be one of: MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI, DISTRICT_SUPERVISOR' })
 });
 
 // Senapoti Role Management validation schemas
