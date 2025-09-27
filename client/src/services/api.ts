@@ -298,5 +298,67 @@ export const api = {
   }> => {
     const res = await apiRequest("GET", "/api/user/address-defaults");
     return res.json();
+  },
+
+  // Senapoti Role Management
+  getAvailableSupervisors: async (districtCode: string, targetRole: string, excludeIds: number[] = []): Promise<Devotee[]> => {
+    const url = `/api/senapoti/available-supervisors/${encodeURIComponent(districtCode)}/${encodeURIComponent(targetRole)}`;
+    const params = excludeIds.length > 0 ? `?excludeIds=${excludeIds.join(',')}` : '';
+    const res = await apiRequest("GET", `${url}${params}`);
+    return res.json();
+  },
+
+  getAllSubordinates: async (devoteeId: number): Promise<{ subordinates: Devotee[], count: number }> => {
+    const res = await apiRequest("GET", `/api/senapoti/subordinates/${devoteeId}/all`);
+    return res.json();
+  },
+
+  getDirectSubordinates: async (devoteeId: number): Promise<{ subordinates: Devotee[], count: number }> => {
+    const res = await apiRequest("GET", `/api/senapoti/subordinates/${devoteeId}`);
+    return res.json();
+  },
+
+  getRoleChangeHistory: async (devoteeId: number): Promise<any[]> => {
+    const res = await apiRequest("GET", `/api/senapoti/role-history/${devoteeId}`);
+    return res.json();
+  },
+
+  promoteDevotee: async (data: {
+    devoteeId: number;
+    targetRole: string;
+    newReportingTo?: number;
+    reason: string;
+  }): Promise<{ message: string, transferred: number }> => {
+    const res = await apiRequest("POST", "/api/senapoti/promote", data);
+    return res.json();
+  },
+
+  demoteDevotee: async (data: {
+    devoteeId: number;
+    targetRole: string | null;
+    newReportingTo?: number;
+    reason: string;
+  }): Promise<{ message: string, transferred: number }> => {
+    const res = await apiRequest("POST", "/api/senapoti/demote", data);
+    return res.json();
+  },
+
+  removeDevoteeRole: async (data: {
+    devoteeId: number;
+    reason: string;
+  }): Promise<{ message: string, transferred: number }> => {
+    const res = await apiRequest("POST", "/api/senapoti/remove-role", data);
+    return res.json();
+  },
+
+  transferSubordinates: async (data: {
+    fromDevoteeId: number | null;
+    toDevoteeId: number | null;
+    subordinateIds: number[];
+    reason: string;
+    districtCode?: string;
+  }): Promise<{ message: string, transferred: number, subordinates: Devotee[] }> => {
+    const res = await apiRequest("POST", "/api/senapoti/transfer-subordinates", data);
+    return res.json();
   }
 };

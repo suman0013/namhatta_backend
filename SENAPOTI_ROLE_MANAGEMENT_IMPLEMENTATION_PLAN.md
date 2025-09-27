@@ -121,13 +121,13 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ### **TASK 5: Frontend Components** - Status: IN_PROGRESS
 
-#### Subtask 5.1: Role Management Modal - Status: NOT_STARTED
-- Create unified modal for all role changes (promote/demote/remove)
-- Include role selection dropdown with validation
-- Add reason input field for audit trail
-- Show preview of changes before confirmation
+#### Subtask 5.1: Role Management Modal - Status: COMPLETED
+- Create unified modal for all role changes (promote/demote/remove) ✓
+- Include role selection dropdown with validation ✓
+- Add reason input field for audit trail ✓
+- Show preview of changes before confirmation ✓
 
-#### Subtask 5.2: Supervisor Selection Component - Status: NOT_STARTED
+#### Subtask 5.2: Supervisor Selection Component - Status: IN_PROGRESS
 - Create district-filtered supervisor selection
 - Show hierarchy context for better decision making
 - Include subordinate count and workload information
