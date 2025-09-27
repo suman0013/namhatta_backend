@@ -43,7 +43,7 @@ interface RoleManagementModalProps {
   districtCode: string;
 }
 
-type RoleAction = 'promote' | 'demote' | 'remove';
+type RoleAction = 'promote' | 'demote' | 'remove' | 'assign';
 
 interface RoleOption {
   value: string;
@@ -78,6 +78,9 @@ const SENAPOTI_ROLES: RoleOption[] = [
     description: 'Reports to Chakra Senapoti' 
   },
 ];
+
+// Roles available for assignment/promotion (excluding DISTRICT_SUPERVISOR)
+const ASSIGNABLE_SENAPOTI_ROLES: RoleOption[] = SENAPOTI_ROLES.filter(role => role.value !== 'DISTRICT_SUPERVISOR');
 
 export default function RoleManagementModal({
   isOpen,
@@ -125,17 +128,18 @@ export default function RoleManagementModal({
   const getValidTargetRoles = (): RoleOption[] => {
     if (action === 'remove') return [];
     
-    const allRoles = SENAPOTI_ROLES;
-    
-    if (action === 'promote') {
-      // Can promote to higher levels (lower index numbers)
-      return allRoles.filter((_, index) => index < currentLevel);
+    if (action === 'assign') {
+      // For devotees with no role, can assign any senapoti role (excluding DISTRICT_SUPERVISOR)
+      return ASSIGNABLE_SENAPOTI_ROLES;
+    } else if (action === 'promote') {
+      // Can promote to higher levels (lower index numbers), but never to DISTRICT_SUPERVISOR
+      return ASSIGNABLE_SENAPOTI_ROLES.filter((_, index) => index < currentLevel - 1);
     } else if (action === 'demote') {
       // Can demote to lower levels (higher index numbers)
-      return allRoles.filter((_, index) => index > currentLevel);
+      return SENAPOTI_ROLES.filter((_, index) => index > currentLevel);
     }
     
-    return allRoles;
+    return ASSIGNABLE_SENAPOTI_ROLES;
   };
 
   const validTargetRoles = getValidTargetRoles();
@@ -148,7 +152,7 @@ export default function RoleManagementModal({
       setIsValid(
         !!targetRole && 
         reason.trim().length > 0 &&
-        (action === 'promote' || !!newSupervisor) // Promotions may not need supervisor, demotions do
+        (action === 'promote' || action === 'assign' || !!newSupervisor) // Promotions and assignments may not need supervisor, demotions do
       );
     }
   }, [action, targetRole, newSupervisor, reason]);
@@ -187,6 +191,34 @@ export default function RoleManagementModal({
       toast({
         title: "Error",
         description: error.message || "Failed to promote devotee",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Assign role mutation (for devotees with no current role)
+  const assignRoleMutation = useMutation({
+    mutationFn: async () => {
+      return api.promoteDevotee({
+        devoteeId: devotee.id,
+        targetRole,
+        newReportingTo: newSupervisor ? parseInt(newSupervisor) : undefined,
+        reason,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Role assigned successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/devotees"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/senapoti"] });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to assign role",
         variant: "destructive",
       });
     },
@@ -251,6 +283,8 @@ export default function RoleManagementModal({
 
     if (action === 'promote') {
       promoteMutation.mutate();
+    } else if (action === 'assign') {
+      assignRoleMutation.mutate();
     } else if (action === 'demote') {
       demoteMutation.mutate();
     } else if (action === 'remove') {
@@ -258,11 +292,12 @@ export default function RoleManagementModal({
     }
   };
 
-  const isLoading = promoteMutation.isPending || demoteMutation.isPending || removeRoleMutation.isPending;
+  const isLoading = promoteMutation.isPending || assignRoleMutation.isPending || demoteMutation.isPending || removeRoleMutation.isPending;
 
   const getActionIcon = (actionType: RoleAction) => {
     switch (actionType) {
       case 'promote': return <UserCheck className="w-4 h-4 text-green-600" />;
+      case 'assign': return <UserCheck className="w-4 h-4 text-blue-600" />;
       case 'demote': return <UserMinus className="w-4 h-4 text-yellow-600" />;
       case 'remove': return <UserX className="w-4 h-4 text-red-600" />;
     }
@@ -271,6 +306,7 @@ export default function RoleManagementModal({
   const getActionColor = (actionType: RoleAction) => {
     switch (actionType) {
       case 'promote': return 'border-green-200 bg-green-50 hover:bg-green-100 dark:border-green-800 dark:bg-green-900/20';
+      case 'assign': return 'border-blue-200 bg-blue-50 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20';
       case 'demote': return 'border-yellow-200 bg-yellow-50 hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-900/20';
       case 'remove': return 'border-red-200 bg-red-50 hover:bg-red-100 dark:border-red-800 dark:bg-red-900/20';
     }
@@ -328,6 +364,22 @@ export default function RoleManagementModal({
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="grid gap-3">
+                  {!devotee.leadershipRole && (
+                    <button
+                      className={`p-4 border rounded-lg text-left transition-colors cursor-pointer ${getActionColor('assign')}`}
+                      onClick={() => setAction('assign')}
+                      data-testid="button-assign"
+                    >
+                      <div className="flex items-center gap-3">
+                        {getActionIcon('assign')}
+                        <div>
+                          <h3 className="font-medium">Assign Role</h3>
+                          <p className="text-sm text-muted-foreground">Assign a senapoti leadership role</p>
+                        </div>
+                      </div>
+                    </button>
+                  )}
+                  
                   {currentLevel > 0 && (
                     <button
                       className={`p-4 border rounded-lg text-left transition-colors cursor-pointer ${getActionColor('promote')}`}
@@ -386,7 +438,7 @@ export default function RoleManagementModal({
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   {getActionIcon(action)}
-                  Configure {action === 'promote' ? 'Promotion' : action === 'demote' ? 'Demotion' : 'Role Removal'}
+                  Configure {action === 'promote' ? 'Promotion' : action === 'assign' ? 'Role Assignment' : action === 'demote' ? 'Demotion' : 'Role Removal'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-0">
@@ -522,7 +574,7 @@ export default function RoleManagementModal({
                 data-testid="button-confirm"
               >
                 {isLoading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Confirm {action === 'promote' ? 'Promotion' : action === 'demote' ? 'Demotion' : 'Role Removal'}
+                Confirm {action === 'promote' ? 'Promotion' : action === 'assign' ? 'Assignment' : action === 'demote' ? 'Demotion' : 'Role Removal'}
               </Button>
             )}
           </div>
