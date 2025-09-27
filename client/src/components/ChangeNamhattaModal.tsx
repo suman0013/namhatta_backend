@@ -38,15 +38,15 @@ export default function ChangeNamhattaModal({
   currentNamhattaName,
 }: ChangeNamhattaModalProps) {
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedNamhattaId, setSelectedNamhattaId] = useState<number | null>(null);
   const [reason, setReason] = useState("");
   const [isValid, setIsValid] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch namhattas with search
+  // Fetch all namhattas
   const { data: namhattasData, isLoading: isLoadingNamhattas } = useQuery({
-    queryKey: ["/api/namhattas", searchTerm],
-    queryFn: () => api.getNamhattas(1, 50, { search: searchTerm, status: "APPROVED" }),
+    queryKey: ["/api/namhattas"],
+    queryFn: () => api.getNamhattas(1, 1000, { status: "APPROVED" }),
     enabled: isOpen,
   });
 
@@ -68,6 +68,13 @@ export default function ChangeNamhattaModal({
       setIsValid(false);
     }
   }, [isOpen]);
+
+  // Filter namhattas based on search term
+  const filteredNamhattas = namhattasData?.data.filter(namhatta => 
+    namhatta.id !== devotee.namhattaId && // Exclude current namhatta
+    (namhatta.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     namhatta.code.toLowerCase().includes(searchTerm.toLowerCase()))
+  ) || [];
 
   const updateDevoteeMutation = useMutation({
     mutationFn: async () => {
@@ -129,53 +136,50 @@ export default function ChangeNamhattaModal({
             </p>
           </div>
 
-          {/* Namhatta Search */}
+          {/* Search and Select Namhatta */}
           <div className="space-y-2">
-            <Label htmlFor="namhatta-search">Search Namhatta *</Label>
+            <Label htmlFor="namhatta-select">Search and Select New Namhatta *</Label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                id="namhatta-search"
-                type="text"
-                placeholder="Search by name or code..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-                data-testid="input-namhatta-search"
-              />
-            </div>
-          </div>
-
-          {/* Namhatta Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="namhatta-select">Select New Namhatta *</Label>
-            <Select 
-              value={selectedNamhattaId?.toString() || ""} 
-              onValueChange={(value) => setSelectedNamhattaId(parseInt(value))}
-            >
-              <SelectTrigger data-testid="select-namhatta">
-                <SelectValue placeholder="Select a namhatta" />
-              </SelectTrigger>
-              <SelectContent>
-                {isLoadingNamhattas ? (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
+              <Select 
+                value={selectedNamhattaId?.toString() || ""} 
+                onValueChange={(value) => setSelectedNamhattaId(parseInt(value))}
+              >
+                <SelectTrigger data-testid="select-namhatta" className="pl-10">
+                  <SelectValue placeholder="Search and select a namhatta..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <div className="sticky top-0 bg-white dark:bg-gray-950 border-b p-2 z-10">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Type to search..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 h-8"
+                        data-testid="input-namhatta-search"
+                      />
+                    </div>
                   </div>
-                ) : namhattasData?.data.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
-                    No namhattas found
-                  </div>
-                ) : (
-                  namhattasData?.data
-                    .filter(namhatta => namhatta.id !== devotee.namhattaId) // Exclude current namhatta
-                    .map((namhatta) => (
+                  {isLoadingNamhattas ? (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    </div>
+                  ) : filteredNamhattas.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      {searchTerm ? "No namhattas match your search" : "No namhattas found"}
+                    </div>
+                  ) : (
+                    filteredNamhattas.map((namhatta) => (
                       <SelectItem key={namhatta.id} value={namhatta.id.toString()}>
                         {namhatta.name} ({namhatta.code})
                       </SelectItem>
                     ))
-                )}
-              </SelectContent>
-            </Select>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Selected Namhatta Preview */}
