@@ -2682,6 +2682,27 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAvailableDevoteesForSenapotiRoles(): Promise<Devotee[]> {
+    try {
+      // Get all devotees who are available for senapoti role assignment
+      // This includes all devotees who are not currently assigned as regular members to any namhatta
+      const availableDevoteesResult = await db
+        .select()
+        .from(devotees)
+        .where(
+          // Not assigned to any namhatta as a regular member (namhattaId should be null)
+          // This allows for leadership role assignments across namhattas
+          isNull(devotees.namhattaId)
+        )
+        .orderBy(asc(devotees.legalName));
+
+      return availableDevoteesResult;
+    } catch (error) {
+      console.error('Error in getAvailableDevoteesForSenapotiRoles:', error);
+      throw error;
+    }
+  }
+
   async assignLeadershipRole(devoteeId: number, data: {
     leadershipRole: string;
     reportingToDevoteeId?: number;

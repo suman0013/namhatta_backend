@@ -192,6 +192,8 @@ export interface IStorage {
     children: Array<any>;
   }>>;
   getEligibleLeaders(): Promise<Devotee[]>;
+  getAvailableDevoteesForOfficerPositions(): Promise<Devotee[]>;
+  getAvailableDevoteesForSenapotiRoles(): Promise<Devotee[]>;
 
   // User-Devotee Linking
   getDevoteeLinkedUser(devoteeId: number): Promise<User | null>;
