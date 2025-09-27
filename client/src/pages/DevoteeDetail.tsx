@@ -97,10 +97,13 @@ export default function DevoteeDetail() {
   });
 
   // Get devotee's district for role management
-  const getDevoteeDistrict = () => {
+  const getDevoteeDistrict = (): string => {
     if (devotee?.presentAddress?.district) return devotee.presentAddress.district;
     if (devotee?.permanentAddress?.district) return devotee.permanentAddress.district;
-    if (user?.districts && user.districts.length > 0) return user.districts[0];
+    if (user?.districts && user.districts.length > 0) {
+      const district = user.districts[0];
+      return typeof district === 'string' ? district : district.code || district.name || 'UNKNOWN';
+    }
     return 'UNKNOWN';
   };
 

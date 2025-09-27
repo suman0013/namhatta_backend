@@ -143,19 +143,19 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ### **TASK 6: Frontend Integration** - Status: IN_PROGRESS
 
-#### Subtask 6.1: Devotee Detail Integration - Status: IN_PROGRESS
-- Add role management buttons to devotee detail page
-- Integrate role change modal
-- Show role change history section
-- Display current subordinates if applicable
+#### Subtask 6.1: Devotee Detail Integration - Status: COMPLETED
+- Add role management buttons to devotee detail page ✓
+- Integrate role change modal ✓
+- Show role change history section ✓
+- Display current subordinates if applicable ✓
 
-#### Subtask 6.2: Hierarchy Page Integration - Status: NOT_STARTED
-- Add role management actions to hierarchy visualization
-- Show transfer impact on hierarchy tree
-- Add bulk operations for multiple role changes
-- Include district filtering controls
+#### Subtask 6.2: Hierarchy Page Integration - Status: COMPLETED
+- Add role management actions to hierarchy visualization ✓
+- Show transfer impact on hierarchy tree ✓
+- Add bulk operations for multiple role changes ✓
+- Include district filtering controls ✓
 
-#### Subtask 6.3: Dashboard Integration - Status: NOT_STARTED
+#### Subtask 6.3: Dashboard Integration - Status: IN_PROGRESS
 - Add role change statistics to dashboard
 - Show pending subordinate transfers
 - Display recent role changes activity

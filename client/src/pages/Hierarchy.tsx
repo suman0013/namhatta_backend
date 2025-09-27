@@ -3,11 +3,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield, TreePine, Network, Zap, Circle, ArrowRight, ArrowDown, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPin, Crown, UserCheck, Users, Shield, TreePine, Network, Zap, Circle, ArrowRight, ArrowDown, Search, UserCog, MoreVertical } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import iskconLogo from "@assets/iskcon_logo_1757665218141.png";
 import namhattaLogo from "@assets/namhatta_logo_1757673165218.png";
 import prabhupadaImage from "@assets/PRAVUPADA_1757698417419.jpg";
+import RoleManagementModal from "@/components/RoleManagementModal";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Leader {
   id: number;
@@ -39,6 +47,9 @@ export default function Hierarchy() {
   const [selectedMalaSenapoti, setSelectedMalaSenapoti] = useState<number | null>(null);
   const [selectedMahaChakraSenapoti, setSelectedMahaChakraSenapoti] = useState<number | null>(null);
   const [selectedChakraSenapoti, setSelectedChakraSenapoti] = useState<number | null>(null);
+  const [selectedDevoteeForRoleManagement, setSelectedDevoteeForRoleManagement] = useState<any>(null);
+  const [showRoleManagementModal, setShowRoleManagementModal] = useState(false);
+  const { user } = useAuth();
   
   const { data: hierarchy, isLoading, error } = useQuery<HierarchyData>({
     queryKey: ["/api/hierarchy"],
@@ -117,6 +128,26 @@ export default function Hierarchy() {
 
   const handleChakraSenapotiClick = (chakraSenapotiId: number) => {
     setSelectedChakraSenapoti(chakraSenapotiId);
+  };
+
+  // Helper functions for role management
+  const handleRoleManagement = (devotee: any) => {
+    const districtCode = getDevoteeDistrict(devotee);
+    setSelectedDevoteeForRoleManagement({ ...devotee, districtCode });
+    setShowRoleManagementModal(true);
+  };
+
+  const canManageRoles = user?.role === 'ADMIN' || user?.role === 'DISTRICT_SUPERVISOR';
+
+  const getDevoteeDistrict = (devotee: any): string => {
+    // Try to get district from devotee's address or use user's district as fallback
+    if (devotee?.presentAddress?.district) return devotee.presentAddress.district;
+    if (devotee?.permanentAddress?.district) return devotee.permanentAddress.district;
+    if (user?.districts && user.districts.length > 0) {
+      const district = user.districts[0];
+      return typeof district === 'string' ? district : (district.code || district.name || 'UNKNOWN');
+    }
+    return 'UNKNOWN';
   };
 
   if (isLoading || isLoadingDistrictSupervisors) {
@@ -354,13 +385,37 @@ export default function Hierarchy() {
                         <h4 className="text-sm font-bold text-red-700 dark:text-red-300">Mala Senapotis</h4>
                         <div className="space-y-1 max-h-32 overflow-y-auto">
                           {hierarchy.malaSenapotis.map((leader) => (
-                            <div key={leader.id} className="text-xs">
-                              <p className="font-medium text-red-800 dark:text-red-200">{leader.name}</p>
-                              {leader.namhattaName && (
-                                <p className="text-red-600 dark:text-red-400 truncate" title={leader.namhattaName}>
-                                  {leader.namhattaName}
-                                </p>
-                              )}
+                            <div key={leader.id} className="text-xs relative group">
+                              <div className="flex items-center justify-between p-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                <div className="flex-1">
+                                  <p className="font-medium text-red-800 dark:text-red-200">{leader.name}</p>
+                                  {leader.namhattaName && (
+                                    <p className="text-red-600 dark:text-red-400 truncate" title={leader.namhattaName}>
+                                      {leader.namhattaName}
+                                    </p>
+                                  )}
+                                </div>
+                                {canManageRoles && (
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        data-testid={`button-role-menu-${leader.id}`}
+                                      >
+                                        <MoreVertical className="h-3 w-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem onClick={() => handleRoleManagement(leader)}>
+                                        <UserCog className="mr-2 h-3 w-3" />
+                                        Manage Role
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -640,6 +695,16 @@ export default function Hierarchy() {
         
         </div>
       </div>
+
+      {/* Role Management Modal */}
+      {showRoleManagementModal && selectedDevoteeForRoleManagement && (
+        <RoleManagementModal
+          isOpen={showRoleManagementModal}
+          onClose={() => setShowRoleManagementModal(false)}
+          devotee={selectedDevoteeForRoleManagement}
+          districtCode={selectedDevoteeForRoleManagement.districtCode}
+        />
+      )}
     </div>
   );
 }
