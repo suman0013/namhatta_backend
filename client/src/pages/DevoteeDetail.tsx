@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   ArrowLeft,
   Edit,
@@ -31,10 +32,12 @@ import {
   Zap,
   Home,
   Activity,
-  Building
+  Building,
+  RefreshCw
 } from "lucide-react";
 import type { Devotee } from "@/lib/types";
 import DevoteeForm from "@/components/forms/DevoteeForm";
+import ChangeNamhattaModal from "@/components/ChangeNamhattaModal";
 
 
 
@@ -42,11 +45,13 @@ export default function DevoteeDetail() {
   const { id } = useParams();
   const [location] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const [showEditForm, setShowEditForm] = useState(false);
   const [statusComment, setStatusComment] = useState("");
   const [selectedStatusId, setSelectedStatusId] = useState<number | null>(null);
   const [backUrl, setBackUrl] = useState("/devotees");
+  const [showChangeNamhattaModal, setShowChangeNamhattaModal] = useState(false);
 
   // Check if we came from a Namhatta page
   useEffect(() => {
@@ -72,6 +77,13 @@ export default function DevoteeDetail() {
     queryKey: ["/api/devotees", id, "status-history"],
     queryFn: () => api.getDevoteeStatusHistory(parseInt(id!)),
     enabled: !!id,
+  });
+
+  // Fetch current namhatta data if devotee has one
+  const { data: currentNamhatta } = useQuery({
+    queryKey: ["/api/namhattas", devotee?.namhattaId],
+    queryFn: () => api.getNamhatta(devotee!.namhattaId!),
+    enabled: !!devotee?.namhattaId,
   });
 
   const { data: shraddhakutirs } = useQuery({
@@ -260,6 +272,64 @@ export default function DevoteeDetail() {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Namhatta Assignment */}
+            <Card className="glass-card">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between text-base">
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-2">
+                      <Building className="h-3 w-3 text-white" />
+                    </div>
+                    Namhatta Assignment
+                  </div>
+                  {/* Change Namhatta button - only for admin/office */}
+                  {(user?.role === 'ADMIN' || user?.role === 'OFFICE') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowChangeNamhattaModal(true)}
+                      className="text-xs"
+                      data-testid="button-change-namhatta"
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Change Namhatta
+                    </Button>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-2">
+                {devotee.namhattaId && currentNamhatta ? (
+                  <div className="p-3 bg-gradient-to-br from-indigo-50 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                    <div className="flex items-center mb-2">
+                      <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400 mr-2" />
+                      <p className="text-sm font-medium text-indigo-600 dark:text-indigo-400">Current Namhatta</p>
+                    </div>
+                    <p className="font-semibold text-gray-900 dark:text-white text-base">
+                      {currentNamhatta.name}
+                    </p>
+                    <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                      Code: {currentNamhatta.code}
+                    </p>
+                    {currentNamhatta.meetingDay && currentNamhatta.meetingTime && (
+                      <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">
+                        Meetings: {currentNamhatta.meetingDay} at {currentNamhatta.meetingTime}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-3 bg-gradient-to-br from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 rounded-lg border border-gray-200 dark:border-gray-800">
+                    <div className="flex items-center mb-1">
+                      <Building className="h-4 w-4 text-gray-500 dark:text-gray-400 mr-2" />
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Namhatta Assignment</p>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      No namhatta assigned
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -820,6 +890,16 @@ export default function DevoteeDetail() {
             // Refresh the devotee data
             queryClient.invalidateQueries({ queryKey: ["/api/devotees", id] });
           }}
+        />
+      )}
+
+      {/* Change Namhatta Modal */}
+      {showChangeNamhattaModal && devotee && (
+        <ChangeNamhattaModal
+          isOpen={showChangeNamhattaModal}
+          onClose={() => setShowChangeNamhattaModal(false)}
+          devotee={devotee}
+          currentNamhattaName={currentNamhatta?.name}
         />
       )}
     </div>
