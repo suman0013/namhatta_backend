@@ -496,7 +496,7 @@ export default function Hierarchy() {
                       <span className="text-sm text-slate-600 dark:text-slate-400">Loading district supervisors...</span>
                     </div>
                   ) : (
-                    <div className="space-y-1">
+                    <div className="grid grid-cols-2 gap-4">
                       {(districtSupervisors as any[])
                         .filter((s: any) => 
                           s.fullName.toLowerCase().includes(districtSearchTerm.toLowerCase())
