@@ -213,8 +213,8 @@ export default function DevoteeDetail() {
           </div>
         </div>
         <div className="flex space-x-3">
-          {/* Role Management Button - Only for ADMIN and DISTRICT_SUPERVISOR */}
-          {(user?.role === 'ADMIN' || user?.role === 'DISTRICT_SUPERVISOR') && devotee.leadershipRole && (
+          {/* Role Management Button - For ADMIN and DISTRICT_SUPERVISOR (both with and without existing roles) */}
+          {(user?.role === 'ADMIN' || user?.role === 'DISTRICT_SUPERVISOR') && (
             <Button 
               variant="outline" 
               className="glass" 
@@ -222,7 +222,7 @@ export default function DevoteeDetail() {
               data-testid="button-role-management"
             >
               <Shield className="mr-2 h-4 w-4" />
-              Manage Role
+              {devotee.leadershipRole ? 'Manage Role' : 'Assign Role'}
             </Button>
           )}
           
@@ -369,6 +369,90 @@ export default function DevoteeDetail() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Leadership Role Assignment - Show only when devotee has no leadership role */}
+            {(user?.role === 'ADMIN' || user?.role === 'DISTRICT_SUPERVISOR') && !devotee.leadershipRole && (
+              <Card className="glass-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center justify-between text-base">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center mr-2">
+                        <Shield className="h-3 w-3 text-white" />
+                      </div>
+                      Leadership Role Assignment
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowRoleManagementModal(true)}
+                      className="text-xs"
+                      data-testid="button-assign-senapoti-role"
+                    >
+                      <UserCog className="h-3 w-3 mr-1" />
+                      Assign Senapoti Role
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="p-3 bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center mb-2">
+                      <Shield className="h-4 w-4 text-orange-600 dark:text-orange-400 mr-2" />
+                      <p className="text-sm font-medium text-orange-600 dark:text-orange-400">Current Leadership Role</p>
+                    </div>
+                    <p className="text-sm text-orange-700 dark:text-orange-300 mb-2">
+                      No leadership role assigned
+                    </p>
+                    <p className="text-xs text-orange-600 dark:text-orange-400">
+                      Click "Assign Senapoti Role" to assign this devotee to a leadership position in the organizational hierarchy.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Current Leadership Role - Show only when devotee has a leadership role */}
+            {devotee.leadershipRole && (
+              <Card className="glass-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center justify-between text-base">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mr-2">
+                        <Shield className="h-3 w-3 text-white" />
+                      </div>
+                      Leadership Role
+                    </div>
+                    {(user?.role === 'ADMIN' || user?.role === 'DISTRICT_SUPERVISOR') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowRoleManagementModal(true)}
+                        className="text-xs"
+                        data-testid="button-manage-leadership-role"
+                      >
+                        <UserCog className="h-3 w-3 mr-1" />
+                        Manage Role
+                      </Button>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-2">
+                  <div className="p-3 bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center mb-2">
+                      <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mr-2" />
+                      <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Current Role</p>
+                    </div>
+                    <p className="font-semibold text-gray-900 dark:text-white text-base">
+                      {devotee.leadershipRole.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </p>
+                    {devotee.reportingToDevoteeId && (
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                        Reports to: Devotee ID {devotee.reportingToDevoteeId}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Family Information */}
             <Card className="glass-card">
