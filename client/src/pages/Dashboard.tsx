@@ -73,6 +73,12 @@ export default function Dashboard() {
     queryKey: ["/api/hierarchy"],
   });
 
+  // Query for role management statistics
+  const { data: senapotiStats, isLoading: senapotiStatsLoading } = useQuery({
+    queryKey: ["/api/role-management/statistics"],
+    enabled: true, // Always enabled for dashboard
+  });
+
   if (dashboardLoading || hierarchyLoading || statusLoading) {
     return <DashboardSkeleton />;
   }
@@ -253,7 +259,85 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Role Management Statistics */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 
+            className="text-2xl font-bold text-black dark:text-white cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200 flex items-center"
+            onClick={() => setLocation("/hierarchy")}
+          >
+            <UserCheck className="mr-3 h-6 w-6 text-purple-600 dark:text-purple-400" />
+            Senapoti Role Management
+          </h2>
+        </div>
 
+        {/* Role Statistics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="glass-card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/hierarchy")}>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-lg flex items-center justify-center">
+                  <Crown className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Mala Senapotis</p>
+                  <p className="text-2xl font-bold text-red-700 dark:text-red-300" data-testid="count-mala-senapotis">
+                    {(hierarchy as any)?.malaSenapotis?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/hierarchy")}>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <UserCheck className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Maha Chakra</p>
+                  <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-300" data-testid="count-maha-chakra-senapotis">
+                    {(hierarchy as any)?.mahaChakraSenapotis?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/hierarchy")}>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Chakra</p>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300" data-testid="count-chakra-senapotis">
+                    {(hierarchy as any)?.chakraSenapotis?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass-card hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation("/hierarchy")}>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Upa Chakra</p>
+                  <p className="text-2xl font-bold text-yellow-700 dark:text-yellow-300" data-testid="count-upa-chakra-senapotis">
+                    {(hierarchy as any)?.upaChakraSenapotis?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Recent Activity & Updates */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
