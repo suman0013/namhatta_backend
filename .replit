@@ -8,16 +8,11 @@ packages = ["mysql80", "sqlite"]
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 33655
-externalPort = 5000
 
 [[ports]]
 localPort = 38377
