@@ -513,7 +513,7 @@ export default function Hierarchy() {
                               <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                               <span className="text-sm font-medium truncate">{supervisor.fullName}</span>
                               {supervisor.districts && supervisor.districts.length > 0 && (
-                                <span className="text-xs text-slate-500 dark:text-slate-400">({supervisor.districts.length})</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">({supervisor.districts.join(", ")})</span>
                               )}
                             </div>
                             
@@ -538,7 +538,7 @@ export default function Hierarchy() {
                                         data-testid={`card-mala-senapoti-${mala.id}`}
                                       >
                                         <Crown className="h-4 w-4 text-pink-600 dark:text-pink-400 flex-shrink-0" />
-                                        <span className="text-sm font-medium truncate">{mala.legalName}</span>
+                                        <span className="text-sm font-medium truncate">{mala.legalName}{mala.name ? ` :: ${mala.name}` : ''}</span>
                                         <span className="text-xs text-slate-500 dark:text-slate-400">Mala</span>
                                       </div>
                                       
@@ -563,7 +563,7 @@ export default function Hierarchy() {
                                                   data-testid={`card-maha-chakra-senapoti-${mahaChakra.id}`}
                                                 >
                                                   <UserCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
-                                                  <span className="text-sm font-medium truncate">{mahaChakra.legalName}</span>
+                                                  <span className="text-sm font-medium truncate">{mahaChakra.legalName}{mahaChakra.name ? ` :: ${mahaChakra.name}` : ''}</span>
                                                   <span className="text-xs text-slate-500 dark:text-slate-400">Maha Chakra</span>
                                                 </div>
                                                 
@@ -588,7 +588,7 @@ export default function Hierarchy() {
                                                             data-testid={`card-chakra-senapoti-${chakra.id}`}
                                                           >
                                                             <Users className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                                                            <span className="text-sm font-medium truncate">{chakra.legalName}</span>
+                                                            <span className="text-sm font-medium truncate">{chakra.legalName}{chakra.name ? ` :: ${chakra.name}` : ''}</span>
                                                             <span className="text-xs text-slate-500 dark:text-slate-400">Chakra</span>
                                                           </div>
                                                           
@@ -606,7 +606,7 @@ export default function Hierarchy() {
                                                                 upaChakraSenapotis.map((upaChakra: any) => (
                                                                   <div key={upaChakra.id} className="flex items-center gap-2 p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800">
                                                                     <Circle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                                                                    <span className="text-sm font-medium truncate">{upaChakra.legalName}</span>
+                                                                    <span className="text-sm font-medium truncate">{upaChakra.legalName}{upaChakra.name ? ` :: ${upaChakra.name}` : ''}</span>
                                                                     <span className="text-xs text-slate-500 dark:text-slate-400">Upa Chakra</span>
                                                                   </div>
                                                                 ))
