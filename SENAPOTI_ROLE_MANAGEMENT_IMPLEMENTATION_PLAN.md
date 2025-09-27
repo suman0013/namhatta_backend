@@ -35,75 +35,61 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 1: Update Schema Types** - Status: NOT_STARTED
+### **TASK 1: Core Utility Functions** - Status: COMPLETED
 
-#### Subtask 1.1: Add Role History Schema to shared/schema.ts - Status: NOT_STARTED
-- Add `senapotiRoleHistory` table definition to match the SQL table created
-- Add corresponding insert schema and types for TypeScript support
-- Add fields: id, devoteeId, previousRole, newRole, previousReportingTo, newReportingTo, changeType, reason, changedBy, changedAt
-
-#### Subtask 1.2: Update Devotee Schema - Status: NOT_STARTED
-- Add `lastRoleChangeDate` and `roleChangeReason` fields to devotee schema
-- Update `insertDevoteeSchema` and types
-- Ensure proper type coercion for new fields
-
----
-
-### **TASK 2: Core Utility Functions** - Status: NOT_STARTED
-
-#### Subtask 2.1: Hierarchy Validation Functions - Status: NOT_STARTED
+#### Subtask 1.1: Hierarchy Validation Functions - Status: COMPLETED
 - Create `validateHierarchyChange()` function
 - Create `checkCircularReference()` function
 - Create `getValidTargetRoles()` function
 - Add role progression rules validation
 
-#### Subtask 2.2: District Filtering Functions - Status: NOT_STARTED
+#### Subtask 1.2: District Filtering Functions - Status: COMPLETED
 - Create `getDevoteesByDistrictAndRole()` function
 - Create `getDistrictHierarchy()` function
 - Create `findAvailableSupervisors()` function
 
-#### Subtask 2.3: Subordinate Management Functions - Status: NOT_STARTED
+#### Subtask 1.3: Subordinate Management Functions - Status: COMPLETED
 - Create `getDirectSubordinates()` function
 - Create `getAllSubordinatesInChain()` function
 - Create `validateSubordinateTransfer()` function
 
 ---
 
-### **TASK 3: Backend Storage Layer** - Status: NOT_STARTED
+### **TASK 2: Backend Storage Layer** - Status: NOT_STARTED
 
-#### Subtask 3.1: Role Management Storage Methods - Status: NOT_STARTED
+#### Subtask 2.1: Role Management Storage Methods - Status: NOT_STARTED
 - Add `changeDevoteeRole()` method to storage interface
 - Add `transferSubordinates()` method
 - Add `getRoleChangeHistory()` method
 - Add `getAvailableSupervisors()` method
 
-#### Subtask 3.2: Implement Storage Methods in DB Storage - Status: NOT_STARTED
+#### Subtask 2.2: Implement Storage Methods in DB Storage - Status: NOT_STARTED
 - Implement all role management methods in storage-db.ts
 - Add proper transaction handling for complex operations
 - Add error handling and rollback mechanisms
 
-#### Subtask 3.3: Add Audit Trail Storage - Status: NOT_STARTED
+#### Subtask 2.3: Add Audit Trail Storage - Status: NOT_STARTED
 - Implement `recordRoleChange()` method
 - Add bulk subordinate transfer tracking
 - Ensure all changes are logged with timestamps and reasons
 
 ---
 
-### **TASK 4: API Endpoints** - Status: NOT_STARTED
+### **TASK 3: API Endpoints** - Status: NOT_STARTED
 
-#### Subtask 4.1: Subordinate Transfer API - Status: NOT_STARTED
+#### Subtask 3.1: Subordinate Transfer API - Status: NOT_STARTED
 - Create `POST /api/senapoti/transfer-subordinates` endpoint
 - Handle bulk subordinate reassignment
 - Validate district boundaries and hierarchy rules
 - Add request/response validation with Zod schemas
 
-#### Subtask 4.2: Role Change APIs - Status: NOT_STARTED
+#### Subtask 3.2: Role Change APIs - Status: NOT_STARTED
 - Create `POST /api/senapoti/promote` endpoint
 - Create `POST /api/senapoti/demote` endpoint  
 - Create `POST /api/senapoti/remove-role` endpoint
 - All endpoints must handle subordinate transfer automatically
 
-#### Subtask 4.3: Supporting APIs - Status: NOT_STARTED
+#### Subtask 3.3: Supporting APIs - Status: NOT_STARTED
 - Create `GET /api/senapoti/available-supervisors/{districtId}/{targetRole}` endpoint
 - Create `GET /api/senapoti/subordinates/{devoteeId}` endpoint
 - Create `GET /api/senapoti/role-history/{devoteeId}` endpoint
@@ -111,21 +97,21 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 5: Core Business Logic** - Status: NOT_STARTED
+### **TASK 4: Core Business Logic** - Status: NOT_STARTED
 
-#### Subtask 5.1: Promotion Logic - Status: NOT_STARTED
+#### Subtask 4.1: Promotion Logic - Status: NOT_STARTED
 - Implement complete promotion workflow
 - Handle subordinate transfer before role change
 - Update reporting chains and Namhatta assignments
 - Validate hierarchy progression rules
 
-#### Subtask 5.2: Demotion Logic - Status: NOT_STARTED
+#### Subtask 4.2: Demotion Logic - Status: NOT_STARTED
 - Implement complete demotion workflow
 - Transfer all subordinates to appropriate supervisors
 - Find and assign new supervisor within district hierarchy
 - Update all affected Namhatta records
 
-#### Subtask 5.3: Role Removal Logic - Status: NOT_STARTED
+#### Subtask 4.3: Role Removal Logic - Status: NOT_STARTED
 - Implement complete role stripping workflow
 - Transfer all subordinates to appropriate alternatives
 - Clear all Namhatta leadership assignments
@@ -133,21 +119,21 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 6: Frontend Components** - Status: NOT_STARTED
+### **TASK 5: Frontend Components** - Status: NOT_STARTED
 
-#### Subtask 6.1: Role Management Modal - Status: NOT_STARTED
+#### Subtask 5.1: Role Management Modal - Status: NOT_STARTED
 - Create unified modal for all role changes (promote/demote/remove)
 - Include role selection dropdown with validation
 - Add reason input field for audit trail
 - Show preview of changes before confirmation
 
-#### Subtask 6.2: Supervisor Selection Component - Status: NOT_STARTED
+#### Subtask 5.2: Supervisor Selection Component - Status: NOT_STARTED
 - Create district-filtered supervisor selection
 - Show hierarchy context for better decision making
 - Include subordinate count and workload information
 - Add search and filter capabilities
 
-#### Subtask 6.3: Subordinate Transfer Interface - Status: NOT_STARTED
+#### Subtask 5.3: Subordinate Transfer Interface - Status: NOT_STARTED
 - Create bulk subordinate transfer component
 - Show all affected subordinates before transfer
 - Allow individual or bulk supervisor assignment
@@ -155,21 +141,21 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 7: Frontend Integration** - Status: NOT_STARTED
+### **TASK 6: Frontend Integration** - Status: NOT_STARTED
 
-#### Subtask 7.1: Devotee Detail Integration - Status: NOT_STARTED
+#### Subtask 6.1: Devotee Detail Integration - Status: NOT_STARTED
 - Add role management buttons to devotee detail page
 - Integrate role change modal
 - Show role change history section
 - Display current subordinates if applicable
 
-#### Subtask 7.2: Hierarchy Page Integration - Status: NOT_STARTED
+#### Subtask 6.2: Hierarchy Page Integration - Status: NOT_STARTED
 - Add role management actions to hierarchy visualization
 - Show transfer impact on hierarchy tree
 - Add bulk operations for multiple role changes
 - Include district filtering controls
 
-#### Subtask 7.3: Dashboard Integration - Status: NOT_STARTED
+#### Subtask 6.3: Dashboard Integration - Status: NOT_STARTED
 - Add role change statistics to dashboard
 - Show pending subordinate transfers
 - Display recent role changes activity
@@ -177,21 +163,21 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 8: Validation and Error Handling** - Status: NOT_STARTED
+### **TASK 7: Validation and Error Handling** - Status: NOT_STARTED
 
-#### Subtask 8.1: Frontend Validation - Status: NOT_STARTED
+#### Subtask 7.1: Frontend Validation - Status: NOT_STARTED
 - Add real-time role change validation
 - Show hierarchy impact preview
 - Validate district boundaries in UI
 - Add subordinate transfer validation
 
-#### Subtask 8.2: Backend Validation - Status: NOT_STARTED
+#### Subtask 7.2: Backend Validation - Status: NOT_STARTED
 - Implement comprehensive business rule validation
 - Add circular reference prevention
 - Validate all hierarchy changes before execution
 - Add proper error messages for all failure cases
 
-#### Subtask 8.3: Transaction Safety - Status: NOT_STARTED
+#### Subtask 7.3: Transaction Safety - Status: NOT_STARTED
 - Ensure all role changes are atomic operations
 - Implement proper rollback on failure
 - Add conflict resolution for concurrent changes
@@ -199,21 +185,21 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 9: Testing and Quality Assurance** - Status: NOT_STARTED
+### **TASK 8: Testing and Quality Assurance** - Status: NOT_STARTED
 
-#### Subtask 9.1: Backend API Testing - Status: NOT_STARTED
+#### Subtask 8.1: Backend API Testing - Status: NOT_STARTED
 - Test all role change scenarios (promote/demote/remove)
 - Test subordinate transfer operations
 - Test district boundary enforcement
 - Test error handling and edge cases
 
-#### Subtask 9.2: Frontend Component Testing - Status: NOT_STARTED
+#### Subtask 8.2: Frontend Component Testing - Status: NOT_STARTED
 - Test role management modal workflows
 - Test supervisor selection and subordinate transfer
 - Test validation and error display
 - Test integration with existing pages
 
-#### Subtask 9.3: End-to-End Testing - Status: NOT_STARTED
+#### Subtask 8.3: End-to-End Testing - Status: NOT_STARTED
 - Test complete role change workflows
 - Test hierarchy integrity maintenance
 - Test audit trail accuracy
@@ -221,21 +207,21 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 
 ---
 
-### **TASK 10: Documentation and Deployment** - Status: NOT_STARTED
+### **TASK 9: Documentation and Deployment** - Status: NOT_STARTED
 
-#### Subtask 10.1: Update System Documentation - Status: NOT_STARTED
+#### Subtask 9.1: Update System Documentation - Status: NOT_STARTED
 - Update replit.md with new features
 - Document role management workflows
 - Add hierarchy change procedures
 - Update API documentation
 
-#### Subtask 10.2: User Interface Polish - Status: NOT_STARTED
+#### Subtask 9.2: User Interface Polish - Status: NOT_STARTED
 - Ensure consistent styling with existing design
 - Add proper loading states and feedback
 - Optimize mobile responsiveness
 - Add keyboard navigation support
 
-#### Subtask 10.3: Final Testing and Deployment - Status: NOT_STARTED
+#### Subtask 9.3: Final Testing and Deployment - Status: NOT_STARTED
 - Perform comprehensive system testing
 - Test with realistic data volumes
 - Verify all features work in production environment
@@ -271,4 +257,4 @@ Upa Chakra Senapoti (reports to Chakra Senapoti)
 - COMPLETED: Task finished and tested
 
 **Agent Instructions:**
-Pick Task 1 and work through all its subtasks before moving to Task 2. Update status as you progress. Each task builds on the previous ones, so maintain the order strictly. The plan contains 10 tasks total (Task 1 through Task 10).
+Pick Task 1 and work through all its subtasks before moving to Task 2. Update status as you progress. Each task builds on the previous ones, so maintain the order strictly. The plan contains 9 tasks total (Task 1 through Task 9).
