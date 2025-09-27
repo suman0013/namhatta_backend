@@ -1,4 +1,4 @@
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser } from "../shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser, RoleChangeHistory, InsertRoleChangeHistory } from "../shared/schema";
 
 export interface IStorage {
   // Devotees
@@ -207,6 +207,67 @@ export interface IStorage {
     force?: boolean;
     createdBy?: number;
   }): Promise<{ user: User; devotee: any }>;
+
+  // Senapoti Role Management System
+  changeDevoteeRole(data: {
+    devoteeId: number;
+    newRole: string | null; // null for role removal
+    newReportingTo: number | null;
+    changedBy: number;
+    reason: string;
+    districtCode?: string;
+  }): Promise<{
+    devotee: Devotee;
+    subordinatesTransferred: number;
+    roleChangeRecord: RoleChangeHistory;
+  }>;
+  
+  transferSubordinates(data: {
+    fromDevoteeId: number;
+    toDevoteeId: number | null; // null means remove subordinates
+    subordinateIds: number[];
+    changedBy: number;
+    reason: string;
+    districtCode?: string;
+  }): Promise<{
+    transferred: number;
+    subordinates: Devotee[];
+  }>;
+  
+  getRoleChangeHistory(devoteeId: number, page?: number, size?: number): Promise<{ 
+    data: Array<RoleChangeHistory & { 
+      devoteeNames?: string;
+      changedByName?: string;
+      previousReportingToName?: string;
+      newReportingToName?: string;
+    }>, 
+    total: number 
+  }>;
+  
+  getAvailableSupervisors(data: {
+    targetRole: string;
+    districtCode: string;
+    excludeDevoteeIds?: number[];
+  }): Promise<Array<Devotee & { 
+    subordinateCount?: number;
+    workloadScore?: number;
+  }>>;
+  
+  recordRoleChange(data: InsertRoleChangeHistory): Promise<RoleChangeHistory>;
+  
+  getDirectSubordinates(devoteeId: number): Promise<Devotee[]>;
+  getAllSubordinatesInChain(devoteeId: number): Promise<Devotee[]>;
+  
+  validateSubordinateTransfer(data: {
+    fromDevoteeId: number;
+    toDevoteeId: number | null;
+    subordinateIds: number[];
+    districtCode: string;
+  }): Promise<{
+    isValid: boolean;
+    errors: string[];
+    warnings: string[];
+  }>;
 }
 
 // Import database storage implementation

@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs, users, userDistricts } from "@shared/schema";
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser } from "@shared/schema";
+import { devotees, namhattas, devotionalStatuses, shraddhakutirs, namhattaUpdates, leaders, statusHistory, addresses, devoteeAddresses, namhattaAddresses, gurudevs, users, userDistricts, roleChangeHistory } from "@shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, InsertLeader, StatusHistory, Gurudev, InsertGurudev, User, InsertUser, RoleChangeHistory, InsertRoleChangeHistory } from "@shared/schema";
 import { sql, eq, desc, asc, and, or, like, count, inArray, ne, isNotNull, isNull, not } from "drizzle-orm";
 import { IStorage } from "./storage-fresh";
 import { seedDatabase } from "./seed-data";
@@ -3403,5 +3403,403 @@ export class DatabaseStorage implements IStorage {
       namhattaCount: namhattaMap.get(village.village!) || 0,
       devoteeCount: devoteeMap.get(village.village!) || 0
     })).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Senapoti Role Management System Implementation
+  async changeDevoteeRole(data: {
+    devoteeId: number;
+    newRole: string | null;
+    newReportingTo: number | null;
+    changedBy: number;
+    reason: string;
+    districtCode?: string;
+  }): Promise<{
+    devotee: Devotee;
+    subordinatesTransferred: number;
+    roleChangeRecord: RoleChangeHistory;
+  }> {
+    return await db.transaction(async (tx) => {
+      // Get current devotee information
+      const currentDevotee = await tx
+        .select()
+        .from(devotees)
+        .where(eq(devotees.id, data.devoteeId))
+        .limit(1);
+
+      if (!currentDevotee.length) {
+        throw new Error(`Devotee with ID ${data.devoteeId} not found`);
+      }
+
+      const devotee = currentDevotee[0];
+      const previousRole = devotee.leadershipRole;
+      const previousReportingTo = devotee.reportingToDevoteeId;
+
+      // Get all direct subordinates before role change
+      const subordinates = await this.getDirectSubordinates(data.devoteeId);
+      
+      // Transfer subordinates if any exist
+      let subordinatesTransferred = 0;
+      if (subordinates.length > 0) {
+        // If removing role or changing to a non-supervisory role, transfer subordinates
+        if (!data.newRole || !['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI', 'DISTRICT_SUPERVISOR'].includes(data.newRole)) {
+          // Transfer all subordinates to the new supervisor (or remove if no new supervisor)
+          for (const subordinate of subordinates) {
+            await tx
+              .update(devotees)
+              .set({ reportingToDevoteeId: data.newReportingTo })
+              .where(eq(devotees.id, subordinate.id));
+          }
+          subordinatesTransferred = subordinates.length;
+        }
+      }
+
+      // Update devotee role and reporting
+      const updatedDevoteeResult = await tx
+        .update(devotees)
+        .set({
+          leadershipRole: data.newRole,
+          reportingToDevoteeId: data.newReportingTo,
+          updatedAt: new Date()
+        })
+        .where(eq(devotees.id, data.devoteeId))
+        .returning();
+
+      const updatedDevotee = updatedDevoteeResult[0];
+
+      // Record the role change in history
+      const roleChangeRecord = await this.recordRoleChange({
+        devoteeId: data.devoteeId,
+        previousRole: previousRole,
+        newRole: data.newRole,
+        previousReportingTo: previousReportingTo,
+        newReportingTo: data.newReportingTo,
+        changedBy: data.changedBy,
+        reason: data.reason,
+        districtCode: data.districtCode,
+        subordinatesTransferred: subordinatesTransferred
+      });
+
+      // Get the full devotee object with all details
+      const fullDevotee = await this.getDevotee(data.devoteeId);
+      if (!fullDevotee) {
+        throw new Error('Failed to retrieve updated devotee');
+      }
+
+      return {
+        devotee: fullDevotee,
+        subordinatesTransferred,
+        roleChangeRecord
+      };
+    });
+  }
+
+  async transferSubordinates(data: {
+    fromDevoteeId: number;
+    toDevoteeId: number | null;
+    subordinateIds: number[];
+    changedBy: number;
+    reason: string;
+    districtCode?: string;
+  }): Promise<{
+    transferred: number;
+    subordinates: Devotee[];
+  }> {
+    return await db.transaction(async (tx) => {
+      // Validate subordinates belong to fromDevoteeId
+      const validSubordinates = await tx
+        .select()
+        .from(devotees)
+        .where(
+          and(
+            inArray(devotees.id, data.subordinateIds),
+            eq(devotees.reportingToDevoteeId, data.fromDevoteeId)
+          )
+        );
+
+      if (validSubordinates.length !== data.subordinateIds.length) {
+        throw new Error('Some subordinates do not report to the specified devotee');
+      }
+
+      // Transfer subordinates
+      const transferredSubordinates = [];
+      for (const subordinate of validSubordinates) {
+        const updatedResult = await tx
+          .update(devotees)
+          .set({
+            reportingToDevoteeId: data.toDevoteeId,
+            updatedAt: new Date()
+          })
+          .where(eq(devotees.id, subordinate.id))
+          .returning();
+
+        transferredSubordinates.push(updatedResult[0]);
+      }
+
+      // Record the transfer in role change history
+      await this.recordRoleChange({
+        devoteeId: data.fromDevoteeId,
+        previousRole: null, // This is just a transfer, not a role change
+        newRole: null,
+        previousReportingTo: null,
+        newReportingTo: null,
+        changedBy: data.changedBy,
+        reason: `Subordinate transfer: ${data.reason}`,
+        districtCode: data.districtCode,
+        subordinatesTransferred: validSubordinates.length
+      });
+
+      return {
+        transferred: validSubordinates.length,
+        subordinates: transferredSubordinates
+      };
+    });
+  }
+
+  async getRoleChangeHistory(devoteeId: number, page = 1, size = 10): Promise<{
+    data: Array<RoleChangeHistory & {
+      devoteeNames?: string;
+      changedByName?: string;
+      previousReportingToName?: string;
+      newReportingToName?: string;
+    }>;
+    total: number;
+  }> {
+    const offset = (page - 1) * size;
+
+    // Get role change history with names
+    const history = await db
+      .select({
+        id: roleChangeHistory.id,
+        devoteeId: roleChangeHistory.devoteeId,
+        previousRole: roleChangeHistory.previousRole,
+        newRole: roleChangeHistory.newRole,
+        previousReportingTo: roleChangeHistory.previousReportingTo,
+        newReportingTo: roleChangeHistory.newReportingTo,
+        changedBy: roleChangeHistory.changedBy,
+        reason: roleChangeHistory.reason,
+        districtCode: roleChangeHistory.districtCode,
+        subordinatesTransferred: roleChangeHistory.subordinatesTransferred,
+        createdAt: roleChangeHistory.createdAt,
+        devoteeNames: sql`COALESCE(d.name, d.legal_name)`,
+        changedByName: sql`u.full_name`,
+        previousReportingToName: sql`COALESCE(prev_supervisor.name, prev_supervisor.legal_name)`,
+        newReportingToName: sql`COALESCE(new_supervisor.name, new_supervisor.legal_name)`
+      })
+      .from(roleChangeHistory)
+      .leftJoin(sql`${devotees} as d`, eq(roleChangeHistory.devoteeId, sql`d.id`))
+      .leftJoin(sql`${users} as u`, eq(roleChangeHistory.changedBy, sql`u.id`))
+      .leftJoin(sql`${devotees} as prev_supervisor`, eq(roleChangeHistory.previousReportingTo, sql`prev_supervisor.id`))
+      .leftJoin(sql`${devotees} as new_supervisor`, eq(roleChangeHistory.newReportingTo, sql`new_supervisor.id`))
+      .where(eq(roleChangeHistory.devoteeId, devoteeId))
+      .orderBy(desc(roleChangeHistory.createdAt))
+      .limit(size)
+      .offset(offset);
+
+    // Get total count
+    const totalResult = await db
+      .select({ count: count() })
+      .from(roleChangeHistory)
+      .where(eq(roleChangeHistory.devoteeId, devoteeId));
+
+    return {
+      data: history.map(record => ({
+        ...record,
+        devoteeNames: record.devoteeNames as string,
+        changedByName: record.changedByName as string,
+        previousReportingToName: record.previousReportingToName as string,
+        newReportingToName: record.newReportingToName as string
+      })),
+      total: totalResult[0].count
+    };
+  }
+
+  async getAvailableSupervisors(data: {
+    targetRole: string;
+    districtCode: string;
+    excludeDevoteeIds?: number[];
+  }): Promise<Array<Devotee & {
+    subordinateCount?: number;
+    workloadScore?: number;
+  }>> {
+    // Define valid supervisor roles for each target role
+    const supervisorRoleMap: { [key: string]: string[] } = {
+      'DISTRICT_SUPERVISOR': ['REGIONAL_DIRECTOR', 'CO_REGIONAL_DIRECTOR'],
+      'MALA_SENAPOTI': ['DISTRICT_SUPERVISOR'],
+      'MAHA_CHAKRA_SENAPOTI': ['MALA_SENAPOTI', 'DISTRICT_SUPERVISOR'],
+      'CHAKRA_SENAPOTI': ['MAHA_CHAKRA_SENAPOTI', 'MALA_SENAPOTI', 'DISTRICT_SUPERVISOR'],
+      'UPA_CHAKRA_SENAPOTI': ['CHAKRA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'MALA_SENAPOTI', 'DISTRICT_SUPERVISOR']
+    };
+
+    const validSupervisorRoles = supervisorRoleMap[data.targetRole] || [];
+    if (validSupervisorRoles.length === 0) {
+      return [];
+    }
+
+    // Build WHERE conditions
+    const whereConditions = [
+      inArray(devotees.leadershipRole, validSupervisorRoles),
+      isNotNull(devotees.leadershipRole)
+    ];
+
+    if (data.excludeDevoteeIds && data.excludeDevoteeIds.length > 0) {
+      whereConditions.push(not(inArray(devotees.id, data.excludeDevoteeIds)));
+    }
+
+    // Get potential supervisors in the same district
+    const supervisors = await db
+      .select()
+      .from(devotees)
+      .innerJoin(devoteeAddresses, eq(devotees.id, devoteeAddresses.devoteeId))
+      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+      .where(
+        and(
+          ...whereConditions,
+          eq(addresses.districtCode, data.districtCode)
+        )
+      );
+
+    // Calculate subordinate counts and workload scores
+    const enrichedSupervisors = await Promise.all(
+      supervisors.map(async ({ devotees: supervisor }) => {
+        const subordinates = await this.getDirectSubordinates(supervisor.id);
+        const subordinateCount = subordinates.length;
+        
+        // Simple workload score: fewer subordinates = lower score (better availability)
+        const workloadScore = subordinateCount;
+
+        const fullSupervisor = await this.getDevotee(supervisor.id);
+        return {
+          ...fullSupervisor,
+          subordinateCount,
+          workloadScore
+        };
+      })
+    );
+
+    // Sort by workload score (ascending - lower score means less busy)
+    return enrichedSupervisors
+      .filter(Boolean)
+      .sort((a, b) => (a?.workloadScore || 0) - (b?.workloadScore || 0)) as Array<Devotee & {
+        subordinateCount?: number;
+        workloadScore?: number;
+      }>;
+  }
+
+  async recordRoleChange(data: InsertRoleChangeHistory): Promise<RoleChangeHistory> {
+    const result = await db.insert(roleChangeHistory).values(data).returning();
+    return result[0];
+  }
+
+  async getDirectSubordinates(devoteeId: number): Promise<Devotee[]> {
+    const subordinateResults = await db
+      .select()
+      .from(devotees)
+      .where(eq(devotees.reportingToDevoteeId, devoteeId))
+      .orderBy(asc(devotees.legalName));
+
+    // Get full devotee objects with all details
+    const subordinates = await Promise.all(
+      subordinateResults.map(async (subordinate) => {
+        const fullDevotee = await this.getDevotee(subordinate.id);
+        return fullDevotee;
+      })
+    );
+
+    return subordinates.filter(Boolean) as Devotee[];
+  }
+
+  async getAllSubordinatesInChain(devoteeId: number): Promise<Devotee[]> {
+    const allSubordinates: Devotee[] = [];
+    const visited = new Set<number>();
+
+    const getSubordinatesRecursive = async (currentId: number) => {
+      if (visited.has(currentId)) {
+        return; // Prevent infinite loops
+      }
+      visited.add(currentId);
+
+      const directSubordinates = await this.getDirectSubordinates(currentId);
+      
+      for (const subordinate of directSubordinates) {
+        allSubordinates.push(subordinate);
+        await getSubordinatesRecursive(subordinate.id);
+      }
+    };
+
+    await getSubordinatesRecursive(devoteeId);
+    return allSubordinates;
+  }
+
+  async validateSubordinateTransfer(data: {
+    fromDevoteeId: number;
+    toDevoteeId: number | null;
+    subordinateIds: number[];
+    districtCode: string;
+  }): Promise<{
+    isValid: boolean;
+    errors: string[];
+    warnings: string[];
+  }> {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    try {
+      // Validate that all subordinates actually report to fromDevoteeId
+      const validSubordinates = await db
+        .select()
+        .from(devotees)
+        .where(
+          and(
+            inArray(devotees.id, data.subordinateIds),
+            eq(devotees.reportingToDevoteeId, data.fromDevoteeId)
+          )
+        );
+
+      if (validSubordinates.length !== data.subordinateIds.length) {
+        errors.push('Some selected subordinates do not report to the specified supervisor');
+      }
+
+      // If transferring to a specific devotee, validate they exist and are in the same district
+      if (data.toDevoteeId) {
+        const newSupervisor = await this.getDevotee(data.toDevoteeId);
+        if (!newSupervisor) {
+          errors.push('Target supervisor not found');
+        } else {
+          // Check if new supervisor is in the same district
+          const supervisorDistricts = await db
+            .select({ district: addresses.districtCode })
+            .from(devoteeAddresses)
+            .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
+            .where(eq(devoteeAddresses.devoteeId, data.toDevoteeId))
+            .limit(1);
+
+          if (supervisorDistricts.length === 0) {
+            warnings.push('Target supervisor has no registered address district');
+          } else if (supervisorDistricts[0].district !== data.districtCode) {
+            errors.push('Target supervisor is not in the same district');
+          }
+
+          // Check workload
+          const currentSubordinates = await this.getDirectSubordinates(data.toDevoteeId);
+          if (currentSubordinates.length + data.subordinateIds.length > 10) {
+            warnings.push('Target supervisor will have a high workload after this transfer');
+          }
+        }
+      }
+
+      // Check for circular references
+      if (data.toDevoteeId && data.subordinateIds.includes(data.toDevoteeId)) {
+        errors.push('Cannot assign a devotee to report to themselves');
+      }
+
+    } catch (error) {
+      errors.push(`Validation error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      warnings
+    };
   }
 }

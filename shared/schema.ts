@@ -214,6 +214,21 @@ export const jwtBlacklist = pgTable("jwt_blacklist", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Role Change History table for Senapoti Role Management
+export const roleChangeHistory = pgTable("role_change_history", {
+  id: serial("id").primaryKey(),
+  devoteeId: integer("devotee_id").notNull(),
+  previousRole: text("previous_role"), // Previous leadership role or null for no role
+  newRole: text("new_role"), // New leadership role or null for role removal
+  previousReportingTo: integer("previous_reporting_to"), // Previous supervisor ID
+  newReportingTo: integer("new_reporting_to"), // New supervisor ID
+  changedBy: integer("changed_by").notNull(), // User ID who made the change
+  reason: text("reason").notNull(), // Reason for the role change
+  districtCode: text("district_code"), // District where change occurred (for audit)
+  subordinatesTransferred: integer("subordinates_transferred").default(0), // Number of subordinates transferred
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertDevoteeSchema = createInsertSchema(devotees).omit({
   id: true,
@@ -363,6 +378,11 @@ export const insertJwtBlacklistSchema = createInsertSchema(jwtBlacklist).omit({
   createdAt: true,
 });
 
+export const insertRoleChangeHistorySchema = createInsertSchema(roleChangeHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type Devotee = typeof devotees.$inferSelect & {
   devotionalStatusName?: string;
@@ -435,3 +455,6 @@ export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
 
 export type JwtBlacklist = typeof jwtBlacklist.$inferSelect;
 export type InsertJwtBlacklist = z.infer<typeof insertJwtBlacklistSchema>;
+
+export type RoleChangeHistory = typeof roleChangeHistory.$inferSelect;
+export type InsertRoleChangeHistory = z.infer<typeof insertRoleChangeHistorySchema>;

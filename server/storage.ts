@@ -1,4 +1,4 @@
-import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, StatusHistory, User, InsertUser } from "@shared/schema";
+import { Devotee, InsertDevotee, Namhatta, InsertNamhatta, DevotionalStatus, InsertDevotionalStatus, Shraddhakutir, InsertShraddhakutir, NamhattaUpdate, InsertNamhattaUpdate, Leader, StatusHistory, User, InsertUser, RoleChangeHistory, InsertRoleChangeHistory } from "@shared/schema";
 import { IStorage } from "./storage-fresh";
 
 // Import Gurudev type
@@ -969,6 +969,171 @@ export class MemStorage implements IStorage {
     return {
       user: newUser,
       devotee: devotee
+    };
+  }
+
+  // Senapoti Role Management System - Memory Storage Stubs
+  async changeDevoteeRole(data: {
+    devoteeId: number;
+    newRole: string | null;
+    newReportingTo: number | null;
+    changedBy: number;
+    reason: string;
+    districtCode?: string;
+  }): Promise<{
+    devotee: Devotee;
+    subordinatesTransferred: number;
+    roleChangeRecord: RoleChangeHistory;
+  }> {
+    // Stub implementation for memory storage
+    const devotee = await this.getDevotee(data.devoteeId);
+    if (!devotee) throw new Error('Devotee not found');
+
+    // Simple stub implementation
+    const index = this.devotees.findIndex(d => d.id === data.devoteeId);
+    if (index !== -1) {
+      this.devotees[index].leadershipRole = data.newRole;
+      this.devotees[index].reportingToDevoteeId = data.newReportingTo;
+      this.devotees[index].updatedAt = new Date();
+    }
+
+    const roleChangeRecord: RoleChangeHistory = {
+      id: this.nextId++,
+      devoteeId: data.devoteeId,
+      previousRole: devotee.leadershipRole,
+      newRole: data.newRole,
+      previousReportingTo: devotee.reportingToDevoteeId,
+      newReportingTo: data.newReportingTo,
+      changedBy: data.changedBy,
+      reason: data.reason,
+      districtCode: data.districtCode,
+      subordinatesTransferred: 0,
+      createdAt: new Date()
+    };
+
+    return {
+      devotee: this.devotees[index],
+      subordinatesTransferred: 0,
+      roleChangeRecord
+    };
+  }
+
+  async transferSubordinates(data: {
+    fromDevoteeId: number;
+    toDevoteeId: number | null;
+    subordinateIds: number[];
+    changedBy: number;
+    reason: string;
+    districtCode?: string;
+  }): Promise<{
+    transferred: number;
+    subordinates: Devotee[];
+  }> {
+    // Stub implementation for memory storage
+    const transferred: Devotee[] = [];
+    for (const subordinateId of data.subordinateIds) {
+      const index = this.devotees.findIndex(d => d.id === subordinateId);
+      if (index !== -1 && this.devotees[index].reportingToDevoteeId === data.fromDevoteeId) {
+        this.devotees[index].reportingToDevoteeId = data.toDevoteeId;
+        this.devotees[index].updatedAt = new Date();
+        transferred.push(this.devotees[index]);
+      }
+    }
+
+    return {
+      transferred: transferred.length,
+      subordinates: transferred
+    };
+  }
+
+  async getRoleChangeHistory(devoteeId: number, page = 1, size = 10): Promise<{
+    data: Array<RoleChangeHistory & {
+      devoteeNames?: string;
+      changedByName?: string;
+      previousReportingToName?: string;
+      newReportingToName?: string;
+    }>;
+    total: number;
+  }> {
+    // Stub implementation - return empty array for memory storage
+    return {
+      data: [],
+      total: 0
+    };
+  }
+
+  async getAvailableSupervisors(data: {
+    targetRole: string;
+    districtCode: string;
+    excludeDevoteeIds?: number[];
+  }): Promise<Array<Devotee & {
+    subordinateCount?: number;
+    workloadScore?: number;
+  }>> {
+    // Stub implementation - return empty array for memory storage
+    return [];
+  }
+
+  async recordRoleChange(data: InsertRoleChangeHistory): Promise<RoleChangeHistory> {
+    // Stub implementation for memory storage
+    const record: RoleChangeHistory = {
+      id: this.nextId++,
+      ...data,
+      createdAt: new Date()
+    };
+    return record;
+  }
+
+  async getDirectSubordinates(devoteeId: number): Promise<Devotee[]> {
+    return this.devotees.filter(d => d.reportingToDevoteeId === devoteeId);
+  }
+
+  async getAllSubordinatesInChain(devoteeId: number): Promise<Devotee[]> {
+    const allSubordinates: Devotee[] = [];
+    const visited = new Set<number>();
+
+    const getSubordinatesRecursive = (currentId: number) => {
+      if (visited.has(currentId)) return;
+      visited.add(currentId);
+
+      const directSubordinates = this.devotees.filter(d => d.reportingToDevoteeId === currentId);
+      for (const subordinate of directSubordinates) {
+        allSubordinates.push(subordinate);
+        getSubordinatesRecursive(subordinate.id);
+      }
+    };
+
+    getSubordinatesRecursive(devoteeId);
+    return allSubordinates;
+  }
+
+  async validateSubordinateTransfer(data: {
+    fromDevoteeId: number;
+    toDevoteeId: number | null;
+    subordinateIds: number[];
+    districtCode: string;
+  }): Promise<{
+    isValid: boolean;
+    errors: string[];
+    warnings: string[];
+  }> {
+    // Stub implementation for memory storage
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    // Basic validation
+    const validSubordinates = this.devotees.filter(d =>
+      data.subordinateIds.includes(d.id) && d.reportingToDevoteeId === data.fromDevoteeId
+    );
+
+    if (validSubordinates.length !== data.subordinateIds.length) {
+      errors.push('Some subordinates do not report to the specified supervisor');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      warnings
     };
   }
 }
