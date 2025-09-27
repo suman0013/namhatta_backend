@@ -106,7 +106,7 @@ export default function SubordinateTransferInterface({
       } else {
         // Individual transfers - we need to handle multiple API calls
         const results = [];
-        for (const subordinateId of subordinateIds) {
+        for (const subordinateId of Array.from(subordinateIds)) {
           const assignment = individualAssignments.get(subordinateId);
           if (assignment?.selectedSupervisorId) {
             const result = await api.transferSubordinates({
@@ -190,7 +190,7 @@ export default function SubordinateTransferInterface({
       return !!bulkSupervisorId;
     } else {
       // Check if all selected subordinates have supervisors assigned
-      for (const subordinateId of selectedSubordinateIds) {
+      for (const subordinateId of Array.from(selectedSubordinateIds)) {
         const assignment = individualAssignments.get(subordinateId);
         if (!assignment?.selectedSupervisorId) return false;
       }

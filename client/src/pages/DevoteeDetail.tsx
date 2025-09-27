@@ -38,6 +38,8 @@ import {
 import type { Devotee } from "@/lib/types";
 import DevoteeForm from "@/components/forms/DevoteeForm";
 import ChangeNamhattaModal from "@/components/ChangeNamhattaModal";
+import RoleManagementModal from "@/components/RoleManagementModal";
+import { Shield, UserCog, History } from "lucide-react";
 
 
 
@@ -52,6 +54,7 @@ export default function DevoteeDetail() {
   const [selectedStatusId, setSelectedStatusId] = useState<number | null>(null);
   const [backUrl, setBackUrl] = useState("/devotees");
   const [showChangeNamhattaModal, setShowChangeNamhattaModal] = useState(false);
+  const [showRoleManagementModal, setShowRoleManagementModal] = useState(false);
 
   // Check if we came from a Namhatta page
   useEffect(() => {
@@ -85,6 +88,23 @@ export default function DevoteeDetail() {
     queryFn: () => api.getNamhatta(devotee!.namhattaId!),
     enabled: !!devotee?.namhattaId,
   });
+
+  // Fetch role change history for devotee
+  const { data: roleChangeHistory } = useQuery({
+    queryKey: ["/api/senapoti/role-history", id],
+    queryFn: () => api.getRoleChangeHistory(parseInt(id!)),
+    enabled: !!id && !!devotee?.leadershipRole,
+  });
+
+  // Get devotee's district for role management
+  const getDevoteeDistrict = () => {
+    if (devotee?.presentAddress?.district) return devotee.presentAddress.district;
+    if (devotee?.permanentAddress?.district) return devotee.permanentAddress.district;
+    if (user?.districts && user.districts.length > 0) return user.districts[0];
+    return 'UNKNOWN';
+  };
+
+  const devoteeDistrict = getDevoteeDistrict();
 
   const { data: shraddhakutirs } = useQuery({
     queryKey: ["/api/shraddhakutirs"],
@@ -190,6 +210,20 @@ export default function DevoteeDetail() {
           </div>
         </div>
         <div className="flex space-x-3">
+          {/* Role Management Button - Only for ADMIN and DISTRICT_SUPERVISOR */}
+          {(user?.role === 'ADMIN' || user?.role === 'DISTRICT_SUPERVISOR') && devotee.leadershipRole && (
+            <Button 
+              variant="outline" 
+              className="glass" 
+              onClick={() => setShowRoleManagementModal(true)}
+              data-testid="button-role-management"
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              Manage Role
+            </Button>
+          )}
+          
+          {/* Edit Profile Button */}
           <Button variant="outline" className="glass" onClick={() => setShowEditForm(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Profile
@@ -818,6 +852,72 @@ export default function DevoteeDetail() {
             </Card>
 
             {/* Status History */}
+            {/* Role Change History - Show if user has leadership role */}
+            {devotee.leadershipRole && (
+              <Card className="glass-card min-h-64 relative overflow-hidden mb-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5"></div>
+                <CardHeader className="relative z-10">
+                  <CardTitle className="flex items-center text-base">
+                    <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-2">
+                      <Shield className="h-3 w-3 text-white" />
+                    </div>
+                    Role Change History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="relative z-10">
+                  <div className="space-y-3 max-h-48 overflow-y-auto">
+                    {!roleChangeHistory || roleChangeHistory.length === 0 ? (
+                      <div className="text-center py-6">
+                        <UserCog className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-600 dark:text-gray-400 font-medium">
+                          No role changes recorded yet.
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+                          Role changes will appear here when they occur.
+                        </p>
+                      </div>
+                    ) : (
+                      roleChangeHistory.map((entry: any, index: number) => (
+                        <div key={entry.id} className="relative">
+                          <div className="flex items-start space-x-3 p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 hover:shadow-md transition-all duration-200">
+                            <div className="w-3 h-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mt-1 shadow-sm" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+                                {entry.previousRole ? `Changed from ${entry.previousRole.replace(/_/g, ' ')} to ` : 'Appointed as '}
+                                {entry.newRole ? entry.newRole.replace(/_/g, ' ') : 'No Role'}
+                              </p>
+                              <div className="flex items-center text-xs text-blue-600 dark:text-blue-400 mb-1">
+                                <History className="h-3 w-3 mr-1" />
+                                {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : 'Recently'}
+                              </div>
+                              {entry.reason && (
+                                <div className="mt-2 p-2 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800/50 dark:to-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                                  <p className="text-xs text-gray-600 dark:text-gray-400 italic">
+                                    "{entry.reason}"
+                                  </p>
+                                </div>
+                              )}
+                              {entry.subordinatesTransferred > 0 && (
+                                <div className="mt-1">
+                                  <Badge variant="outline" className="text-xs">
+                                    {entry.subordinatesTransferred} subordinates transferred
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {index < (roleChangeHistory.length - 1) && (
+                            <div className="absolute left-7 top-14 w-px h-4 bg-gradient-to-b from-blue-300 to-indigo-300 dark:from-blue-700 dark:to-indigo-700" />
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Status History */}
             <Card className="glass-card min-h-96 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5"></div>
               <CardHeader className="relative z-10">
@@ -900,6 +1000,16 @@ export default function DevoteeDetail() {
           onClose={() => setShowChangeNamhattaModal(false)}
           devotee={devotee}
           currentNamhattaName={currentNamhatta?.name}
+        />
+      )}
+
+      {/* Role Management Modal */}
+      {showRoleManagementModal && devotee && (
+        <RoleManagementModal
+          isOpen={showRoleManagementModal}
+          onClose={() => setShowRoleManagementModal(false)}
+          devotee={devotee}
+          districtCode={devoteeDistrict}
         />
       )}
     </div>
