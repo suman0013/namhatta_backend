@@ -5,7 +5,7 @@ import { z } from "zod";
 import { DatabaseStorage } from "./storage-db";
 
 const storage = new DatabaseStorage();
-import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema, insertGurudevSchema } from "@shared/schema";
+import { insertDevoteeSchema, insertNamhattaSchema, insertDevotionalStatusSchema, insertShraddhakutirSchema, insertNamhattaUpdateSchema, insertGurudevSchema, insertRoleChangeHistorySchema } from "@shared/schema";
 import { authRoutes } from "./auth/routes";
 import { authenticateJWT, authorize, validateDistrictAccess, loginRateLimit, sanitizeInput } from "./auth/middleware";
 import rateLimit from 'express-rate-limit';
@@ -43,6 +43,42 @@ const createUserForDevoteeSchema = z.object({
 const validLeadershipRoles = ['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI'] as const;
 const roleParamSchema = z.enum(validLeadershipRoles, {
   errorMap: () => ({ message: 'Invalid role parameter. Must be one of: MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI' })
+});
+
+// Senapoti Role Management validation schemas
+const transferSubordinatesSchema = z.object({
+  fromDevoteeId: z.number().int().positive(),
+  toDevoteeId: z.number().int().positive().nullable(),
+  subordinateIds: z.array(z.number().int().positive()).min(1, 'At least one subordinate must be selected'),
+  reason: z.string().min(3, 'Reason must be at least 3 characters long').max(500, 'Reason must be less than 500 characters'),
+  districtCode: z.string().optional()
+});
+
+const changeDevoteeRoleSchema = z.object({
+  devoteeId: z.number().int().positive(),
+  newRole: z.enum(['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI', 'DISTRICT_SUPERVISOR']).nullable(),
+  newReportingTo: z.number().int().positive().nullable(),
+  reason: z.string().min(3, 'Reason must be at least 3 characters long').max(500, 'Reason must be less than 500 characters'),
+  districtCode: z.string().optional()
+});
+
+const promoteDevoteeSchema = z.object({
+  devoteeId: z.number().int().positive(),
+  targetRole: z.enum(['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI', 'DISTRICT_SUPERVISOR']),
+  newReportingTo: z.number().int().positive().nullable(),
+  reason: z.string().min(3, 'Reason must be at least 3 characters long').max(500, 'Reason must be less than 500 characters')
+});
+
+const demoteDevoteeSchema = z.object({
+  devoteeId: z.number().int().positive(),
+  targetRole: z.enum(['MALA_SENAPOTI', 'MAHA_CHAKRA_SENAPOTI', 'CHAKRA_SENAPOTI', 'UPA_CHAKRA_SENAPOTI']).nullable(),
+  newReportingTo: z.number().int().positive().nullable(),
+  reason: z.string().min(3, 'Reason must be at least 3 characters long').max(500, 'Reason must be less than 500 characters')
+});
+
+const removeRoleSchema = z.object({
+  devoteeId: z.number().int().positive(),
+  reason: z.string().min(3, 'Reason must be at least 3 characters long').max(500, 'Reason must be less than 500 characters')
 });
 
 // Rate limiting for API endpoints
@@ -1277,6 +1313,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deactivating user:", error);
       res.status(500).json({ error: "Failed to deactivate user" });
+    }
+  });
+
+  // ====================================================================================
+  // SENAPOTI ROLE MANAGEMENT SYSTEM API ENDPOINTS
+  // ====================================================================================
+
+  // Transfer subordinates from one supervisor to another
+  app.post("/api/senapoti/transfer-subordinates", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const validatedData = transferSubordinatesSchema.parse(req.body);
+      
+      // Get user's district if they are a district supervisor for validation
+      let allowedDistricts: string[] = [];
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        allowedDistricts = req.user.districts || [];
+      }
+      
+      // Validate subordinate transfer
+      const validation = await storage.validateSubordinateTransfer({
+        fromDevoteeId: validatedData.fromDevoteeId,
+        toDevoteeId: validatedData.toDevoteeId,
+        subordinateIds: validatedData.subordinateIds,
+        districtCode: validatedData.districtCode || (allowedDistricts[0] || '')
+      });
+
+      if (!validation.isValid) {
+        return res.status(400).json({ 
+          error: 'Transfer validation failed', 
+          errors: validation.errors,
+          warnings: validation.warnings
+        });
+      }
+
+      // Perform the transfer
+      const result = await storage.transferSubordinates({
+        fromDevoteeId: validatedData.fromDevoteeId,
+        toDevoteeId: validatedData.toDevoteeId,
+        subordinateIds: validatedData.subordinateIds,
+        changedBy: req.user!.id,
+        reason: validatedData.reason,
+        districtCode: validatedData.districtCode
+      });
+
+      res.json({
+        message: `Successfully transferred ${result.transferred} subordinates`,
+        transferred: result.transferred,
+        subordinates: result.subordinates
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to transfer subordinates', message: errorMessage });
+    }
+  });
+
+  // Promote devotee to higher role
+  app.post("/api/senapoti/promote", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const validatedData = promoteDevoteeSchema.parse(req.body);
+      
+      // Get user's district for validation
+      let districtCode = '';
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        districtCode = req.user.districts?.[0] || '';
+      }
+
+      // Perform role change (promotion)
+      const result = await storage.changeDevoteeRole({
+        devoteeId: validatedData.devoteeId,
+        newRole: validatedData.targetRole,
+        newReportingTo: validatedData.newReportingTo,
+        changedBy: req.user!.id,
+        reason: `Promotion: ${validatedData.reason}`,
+        districtCode: districtCode
+      });
+
+      res.json({
+        message: `Successfully promoted devotee to ${validatedData.targetRole}`,
+        devotee: result.devotee,
+        subordinatesTransferred: result.subordinatesTransferred,
+        roleChangeRecord: result.roleChangeRecord
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to promote devotee', message: errorMessage });
+    }
+  });
+
+  // Demote devotee to lower role
+  app.post("/api/senapoti/demote", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const validatedData = demoteDevoteeSchema.parse(req.body);
+      
+      // Get user's district for validation
+      let districtCode = '';
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        districtCode = req.user.districts?.[0] || '';
+      }
+
+      // Perform role change (demotion)
+      const result = await storage.changeDevoteeRole({
+        devoteeId: validatedData.devoteeId,
+        newRole: validatedData.targetRole,
+        newReportingTo: validatedData.newReportingTo,
+        changedBy: req.user!.id,
+        reason: `Demotion: ${validatedData.reason}`,
+        districtCode: districtCode
+      });
+
+      res.json({
+        message: `Successfully demoted devotee${validatedData.targetRole ? ` to ${validatedData.targetRole}` : ' (role removed)'}`,
+        devotee: result.devotee,
+        subordinatesTransferred: result.subordinatesTransferred,
+        roleChangeRecord: result.roleChangeRecord
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to demote devotee', message: errorMessage });
+    }
+  });
+
+  // Remove role from devotee completely
+  app.post("/api/senapoti/remove-role", sanitizeInput, modifyRateLimit, authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const validatedData = removeRoleSchema.parse(req.body);
+      
+      // Get user's district for validation
+      let districtCode = '';
+      if (req.user?.role === 'DISTRICT_SUPERVISOR') {
+        districtCode = req.user.districts?.[0] || '';
+      }
+
+      // Perform role removal
+      const result = await storage.changeDevoteeRole({
+        devoteeId: validatedData.devoteeId,
+        newRole: null, // Remove role completely
+        newReportingTo: null,
+        changedBy: req.user!.id,
+        reason: `Role Removal: ${validatedData.reason}`,
+        districtCode: districtCode
+      });
+
+      res.json({
+        message: 'Successfully removed leadership role from devotee',
+        devotee: result.devotee,
+        subordinatesTransferred: result.subordinatesTransferred,
+        roleChangeRecord: result.roleChangeRecord
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to remove role', message: errorMessage });
+    }
+  });
+
+  // Get available supervisors for a target role within a district
+  app.get("/api/senapoti/available-supervisors/:districtCode/:targetRole", authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const districtCode = req.params.districtCode;
+      const targetRole = roleParamSchema.parse(req.params.targetRole);
+      const excludeIds = req.query.excludeIds ? 
+        String(req.query.excludeIds).split(',').map(id => parseInt(id)).filter(id => !isNaN(id)) : 
+        [];
+
+      const supervisors = await storage.getAvailableSupervisors({
+        targetRole,
+        districtCode,
+        excludeDevoteeIds: excludeIds
+      });
+
+      res.json({
+        districtCode,
+        targetRole,
+        supervisors
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to get available supervisors', message: errorMessage });
+    }
+  });
+
+  // Get direct subordinates of a devotee
+  app.get("/api/senapoti/subordinates/:devoteeId", authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.devoteeId);
+      if (isNaN(devoteeId)) {
+        return res.status(400).json({ error: 'Invalid devotee ID' });
+      }
+
+      const subordinates = await storage.getDirectSubordinates(devoteeId);
+      
+      res.json({
+        devoteeId,
+        subordinates,
+        count: subordinates.length
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to get subordinates', message: errorMessage });
+    }
+  });
+
+  // Get role change history for a devotee
+  app.get("/api/senapoti/role-history/:devoteeId", authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.devoteeId);
+      if (isNaN(devoteeId)) {
+        return res.status(400).json({ error: 'Invalid devotee ID' });
+      }
+
+      const page = parseInt(req.query.page as string) || 1;
+      const size = parseInt(req.query.size as string) || 10;
+
+      const history = await storage.getRoleChangeHistory(devoteeId, page, size);
+      
+      res.json(history);
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to get role change history', message: errorMessage });
+    }
+  });
+
+  // Get all subordinates in chain (recursive)
+  app.get("/api/senapoti/subordinates/:devoteeId/all", authenticateJWT, authorize(['ADMIN', 'DISTRICT_SUPERVISOR']), async (req, res) => {
+    try {
+      const devoteeId = parseInt(req.params.devoteeId);
+      if (isNaN(devoteeId)) {
+        return res.status(400).json({ error: 'Invalid devotee ID' });
+      }
+
+      const allSubordinates = await storage.getAllSubordinatesInChain(devoteeId);
+      
+      res.json({
+        devoteeId,
+        allSubordinates,
+        count: allSubordinates.length
+      });
+    } catch (error) {
+      console.error('API Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(400).json({ error: 'Failed to get all subordinates', message: errorMessage });
     }
   });
 

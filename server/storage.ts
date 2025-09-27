@@ -1000,13 +1000,13 @@ export class MemStorage implements IStorage {
     const roleChangeRecord: RoleChangeHistory = {
       id: this.nextId++,
       devoteeId: data.devoteeId,
-      previousRole: devotee.leadershipRole,
+      previousRole: devotee.leadershipRole || null,
       newRole: data.newRole,
-      previousReportingTo: devotee.reportingToDevoteeId,
+      previousReportingTo: devotee.reportingToDevoteeId || null,
       newReportingTo: data.newReportingTo,
       changedBy: data.changedBy,
       reason: data.reason,
-      districtCode: data.districtCode,
+      districtCode: data.districtCode || null,
       subordinatesTransferred: 0,
       createdAt: new Date()
     };
@@ -1078,7 +1078,15 @@ export class MemStorage implements IStorage {
     // Stub implementation for memory storage
     const record: RoleChangeHistory = {
       id: this.nextId++,
-      ...data,
+      devoteeId: data.devoteeId,
+      previousRole: data.previousRole || null,
+      newRole: data.newRole || null,
+      previousReportingTo: data.previousReportingTo || null,
+      newReportingTo: data.newReportingTo || null,
+      changedBy: data.changedBy,
+      reason: data.reason,
+      districtCode: data.districtCode || null,
+      subordinatesTransferred: data.subordinatesTransferred || 0,
       createdAt: new Date()
     };
     return record;
