@@ -96,14 +96,23 @@ export default function DevoteeDetail() {
     enabled: !!id && !!devotee?.leadershipRole,
   });
 
-  // Get devotee's district for role management
+  // Get devotee's district for role management - MUST use namhatta's district, not personal address
   const getDevoteeDistrict = (): string => {
+    // First priority: Use the namhatta's district (where they serve spiritually)
+    if (currentNamhatta?.address?.district) {
+      return currentNamhatta.address.district;
+    }
+    
+    // Fallback: If no namhatta, try personal address (rare case)
     if (devotee?.presentAddress?.district) return devotee.presentAddress.district;
     if (devotee?.permanentAddress?.district) return devotee.permanentAddress.district;
+    
+    // Last resort: Use current user's district if they're a district supervisor
     if (user?.districts && user.districts.length > 0) {
       const district = user.districts[0];
       return typeof district === 'string' ? district : district.code || district.name || 'UNKNOWN';
     }
+    
     return 'UNKNOWN';
   };
 
