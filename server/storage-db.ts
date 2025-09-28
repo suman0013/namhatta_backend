@@ -3655,32 +3655,86 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
 
-    // Build WHERE conditions
-    const whereConditions = [
-      inArray(devotees.leadershipRole, validSupervisorRoles),
-      isNotNull(devotees.leadershipRole)
-    ];
+    let supervisors: any[] = [];
 
-    if (data.excludeDevoteeIds && data.excludeDevoteeIds.length > 0) {
-      whereConditions.push(not(inArray(devotees.id, data.excludeDevoteeIds)));
+    // Special handling for District Supervisors - they are assigned to districts via userDistricts, not by personal address
+    if (validSupervisorRoles.includes('DISTRICT_SUPERVISOR')) {
+      // Find users who are assigned to this district as District Supervisors
+      const districtSupervisorUsers = await db
+        .select({
+          userId: userDistricts.userId,
+          devoteeId: users.devoteeId
+        })
+        .from(userDistricts)
+        .innerJoin(users, eq(userDistricts.userId, users.id))
+        .where(
+          and(
+            eq(userDistricts.districtCode, data.districtCode),
+            eq(users.role, 'DISTRICT_SUPERVISOR'),
+            isNotNull(users.devoteeId),
+            eq(users.isActive, true)
+          )
+        );
+
+      // Get the devotee records for these district supervisors
+      for (const user of districtSupervisorUsers) {
+        if (user.devoteeId) {
+          const devotee = await db
+            .select()
+            .from(devotees)
+            .where(eq(devotees.id, user.devoteeId))
+            .limit(1);
+          
+          if (devotee.length > 0) {
+            supervisors.push({ devotees: devotee[0] });
+          }
+        }
+      }
     }
 
-    // Get potential supervisors in the same district
-    const supervisors = await db
-      .select()
-      .from(devotees)
-      .innerJoin(devoteeAddresses, eq(devotees.id, devoteeAddresses.devoteeId))
-      .innerJoin(addresses, eq(devoteeAddresses.addressId, addresses.id))
-      .where(
-        and(
-          ...whereConditions,
-          eq(addresses.districtCode, data.districtCode)
-        )
-      );
+    // For other supervisor roles (MALA_SENAPOTI, etc.), find them by their location in the district
+    const otherSupervisorRoles = validSupervisorRoles.filter(role => role !== 'DISTRICT_SUPERVISOR');
+    if (otherSupervisorRoles.length > 0) {
+      // Build WHERE conditions for other roles
+      const whereConditions = [
+        inArray(devotees.leadershipRole, otherSupervisorRoles),
+        isNotNull(devotees.leadershipRole)
+      ];
+
+      if (data.excludeDevoteeIds && data.excludeDevoteeIds.length > 0) {
+        whereConditions.push(not(inArray(devotees.id, data.excludeDevoteeIds)));
+      }
+
+      // Get potential supervisors in the same district by their namhatta location
+      const otherSupervisors = await db
+        .select()
+        .from(devotees)
+        .innerJoin(namhattas, eq(devotees.namhattaId, namhattas.id))
+        .innerJoin(namhattaAddresses, eq(namhattas.id, namhattaAddresses.namhattaId))
+        .innerJoin(addresses, eq(namhattaAddresses.addressId, addresses.id))
+        .where(
+          and(
+            ...whereConditions,
+            eq(addresses.districtCode, data.districtCode)
+          )
+        );
+
+      supervisors.push(...otherSupervisors);
+    }
+
+    // Remove duplicates and excluded devotees
+    const uniqueSupervisors = supervisors.filter((supervisor, index, arr) => {
+      const devoteeId = supervisor.devotees.id;
+      // Check if this is the first occurrence of this devotee ID
+      const isFirstOccurrence = arr.findIndex(s => s.devotees.id === devoteeId) === index;
+      // Check if this devotee is not in the exclude list
+      const isNotExcluded = !data.excludeDevoteeIds?.includes(devoteeId);
+      return isFirstOccurrence && isNotExcluded;
+    });
 
     // Calculate subordinate counts and workload scores
     const enrichedSupervisors = await Promise.all(
-      supervisors.map(async ({ devotees: supervisor }) => {
+      uniqueSupervisors.map(async ({ devotees: supervisor }) => {
         const subordinates = await this.getDirectSubordinates(supervisor.id);
         const subordinateCount = subordinates.length;
         
