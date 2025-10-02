@@ -1,1975 +1,58 @@
 # Namhatta Management System - Spring Boot Migration Specification
 
-**Document Version:** 1.0  
+**Document Version:** 2.0  
 **Last Updated:** October 2, 2025  
-**Purpose:** Complete backend specification for Spring Boot reimplementation
+**Purpose:** Complete backend specification for Spring Boot 3 reimplementation with Java 17
+
+**Source System:** Node.js Express.js + TypeScript  
+**Target System:** Spring Boot 3 + Java 17  
+**Database:** PostgreSQL (Neon) - **NO CHANGES ALLOWED**  
+**Database Connection:** `jdbc:postgresql://ep-calm-silence-a15zko7l-pooler.ap-southeast-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_5MIwCD4YhSdP&sslmode=require&channelBinding=require`
 
 ---
 
-## 1. System Overview (Backend Only)
+## IMPORTANT INSTRUCTIONS FOR IMPLEMENTING AGENT
 
-### 1.1 Functional Description
-The Namhatta Management System backend is a RESTful API service designed to manage a religious/spiritual organization's hierarchy, centers (Namhattas), devotees, and activities. The system provides:
+### Task Status Management
+Each task has a status field. **YOU MUST UPDATE** the status as you work:
+- **NOT_STARTED**: Task not yet begun
+- **IN_PROGRESS**: Currently working on this task
+- **COMPLETED**: Task fully implemented and tested
 
-- **User Authentication & Authorization**: JWT-based auth with HTTP-only cookies, role-based access control (RBAC), and single-login enforcement
-- **Hierarchical Organization Management**: Multi-level leadership hierarchy with district-based data segregation
-- **Devotee Management**: Complete lifecycle management of devotee records with present/permanent addresses
-- **Namhatta (Center) Management**: Registration, approval workflow, and status tracking
-- **Geographic Address Management**: Normalized address structure supporting country/state/district/sub-district/village hierarchy
-- **Senapoti Role Management**: Dynamic role assignment, promotion/demotion with subordinate transfers
-- **Activity Updates**: Track and report Namhatta program activities (kirtan, prasadam, book distribution, etc.)
-- **Dashboard & Reporting**: Hierarchical reports with district-level filtering
+### Task Dependencies
+- Tasks are ordered to ensure prerequisites are met
+- **DO NOT** start a task until all its prerequisites are COMPLETED
+- Check the "Prerequisites" field for each task
+- If a task has no prerequisites listed, you may begin immediately
 
-### 1.2 Role in Overall System
-The backend serves as the central API layer providing:
-- Data persistence via PostgreSQL (Neon-hosted serverless)
-- Business logic enforcement for hierarchy rules and validations
-- Security layer with authentication, authorization, and rate limiting
-- RESTful APIs consumed by React frontend and potentially mobile apps
-- District-based data segregation for multi-tenant like access control
+### Implementation Rules
+1. **Follow the exact task order** - Tasks are sequenced to avoid dependency issues
+2. **Update status immediately** when you start or complete a task
+3. **Test each phase** before moving to the next
+4. **No database schema changes** - Use existing Neon PostgreSQL database as-is
+5. **Maintain API compatibility** - Frontend expects exact same API contracts
+6. **Implement ALL features** - Do not skip any functionality from the Node.js version
 
 ---
 
-## 2. API Specifications
-
-### 2.1 Authentication Module (`/api/auth`)
-
-#### 2.1.1 POST `/api/auth/login`
-- **Purpose**: Authenticate user and create session
-- **Authentication**: Not required
-- **Authorization**: N/A
-- **Rate Limit**: 5 attempts per 15 minutes per IP
-- **Request Payload**:
-  ```json
-  {
-    "username": "string (required, min: 1)",
-    "password": "string (required, min: 1)"
-  }
-  ```
-- **Validations**:
-  - Username and password are non-empty
-  - User must exist and be active (`isActive = true`)
-  - Password must match bcrypt hash
-- **Response (200 OK)**:
-  ```json
-  {
-    "user": {
-      "id": "number",
-      "username": "string",
-      "role": "ADMIN | OFFICE | DISTRICT_SUPERVISOR",
-      "districts": ["string"]
-    }
-  }
-  ```
-  - Sets HTTP-only cookie `auth_token` with JWT (1 hour expiry)
-  - Cookie settings: `httpOnly=true`, `sameSite=strict`, `secure=true (production)`
-- **Response (401 Unauthorized)**:
-  ```json
-  {
-    "error": "Invalid credentials"
-  }
-  ```
-- **Response (400 Bad Request)**:
-  ```json
-  {
-    "error": "Invalid input",
-    "details": [...]
-  }
-  ```
-- **Business Logic**:
-  - Invalidate any existing session for user (single login enforcement)
-  - Create new session token
-  - Generate JWT containing: userId, username, role, districts, sessionToken
-  - Return user data without sensitive information
-
-#### 2.1.2 POST `/api/auth/logout`
-- **Purpose**: Invalidate user session and JWT
-- **Authentication**: Cookie-based (optional, gracefully handles missing token)
-- **Request**: Empty body
-- **Response (200 OK)**:
-  ```json
-  {
-    "message": "Logged out successfully"
-  }
-  ```
-- **Business Logic**:
-  - Add JWT to blacklist table
-  - Delete user session from database
-  - Clear `auth_token` cookie
-
-#### 2.1.3 GET `/api/auth/verify`
-- **Purpose**: Verify JWT validity and return user info
-- **Authentication**: Required (cookie)
-- **Response (200 OK)**:
-  ```json
-  {
-    "user": {
-      "id": "number",
-      "username": "string",
-      "role": "ADMIN | OFFICE | DISTRICT_SUPERVISOR",
-      "districts": ["string"]
-    }
-  }
-  ```
-- **Response (401 Unauthorized)**:
-  ```json
-  {
-    "error": "No token provided | Token invalidated | Invalid token | Session expired | User not found or inactive"
-  }
-  ```
-- **Business Logic**:
-  - Check if JWT is blacklisted
-  - Verify JWT signature and expiration
-  - Validate session token matches active session
-  - Check session expiration
-  - Fetch current user districts (may have changed since login)
-
-#### 2.1.4 GET `/api/auth/user-districts`
-- **Purpose**: Get authenticated user's assigned districts
-- **Authentication**: Required
-- **Response (200 OK)**:
-  ```json
-  {
-    "districts": [
-      {
-        "code": "string",
-        "name": "string"
-      }
-    ]
-  }
-  ```
-
-### 2.2 System APIs
-
-#### 2.2.1 GET `/api/health`
-- **Purpose**: Health check endpoint
-- **Authentication**: Not required
-- **Response (200 OK)**:
-  ```json
-  {
-    "status": "OK"
-  }
-  ```
-
-#### 2.2.2 GET `/api/about`
-- **Purpose**: System metadata
-- **Authentication**: Not required
-- **Response (200 OK)**:
-  ```json
-  {
-    "name": "Namhatta Management System",
-    "version": "1.0.0",
-    "description": "OpenAPI spec for Namhatta web and mobile-compatible system"
-  }
-  ```
-
-### 2.3 Geography/Address APIs
-
-#### 2.3.1 GET `/api/countries`
-- **Purpose**: List all countries
-- **Authentication**: Not required
-- **Response (200 OK)**: `["India", "USA", ...]`
-
-#### 2.3.2 GET `/api/states?country={country}`
-- **Purpose**: Get states filtered by country
-- **Authentication**: Not required
-- **Query Parameters**: `country` (optional, string)
-- **Response (200 OK)**: `["West Bengal", "Odisha", ...]`
-
-#### 2.3.3 GET `/api/districts?state={state}`
-- **Purpose**: Get districts filtered by state
-- **Authentication**: Not required
-- **Query Parameters**: `state` (optional, string)
-- **Response (200 OK)**: `["Kolkata", "Nadia", ...]`
-
-#### 2.3.4 GET `/api/sub-districts?district={district}&pincode={pincode}`
-- **Purpose**: Get sub-districts
-- **Authentication**: Not required
-- **Query Parameters**: `district`, `pincode` (both optional)
-- **Response (200 OK)**: `["Sub-District 1", ...]`
-
-#### 2.3.5 GET `/api/villages?subDistrict={subDistrict}&pincode={pincode}`
-- **Purpose**: Get villages
-- **Authentication**: Not required
-- **Query Parameters**: `subDistrict`, `pincode` (both optional)
-- **Response (200 OK)**: `["Village 1", ...]`
-
-#### 2.3.6 GET `/api/pincodes?village={village}&district={district}&subDistrict={subDistrict}`
-- **Purpose**: Get pincodes
-- **Authentication**: Not required
-- **Query Parameters**: `village`, `district`, `subDistrict` (all optional)
-- **Response (200 OK)**: `["700001", "700002", ...]`
-
-#### 2.3.7 GET `/api/pincodes/search?country={country}&search={term}&page={page}&limit={limit}`
-- **Purpose**: Paginated pincode search
-- **Authentication**: Not required
-- **Query Parameters**:
-  - `country` (required, max 50 chars)
-  - `search` (optional, max 100 chars)
-  - `page` (optional, default 1, numeric string)
-  - `limit` (optional, default 25, max 100, numeric string)
-- **Validations**:
-  - Country is required
-  - Limit capped at 100
-- **Response (200 OK)**:
-  ```json
-  {
-    "pincodes": ["700001", "700002"],
-    "total": 250,
-    "hasMore": true
-  }
-  ```
-
-#### 2.3.8 GET `/api/address-by-pincode?pincode={pincode}`
-- **Purpose**: Get full address details by pincode
-- **Authentication**: Not required
-- **Query Parameters**: `pincode` (required, 6 digits)
-- **Response (200 OK)**:
-  ```json
-  {
-    "country": "India",
-    "state": "West Bengal",
-    "district": "Kolkata",
-    "subDistricts": ["Ballygunge"],
-    "villages": ["Village 1"]
-  }
-  ```
-- **Response (400 Bad Request)**: `{"error": "Pincode is required"}`
-
-### 2.4 Devotee Management APIs (`/api/devotees`)
-
-#### 2.4.1 GET `/api/devotees`
-- **Purpose**: List devotees with pagination and filtering
-- **Authentication**: Required
-- **Authorization**: All roles
-- **District Access Control**: DISTRICT_SUPERVISOR sees only their districts
-- **Query Parameters**:
-  - `page` (optional, default 1, number)
-  - `size` (optional, default 10, number)
-  - `sortBy` (optional, default "name", string)
-  - `sortOrder` (optional, default "asc", "asc"|"desc")
-  - `search` (optional, string)
-  - `country` (optional, string)
-  - `state` (optional, string)
-  - `district` (optional, string)
-  - `statusId` (optional, number)
-- **Response (200 OK)**:
-  ```json
-  {
-    "data": [
-      {
-        "id": "number",
-        "legalName": "string",
-        "name": "string | null",
-        "dob": "string | null",
-        "email": "string | null",
-        "phone": "string | null",
-        "gender": "MALE | FEMALE | OTHER | null",
-        "devotionalStatusId": "number | null",
-        "namhattaId": "number | null",
-        "leadershipRole": "MALA_SENAPOTI | MAHA_CHAKRA_SENAPOTI | CHAKRA_SENAPOTI | UPA_CHAKRA_SENAPOTI | null",
-        "reportingToDevoteeId": "number | null",
-        "presentAddress": { "country": "...", "state": "...", ... },
-        "permanentAddress": { ... }
-      }
-    ],
-    "total": "number"
-  }
-  ```
-
-#### 2.4.2 GET `/api/devotees/:id`
-- **Purpose**: Get single devotee by ID
-- **Authentication**: Required
-- **Path Parameters**: `id` (number)
-- **Response (200 OK)**: Devotee object (same as list item)
-- **Response (404 Not Found)**: `{"message": "Devotee not found"}`
-
-#### 2.4.3 POST `/api/devotees`
-- **Purpose**: Create new devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Rate Limit**: 10 requests per minute
-- **Input Sanitization**: All string inputs trimmed and HTML-escaped
-- **Request Payload**:
-  ```json
-  {
-    "legalName": "string (required)",
-    "name": "string | null",
-    "dob": "string | null (date format)",
-    "email": "string | null (email format)",
-    "phone": "string | null",
-    "fatherName": "string | null",
-    "motherName": "string | null",
-    "husbandName": "string | null",
-    "gender": "MALE | FEMALE | OTHER | null",
-    "bloodGroup": "string | null",
-    "maritalStatus": "MARRIED | UNMARRIED | WIDOWED | null",
-    "devotionalStatusId": "number | null",
-    "namhattaId": "number | null",
-    "harinamInitiationGurudevId": "number | null",
-    "pancharatrikInitiationGurudevId": "number | null",
-    "initiatedName": "string | null",
-    "harinamDate": "string | null",
-    "pancharatrikDate": "string | null",
-    "education": "string | null",
-    "occupation": "string | null",
-    "devotionalCourses": "array | null",
-    "additionalComments": "string | null",
-    "shraddhakutirId": "number | null",
-    "leadershipRole": "string | null",
-    "reportingToDevoteeId": "number | null",
-    "hasSystemAccess": "boolean (default: false)",
-    "presentAddress": {
-      "country": "string",
-      "state": "string",
-      "district": "string",
-      "subDistrict": "string",
-      "village": "string",
-      "postalCode": "string",
-      "landmark": "string"
-    },
-    "permanentAddress": { ... }
-  }
-  ```
-- **Validations**:
-  - `legalName` is required
-  - Numeric IDs must be positive integers
-  - Email must be valid email format (if provided)
-- **Response (201 Created)**: Created devotee object
-- **Response (400 Bad Request)**: `{"message": "Invalid devotee data", "error": "..."}`
-
-#### 2.4.4 POST `/api/devotees/:namhattaId`
-- **Purpose**: Create devotee directly associated with a Namhatta
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `namhattaId` (number)
-- **Request/Response**: Same as POST `/api/devotees` but auto-assigns `namhattaId`
-
-#### 2.4.5 PUT `/api/devotees/:id`
-- **Purpose**: Update existing devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE, DISTRICT_SUPERVISOR
-- **District Access Control**: DISTRICT_SUPERVISOR can only update devotees in their districts
-- **Path Parameters**: `id` (number)
-- **Request Payload**: Partial devotee object (same fields as create)
-- **Business Logic**:
-  - For DISTRICT_SUPERVISOR: Check if devotee's district matches user's assigned districts
-  - Partial update allowed (only provided fields are updated)
-- **Response (200 OK)**: Updated devotee object
-- **Response (403 Forbidden)**: `{"error": "Access denied: Devotee not in your assigned districts"}`
-
-#### 2.4.6 POST `/api/devotees/:id/upgrade-status`
-- **Purpose**: Upgrade devotee's devotional status
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "newStatusId": "number (required)",
-    "notes": "string | null"
-  }
-  ```
-- **Business Logic**:
-  - Update devotee's `devotionalStatusId`
-  - Create status history record with previous/new status and notes
-- **Response (200 OK)**: `{"message": "Status upgraded successfully"}`
-
-#### 2.4.7 POST `/api/devotees/:id/assign-leadership`
-- **Purpose**: Assign leadership role to devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "leadershipRole": "MALA_SENAPOTI | MAHA_CHAKRA_SENAPOTI | CHAKRA_SENAPOTI | UPA_CHAKRA_SENAPOTI (required)",
-    "reportingToDevoteeId": "number | null",
-    "hasSystemAccess": "boolean (default: false)"
-  }
-  ```
-- **Validations**:
-  - `leadershipRole` must be one of the valid roles
-  - `reportingToDevoteeId` must reference valid devotee (if provided)
-- **Response (200 OK)**: `{"message": "Leadership role assigned successfully"}`
-
-#### 2.4.8 DELETE `/api/devotees/:id/leadership`
-- **Purpose**: Remove leadership role from devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `id` (number)
-- **Business Logic**:
-  - Set `leadershipRole`, `reportingToDevoteeId`, `hasSystemAccess` to null/false
-- **Response (200 OK)**: `{"message": "Leadership role removed successfully"}`
-
-#### 2.4.9 POST `/api/devotees/:id/link-user`
-- **Purpose**: Link devotee to system user account
-- **Authentication**: Required
-- **Authorization**: ADMIN only
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "username": "string (required, min: 3, max: 50, alphanumeric + underscore)",
-    "password": "string (required, min: 8, max: 100, must contain uppercase, lowercase, number)",
-    "email": "string (required, valid email, max: 100)",
-    "role": "DISTRICT_SUPERVISOR | OFFICE (required)",
-    "force": "boolean (optional, default: false)"
-  }
-  ```
-- **Validations**:
-  - Username: 3-50 chars, alphanumeric + underscore only
-  - Password: 8-100 chars, must have uppercase, lowercase, and number
-  - Email: valid email format, max 100 chars
-  - Check if devotee already linked to a user (unless `force: true`)
-- **Business Logic**:
-  - Hash password with bcrypt
-  - Create user record
-  - Link user to devotee (`user.devoteeId = devotee.id`)
-- **Response (201 Created)**: User object (without password hash)
-- **Response (400 Bad Request)**: Validation errors
-
-#### 2.4.10 GET `/api/devotees/available-officers`
-- **Purpose**: Get devotees available for officer positions (Secretary, President, Accountant)
-- **Authentication**: Required
-- **Response (200 OK)**: Array of devotees eligible for officer roles
-
-### 2.5 Namhatta Management APIs (`/api/namhattas`)
-
-#### 2.5.1 GET `/api/namhattas`
-- **Purpose**: List Namhattas with pagination and filtering
-- **Authentication**: Required (for some operations)
-- **Query Parameters**: `page`, `size`, `search`, `country`, `state`, `district`, `status`
-- **Response (200 OK)**:
-  ```json
-  {
-    "data": [
-      {
-        "id": "number",
-        "code": "string (unique)",
-        "name": "string",
-        "meetingDay": "string | null",
-        "meetingTime": "string | null",
-        "malaSenapotiId": "number | null",
-        "mahaChakraSenapotiId": "number | null",
-        "chakraSenapotiId": "number | null",
-        "upaChakraSenapotiId": "number | null",
-        "secretaryId": "number | null",
-        "presidentId": "number | null",
-        "accountantId": "number | null",
-        "districtSupervisorId": "number (required)",
-        "status": "PENDING_APPROVAL | APPROVED | REJECTED",
-        "registrationNo": "string | null (unique)",
-        "registrationDate": "string | null",
-        "address": { ... }
-      }
-    ],
-    "total": "number"
-  }
-  ```
-
-#### 2.5.2 GET `/api/namhattas/:id`
-- **Purpose**: Get single Namhatta
-- **Authentication**: Not required
-- **Path Parameters**: `id` (number)
-- **Response (200 OK)**: Namhatta object
-- **Response (404 Not Found)**: `{"message": "Namhatta not found"}`
-
-#### 2.5.3 POST `/api/namhattas`
-- **Purpose**: Create new Namhatta
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Rate Limit**: 10 requests per minute
-- **Request Payload**:
-  ```json
-  {
-    "code": "string (required, unique)",
-    "name": "string (required)",
-    "meetingDay": "string | null",
-    "meetingTime": "string | null",
-    "malaSenapotiId": "number | null",
-    "mahaChakraSenapotiId": "number | null",
-    "chakraSenapotiId": "number | null",
-    "upaChakraSenapotiId": "number | null",
-    "secretaryId": "number | null",
-    "presidentId": "number | null",
-    "accountantId": "number | null",
-    "districtSupervisorId": "number (required)",
-    "status": "PENDING_APPROVAL (default) | APPROVED | REJECTED",
-    "address": {
-      "country": "string",
-      "state": "string",
-      "district": "string",
-      "subDistrict": "string",
-      "village": "string",
-      "postalCode": "string",
-      "landmark": "string"
-    }
-  }
-  ```
-- **Validations**:
-  - `code` must be unique
-  - `districtSupervisorId` is required and must reference valid user
-  - All senapoti/officer IDs must reference valid devotees (if provided)
-- **Business Logic**:
-  - Find or create address record (normalized)
-  - Create namhatta-address link with landmark
-  - Default status to PENDING_APPROVAL
-- **Response (201 Created)**: Created Namhatta object
-- **Response (409 Conflict)**: `{"message": "Namhatta with code '...' already exists"}`
-
-#### 2.5.4 PUT `/api/namhattas/:id`
-- **Purpose**: Update Namhatta
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Rate Limit**: 10 requests per minute
-- **Request Payload**: Partial Namhatta object (same as create)
-- **Response (200 OK)**: Updated Namhatta object
-
-#### 2.5.5 GET `/api/namhattas/check-registration/:registrationNo`
-- **Purpose**: Check if registration number exists
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `registrationNo` (string)
-- **Response (200 OK)**: `{"exists": true|false}`
-
-#### 2.5.6 POST `/api/namhattas/:id/approve`
-- **Purpose**: Approve pending Namhatta
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "registrationNo": "string (required, must be unique)",
-    "registrationDate": "string (required)"
-  }
-  ```
-- **Validations**:
-  - `registrationNo` must be unique across all Namhattas
-  - Both fields required
-- **Business Logic**:
-  - Update status to "APPROVED"
-  - Set registrationNo and registrationDate
-- **Response (200 OK)**: `{"message": "Namhatta approved successfully"}`
-- **Response (400 Bad Request)**: `{"message": "Registration number already exists"}`
-
-#### 2.5.7 POST `/api/namhattas/:id/reject`
-- **Purpose**: Reject pending Namhatta
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE only
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "reason": "string | null"
-  }
-  ```
-- **Business Logic**: Update status to "REJECTED"
-- **Response (200 OK)**: `{"message": "Namhatta rejected successfully"}`
-
-#### 2.5.8 GET `/api/namhattas/:id/devotees`
-- **Purpose**: Get devotees belonging to a Namhatta
-- **Authentication**: Not required
-- **Path Parameters**: `id` (number)
-- **Query Parameters**: `page`, `size`, `statusId`
-- **Response (200 OK)**:
-  ```json
-  {
-    "data": [/* devotee objects */],
-    "total": "number"
-  }
-  ```
-
-#### 2.5.9 GET `/api/namhattas/:id/updates`
-- **Purpose**: Get activity updates for a Namhatta
-- **Authentication**: Not required
-- **Path Parameters**: `id` (number)
-- **Response (200 OK)**: Array of NamhattaUpdate objects
-
-#### 2.5.10 GET `/api/namhattas/:id/devotee-status-count`
-- **Purpose**: Get count of devotees by devotional status
-- **Authentication**: Not required
-- **Path Parameters**: `id` (number)
-- **Response (200 OK)**:
-  ```json
-  {
-    "Shraddhavan": 10,
-    "Harinam Diksha": 5,
-    ...
-  }
-  ```
-
-#### 2.5.11 GET `/api/namhattas/:id/status-history`
-- **Purpose**: Get devotional status change history for Namhatta devotees
-- **Authentication**: Not required
-- **Path Parameters**: `id` (number)
-- **Query Parameters**: `page`, `size`
-- **Response (200 OK)**:
-  ```json
-  {
-    "data": [
-      {
-        "id": "number",
-        "devoteeId": "number",
-        "previousStatus": "string | null",
-        "newStatus": "string",
-        "updatedAt": "timestamp",
-        "comment": "string | null"
-      }
-    ],
-    "total": "number"
-  }
-  ```
-
-### 2.6 District Supervisor APIs
-
-#### 2.6.1 GET `/api/district-supervisors/all`
-- **Purpose**: Get all district supervisors (for hierarchy display)
-- **Authentication**: Required
-- **Response (200 OK)**: Array of district supervisor objects with devotee info
-
-#### 2.6.2 GET `/api/district-supervisors?district={district}`
-- **Purpose**: Get district supervisors for a specific district
-- **Authentication**: Required
-- **Query Parameters**: `district` (required, string)
-- **Response (200 OK)**: Array of district supervisors
-
-#### 2.6.3 GET `/api/user/address-defaults`
-- **Purpose**: Get logged-in user's default address (for DISTRICT_SUPERVISOR)
-- **Authentication**: Required
-- **Business Logic**:
-  - For DISTRICT_SUPERVISOR: return first assigned district's address info
-  - For others: return empty/null
-- **Response (200 OK)**:
-  ```json
-  {
-    "country": "string | null",
-    "state": "string | null",
-    "district": "string | null"
-  }
-  ```
-
-### 2.7 Dashboard & Reports APIs
-
-#### 2.7.1 GET `/api/dashboard`
-- **Purpose**: Get dashboard summary statistics
-- **Authentication**: Required
-- **Response (200 OK)**:
-  ```json
-  {
-    "totalDevotees": "number",
-    "totalNamhattas": "number",
-    "recentUpdates": [
-      {
-        "namhattaId": "number",
-        "namhattaName": "string",
-        "programType": "string",
-        "date": "string",
-        "attendance": "number"
-      }
-    ]
-  }
-  ```
-
-#### 2.7.2 GET `/api/status-distribution`
-- **Purpose**: Get devotional status distribution
-- **Authentication**: Required
-- **Response (200 OK)**:
-  ```json
-  [
-    {
-      "statusName": "Shraddhavan",
-      "count": 50,
-      "percentage": 25
-    }
-  ]
-  ```
-
-#### 2.7.3 GET `/api/reports/hierarchical`
-- **Purpose**: Get hierarchical reports (country > state > district > sub-district > village)
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE, DISTRICT_SUPERVISOR
-- **District Access Control**: DISTRICT_SUPERVISOR sees only their districts
-- **Cache Control**: `no-cache, no-store, must-revalidate`
-- **Response (200 OK)**: Hierarchical structure with counts
-
-#### 2.7.4 GET `/api/reports/states`
-- **Purpose**: Get all states with Namhatta counts
-- **Authentication**: Required
-- **Authorization**: ADMIN, OFFICE, DISTRICT_SUPERVISOR
-- **District Access Control**: Applied for DISTRICT_SUPERVISOR
-- **Response (200 OK)**: Array of state objects with counts
-
-#### 2.7.5 GET `/api/reports/districts/:state`
-- **Purpose**: Get districts for a state with counts
-- **Path Parameters**: `state` (string)
-- **Similar structure to above reports**
-
-#### 2.7.6 GET `/api/reports/sub-districts/:state/:district`
-#### 2.7.7 GET `/api/reports/villages/:state/:district/:subdistrict`
-
-### 2.8 Devotional Status APIs (`/api/statuses`)
-
-#### 2.8.1 GET `/api/statuses`
-- **Purpose**: List all devotional statuses
-- **Authentication**: Not required
-- **Response (200 OK)**:
-  ```json
-  [
-    {
-      "id": "number",
-      "name": "string",
-      "createdAt": "timestamp"
-    }
-  ]
-  ```
-
-#### 2.8.2 POST `/api/statuses`
-- **Purpose**: Create new devotional status
-- **Authentication**: Not required (should be restricted in production)
-- **Request Payload**:
-  ```json
-  {
-    "name": "string (required, unique)"
-  }
-  ```
-- **Response (201 Created)**: Created status object
-
-#### 2.8.3 POST `/api/statuses/:id/rename`
-- **Purpose**: Rename devotional status
-- **Authentication**: Not required (should be restricted in production)
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "newName": "string (required)"
-  }
-  ```
-- **Response (200 OK)**: `{"message": "Status renamed successfully"}`
-
-### 2.9 Gurudev APIs (`/api/gurudevs`)
-
-#### 2.9.1 GET `/api/gurudevs`
-- **Purpose**: List all spiritual masters/gurus
-- **Authentication**: Not required
-- **Response (200 OK)**:
-  ```json
-  [
-    {
-      "id": "number",
-      "name": "string",
-      "title": "string | null",
-      "createdAt": "timestamp"
-    }
-  ]
-  ```
-
-#### 2.9.2 POST `/api/gurudevs`
-- **Purpose**: Add new Gurudev
-- **Authentication**: Not required (should be restricted)
-- **Request Payload**:
-  ```json
-  {
-    "name": "string (required)",
-    "title": "string | null"
-  }
-  ```
-- **Response (201 Created)**: Created Gurudev object
-
-### 2.10 Shraddhakutir APIs (`/api/shraddhakutirs`)
-
-#### 2.10.1 GET `/api/shraddhakutirs?district={district}`
-- **Purpose**: Get Shraddhakutirs (devotional centers) filtered by district
-- **Authentication**: Not required
-- **Query Parameters**: `district` (optional, string)
-- **Response (200 OK)**:
-  ```json
-  [
-    {
-      "id": "number",
-      "name": "string",
-      "districtCode": "string",
-      "createdAt": "timestamp"
-    }
-  ]
-  ```
-
-#### 2.10.2 POST `/api/shraddhakutirs`
-- **Purpose**: Create new Shraddhakutir
-- **Request Payload**:
-  ```json
-  {
-    "name": "string (required)",
-    "districtCode": "string (required)"
-  }
-  ```
-- **Response (201 Created)**: Created Shraddhakutir object
-
-### 2.11 Namhatta Update APIs (`/api/updates`)
-
-#### 2.11.1 POST `/api/updates`
-- **Purpose**: Create activity update for a Namhatta
-- **Authentication**: Not required (should be restricted)
-- **Request Payload**:
-  ```json
-  {
-    "namhattaId": "number (required)",
-    "programType": "string (required)",
-    "date": "string (required)",
-    "attendance": "number (required)",
-    "prasadDistribution": "number | null",
-    "nagarKirtan": "number (default: 0)",
-    "bookDistribution": "number (default: 0)",
-    "chanting": "number (default: 0)",
-    "arati": "number (default: 0)",
-    "bhagwatPath": "number (default: 0)",
-    "imageUrls": "string[] | null",
-    "facebookLink": "string | null",
-    "youtubeLink": "string | null",
-    "specialAttraction": "string | null"
-  }
-  ```
-- **Validations**:
-  - Numeric fields must be numbers
-- **Response (201 Created)**: Created update object
-
-#### 2.11.2 GET `/api/updates/all`
-- **Purpose**: Get all updates from all Namhattas
-- **Authentication**: Not required
-- **Response (200 OK)**: Array of updates with Namhatta names
-
-### 2.12 Hierarchy APIs (`/api/hierarchy`)
-
-#### 2.12.1 GET `/api/hierarchy`
-- **Purpose**: Get top-level organizational hierarchy
-- **Authentication**: Required
-- **Response (200 OK)**:
-  ```json
-  {
-    "founder": [/* Leader objects */],
-    "gbc": [/* Leader objects */],
-    "regionalDirectors": [/* Leader objects */],
-    "coRegionalDirectors": [/* Leader objects */]
-  }
-  ```
-
-#### 2.12.2 GET `/api/hierarchy/:level`
-- **Purpose**: Get leaders by hierarchy level
-- **Path Parameters**: `level` (DISTRICT_SUPERVISOR | MALA_SENAPOTI | MAHA_CHAKRA_SENAPOTI | CHAKRA_SENAPOTI | UPA_CHAKRA_SENAPOTI)
-- **Validations**: level must be one of valid hierarchy levels
-- **Response (200 OK)**: Array of Leader objects
-- **Response (400 Bad Request)**: `{"message": "Invalid hierarchy level"}`
-
-### 2.13 Admin User Management APIs (`/api/admin`)
-
-#### 2.13.1 POST `/api/admin/register-supervisor`
-- **Purpose**: Create District Supervisor user account
-- **Authentication**: Required
-- **Authorization**: ADMIN only
-- **Request Payload**:
-  ```json
-  {
-    "username": "string (required)",
-    "fullName": "string (required)",
-    "email": "string (required)",
-    "password": "string (required)",
-    "districts": ["string"] (required, array of district codes)
-  }
-  ```
-- **Validations**:
-  - All fields required
-  - districts must be non-empty array
-  - Username must be unique
-  - Email must be unique
-- **Business Logic**:
-  - Hash password
-  - Create user with role DISTRICT_SUPERVISOR
-  - Create user-district mappings for each district
-- **Response (201 Created)**:
-  ```json
-  {
-    "message": "District supervisor created successfully",
-    "supervisor": {
-      "id": "number",
-      "username": "string",
-      "fullName": "string",
-      "email": "string",
-      "districts": [{"code": "...", "name": "..."}]
-    }
-  }
-  ```
-
-#### 2.13.2 GET `/api/admin/users`
-- **Purpose**: List all users
-- **Authentication**: Required
-- **Authorization**: ADMIN only
-- **Response (200 OK)**: Array of user objects (without passwords)
-
-#### 2.13.3 GET `/api/admin/available-districts`
-- **Purpose**: Get districts available for assignment
-- **Authentication**: Required
-- **Authorization**: ADMIN only
-- **Response (200 OK)**: Array of district objects
-
-#### 2.13.4 PUT `/api/admin/users/:id`
-- **Purpose**: Update user
-- **Authentication**: Required
-- **Authorization**: ADMIN only
-- **Path Parameters**: `id` (number)
-- **Request Payload**:
-  ```json
-  {
-    "fullName": "string (required)",
-    "email": "string (required)",
-    "password": "string | null" (optional, only if changing)
-  }
-  ```
-- **Business Logic**:
-  - If password provided, hash and update
-  - Update fullName and email
-- **Response (200 OK)**: `{"message": "User updated successfully", "user": {...}}`
-
-#### 2.13.5 DELETE `/api/admin/users/:id`
-- **Purpose**: Deactivate user
-- **Authentication**: Required
-- **Authorization**: ADMIN only
-- **Path Parameters**: `id` (number)
-- **Business Logic**: Set `isActive = false` (soft delete)
-- **Response (200 OK)**: `{"message": "User deactivated successfully"}`
-
-### 2.14 Senapoti Role Management APIs (`/api/senapoti`)
-
-#### 2.14.1 POST `/api/senapoti/transfer-subordinates`
-- **Purpose**: Transfer subordinates from one supervisor to another
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Rate Limit**: 10 requests per minute
-- **Request Payload**:
-  ```json
-  {
-    "fromDevoteeId": "number (required, positive)",
-    "toDevoteeId": "number | null (required)",
-    "subordinateIds": "number[] (required, min 1 item, positive integers)",
-    "reason": "string (required, min 3 chars, max 500)",
-    "districtCode": "string | null"
-  }
-  ```
-- **Validations**:
-  - Check circular reference
-  - Validate subordinates belong to fromDevotee
-  - If DISTRICT_SUPERVISOR: ensure transfer within their districts
-- **Business Logic**:
-  - Update each subordinate's `reportingToDevoteeId`
-  - Create role change history for each transfer
-- **Response (200 OK)**:
-  ```json
-  {
-    "message": "Successfully transferred N subordinates",
-    "transferred": "number",
-    "subordinates": [/* devotee objects */]
-  }
-  ```
-- **Response (400 Bad Request)**: Validation errors with details
-
-#### 2.14.2 POST `/api/senapoti/promote`
-- **Purpose**: Promote devotee to higher role
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Rate Limit**: 10 requests per minute
-- **Request Payload**:
-  ```json
-  {
-    "devoteeId": "number (required, positive)",
-    "targetRole": "MALA_SENAPOTI | MAHA_CHAKRA_SENAPOTI | CHAKRA_SENAPOTI | UPA_CHAKRA_SENAPOTI | DISTRICT_SUPERVISOR (required)",
-    "newReportingTo": "number | null",
-    "reason": "string (required, min 3, max 500)"
-  }
-  ```
-- **Validations**:
-  - Check role hierarchy rules (can only promote to allowed next level)
-  - Validate no circular reference
-  - Check district boundaries for DISTRICT_SUPERVISOR
-- **Business Logic**:
-  - Transfer subordinates if needed
-  - Update devotee role and reporting structure
-  - Create role change history with reason "Promotion: {reason}"
-- **Response (200 OK)**:
-  ```json
-  {
-    "message": "Successfully promoted devotee to {targetRole}",
-    "devotee": {/* updated devotee */},
-    "subordinatesTransferred": "number",
-    "roleChangeRecord": {/* history record */}
-  }
-  ```
-
-#### 2.14.3 POST `/api/senapoti/demote`
-- **Purpose**: Demote devotee to lower role
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Request Payload**:
-  ```json
-  {
-    "devoteeId": "number (required)",
-    "targetRole": "MALA_SENAPOTI | MAHA_CHAKRA_SENAPOTI | CHAKRA_SENAPOTI | UPA_CHAKRA_SENAPOTI | null",
-    "newReportingTo": "number | null",
-    "reason": "string (required, min 3, max 500)"
-  }
-  ```
-- **Validations**: Similar to promote, but validates demotion is allowed
-- **Business Logic**:
-  - Transfer subordinates to new supervisor
-  - Update role and reporting
-  - Create history with reason "Demotion: {reason}"
-- **Response**: Similar structure to promote
-
-#### 2.14.4 POST `/api/senapoti/remove-role`
-- **Purpose**: Completely remove leadership role from devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Request Payload**:
-  ```json
-  {
-    "devoteeId": "number (required)",
-    "reason": "string (required, min 3, max 500)"
-  }
-  ```
-- **Business Logic**:
-  - Transfer all subordinates to another supervisor
-  - Set leadershipRole = null, reportingToDevoteeId = null, hasSystemAccess = false
-  - Create history with reason "Role Removal: {reason}"
-- **Response (200 OK)**:
-  ```json
-  {
-    "message": "Successfully removed leadership role from devotee",
-    "devotee": {/* updated */},
-    "subordinatesTransferred": "number",
-    "roleChangeRecord": {/* history */}
-  }
-  ```
-
-#### 2.14.5 GET `/api/senapoti/available-supervisors/:districtCode/:targetRole?excludeIds={ids}`
-- **Purpose**: Get available supervisors for a role within district
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Path Parameters**:
-  - `districtCode` (string)
-  - `targetRole` (MALA_SENAPOTI | MAHA_CHAKRA_SENAPOTI | CHAKRA_SENAPOTI | UPA_CHAKRA_SENAPOTI | DISTRICT_SUPERVISOR)
-- **Query Parameters**: `excludeIds` (comma-separated numbers, optional)
-- **Validations**: targetRole must be valid
-- **Business Logic**:
-  - Find devotees in district with role eligible to supervise targetRole
-  - Exclude specified IDs
-- **Response (200 OK)**:
-  ```json
-  {
-    "districtCode": "string",
-    "targetRole": "string",
-    "supervisors": [/* devotee objects */]
-  }
-  ```
-
-#### 2.14.6 GET `/api/senapoti/subordinates/:devoteeId`
-- **Purpose**: Get direct subordinates of a devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Path Parameters**: `devoteeId` (number)
-- **Response (200 OK)**:
-  ```json
-  {
-    "devoteeId": "number",
-    "subordinates": [/* devotee objects */],
-    "count": "number"
-  }
-  ```
-
-#### 2.14.7 GET `/api/senapoti/role-history/:devoteeId?page={page}&size={size}`
-- **Purpose**: Get role change history for devotee
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Path Parameters**: `devoteeId` (number)
-- **Query Parameters**: `page`, `size` (pagination)
-- **Response (200 OK)**:
-  ```json
-  {
-    "data": [
-      {
-        "id": "number",
-        "devoteeId": "number",
-        "previousRole": "string | null",
-        "newRole": "string | null",
-        "previousReportingTo": "number | null",
-        "newReportingTo": "number | null",
-        "changedBy": "number",
-        "reason": "string",
-        "districtCode": "string | null",
-        "subordinatesTransferred": "number",
-        "createdAt": "timestamp"
-      }
-    ],
-    "total": "number"
-  }
-  ```
-
-#### 2.14.8 GET `/api/senapoti/subordinates/:devoteeId/all`
-- **Purpose**: Get all subordinates in chain (recursive)
-- **Authentication**: Required
-- **Authorization**: ADMIN, DISTRICT_SUPERVISOR
-- **Path Parameters**: `devoteeId` (number)
-- **Business Logic**: Recursively fetch all subordinates down the hierarchy
-- **Response (200 OK)**:
-  ```json
-  {
-    "devoteeId": "number",
-    "allSubordinates": [/* all subordinates recursively */],
-    "count": "number"
-  }
-  ```
-
----
-
-## 3. Data & Entities
-
-### 3.1 Entity Definitions
-
-#### 3.1.1 User
-- **Purpose**: System user accounts with authentication
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `username` (String, Unique, Not Null)
-  - `passwordHash` (String, Not Null) - bcrypt hash
-  - `fullName` (String, Not Null)
-  - `email` (String, Unique, Not Null)
-  - `role` (Enum: ADMIN, OFFICE, DISTRICT_SUPERVISOR, Not Null)
-  - `devoteeId` (Integer, FK to Devotee, Nullable) - Links user to devotee record
-  - `isActive` (Boolean, Default: true)
-  - `createdAt` (Timestamp, Default: now)
-  - `updatedAt` (Timestamp, Default: now)
-- **Relationships**:
-  - One-to-Many with UserDistrict
-  - One-to-One with Devotee (optional)
-  - One-to-One with UserSession
-
-#### 3.1.2 UserDistrict
-- **Purpose**: Many-to-Many mapping of users to districts
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `userId` (Integer, FK to User, Not Null)
-  - `districtCode` (String, Not Null)
-  - `districtNameEnglish` (String, Not Null)
-  - `isDefaultDistrictSupervisor` (Boolean, Default: false)
-  - `createdAt` (Timestamp, Default: now)
-- **Constraints**:
-  - Unique constraint on (userId, districtCode)
-- **Relationships**:
-  - Many-to-One with User
-
-#### 3.1.3 UserSession
-- **Purpose**: Track active sessions for single-login enforcement
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `userId` (Integer, Unique, FK to User, Not Null)
-  - `sessionToken` (String, Not Null)
-  - `expiresAt` (Timestamp, Not Null)
-  - `createdAt` (Timestamp, Default: now)
-- **Constraints**:
-  - Unique userId (only one active session per user)
-- **Relationships**:
-  - One-to-One with User
-
-#### 3.1.4 JwtBlacklist
-- **Purpose**: Invalidated JWT tokens (logout)
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `tokenHash` (String, Not Null) - SHA-256 hash of token
-  - `expiredAt` (Timestamp, Not Null)
-  - `createdAt` (Timestamp, Default: now)
-- **Business Logic**:
-  - Periodic cleanup of expired entries (expiredAt < now)
-
-#### 3.1.5 Devotee
-- **Purpose**: Core devotee/member records
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `legalName` (String, Not Null)
-  - `name` (String, Nullable) - Spiritual/initiated name
-  - `dob` (String, Nullable) - Date of birth as text
-  - `email` (String, Nullable)
-  - `phone` (String, Nullable)
-  - `fatherName` (String, Nullable)
-  - `motherName` (String, Nullable)
-  - `husbandName` (String, Nullable)
-  - `gender` (Enum: MALE, FEMALE, OTHER, Nullable)
-  - `bloodGroup` (String, Nullable)
-  - `maritalStatus` (Enum: MARRIED, UNMARRIED, WIDOWED, Nullable)
-  - `devotionalStatusId` (Integer, FK to DevotionalStatus, Nullable)
-  - `namhattaId` (Integer, FK to Namhatta, Nullable)
-  - `harinamInitiationGurudevId` (Integer, FK to Gurudev, Nullable)
-  - `pancharatrikInitiationGurudevId` (Integer, FK to Gurudev, Nullable)
-  - `initiatedName` (String, Nullable)
-  - `harinamDate` (String, Nullable)
-  - `pancharatrikDate` (String, Nullable)
-  - `education` (String, Nullable)
-  - `occupation` (String, Nullable)
-  - `devotionalCourses` (JSONB, Nullable) - Array of {name, date, institute}
-  - `additionalComments` (String, Nullable)
-  - `shraddhakutirId` (Integer, FK to Shraddhakutir, Nullable)
-  - **Leadership fields**:
-    - `leadershipRole` (Enum: MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI, Nullable)
-    - `reportingToDevoteeId` (Integer, FK to Devotee, Nullable) - Self-referencing hierarchy
-    - `hasSystemAccess` (Boolean, Default: false)
-    - `appointedDate` (String, Nullable)
-    - `appointedBy` (Integer, FK to User, Nullable)
-  - `createdAt` (Timestamp, Default: now)
-  - `updatedAt` (Timestamp, Default: now)
-- **Relationships**:
-  - Many-to-One with DevotionalStatus
-  - Many-to-One with Namhatta
-  - Many-to-One with Gurudev (2 FKs)
-  - Many-to-One with Shraddhakutir
-  - Self-referencing Many-to-One (reporting hierarchy)
-  - One-to-Many with DevoteeAddress
-  - One-to-One with User (reverse)
-
-#### 3.1.6 Address
-- **Purpose**: Normalized address master table
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `country` (String, Not Null, Default: "India")
-  - `stateCode` (String, Nullable)
-  - `stateNameEnglish` (String, Nullable)
-  - `districtCode` (String, Nullable)
-  - `districtNameEnglish` (String, Nullable)
-  - `subdistrictCode` (String, Nullable)
-  - `subdistrictNameEnglish` (String, Nullable)
-  - `villageCode` (String, Nullable)
-  - `villageNameEnglish` (String, Nullable)
-  - `pincode` (String, Nullable)
-  - `createdAt` (Timestamp, Default: now)
-- **Business Logic**:
-  - Exact match lookup before creating new address (including null values)
-  - Shared across Devotee and Namhatta entities
-
-#### 3.1.7 DevoteeAddress
-- **Purpose**: Junction table for Devotee-Address relationship
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `devoteeId` (Integer, FK to Devotee, Not Null)
-  - `addressId` (Integer, FK to Address, Not Null)
-  - `addressType` (Enum: 'present', 'permanent', Not Null)
-  - `landmark` (String, Nullable)
-  - `createdAt` (Timestamp, Default: now)
-- **Relationships**:
-  - Many-to-One with Devotee
-  - Many-to-One with Address
-
-#### 3.1.8 NamhattaAddress
-- **Purpose**: Junction table for Namhatta-Address relationship
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `namhattaId` (Integer, FK to Namhatta, Not Null)
-  - `addressId` (Integer, FK to Address, Not Null)
-  - `landmark` (String, Nullable)
-  - `createdAt` (Timestamp, Default: now)
-- **Relationships**:
-  - Many-to-One with Namhatta
-  - Many-to-One with Address
-
-#### 3.1.9 Namhatta
-- **Purpose**: Spiritual center/group records
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `code` (String, Unique, Not Null)
-  - `name` (String, Not Null)
-  - `meetingDay` (String, Nullable)
-  - `meetingTime` (String, Nullable)
-  - **Leadership positions** (all Nullable, FK to Devotee):
-    - `malaSenapotiId`
-    - `mahaChakraSenapotiId`
-    - `chakraSenapotiId`
-    - `upaChakraSenapotiId`
-    - `secretaryId`
-    - `presidentId`
-    - `accountantId`
-  - `districtSupervisorId` (Integer, Not Null) - References User, not Devotee
-  - `status` (Enum: PENDING_APPROVAL, APPROVED, REJECTED, Default: PENDING_APPROVAL)
-  - `registrationNo` (String, Unique, Nullable)
-  - `registrationDate` (String, Nullable)
-  - `createdAt` (Timestamp, Default: now)
-  - `updatedAt` (Timestamp, Default: now)
-- **Constraints**:
-  - Unique `code`
-  - Unique `registrationNo` (when not null)
-- **Relationships**:
-  - Many-to-One with User (via districtSupervisorId)
-  - Many-to-One with Devotee (multiple FKs for positions)
-  - One-to-Many with Devotee (via namhattaId)
-  - One-to-Many with NamhattaAddress
-  - One-to-Many with NamhattaUpdate
-
-#### 3.1.10 DevotionalStatus
-- **Purpose**: Spiritual progress levels
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `name` (String, Unique, Not Null)
-  - `createdAt` (Timestamp, Default: now)
-- **Examples**: Shraddhavan, Sadhusangi, Harinam Diksha, Pancharatrik Diksha
-
-#### 3.1.11 StatusHistory
-- **Purpose**: Track devotional status changes
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `devoteeId` (Integer, FK to Devotee, Not Null)
-  - `previousStatus` (String, Nullable)
-  - `newStatus` (String, Not Null)
-  - `updatedAt` (Timestamp, Default: now)
-  - `comment` (String, Nullable)
-- **Relationships**:
-  - Many-to-One with Devotee
-
-#### 3.1.12 Gurudev
-- **Purpose**: Spiritual masters/gurus
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `name` (String, Unique, Not Null)
-  - `title` (String, Nullable) - e.g., "His Holiness", "His Grace"
-  - `createdAt` (Timestamp, Default: now)
-
-#### 3.1.13 Shraddhakutir
-- **Purpose**: Devotional centers/temples
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `name` (String, Not Null)
-  - `districtCode` (String, Not Null)
-  - `createdAt` (Timestamp, Default: now)
-
-#### 3.1.14 NamhattaUpdate
-- **Purpose**: Activity/program updates for Namhattas
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `namhattaId` (Integer, FK to Namhatta, Not Null)
-  - `programType` (String, Not Null)
-  - `date` (String, Not Null)
-  - `attendance` (Integer, Not Null)
-  - `prasadDistribution` (Integer, Nullable)
-  - `nagarKirtan` (Integer, Default: 0)
-  - `bookDistribution` (Integer, Default: 0)
-  - `chanting` (Integer, Default: 0)
-  - `arati` (Integer, Default: 0)
-  - `bhagwatPath` (Integer, Default: 0)
-  - `imageUrls` (JSONB, Nullable) - Array of strings
-  - `facebookLink` (String, Nullable)
-  - `youtubeLink` (String, Nullable)
-  - `specialAttraction` (String, Nullable)
-  - `createdAt` (Timestamp, Default: now)
-- **Relationships**:
-  - Many-to-One with Namhatta
-
-#### 3.1.15 Leader
-- **Purpose**: Top-level organizational hierarchy (GBC, Regional Directors, etc.)
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `name` (String, Not Null)
-  - `role` (Enum: FOUNDER_ACHARYA, GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR)
-  - `reportingTo` (Integer, FK to Leader, Nullable) - Self-referencing
-  - `location` (JSONB, Nullable) - {country, state, district}
-  - `createdAt` (Timestamp, Default: now)
-
-#### 3.1.16 RoleChangeHistory
-- **Purpose**: Audit trail for Senapoti role changes
-- **Attributes**:
-  - `id` (Integer, PK, Auto-increment)
-  - `devoteeId` (Integer, FK to Devotee, Not Null)
-  - `previousRole` (String, Nullable)
-  - `newRole` (String, Nullable)
-  - `previousReportingTo` (Integer, Nullable)
-  - `newReportingTo` (Integer, Nullable)
-  - `changedBy` (Integer, FK to User, Not Null)
-  - `reason` (String, Not Null)
-  - `districtCode` (String, Nullable)
-  - `subordinatesTransferred` (Integer, Default: 0)
-  - `createdAt` (Timestamp, Default: now)
-- **Relationships**:
-  - Many-to-One with Devotee
-  - Many-to-One with User
-
-### 3.2 Entity-CRUD-API Mapping
-
-| Entity | Create | Read | Update | Delete |
-|--------|--------|------|--------|--------|
-| User | POST /api/admin/register-supervisor | GET /api/admin/users | PUT /api/admin/users/:id | DELETE /api/admin/users/:id (soft) |
-| Devotee | POST /api/devotees | GET /api/devotees, GET /api/devotees/:id | PUT /api/devotees/:id | N/A |
-| Namhatta | POST /api/namhattas | GET /api/namhattas, GET /api/namhattas/:id | PUT /api/namhattas/:id | N/A |
-| DevotionalStatus | POST /api/statuses | GET /api/statuses | POST /api/statuses/:id/rename | N/A |
-| Gurudev | POST /api/gurudevs | GET /api/gurudevs | N/A | N/A |
-| Shraddhakutir | POST /api/shraddhakutirs | GET /api/shraddhakutirs | N/A | N/A |
-| NamhattaUpdate | POST /api/updates | GET /api/namhattas/:id/updates, GET /api/updates/all | N/A | N/A |
-| Leader | N/A (pre-seeded) | GET /api/hierarchy | N/A | N/A |
-| StatusHistory | Auto-created on status upgrade | GET /api/namhattas/:id/status-history | N/A | N/A |
-| RoleChangeHistory | Auto-created on role change | GET /api/senapoti/role-history/:devoteeId | N/A | N/A |
-
----
-
-## 4. Business Logic & Rules
-
-### 4.1 Authentication & Authorization
-
-#### 4.1.1 Password Policy
-- **Minimum Length**: 10 characters
-- **Complexity**: Must contain:
-  - At least 1 uppercase letter
-  - At least 1 lowercase letter
-  - At least 1 number
-  - At least 1 special character: `!@#$%^&*()_+-=[]{};':"\\|,.<>/?`
-- **Storage**: Bcrypt hash with salt (cost factor: default bcrypt)
-
-#### 4.1.2 JWT Token Management
-- **Algorithm**: HS256 (HMAC with SHA-256)
-- **Expiration**: 1 hour from issuance
-- **Payload**:
-  ```json
-  {
-    "userId": "number",
-    "username": "string",
-    "role": "ADMIN | OFFICE | DISTRICT_SUPERVISOR",
-    "districts": ["string"],
-    "sessionToken": "string",
-    "iat": "timestamp",
-    "exp": "timestamp"
-  }
-  ```
-- **Blacklisting**:
-  - On logout, add token hash (SHA-256) to `jwtBlacklist` table
-  - Check blacklist on every authenticated request
-  - Periodic cleanup: Delete entries where `expiredAt < now`
-
-#### 4.1.3 Session Management
-- **Single Login Enforcement**:
-  - Each user can have only ONE active session
-  - On new login: delete existing session, create new one
-  - Session timeout: 1 hour
-- **Session Validation**:
-  - On each request: verify session token matches active session
-  - If mismatch: return 401 "Session expired or invalid"
-  - If expired: auto-delete session and return 401
-
-#### 4.1.4 Role-Based Access Control (RBAC)
-
-**Role Hierarchy** (highest to lowest permission):
-1. ADMIN - Full system access, user management
-2. OFFICE - Data entry and management, no user admin
-3. DISTRICT_SUPERVISOR - Limited to assigned districts only
-
-**Permission Matrix**:
-
-| Resource/Action | ADMIN | OFFICE | DISTRICT_SUPERVISOR |
-|----------------|-------|--------|---------------------|
-| Create/Edit Users | ✓ | ✗ | ✗ |
-| Create/Edit Devotees | ✓ | ✓ | ✓ (own districts) |
-| Create/Edit Namhattas | ✓ | ✓ | ✗ |
-| Approve Namhattas | ✓ | ✓ | ✗ |
-| View All Data | ✓ | ✓ | ✗ (districts only) |
-| Senapoti Role Mgmt | ✓ | ✗ | ✓ (own districts) |
-| View Reports | ✓ | ✓ | ✓ (districts only) |
-
-#### 4.1.5 District-Based Access Control
-
-**For DISTRICT_SUPERVISOR role**:
-- User has many-to-many relationship with districts via `UserDistrict` table
-- On data queries: automatically filter by `allowedDistricts`
-- Implementation:
-  - Middleware adds `allowedDistricts` array to request context
-  - Storage layer filters queries: `WHERE district IN (allowedDistricts)`
-- Access check examples:
-  - **Devotee update**: Check if devotee's address district is in user's districts
-  - **Reports**: Only aggregate data from user's assigned districts
-  - **Role changes**: Can only manage devotees within their districts
-
-### 4.2 Senapoti Role Hierarchy & Management
-
-#### 4.2.1 Role Hierarchy Definition
-
-```
-DISTRICT_SUPERVISOR (highest)
-    ↓
-MALA_SENAPOTI (level 1)
-    ↓
-MAHA_CHAKRA_SENAPOTI (level 2)
-    ↓
-CHAKRA_SENAPOTI (level 3)
-    ↓
-UPA_CHAKRA_SENAPOTI (level 4, lowest)
-```
-
-**Hierarchy Rules**:
-- Each role reports to the one above it
-- MALA_SENAPOTI reports to DISTRICT_SUPERVISOR
-- Cannot skip levels in hierarchy
-
-#### 4.2.2 Role Promotion Rules
-
-**Allowed Promotions**:
-- UPA_CHAKRA_SENAPOTI → CHAKRA_SENAPOTI
-- CHAKRA_SENAPOTI → MAHA_CHAKRA_SENAPOTI
-- MAHA_CHAKRA_SENAPOTI → MALA_SENAPOTI
-- MALA_SENAPOTI → Cannot be promoted further
-
-**Validation Steps**:
-1. Check current role exists in hierarchy
-2. Check target role exists in hierarchy
-3. Verify target role is in `canPromoteTo` array of current role
-4. Verify no circular reference in reporting structure
-5. Check district boundaries (if DISTRICT_SUPERVISOR making change)
-
-#### 4.2.3 Role Demotion Rules
-
-**Allowed Demotions**:
-- MALA_SENAPOTI → MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI
-- MAHA_CHAKRA_SENAPOTI → CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI
-- CHAKRA_SENAPOTI → UPA_CHAKRA_SENAPOTI
-- UPA_CHAKRA_SENAPOTI → Cannot be demoted (can only be removed)
-
-**Validation Steps**:
-1. Check current role allows demotion
-2. Verify target role is in `canDemoteTo` array
-3. Handle subordinates (transfer to new supervisor)
-4. Check no circular reference
-5. Record reason for audit trail
-
-#### 4.2.4 Subordinate Transfer Logic
-
-**When subordinates need transfer**:
-- Role removal (all subordinates transferred)
-- Demotion where role no longer manages current subordinates
-- Explicit subordinate reassignment
-
-**Transfer Validation**:
-1. Check all `subordinateIds` belong to `fromDevoteeId`
-2. Verify `toDevoteeId` is eligible to supervise (correct role level)
-3. Check no circular reference (toDevotee not reporting to any subordinate)
-4. For DISTRICT_SUPERVISOR: ensure all devotees in same district
-5. Minimum 1 subordinate must be transferred
-
-**Transfer Process**:
-1. Update each subordinate's `reportingToDevoteeId` to `toDevoteeId`
-2. Create `RoleChangeHistory` record for each subordinate
-3. Return count of transferred subordinates
-
-#### 4.2.5 Circular Reference Prevention
-
-**Check Algorithm**:
-```
-function checkCircular(devoteeId, newReportingToId):
-  if newReportingToId is null: return valid
-  if devoteeId == newReportingToId: return invalid (self-reference)
-  
-  visited = Set()
-  currentId = newReportingToId
-  
-  while currentId not null and currentId not in visited:
-    visited.add(currentId)
-    if currentId == devoteeId:
-      return invalid (circular reference)
-    currentId = getReportingTo(currentId)
-  
-  return valid
-```
-
-**Applied at**:
-- Role promotion
-- Role demotion
-- Subordinate transfer
-- Direct role assignment
-
-#### 4.2.6 Role Change Audit Trail
-
-**RoleChangeHistory Record Created On**:
-- Promotion
-- Demotion
-- Role removal
-- Subordinate transfer
-
-**Required Fields**:
-- `devoteeId`: Who changed
-- `previousRole`, `newRole`: Role transition
-- `previousReportingTo`, `newReportingTo`: Supervisor change
-- `changedBy`: User who made change
-- `reason`: Mandatory explanation (min 3 chars)
-- `districtCode`: Where change occurred
-- `subordinatesTransferred`: Count if applicable
-
-### 4.3 Namhatta Management
-
-#### 4.3.1 Namhatta Creation Rules
-- **Unique Code**: Must be unique across all Namhattas
-- **District Supervisor**: Required field, must reference valid active user with DISTRICT_SUPERVISOR role
-- **Status**: Defaults to PENDING_APPROVAL
-- **Address Normalization**:
-  - Find existing address record with exact match (including nulls)
-  - If not found, create new address
-  - Create NamhattaAddress link with optional landmark
-
-#### 4.3.2 Namhatta Approval Workflow
-**States**: PENDING_APPROVAL → APPROVED | REJECTED
-
-**Approval Requirements**:
-- Only ADMIN or OFFICE can approve/reject
-- For approval: registrationNo and registrationDate required
-- registrationNo must be unique across all Namhattas
-- On approval: status → APPROVED, set registrationNo, registrationDate
-- On rejection: status → REJECTED, reason optional
-
-**Business Rules**:
-- Cannot approve if registrationNo already exists
-- Once APPROVED, registrationNo cannot be changed
-- Rejected Namhattas can be edited and resubmitted
-
-#### 4.3.3 Leadership Position Assignment
-**Officer Roles** (non-hierarchical):
-- Secretary, President, Accountant
-- Can be any devotee (not required to have leadership role)
-
-**Senapoti Roles** (hierarchical):
-- Mala Senapoti, Maha Chakra Senapoti, Chakra Senapoti, Upa Chakra Senapoti
-- Must be devotees with matching `leadershipRole`
-- Automatically link devotee to Namhatta if not already assigned
-
-**Constraints**:
-- Same devotee cannot hold multiple positions in same Namhatta
-- Devotee can be officer/senapoti in multiple Namhattas
-
-### 4.4 Address Management
-
-#### 4.4.1 Address Normalization
-**Find-or-Create Logic**:
-```
-function findOrCreateAddress(addressData):
-  // Normalize: empty strings → null, default country to "India"
-  normalized = {
-    country: addressData.country || "India",
-    state: addressData.state || null,
-    district: addressData.district || null,
-    subDistrict: addressData.subDistrict || null,
-    village: addressData.village || null,
-    postalCode: addressData.postalCode || null
-  }
-  
-  // Exact match including null values
-  existing = findWhere(
-    country = normalized.country AND
-    (state = normalized.state OR (state IS NULL AND normalized.state IS NULL)) AND
-    ... // similar for all fields
-  )
-  
-  if existing:
-    return existing.id
-  else:
-    create new address with normalized data
-    return new id
-```
-
-#### 4.4.2 Devotee Address Linking
-- **Two address types**: present, permanent
-- Each devotee can have 0-2 addresses (one of each type)
-- Create `DevoteeAddress` records with:
-  - `devoteeId`: Reference to devotee
-  - `addressId`: Reference to normalized address
-  - `addressType`: 'present' or 'permanent'
-  - `landmark`: Devotee-specific landmark
-
-#### 4.4.3 Namhatta Address Linking
-- One address per Namhatta
-- Create `NamhattaAddress` with:
-  - `namhattaId`: Reference to Namhatta
-  - `addressId`: Reference to normalized address
-  - `landmark`: Namhatta-specific landmark
-
-### 4.5 Devotee Management
-
-#### 4.5.1 Devotee Creation/Update
-**Required Fields**:
-- `legalName`: Must be provided
-
-**Optional Complex Fields**:
-- `devotionalCourses`: JSONB array of {name, date, institute}
-- `presentAddress`, `permanentAddress`: Normalized and linked separately
-
-**Validation Rules**:
-- Email: valid email format if provided
-- Phone: valid phone format if provided  
-- Numeric IDs: must be positive integers
-- Gender: must be MALE, FEMALE, or OTHER
-- Marital Status: must be MARRIED, UNMARRIED, or WIDOWED
-
-**Address Handling on Create/Update**:
-1. Extract `presentAddress` and `permanentAddress` from request
-2. Validate devotee fields against schema
-3. For each address type:
-   - Find or create Address record
-   - Create/update DevoteeAddress link
-4. Save devotee with address IDs
-
-#### 4.5.2 Devotee-User Linking
-**Requirements**:
-- Only ADMIN can create user accounts for devotees
-- User creation requires:
-  - Valid username (3-50 chars, alphanumeric + underscore)
-  - Strong password (8-100 chars, complexity rules)
-  - Valid unique email
-  - Role: DISTRICT_SUPERVISOR or OFFICE
-- One devotee can link to only one user (unless force flag)
-- One user can link to only one devotee
-
-**Process**:
-1. Validate all user fields
-2. Check if devotee already has linked user (unless `force: true`)
-3. Hash password with bcrypt
-4. Create User record with `devoteeId` reference
-5. If role is DISTRICT_SUPERVISOR: prompt for district assignment
-
-#### 4.5.3 Devotional Status Upgrade
-**Business Rule**:
-- Status progression typically follows spiritual advancement
-- No enforced progression order (flexible for different paths)
-- Create StatusHistory record on every change
-- History includes: devoteeId, previous status, new status, timestamp, optional notes
-
-### 4.6 Data Integrity & Validation
-
-#### 4.6.1 Input Sanitization
-**Applied to**: POST, PUT, PATCH requests
-
-**Sanitization Steps**:
-1. Trim all string values
-2. HTML-escape special characters to prevent XSS
-3. Recursively sanitize nested objects and arrays
-4. Preserve null/undefined values
-
-**Implemented via middleware**: Applied before request validation
-
-#### 4.6.2 Unique Constraints
-| Field | Entity | Enforcement |
-|-------|--------|-------------|
-| username | User | Database + validation |
-| email | User | Database + validation |
-| code | Namhatta | Database + validation |
-| registrationNo | Namhatta | Database + validation (when not null) |
-| name | DevotionalStatus | Database unique |
-| name | Gurudev | Database unique |
-| (userId, districtCode) | UserDistrict | Database composite unique |
-
-#### 4.6.3 Referential Integrity
-**Cascade Rules**:
-- User deletion: Set devotee.devoteeId → NULL (if exists)
-- Devotee deletion: Not implemented (soft delete recommended)
-- Address deletion: Not allowed if referenced by DevoteeAddress or NamhattaAddress
-- Status deletion: Not allowed if referenced by Devotee
-
-**Orphan Prevention**:
-- Cannot delete district supervisor if assigned to Namhattas
-- Cannot delete devotee if serving as Namhatta officer/senapoti
-- Cannot delete status if assigned to devotees
-
----
-
-## 5. Non-Functional Requirements
-
-### 5.1 Security
-
-#### 5.1.1 Authentication Security
-- **Password Storage**: Bcrypt hashing (never store plain text)
-- **JWT Secret**: Strong secret key (min 32 chars), environment-configured
-- **Session Secret**: Separate strong secret for session management
-- **Token Transport**: HTTP-only cookies (not localStorage) to prevent XSS
-- **Cookie Settings**:
-  - `httpOnly: true` - JavaScript cannot access
-  - `secure: true` - HTTPS only in production
-  - `sameSite: 'strict'` - CSRF protection
-  - Max age: 1 hour
-
-#### 5.1.2 Authorization Security
-- **Role Enforcement**: Check on every protected endpoint
-- **District Filtering**: Server-side enforcement for DISTRICT_SUPERVISOR
-- **Token Validation**: Verify JWT signature, expiration, blacklist status
-- **Session Validation**: Check active session matches token
-
-#### 5.1.3 Input Validation & Sanitization
-- **Validation**: Zod schemas for all input data
-- **Sanitization**: HTML escape on all string inputs
-- **SQL Injection Prevention**: Use parameterized queries (JPA)
-- **XSS Prevention**: Sanitize and escape user inputs
-- **CSRF Protection**: SameSite cookie policy
-
-#### 5.1.4 Rate Limiting
-| Endpoint Type | Limit | Window |
-|---------------|-------|--------|
-| Login | 5 attempts | 15 minutes |
-| Data modification (POST/PUT/DELETE) | 10 requests | 1 minute |
-| General API | 100 requests | 15 minutes |
-
-**Implementation**:
-- Track by IP address
-- Return 429 Too Many Requests when exceeded
-- Include retry-after header
-
-#### 5.1.5 CORS Configuration
-**Development**:
-- Allow all origins
-
-**Production**:
-- Whitelist specific domains:
-  - Same-origin (repl.co domain)
-  - *.replit.app pattern
-  - Environment-configured additional origins
-- Credentials: true (for cookies)
-- Methods: GET, POST, PUT, DELETE, PATCH
-- Headers: Content-Type, Authorization, X-Requested-With, Cache-Control
-
-#### 5.1.6 Security Headers (Helmet.js equivalent)
-**Production**:
-- Content-Security-Policy: Strict (no unsafe-inline/unsafe-eval)
-- X-Frame-Options: DENY
-- X-Content-Type-Options: nosniff
-- Strict-Transport-Security: max-age=31536000; includeSubDomains
-- Referrer-Policy: strict-origin-when-cross-origin
-
-**Development**:
-- Relaxed CSP for HMR/debugging (allow unsafe-inline, unsafe-eval, ws:)
-
-### 5.2 Performance
-
-#### 5.2.1 Database Optimization
-- **Indexes**: Create on:
-  - User: username, email
-  - Devotee: legalName, email, namhattaId, leadershipRole, reportingToDevoteeId
-  - Namhatta: code, registrationNo, districtSupervisorId, status
-  - Address: country, stateNameEnglish, districtNameEnglish, pincode
-  - UserDistrict: userId, districtCode
-  - JwtBlacklist: tokenHash, expiredAt
-- **Query Optimization**:
-  - Use pagination for all list endpoints (default: 10 items)
-  - Limit result sets (max 100 items per request)
-  - Lazy load related entities where appropriate
-
-#### 5.2.2 Caching Strategy
-**No Cache** (real-time data):
-- Dashboard statistics
-- Reports
-- Devotee/Namhatta lists
-
-**Cache Headers**:
-- Reports: `Cache-Control: no-cache, no-store, must-revalidate`
-- Static reference data (statuses, gurudevs): Cache for 1 hour
-
-#### 5.2.3 Response Time Targets
-- Authentication endpoints: < 200ms
-- List queries (paginated): < 500ms
-- Single record fetch: < 100ms
-- Complex reports: < 2s
-- Role management operations: < 1s
-
-### 5.3 Error Handling & Logging
-
-#### 5.3.1 Error Response Format
-**Client Errors (4xx)**:
-```json
-{
-  "error": "Human-readable error message",
-  "details": [/* optional validation details */]
-}
-```
-
-**Server Errors (5xx)**:
-```json
-{
-  "error": "Internal Server Error"
-}
-```
-- Never expose stack traces or internal details to client
-- Log full error details server-side only
-
-#### 5.3.2 Logging Requirements
-**Log Levels**:
-- ERROR: Failed operations, exceptions, security issues
-- WARN: Deprecated usage, soft errors, unusual conditions
-- INFO: Successful operations, user actions, system events
-- DEBUG: Detailed flow, variable states (dev only)
-
-**Logged Information**:
-- Timestamp
-- Log level
-- User ID (if authenticated)
-- Request method and URL
-- Error message and stack trace
-- IP address (for security events)
-- Request/response payload (sanitized, no sensitive data)
-
-**What NOT to log**:
-- Passwords (plain or hashed)
-- JWT tokens
-- Session tokens
-- Full credit card numbers
-- Personal identifiable information (beyond user ID)
-
-#### 5.3.3 Error Handling Strategy
-1. **Validation Errors**: Return 400 with details
-2. **Authentication Failures**: Return 401 with generic message
-3. **Authorization Failures**: Return 403 with generic message
-4. **Not Found**: Return 404 with resource type
-5. **Conflict**: Return 409 with conflict details
-6. **Server Errors**: Return 500, log details, alert team
-7. **Database Errors**: Wrap in generic 500, log query (sanitized)
-
-### 5.4 Scalability Considerations
-
-#### 5.4.1 Database Connection Pooling
-- **Connection Pool**: 10-20 connections (adjust based on load)
-- **Timeout**: 30 seconds for query execution
-- **Idle Timeout**: 10 minutes for idle connections
-- **Max Lifetime**: 30 minutes per connection
-
-#### 5.4.2 Stateless Architecture
-- JWT for authentication (no server-side session storage except for single-login)
-- User session stored in database (not in-memory) for multi-instance support
-- All user state in JWT or database
-
-#### 5.4.3 Horizontal Scaling Readiness
-- No in-memory state (except request context)
-- Database-backed sessions for single-login enforcement
-- JWT blacklist in database (not in-memory)
-- Cleanup jobs can run on any instance
-
----
-
-## 6. Implementation Task Breakdown
-
-**Instructions for Agent**:
-- Update task status as you complete each item
-- Mark tasks as IN_PROGRESS when you start working on them
-- Mark as COMPLETED only after implementation and testing
-- Follow task order - each task builds on previous ones
-- Do not skip ahead - complete prerequisites first
-
-### Status Definitions
-- **NOT_STARTED**: Task has not been started
-- **IN_PROGRESS**: Task is currently being worked on
-- **COMPLETED**: Task is fully implemented and tested
-
----
+## TASK BREAKDOWN & IMPLEMENTATION CHECKLIST
 
 ### **PHASE 1: PROJECT SETUP & CONFIGURATION**
 **Status**: NOT_STARTED  
-**Duration**: 1-2 days  
+**Duration**: 1 day  
 **Prerequisites**: None
 
 #### Task 1.1: Initialize Spring Boot Project
-**Status**: NOT_STARTED
-- [ ] 1.1.1: Create new Spring Boot project using Spring Initializr (Maven, Java 17+)
-- [ ] 1.1.2: Add core dependencies: Spring Web, Spring Data JPA, Spring Security
-- [ ] 1.1.3: Add database dependencies: PostgreSQL Driver, HikariCP
-- [ ] 1.1.4: Add utility dependencies: Lombok, Validation API, Jackson
-- [ ] 1.1.5: Configure project structure with packages: config, controller, service, repository, model, dto, security, exception, util
+**Status**: NOT_STARTED  
+**Prerequisites**: None
+- [ ] 1.1.1: Create Spring Boot 3.x project with Maven/Gradle
+- [ ] 1.1.2: Set Java version to 17 in build configuration
+- [ ] 1.1.3: Add core dependencies: spring-boot-starter-web, spring-boot-starter-data-jpa
+- [ ] 1.1.4: Add PostgreSQL driver dependency
+- [ ] 1.1.5: Add Spring Security starter dependency
+- [ ] 1.1.6: Add validation starter (spring-boot-starter-validation)
+- [ ] 1.1.7: Create main application class with @SpringBootApplication
+- [ ] 1.1.8: Set server.port=5000 in configuration
 
 #### Task 1.2: Configure Application Properties
 **Status**: NOT_STARTED  
@@ -1983,11 +66,12 @@ function findOrCreateAddress(addressData):
 #### Task 1.3: Configure Database Connection
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 1.2
-- [ ] 1.3.1: Configure PostgreSQL datasource URL (use environment variable)
-- [ ] 1.3.2: Setup JPA/Hibernate properties (dialect: PostgreSQL, ddl-auto: validate)
+- [ ] 1.3.1: Configure PostgreSQL datasource URL using JDBC connection string from spec header
+- [ ] 1.3.2: Setup JPA/Hibernate properties (dialect: PostgreSQL, ddl-auto: **validate** - NO SCHEMA CHANGES)
 - [ ] 1.3.3: Configure HikariCP connection pooling (pool size: 10-20)
 - [ ] 1.3.4: Setup connection timeout and idle timeout settings
-- [ ] 1.3.5: Test database connectivity with a simple health check
+- [ ] 1.3.5: Test database connectivity with a simple query
+- [ ] 1.3.6: Add environment variables for connection credentials (use connection string from header)
 
 ---
 
@@ -2006,55 +90,68 @@ function findOrCreateAddress(addressData):
 - [ ] 2.1.5: Create MaritalStatus enum (MARRIED, UNMARRIED, WIDOWED)
 - [ ] 2.1.6: Create NamhattaStatus enum (PENDING_APPROVAL, APPROVED, REJECTED)
 - [ ] 2.1.7: Create AddressType enum (PRESENT, PERMANENT)
+- [ ] 2.1.8: Create LeaderRole enum (FOUNDER_ACHARYA, GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR)
 
 #### Task 2.2: Create User-Related Entities
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 2.1
-- [ ] 2.2.1: Create User entity (@Entity) with all fields (id, username, passwordHash, fullName, email, role, devoteeId, isActive, timestamps)
-- [ ] 2.2.2: Add @Column annotations with constraints (unique, nullable, length)
-- [ ] 2.2.3: Create UserDistrict entity with userId, districtCode, districtNameEnglish, isDefaultDistrictSupervisor
-- [ ] 2.2.4: Add unique constraint on (userId, districtCode) in UserDistrict
-- [ ] 2.2.5: Create UserSession entity with userId (unique), sessionToken, expiresAt
-- [ ] 2.2.6: Create JwtBlacklist entity with tokenHash, expiredAt
+- [ ] 2.2.1: Create User entity (@Entity, table="users") with all fields (id, username, passwordHash, fullName, email, role, devoteeId, isActive, timestamps)
+- [ ] 2.2.2: Add @Column annotations with constraints (unique username, unique email, nullable, length)
+- [ ] 2.2.3: Add @ManyToOne relationship to Devotee (devoteeId, nullable)
+- [ ] 2.2.4: Create UserDistrict entity (table="user_districts") with userId, districtCode, districtNameEnglish, isDefaultDistrictSupervisor
+- [ ] 2.2.5: Add @ManyToOne relationship from UserDistrict to User
+- [ ] 2.2.6: Add unique constraint on (userId, districtCode) in UserDistrict
+- [ ] 2.2.7: Create UserSession entity (table="user_sessions") with userId (unique), sessionToken, expiresAt
+- [ ] 2.2.8: Add @OneToOne relationship from UserSession to User
+- [ ] 2.2.9: Create JwtBlacklist entity (table="jwt_blacklist") with tokenHash, expiredAt
 
 #### Task 2.3: Create Devotee Entity
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 2.2
-- [ ] 2.3.1: Create Devotee entity with personal fields (legalName, name, dob, email, phone, etc.)
+- [ ] 2.3.1: Create Devotee entity (table="devotees") with personal fields (legalName, name, dob, email, phone, gender, bloodGroup, maritalStatus)
 - [ ] 2.3.2: Add family fields (fatherName, motherName, husbandName)
-- [ ] 2.3.3: Add spiritual fields (devotionalStatusId, gurudev IDs, initiation dates)
-- [ ] 2.3.4: Add leadership fields (leadershipRole, reportingToDevoteeId, hasSystemAccess, appointedDate, appointedBy)
-- [ ] 2.3.5: Add self-referencing @ManyToOne relationship for hierarchy (reportingToDevotee)
-- [ ] 2.3.6: Add foreign key relationships (namhattaId, devotionalStatusId, etc.)
+- [ ] 2.3.3: Add spiritual fields (devotionalStatusId, harinamInitiationGurudevId, pancharatrikInitiationGurudevId, initiatedName, harinamDate, pancharatrikDate, education, occupation)
+- [ ] 2.3.4: Add devotionalCourses field as JSONB type (use @Type annotation for JSON handling)
+- [ ] 2.3.5: Add leadership fields (leadershipRole, reportingToDevoteeId, hasSystemAccess, appointedDate, appointedBy)
+- [ ] 2.3.6: Add additionalComments, shraddhakutirId, namhattaId fields
+- [ ] 2.3.7: Add self-referencing @ManyToOne relationship for hierarchy (reportingToDevotee)
+- [ ] 2.3.8: Add @ManyToOne relationships (namhattaId, devotionalStatusId, gurudevs, shraddhakutirId, appointedBy)
 
 #### Task 2.4: Create Address Entities
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 2.3
-- [ ] 2.4.1: Create Address entity with country, state, district, subdistrict, village, pincode fields
-- [ ] 2.4.2: Set default value for country = "India"
-- [ ] 2.4.3: Create DevoteeAddress junction table with devoteeId, addressId, addressType, landmark
-- [ ] 2.4.4: Create NamhattaAddress junction table with namhattaId, addressId, landmark
+- [ ] 2.4.1: Create Address entity (table="addresses") with country, stateCode, stateNameEnglish, districtCode, districtNameEnglish, subdistrictCode, subdistrictNameEnglish, villageCode, villageNameEnglish, pincode
+- [ ] 2.4.2: Set @ColumnDefault("India") for country field
+- [ ] 2.4.3: Create DevoteeAddress junction entity (table="devotee_addresses") with devoteeId, addressId, addressType (enum), landmark
+- [ ] 2.4.4: Add @ManyToOne relationships in DevoteeAddress to Devotee and Address
+- [ ] 2.4.5: Create NamhattaAddress junction entity (table="namhatta_addresses") with namhattaId, addressId, landmark
+- [ ] 2.4.6: Add @ManyToOne relationships in NamhattaAddress to Namhatta and Address
 
 #### Task 2.5: Create Namhatta Entity
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 2.4
-- [ ] 2.5.1: Create Namhatta entity with code (unique), name, meetingDay, meetingTime
+- [ ] 2.5.1: Create Namhatta entity (table="namhattas") with code (unique), name, meetingDay, meetingTime
 - [ ] 2.5.2: Add leadership position fields (malaSenapotiId, mahaChakraSenapotiId, chakraSenapotiId, upaChakraSenapotiId)
 - [ ] 2.5.3: Add officer fields (secretaryId, presidentId, accountantId)
-- [ ] 2.5.4: Add districtSupervisorId (required), status, registrationNo (unique), registrationDate
-- [ ] 2.5.5: Add @ManyToOne relationships for all foreign keys
-- [ ] 2.5.6: Add unique constraints on code and registrationNo
+- [ ] 2.5.4: Add districtSupervisorId (required, references User), status (enum, default PENDING_APPROVAL), registrationNo (unique), registrationDate
+- [ ] 2.5.5: Add @ManyToOne relationships for all devotee position foreign keys
+- [ ] 2.5.6: Add @ManyToOne relationship to User (districtSupervisorId)
+- [ ] 2.5.7: Add unique constraints on code and registrationNo
 
 #### Task 2.6: Create Supporting Entities
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 2.5
-- [ ] 2.6.1: Create DevotionalStatus entity (id, name unique, createdAt)
-- [ ] 2.6.2: Create StatusHistory entity (devoteeId, previousStatus, newStatus, comment, updatedAt)
-- [ ] 2.6.3: Create Gurudev entity (id, name unique, title, createdAt)
-- [ ] 2.6.4: Create Shraddhakutir entity (id, name, districtCode, createdAt)
-- [ ] 2.6.5: Create NamhattaUpdate entity with all activity fields (attendance, prasad, kirtan, etc.)
-- [ ] 2.6.6: Create Leader entity (id, name, role, reportingTo, location as JSON, createdAt)
-- [ ] 2.6.7: Create RoleChangeHistory entity with all audit fields
+- [ ] 2.6.1: Create DevotionalStatus entity (table="devotional_statuses") with id, name (unique), createdAt
+- [ ] 2.6.2: Create StatusHistory entity (table="status_history") with devoteeId, previousStatus, newStatus, comment, updatedAt
+- [ ] 2.6.3: Add @ManyToOne relationship from StatusHistory to Devotee
+- [ ] 2.6.4: Create Gurudev entity (table="gurudevs") with id, name (unique), title, createdAt
+- [ ] 2.6.5: Create Shraddhakutir entity (table="shraddhakutirs") with id, name, districtCode, createdAt
+- [ ] 2.6.6: Create NamhattaUpdate entity (table="namhatta_updates") with namhattaId, programType, date, attendance, prasadDistribution, nagarKirtan, bookDistribution, chanting, arati, bhagwatPath, specialAttraction, imageUrls (JSONB), facebookLink, youtubeLink, createdAt
+- [ ] 2.6.7: Add @ManyToOne relationship from NamhattaUpdate to Namhatta
+- [ ] 2.6.8: Create Leader entity (table="leaders") with id, name, role (enum), reportingTo (self-reference), location (JSONB), createdAt
+- [ ] 2.6.9: Add self-referencing @ManyToOne for Leader hierarchy
+- [ ] 2.6.10: Create RoleChangeHistory entity (table="role_change_history") with devoteeId, previousRole, newRole, previousReportingTo, newReportingTo, changedBy (userId), reason, districtCode, subordinatesTransferred, createdAt
+- [ ] 2.6.11: Add @ManyToOne relationships from RoleChangeHistory to Devotee and User
 
 ---
 
@@ -2070,43 +167,77 @@ function findOrCreateAddress(addressData):
 - [ ] 3.1.2: Add method: Optional<User> findByUsername(String username)
 - [ ] 3.1.3: Add method: Optional<User> findByEmail(String email)
 - [ ] 3.1.4: Add method: List<User> findByIsActiveTrue()
-- [ ] 3.1.5: Create UserDistrictRepository with findByUserId and findByDistrictCode methods
-- [ ] 3.1.6: Create UserSessionRepository with findByUserId and deleteByUserId methods
-- [ ] 3.1.7: Create JwtBlacklistRepository with findByTokenHash and deleteByExpiredAtBefore methods
+- [ ] 3.1.5: Add method: List<User> findByRole(UserRole role)
+- [ ] 3.1.6: Create UserDistrictRepository extends JpaRepository<UserDistrict, Long>
+- [ ] 3.1.7: Add method: List<UserDistrict> findByUserId(Long userId)
+- [ ] 3.1.8: Add method: List<UserDistrict> findByDistrictCode(String districtCode)
+- [ ] 3.1.9: Add method: Optional<UserDistrict> findByUserIdAndDistrictCode(Long userId, String districtCode)
+- [ ] 3.1.10: Create UserSessionRepository extends JpaRepository<UserSession, Long>
+- [ ] 3.1.11: Add method: Optional<UserSession> findByUserId(Long userId)
+- [ ] 3.1.12: Add method: void deleteByUserId(Long userId)
+- [ ] 3.1.13: Add method: void deleteByExpiresAtBefore(LocalDateTime dateTime)
+- [ ] 3.1.14: Create JwtBlacklistRepository extends JpaRepository<JwtBlacklist, Long>
+- [ ] 3.1.15: Add method: boolean existsByTokenHash(String tokenHash)
+- [ ] 3.1.16: Add method: void deleteByExpiredAtBefore(LocalDateTime dateTime)
 
 #### Task 3.2: Create Devotee and Namhatta Repositories
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 3.1
 - [ ] 3.2.1: Create DevoteeRepository extends JpaRepository<Devotee, Long>
-- [ ] 3.2.2: Add pagination and filtering query methods (@Query annotations)
+- [ ] 3.2.2: Add @Query method for pagination and filtering by search term, country, state, district, statusId
 - [ ] 3.2.3: Add method: List<Devotee> findByNamhattaId(Long namhattaId)
 - [ ] 3.2.4: Add method: List<Devotee> findByReportingToDevoteeId(Long id)
-- [ ] 3.2.5: Create NamhattaRepository with findByCode and findByRegistrationNo
-- [ ] 3.2.6: Add Namhatta filtering query methods
+- [ ] 3.2.5: Add method: List<Devotee> findByLeadershipRoleNotNull()
+- [ ] 3.2.6: Add method: List<Devotee> findByLeadershipRole(LeadershipRole role)
+- [ ] 3.2.7: Create NamhattaRepository extends JpaRepository<Namhatta, Long>
+- [ ] 3.2.8: Add method: Optional<Namhatta> findByCode(String code)
+- [ ] 3.2.9: Add method: Optional<Namhatta> findByRegistrationNo(String registrationNo)
+- [ ] 3.2.10: Add method: boolean existsByCode(String code)
+- [ ] 3.2.11: Add method: boolean existsByRegistrationNo(String registrationNo)
+- [ ] 3.2.12: Add @Query method for pagination and filtering by search, country, state, district, status
 
 #### Task 3.3: Create Address and Supporting Repositories
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 3.2
-- [ ] 3.3.1: Create AddressRepository with custom exact match query method
-- [ ] 3.3.2: Create DevoteeAddressRepository
-- [ ] 3.3.3: Create NamhattaAddressRepository
-- [ ] 3.3.4: Create DevotionalStatusRepository
-- [ ] 3.3.5: Create StatusHistoryRepository
-- [ ] 3.3.6: Create GurudevRepository
-- [ ] 3.3.7: Create ShraddhakutirRepository with findByDistrictCode
-- [ ] 3.3.8: Create NamhattaUpdateRepository with findByNamhattaId
-- [ ] 3.3.9: Create LeaderRepository with findByRole
-- [ ] 3.3.10: Create RoleChangeHistoryRepository with findByDevoteeId
+- [ ] 3.3.1: Create AddressRepository extends JpaRepository<Address, Long>
+- [ ] 3.3.2: Add @Query method for exact match (country, stateCode, districtCode, subdistrictCode, villageCode, pincode - handle nulls)
+- [ ] 3.3.3: Add method: List<String> findDistinctCountries()
+- [ ] 3.3.4: Add method: List<String> findDistinctStatesByCountry(String country)
+- [ ] 3.3.5: Add method: List<String> findDistinctDistrictsByState(String state)
+- [ ] 3.3.6: Add @Query for pincode search with pagination
+- [ ] 3.3.7: Create DevoteeAddressRepository extends JpaRepository<DevoteeAddress, Long>
+- [ ] 3.3.8: Add method: List<DevoteeAddress> findByDevoteeId(Long devoteeId)
+- [ ] 3.3.9: Add method: Optional<DevoteeAddress> findByDevoteeIdAndAddressType(Long devoteeId, AddressType type)
+- [ ] 3.3.10: Create NamhattaAddressRepository extends JpaRepository<NamhattaAddress, Long>
+- [ ] 3.3.11: Add method: Optional<NamhattaAddress> findByNamhattaId(Long namhattaId)
+- [ ] 3.3.12: Create DevotionalStatusRepository extends JpaRepository<DevotionalStatus, Long>
+- [ ] 3.3.13: Add method: Optional<DevotionalStatus> findByName(String name)
+- [ ] 3.3.14: Create StatusHistoryRepository extends JpaRepository<StatusHistory, Long>
+- [ ] 3.3.15: Add method: List<StatusHistory> findByDevoteeIdOrderByUpdatedAtDesc(Long devoteeId)
+- [ ] 3.3.16: Add @Query for paginated status history with devotee info
+- [ ] 3.3.17: Create GurudevRepository extends JpaRepository<Gurudev, Long>
+- [ ] 3.3.18: Add method: Optional<Gurudev> findByName(String name)
+- [ ] 3.3.19: Create ShraddhakutirRepository extends JpaRepository<Shraddhakutir, Long>
+- [ ] 3.3.20: Add method: List<Shraddhakutir> findByDistrictCode(String districtCode)
+- [ ] 3.3.21: Create NamhattaUpdateRepository extends JpaRepository<NamhattaUpdate, Long>
+- [ ] 3.3.22: Add method: List<NamhattaUpdate> findByNamhattaIdOrderByDateDesc(Long namhattaId)
+- [ ] 3.3.23: Add method: List<NamhattaUpdate> findAllByOrderByDateDesc()
+- [ ] 3.3.24: Create LeaderRepository extends JpaRepository<Leader, Long>
+- [ ] 3.3.25: Add method: List<Leader> findByRole(LeaderRole role)
+- [ ] 3.3.26: Add method: List<Leader> findByReportingToIsNull() (top-level leaders)
+- [ ] 3.3.27: Create RoleChangeHistoryRepository extends JpaRepository<RoleChangeHistory, Long>
+- [ ] 3.3.28: Add @Query for paginated role history by devoteeId
 
-#### Task 3.4: Create Database Indexes
+#### Task 3.4: Create Database Indexes (Verification Only)
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 3.3
-- [ ] 3.4.1: Create index on User (username) - for login performance
-- [ ] 3.4.2: Create index on User (email) - for uniqueness check
-- [ ] 3.4.3: Create indexes on Devotee (legalName, email, namhattaId, leadershipRole, reportingToDevoteeId)
-- [ ] 3.4.4: Create indexes on Namhatta (code, registrationNo, districtSupervisorId, status)
-- [ ] 3.4.5: Create indexes on Address (country, stateNameEnglish, districtNameEnglish, pincode)
-- [ ] 3.4.6: Create index on JwtBlacklist (tokenHash, expiredAt) - for cleanup
+- [ ] 3.4.1: Verify index exists on users(username) - for login performance
+- [ ] 3.4.2: Verify index exists on users(email) - for uniqueness check
+- [ ] 3.4.3: Verify indexes exist on devotees(legal_name, email, namhatta_id, leadership_role, reporting_to_devotee_id)
+- [ ] 3.4.4: Verify indexes exist on namhattas(code, registration_no, district_supervisor_id, status)
+- [ ] 3.4.5: Verify indexes exist on addresses(country, state_name_english, district_name_english, pincode)
+- [ ] 3.4.6: Verify index exists on jwt_blacklist(token_hash, expired_at) - for cleanup
+- [ ] 3.4.7: **IMPORTANT**: Do NOT create new indexes - only verify existing ones
 
 ---
 
@@ -2118,83 +249,116 @@ function findOrCreateAddress(addressData):
 #### Task 4.1: Password Management
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 3.4
-- [ ] 4.1.1: Create PasswordService class
-- [ ] 4.1.2: Configure BCryptPasswordEncoder bean
-- [ ] 4.1.3: Implement hashPassword(String plainPassword) method
+- [ ] 4.1.1: Create PasswordService class with @Service annotation
+- [ ] 4.1.2: Configure BCryptPasswordEncoder bean in SecurityConfig
+- [ ] 4.1.3: Implement hashPassword(String plainPassword) method using BCrypt
 - [ ] 4.1.4: Implement verifyPassword(String plain, String hashed) method
-- [ ] 4.1.5: Create password validation regex (10+ chars, uppercase, lowercase, number, special char)
+- [ ] 4.1.5: Create password validation regex: min 8 chars, must contain uppercase, lowercase, number
 - [ ] 4.1.6: Implement validatePasswordStrength(String password) method
+- [ ] 4.1.7: Throw ValidationException if password doesn't meet criteria
 
 #### Task 4.2: JWT Token Management
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.1
-- [ ] 4.2.1: Create JwtTokenProvider class
-- [ ] 4.2.2: Configure JWT secret from environment variable
-- [ ] 4.2.3: Implement generateToken(UserDetails, districts, sessionToken) method
-- [ ] 4.2.4: Implement validateToken(String token) method
-- [ ] 4.2.5: Implement getUserIdFromToken(String token) method
-- [ ] 4.2.6: Implement extractClaims(String token) method
-- [ ] 4.2.7: Set token expiration to 1 hour
+- [ ] 4.2.1: Create JwtTokenProvider class with @Component annotation
+- [ ] 4.2.2: Configure JWT secret from environment variable (JWT_SECRET)
+- [ ] 4.2.3: Implement generateToken(UserDetails, List<String> districts, String sessionToken) method
+- [ ] 4.2.4: Set JWT payload: userId, username, role, districts, sessionToken
+- [ ] 4.2.5: Set token expiration to 1 hour (3600000ms)
+- [ ] 4.2.6: Implement validateToken(String token) method - verify signature and expiration
+- [ ] 4.2.7: Implement getUserIdFromToken(String token) method
+- [ ] 4.2.8: Implement getClaimsFromToken(String token) method
+- [ ] 4.2.9: Implement hashToken(String token) method using SHA-256 for blacklist storage
 
 #### Task 4.3: Token Blacklist Service
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.2
-- [ ] 4.3.1: Create TokenBlacklistService class
-- [ ] 4.3.2: Implement blacklistToken(String token) - hash token and store
-- [ ] 4.3.3: Implement isTokenBlacklisted(String tokenHash) method
-- [ ] 4.3.4: Implement cleanupExpiredTokens() method
-- [ ] 4.3.5: Add @Scheduled annotation for daily cleanup job
+- [ ] 4.3.1: Create TokenBlacklistService class with @Service annotation
+- [ ] 4.3.2: Inject JwtBlacklistRepository
+- [ ] 4.3.3: Implement blacklistToken(String token) method - hash token with SHA-256 and store
+- [ ] 4.3.4: Implement isTokenBlacklisted(String tokenHash) method - check repository
+- [ ] 4.3.5: Implement cleanupExpiredTokens() method - delete where expiredAt < now
+- [ ] 4.3.6: Add @Scheduled(cron = "0 0 2 * * ?") annotation for daily cleanup at 2 AM
 
 #### Task 4.4: Session Management
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.3
-- [ ] 4.4.1: Create SessionService class
-- [ ] 4.4.2: Implement createSession(Long userId) - delete old, create new (single login)
-- [ ] 4.4.3: Implement validateSession(Long userId, String sessionToken) method
-- [ ] 4.4.4: Implement removeSession(Long userId) method
-- [ ] 4.4.5: Implement cleanupExpiredSessions() method
-- [ ] 4.4.6: Add @Scheduled annotation for hourly cleanup
+- [ ] 4.4.1: Create SessionService class with @Service annotation
+- [ ] 4.4.2: Inject UserSessionRepository
+- [ ] 4.4.3: Implement createSession(Long userId) method:
+  - Delete existing session for userId (single login enforcement)
+  - Generate random sessionToken (UUID or SecureRandom hex)
+  - Set expiresAt to current time + 1 hour
+  - Save new UserSession
+  - Return sessionToken
+- [ ] 4.4.4: Implement validateSession(Long userId, String sessionToken) method:
+  - Find UserSession by userId
+  - Check if sessionToken matches
+  - Check if not expired
+  - Return true/false
+- [ ] 4.4.5: Implement removeSession(Long userId) method - delete session
+- [ ] 4.4.6: Implement cleanupExpiredSessions() method
+- [ ] 4.4.7: Add @Scheduled(cron = "0 0 * * * ?") annotation for hourly cleanup
 
 #### Task 4.5: Spring Security Configuration
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.4
 - [ ] 4.5.1: Create SecurityConfig class with @Configuration and @EnableWebSecurity
 - [ ] 4.5.2: Create SecurityFilterChain bean
-- [ ] 4.5.3: Configure public endpoints (login, health, about, geography APIs)
-- [ ] 4.5.4: Configure authenticated endpoints (all others)
-- [ ] 4.5.5: Disable CSRF (using JWT)
+- [ ] 4.5.3: Configure public endpoints (permitAll):
+  - /api/auth/login, /api/auth/logout, /api/auth/dev/**
+  - /api/health, /api/about
+  - /api/countries, /api/states, /api/districts, /api/sub-districts, /api/villages, /api/pincodes/**, /api/address-by-pincode
+  - /api/map/** (all map endpoints)
+  - GET /api/namhattas, GET /api/namhattas/{id}
+- [ ] 4.5.4: Configure authenticated endpoints (all others) - anyRequest().authenticated()
+- [ ] 4.5.5: Disable CSRF (using JWT, stateless)
 - [ ] 4.5.6: Set session management to STATELESS
+- [ ] 4.5.7: Configure CORS to allow credentials and specific origins
+- [ ] 4.5.8: Add security headers (Helmet-like): XSS protection, Content-Type options, Frame options
 
 #### Task 4.6: JWT Authentication Filter
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.5
 - [ ] 4.6.1: Create JwtAuthenticationFilter extends OncePerRequestFilter
-- [ ] 4.6.2: Extract JWT from cookie (auth_token)
-- [ ] 4.6.3: Validate JWT using JwtTokenProvider
-- [ ] 4.6.4: Check if token is blacklisted
-- [ ] 4.6.5: Validate session using SessionService
-- [ ] 4.6.6: Create Authentication object and set in SecurityContext
-- [ ] 4.6.7: Continue filter chain
+- [ ] 4.6.2: Inject JwtTokenProvider, TokenBlacklistService, SessionService, UserRepository, UserDistrictRepository
+- [ ] 4.6.3: In doFilterInternal:
+  - Extract JWT from cookie named "auth_token"
+  - If no token, continue filter chain (public endpoints allowed)
+  - Validate JWT using JwtTokenProvider.validateToken()
+  - Extract userId from token
+  - Get tokenHash and check if blacklisted
+  - Get sessionToken from JWT claims
+  - Validate session using SessionService.validateSession(userId, sessionToken)
+  - Load User from repository, check isActive
+  - Load user districts from UserDistrictRepository
+  - Create CustomUserDetails object
+  - Create UsernamePasswordAuthenticationToken with authorities
+  - Set authentication in SecurityContext
+  - Continue filter chain
+- [ ] 4.6.4: Handle exceptions and return 401 for invalid/expired/blacklisted tokens
+- [ ] 4.6.5: Register filter in SecurityConfig before UsernamePasswordAuthenticationFilter
 
-#### Task 4.7: Custom UserDetailsService
+#### Task 4.7: Custom UserDetailsService (if needed)
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.6
-- [ ] 4.7.1: Create CustomUserDetailsService implements UserDetailsService
-- [ ] 4.7.2: Implement loadUserByUsername(String username) method
-- [ ] 4.7.3: Fetch User from UserRepository
-- [ ] 4.7.4: Fetch user districts from UserDistrictRepository
-- [ ] 4.7.5: Create UserDetails object with roles and districts
-- [ ] 4.7.6: Handle user not found exception
+- [ ] 4.7.1: Create CustomUserDetails class implements UserDetails
+- [ ] 4.7.2: Add fields: userId, username, role, districts
+- [ ] 4.7.3: Implement getAuthorities() to return role-based authority
+- [ ] 4.7.4: Create constructor to build from User entity and district list
 
 #### Task 4.8: Authorization Components
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.7
-- [ ] 4.8.1: Create @PreAuthorize annotations for role checks
-- [ ] 4.8.2: Create DistrictAccessValidator component
-- [ ] 4.8.3: Implement validateDevoteeAccess(Long devoteeId, List<String> userDistricts)
-- [ ] 4.8.4: Implement filterByDistricts(List<String> districts) for queries
-- [ ] 4.8.5: Create @DistrictAccess custom annotation
-- [ ] 4.8.6: Create DistrictAccessAspect for AOP-based filtering
+- [ ] 4.8.1: Enable method security with @EnableMethodSecurity in SecurityConfig
+- [ ] 4.8.2: Create DistrictAccessValidator component with @Component annotation
+- [ ] 4.8.3: Implement validateDevoteeAccess(Long devoteeId, List<String> userDistricts) method:
+  - Get devotee's address districts
+  - Check if any match userDistricts
+  - Throw AccessDeniedException if no match
+- [ ] 4.8.4: Implement filterByDistricts(Specification, List<String> districts) method for queries
+- [ ] 4.8.5: Create utility method to get current user's districts from SecurityContext
+- [ ] 4.8.6: Create @PreAuthorize helpers for common role checks
 
 ---
 
@@ -2207,98 +371,222 @@ function findOrCreateAddress(addressData):
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 4.8
 - [ ] 5.1.1: Create AuthenticationService class with @Service annotation
-- [ ] 5.1.2: Implement login(LoginRequest) → LoginResponse method
-  - Validate credentials using PasswordService
-  - Create session using SessionService
-  - Generate JWT using JwtTokenProvider
-  - Return user info with token
-- [ ] 5.1.3: Implement logout(String token) method
-  - Blacklist token
-  - Remove session
-- [ ] 5.1.4: Implement verifyToken(String token) → UserInfo method
-  - Validate JWT
-  - Check blacklist
-  - Validate session
-  - Return current user info
+- [ ] 5.1.2: Inject UserRepository, UserDistrictRepository, PasswordService, JwtTokenProvider, SessionService
+- [ ] 5.1.3: Implement login(LoginRequest) → LoginResponse method:
+  - Validate username and password not empty
+  - Find user by username
+  - Check if user exists and isActive=true
+  - Verify password using PasswordService
+  - Throw BadCredentialsException if invalid
+  - Create new session using SessionService (deletes old session)
+  - Get user districts from UserDistrictRepository
+  - Generate JWT using JwtTokenProvider with userId, username, role, districts, sessionToken
+  - Return LoginResponse with user info (id, username, role, districts) and token
+- [ ] 5.1.4: Implement logout(String token) method:
+  - Blacklist token using TokenBlacklistService
+  - Get userId from token
+  - Remove session using SessionService.removeSession(userId)
+- [ ] 5.1.5: Implement verifyToken(String token) → UserInfo method:
+  - Validate JWT using JwtTokenProvider
+  - Check if blacklisted
+  - Get userId and sessionToken from claims
+  - Validate session using SessionService
+  - Get current user from repository, check isActive
+  - Get current districts (may have changed since login)
+  - Return UserInfo with id, username, role, districts
 
 #### Task 5.2: User Management Service
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 5.1
 - [ ] 5.2.1: Create UserService class with @Service annotation
-- [ ] 5.2.2: Implement getAllUsers() → List<UserDTO> method
-- [ ] 5.2.3: Implement createDistrictSupervisor(RegisterRequest) → UserDTO method
-  - Validate unique username and email
-  - Hash password
-  - Create user with DISTRICT_SUPERVISOR role
-  - Create user-district mappings
-- [ ] 5.2.4: Implement updateUser(Long id, UpdateRequest) → UserDTO method
-- [ ] 5.2.5: Implement deactivateUser(Long id) method (soft delete)
-- [ ] 5.2.6: Implement getUserDistricts(Long userId) → List<DistrictDTO> method
-- [ ] 5.2.7: Implement getAvailableDistricts() → List<DistrictDTO> method
+- [ ] 5.2.2: Inject UserRepository, UserDistrictRepository, PasswordService
+- [ ] 5.2.3: Implement getAllUsers() → List<UserDTO> method:
+  - Get all users
+  - Convert to DTOs (hide passwordHash)
+  - Return list
+- [ ] 5.2.4: Implement createDistrictSupervisor(RegisterRequest) → UserDTO method:
+  - Validate request (username unique, email unique, password strength)
+  - Hash password using PasswordService
+  - Create User entity with role=DISTRICT_SUPERVISOR, isActive=true
+  - Save user
+  - Create UserDistrict entries for each assigned district
+  - Save UserDistricts
+  - Return UserDTO
+- [ ] 5.2.5: Implement updateUser(Long id, UpdateRequest) → UserDTO method:
+  - Find user by id
+  - Update allowed fields (fullName, email, role)
+  - If districts changed, update UserDistrict entries
+  - Save and return DTO
+- [ ] 5.2.6: Implement deactivateUser(Long id) method:
+  - Find user by id
+  - Set isActive=false (soft delete)
+  - Save user
+- [ ] 5.2.7: Implement getUserDistricts(Long userId) → List<DistrictDTO> method:
+  - Find UserDistricts by userId
+  - Map to DTOs with code and name
+  - Return list
+- [ ] 5.2.8: Implement getAvailableDistricts() → List<DistrictDTO> method:
+  - Query distinct districts from addresses table
+  - Return list of district codes and names
 
 #### Task 5.3: Address Service
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 5.2
 - [ ] 5.3.1: Create AddressService class with @Service annotation
-- [ ] 5.3.2: Implement findOrCreateAddress(AddressData) → Long method
-  - Build exact match conditions (including null values)
-  - Query for existing address
-  - Create new if not found
-  - Return address ID
-- [ ] 5.3.3: Implement linkDevoteeAddress(devoteeId, addressId, type, landmark) method
-- [ ] 5.3.4: Implement linkNamhattaAddress(namhattaId, addressId, landmark) method
-- [ ] 5.3.5: Implement geography methods: getCountries, getStates, getDistricts, etc.
-- [ ] 5.3.6: Implement searchPincodes(country, search, page, limit) method
-- [ ] 5.3.7: Implement getAddressByPincode(String pincode) method
+- [ ] 5.3.2: Inject AddressRepository, DevoteeAddressRepository, NamhattaAddressRepository
+- [ ] 5.3.3: Implement findOrCreateAddress(AddressData) → Long method:
+  - Build exact match criteria (including null values for all fields)
+  - Query AddressRepository for existing address
+  - If found, return address id
+  - If not found, create new Address entity
+  - Save and return id
+- [ ] 5.3.4: Implement linkDevoteeAddress(devoteeId, addressId, type, landmark) method:
+  - Check if link already exists
+  - If exists, update landmark
+  - If not, create new DevoteeAddress
+  - Save
+- [ ] 5.3.5: Implement linkNamhattaAddress(namhattaId, addressId, landmark) method:
+  - Check if link exists, update or create
+  - Save
+- [ ] 5.3.6: Implement getCountries() → List<String> method - query distinct countries
+- [ ] 5.3.7: Implement getStates(String country) → List<String> method - query distinct states filtered by country
+- [ ] 5.3.8: Implement getDistricts(String state) → List<String> method - query distinct districts filtered by state
+- [ ] 5.3.9: Implement getSubDistricts(String district, String pincode) → List<String> method
+- [ ] 5.3.10: Implement getVillages(String subDistrict, String pincode) → List<String> method
+- [ ] 5.3.11: Implement getPincodes(String village, String district, String subDistrict) → List<String> method
+- [ ] 5.3.12: Implement searchPincodes(country, search, page, limit) → PincodeSearchResult method:
+  - Validate country required
+  - Cap limit at 100
+  - Build query with LIKE on pincode, village, district, subdistrict
+  - Paginate results
+  - Return pincodes array, total count, hasMore flag
+- [ ] 5.3.13: Implement getAddressByPincode(String pincode) → AddressDetails method:
+  - Query addresses by pincode
+  - Return country, state, district, subDistricts array, villages array
 
 #### Task 5.4: Devotee Service
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 5.3
 - [ ] 5.4.1: Create DevoteeService class with @Service annotation
-- [ ] 5.4.2: Implement getDevotees(PageRequest, filters) → Page<DevoteeDTO> method
-  - Apply pagination
-  - Apply filters (search, country, state, district, status)
-  - For DISTRICT_SUPERVISOR: filter by allowed districts
-- [ ] 5.4.3: Implement getDevotee(Long id) → DevoteeDTO method
-- [ ] 5.4.4: Implement createDevotee(CreateDevoteeRequest) → DevoteeDTO method
-  - Validate input
-  - Process addresses (find-or-create)
-  - Create devotee record
-  - Link addresses
-- [ ] 5.4.5: Implement updateDevotee(Long id, UpdateRequest) → DevoteeDTO method
-  - Check district access for DISTRICT_SUPERVISOR
-  - Update devotee fields
-  - Update addresses if changed
-- [ ] 5.4.6: Implement upgradeDevoteeStatus(id, statusId, notes) method
+- [ ] 5.4.2: Inject DevoteeRepository, AddressService, DevoteeAddressRepository, StatusHistoryRepository, DistrictAccessValidator
+- [ ] 5.4.3: Implement getDevotees(Pageable, filters, userRole, userDistricts) → Page<DevoteeDTO> method:
+  - Build Specification with filters (search on legalName/name/email, country, state, district, statusId)
+  - If role=DISTRICT_SUPERVISOR, add district filter using userDistricts
+  - Apply pagination and sorting
+  - Fetch devotees with addresses (join queries)
+  - Convert to DTOs with presentAddress and permanentAddress
+  - Return Page
+- [ ] 5.4.4: Implement getDevotee(Long id) → DevoteeDTO method:
+  - Find devotee by id or throw NotFoundException
+  - Fetch addresses
+  - Convert to DTO
+  - Return
+- [ ] 5.4.5: Implement createDevotee(CreateDevoteeRequest) → DevoteeDTO method:
+  - Validate input (legalName required, email format, numeric IDs positive)
+  - Sanitize string inputs (trim, HTML escape)
+  - Process presentAddress: call AddressService.findOrCreateAddress()
+  - Process permanentAddress: call AddressService.findOrCreateAddress()
+  - Create Devotee entity with all fields
+  - Save devotee
+  - Link addresses using AddressService.linkDevoteeAddress() for both present and permanent
+  - Return DTO
+- [ ] 5.4.6: Implement updateDevotee(Long id, UpdateRequest, userRole, userDistricts) → DevoteeDTO method:
+  - Find devotee by id
+  - If role=DISTRICT_SUPERVISOR: validate access using DistrictAccessValidator.validateDevoteeAccess()
+  - Update provided fields (partial update)
+  - If addresses changed, update address links
+  - Save devotee
+  - Return DTO
+- [ ] 5.4.7: Implement upgradeDevoteeStatus(id, newStatusId, notes) method:
+  - Find devotee
+  - Get previous status
   - Update devotionalStatusId
-  - Create StatusHistory record
-- [ ] 5.4.7: Implement assignLeadership(id, LeadershipRequest) method
-- [ ] 5.4.8: Implement removeLeadership(Long id) method
-- [ ] 5.4.9: Implement linkUserToDevotee(devoteeId, CreateUserRequest) → UserDTO
-- [ ] 5.4.10: Implement getAvailableOfficers() → List<DevoteeDTO> method
+  - Create StatusHistory record with previousStatus, newStatus, comment=notes
+  - Save both
+- [ ] 5.4.8: Implement assignLeadership(id, LeadershipRequest) method:
+  - Find devotee
+  - Validate leadershipRole is valid enum
+  - Validate reportingToDevoteeId exists if provided
+  - Update leadershipRole, reportingToDevoteeId, hasSystemAccess
+  - Save
+- [ ] 5.4.9: Implement removeLeadership(Long id) method:
+  - Find devotee
+  - Set leadershipRole=null, reportingToDevoteeId=null, hasSystemAccess=false
+  - Save
+- [ ] 5.4.10: Implement linkUserToDevotee(devoteeId, CreateUserRequest) → UserDTO:
+  - Validate devotee exists
+  - Validate username, password, email
+  - Check if devotee already linked to user (unless force=true)
+  - Hash password
+  - Create User entity with provided role (DISTRICT_SUPERVISOR or OFFICE)
+  - Set user.devoteeId = devotee.id
+  - Save user
+  - Return UserDTO
+- [ ] 5.4.11: Implement getAvailableOfficers() → List<DevoteeDTO> method:
+  - Query devotees eligible for officer positions (criteria: active, specific status levels)
+  - Return list
 
 #### Task 5.5: Namhatta Service
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 5.4
 - [ ] 5.5.1: Create NamhattaService class with @Service annotation
-- [ ] 5.5.2: Implement getNamhattas(PageRequest, filters) → Page<NamhattaDTO>
-- [ ] 5.5.3: Implement getNamhatta(Long id) → NamhattaDTO
-- [ ] 5.5.4: Implement createNamhatta(CreateRequest) → NamhattaDTO
-  - Validate unique code
-  - Process address
-  - Create namhatta record
-  - Link officers/senapotis
-- [ ] 5.5.5: Implement updateNamhatta(Long id, UpdateRequest) → NamhattaDTO
-- [ ] 5.5.6: Implement checkRegistrationNo(String regNo) → boolean
-- [ ] 5.5.7: Implement approveNamhatta(id, ApproveRequest) method
-  - Validate unique registrationNo
-  - Update status to APPROVED
-  - Set registration number and date
-- [ ] 5.5.8: Implement rejectNamhatta(id, reason) method
-- [ ] 5.5.9: Implement getDevoteesByNamhatta(id, page, statusId) → Page<DevoteeDTO>
-- [ ] 5.5.10: Implement getNamhattaUpdates(Long id) → List<UpdateDTO>
-- [ ] 5.5.11: Implement getDevoteeStatusCount(Long id) → Map<String, Integer>
-- [ ] 5.5.12: Implement getStatusHistory(id, page) → Page<StatusHistoryDTO>
+- [ ] 5.5.2: Inject NamhattaRepository, AddressService, NamhattaAddressRepository, DevoteeRepository, NamhattaUpdateRepository, UserRepository
+- [ ] 5.5.3: Implement getNamhattas(Pageable, filters) → Page<NamhattaDTO>:
+  - Build Specification with filters (search on name/code, country, state, district, status)
+  - Apply pagination
+  - Fetch namhattas with address
+  - Convert to DTOs
+  - Return Page
+- [ ] 5.5.4: Implement getNamhatta(Long id) → NamhattaDTO:
+  - Find by id or throw NotFoundException
+  - Fetch address
+  - Convert to DTO with address, all position IDs
+  - Return
+- [ ] 5.5.5: Implement createNamhatta(CreateRequest) → NamhattaDTO:
+  - Validate code is unique (throw ConflictException if exists)
+  - Validate districtSupervisorId references valid active user with DISTRICT_SUPERVISOR role
+  - Validate all senapoti/officer IDs reference valid devotees if provided
+  - Process address using AddressService.findOrCreateAddress()
+  - Create Namhatta entity with code, name, meetingDay, meetingTime, all position IDs, districtSupervisorId, status=PENDING_APPROVAL (default)
+  - Save namhatta
+  - Link address using AddressService.linkNamhattaAddress()
+  - Return DTO
+- [ ] 5.5.6: Implement updateNamhatta(Long id, UpdateRequest) → NamhattaDTO:
+  - Find namhatta by id
+  - Update provided fields
+  - If address changed, update address link
+  - Save
+  - Return DTO
+- [ ] 5.5.7: Implement checkRegistrationNo(String regNo) → boolean:
+  - Return namhattaRepository.existsByRegistrationNo(regNo)
+- [ ] 5.5.8: Implement approveNamhatta(id, ApproveRequest) method:
+  - Find namhatta by id
+  - Validate registrationNo is unique (throw ConflictException if exists)
+  - Validate registrationNo and registrationDate are provided
+  - Update status=APPROVED, set registrationNo and registrationDate
+  - Save
+- [ ] 5.5.9: Implement rejectNamhatta(id, reason) method:
+  - Find namhatta
+  - Update status=REJECTED
+  - Save (optionally log reason)
+- [ ] 5.5.10: Implement getDevoteesByNamhatta(id, Pageable, statusId) → Page<DevoteeDTO>:
+  - Find devotees by namhattaId with optional statusId filter
+  - Paginate
+  - Convert to DTOs
+  - Return Page
+- [ ] 5.5.11: Implement getNamhattaUpdates(Long id) → List<UpdateDTO>:
+  - Find updates by namhattaId ordered by date desc
+  - Convert to DTOs
+  - Return list
+- [ ] 5.5.12: Implement getDevoteeStatusCount(Long id) → Map<String, Integer>:
+  - Query devotees by namhattaId grouped by devotionalStatus
+  - Count each status
+  - Return map of statusName -> count
+- [ ] 5.5.13: Implement getStatusHistory(id, Pageable) → Page<StatusHistoryDTO>:
+  - Query StatusHistory for devotees in this namhatta
+  - Join with devotee info
+  - Paginate
+  - Return Page
 
 ---
 
@@ -2310,68 +598,125 @@ function findOrCreateAddress(addressData):
 #### Task 6.1: Role Hierarchy Rules Utility
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 5.5
-- [ ] 6.1.1: Create RoleHierarchyRules utility class
-- [ ] 6.1.2: Define ROLE_HIERARCHY map with level, reportsTo, canPromoteTo, canDemoteTo
-- [ ] 6.1.3: Implement canPromote(LeadershipRole from, LeadershipRole to) method
-- [ ] 6.1.4: Implement canDemote(LeadershipRole from, LeadershipRole to) method
-- [ ] 6.1.5: Implement getReportingRole(LeadershipRole role) method
-- [ ] 6.1.6: Implement getManagedRoles(LeadershipRole role) method
+- [ ] 6.1.1: Create RoleHierarchyRules utility class (can be @Component or static utility)
+- [ ] 6.1.2: Define ROLE_HIERARCHY constant Map with entries for each LeadershipRole:
+  - MALA_SENAPOTI: { level: 1, reportsTo: DISTRICT_SUPERVISOR, canPromoteTo: null, canDemoteTo: [MAHA_CHAKRA, CHAKRA, UPA_CHAKRA], manages: [MAHA_CHAKRA] }
+  - MAHA_CHAKRA_SENAPOTI: { level: 2, reportsTo: MALA, canPromoteTo: [MALA], canDemoteTo: [CHAKRA, UPA_CHAKRA], manages: [CHAKRA] }
+  - CHAKRA_SENAPOTI: { level: 3, reportsTo: MAHA_CHAKRA, canPromoteTo: [MAHA_CHAKRA], canDemoteTo: [UPA_CHAKRA], manages: [UPA_CHAKRA] }
+  - UPA_CHAKRA_SENAPOTI: { level: 4, reportsTo: CHAKRA, canPromoteTo: [CHAKRA], canDemoteTo: null, manages: [] }
+- [ ] 6.1.3: Implement canPromote(LeadershipRole from, LeadershipRole to) → boolean method:
+  - Get hierarchy entry for 'from' role
+  - Check if 'to' is in canPromoteTo list
+  - Return true/false
+- [ ] 6.1.4: Implement canDemote(LeadershipRole from, LeadershipRole to) → boolean method:
+  - Get hierarchy entry for 'from' role
+  - Check if 'to' is in canDemoteTo list
+  - Return true/false
+- [ ] 6.1.5: Implement getReportingRole(LeadershipRole role) → LeadershipRole method:
+  - Return reportsTo from hierarchy
+- [ ] 6.1.6: Implement getManagedRoles(LeadershipRole role) → List<LeadershipRole> method:
+  - Return manages list from hierarchy
 
 #### Task 6.2: Role Management Service - Validation
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 6.1
 - [ ] 6.2.1: Create RoleManagementService class with @Service annotation
-- [ ] 6.2.2: Implement validateHierarchyChange(current, target, changeType) → ValidationResult
-  - Check if promotion/demotion is allowed
-  - Return errors/warnings
-- [ ] 6.2.3: Implement checkCircularReference(devoteeId, newReportingId) → boolean
-  - Traverse reporting chain
-  - Detect circular references
-  - Return true if circular, false otherwise
+- [ ] 6.2.2: Inject DevoteeRepository, RoleChangeHistoryRepository, RoleHierarchyRules
+- [ ] 6.2.3: Create ValidationResult inner class with fields: isValid (boolean), errors (List<String>), warnings (List<String>)
+- [ ] 6.2.4: Implement validateHierarchyChange(currentRole, targetRole, changeType) → ValidationResult:
+  - changeType enum: PROMOTE, DEMOTE, REMOVE, REPLACE
+  - If REMOVE: validate current role exists
+  - If PROMOTE: call RoleHierarchyRules.canPromote(current, target), add error if false
+  - If DEMOTE: call RoleHierarchyRules.canDemote(current, target), add error if false
+  - Add warnings if applicable
+  - Return ValidationResult
+- [ ] 6.2.5: Implement checkCircularReference(devoteeId, newReportingId) → boolean:
+  - If newReportingId is null, return false (no circular possible)
+  - If devoteeId == newReportingId, return true (self-reference)
+  - Create visited Set<Long>
+  - Start traversal from newReportingId
+  - While currentId not null and not in visited:
+    - Add currentId to visited
+    - If currentId == devoteeId, return true (circular found)
+    - Get currentId's reportingToDevoteeId
+    - Set currentId to that value
+  - Return false (no circular)
 
 #### Task 6.3: Role Management Service - Subordinate Transfer
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 6.2
-- [ ] 6.3.1: Implement validateSubordinateTransfer(TransferRequest) → ValidationResult
-  - Check all subordinates belong to fromDevotee
-  - Validate toDevotee is eligible supervisor
-  - Check no circular references
-  - For DISTRICT_SUPERVISOR: validate same district
-- [ ] 6.3.2: Implement transferSubordinates(TransferRequest, userId) → TransferResult
-  - Validate transfer
-  - Update reportingToDevoteeId for each subordinate
-  - Create RoleChangeHistory records
-  - Return transfer count and updated subordinates
+- [ ] 6.3.1: Implement getDirectSubordinates(Long devoteeId) → List<Devotee>:
+  - Query devoteeRepository.findByReportingToDevoteeId(devoteeId)
+  - Return list
+- [ ] 6.3.2: Implement validateSubordinateTransfer(fromDevoteeId, toDevoteeId, subordinateIds) → ValidationResult:
+  - Get all subordinates of fromDevoteeId
+  - Check if all subordinateIds are actually reporting to fromDevoteeId
+  - If toDevoteeId provided:
+    - Check toDevotee exists and has leadership role
+    - For each subordinate, check circular reference with toDevoteeId
+  - Add errors/warnings to ValidationResult
+  - Return result
+- [ ] 6.3.3: Implement transferSubordinates(TransferRequest, userId) → TransferResult:
+  - Validate transfer using validateSubordinateTransfer()
+  - If invalid, throw ValidationException
+  - For each subordinateId:
+    - Update devotee.reportingToDevoteeId = toDevoteeId
+    - Save devotee
+    - Create RoleChangeHistory record with reason, changedBy=userId
+  - Return TransferResult with count and updated subordinates
 
 #### Task 6.4: Role Management Service - Promotions/Demotions
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 6.3
-- [ ] 6.4.1: Implement promoteDevotee(PromoteRequest, userId) → RoleChangeResult
-  - Validate hierarchy rules allow promotion
-  - Check no circular reference
-  - Transfer subordinates if role manages different level
-  - Update devotee role and reportingTo
-  - Create RoleChangeHistory with reason
-- [ ] 6.4.2: Implement demoteDevotee(DemoteRequest, userId) → RoleChangeResult
-  - Validate demotion is allowed
+- [ ] 6.4.1: Implement promoteDevotee(PromoteRequest, userId) → RoleChangeResult:
+  - Get devotee by id
+  - Validate hierarchy allows promotion using validateHierarchyChange(currentRole, targetRole, PROMOTE)
+  - Check circular reference for newReportingTo
+  - Get subordinates
+  - If subordinates exist and role change requires transfer:
+    - Transfer subordinates to new supervisor
+  - Update devotee: leadershipRole=targetRole, reportingToDevoteeId=newReportingTo
+  - Save devotee
+  - Create RoleChangeHistory with previousRole, newRole, previousReportingTo, newReportingTo, changedBy=userId, reason="Promotion: " + request.reason, subordinatesTransferred=count
+  - Return RoleChangeResult with updated devotee, subordinatesTransferred count, roleChangeRecord
+- [ ] 6.4.2: Implement demoteDevotee(DemoteRequest, userId) → RoleChangeResult:
+  - Similar to promote but validate demotion is allowed
   - Handle subordinate transfers
   - Update role
-  - Create history record
-- [ ] 6.4.3: Implement removeRole(devoteeId, reason, userId) → RoleChangeResult
-  - Transfer all subordinates to new supervisor
-  - Set role fields to null
-  - Create history with reason
+  - Create history with reason="Demotion: " + request.reason
+  - Return result
+- [ ] 6.4.3: Implement removeRole(devoteeId, reason, userId) → RoleChangeResult:
+  - Get devotee by id
+  - Get all subordinates
+  - If subordinates exist, require newSupervisorId in request
+  - Transfer all subordinates
+  - Update devotee: leadershipRole=null, reportingToDevoteeId=null, hasSystemAccess=false
+  - Save
+  - Create history with reason="Role Removal: " + reason
+  - Return result
 
 #### Task 6.5: Role Management Service - Queries
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 6.4
-- [ ] 6.5.1: Implement getAvailableSupervisors(districtCode, targetRole, excludeIds) → List<DevoteeDTO>
-  - Find devotees in district with appropriate role
-  - Exclude specified IDs
-- [ ] 6.5.2: Implement getDirectSubordinates(Long devoteeId) → List<DevoteeDTO>
-- [ ] 6.5.3: Implement getAllSubordinates(Long devoteeId) → List<DevoteeDTO>
-  - Recursive query to get entire subordinate chain
-- [ ] 6.5.4: Implement getRoleHistory(devoteeId, page) → Page<RoleChangeHistoryDTO>
+- [ ] 6.5.1: Implement getAvailableSupervisors(districtCode, targetRole, excludeIds) → List<DevoteeDTO>:
+  - Determine required supervisor role based on targetRole hierarchy
+  - Query devotees in districtCode with required leadershipRole
+  - Exclude IDs in excludeIds list
+  - Convert to DTOs
+  - Return list
+- [ ] 6.5.2: Implement getDirectSubordinates(Long devoteeId) → List<DevoteeDTO>:
+  - Already implemented in 6.3.1, add DTO conversion
+  - Return list
+- [ ] 6.5.3: Implement getAllSubordinates(Long devoteeId) → List<DevoteeDTO>:
+  - Get direct subordinates
+  - For each subordinate, recursively get their subordinates
+  - Collect all in Set to avoid duplicates
+  - Convert to DTOs
+  - Return list
+- [ ] 6.5.4: Implement getRoleHistory(devoteeId, Pageable) → Page<RoleChangeHistoryDTO>:
+  - Query RoleChangeHistoryRepository by devoteeId with pagination
+  - Convert to DTOs
+  - Return Page
 
 ---
 
@@ -2383,36 +728,99 @@ function findOrCreateAddress(addressData):
 #### Task 7.1: Dashboard and Report Services
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 6.5
-- [ ] 7.1.1: Create DashboardService with @Service annotation
-- [ ] 7.1.2: Implement getDashboardSummary() → DashboardDTO
-  - Get total devotees, namhattas
-  - Get recent updates
-- [ ] 7.1.3: Implement getStatusDistribution() → List<StatusDistributionDTO>
-- [ ] 7.1.4: Create ReportService with @Service annotation
-- [ ] 7.1.5: Implement getHierarchicalReports(allowedDistricts) → HierarchicalReportDTO
-- [ ] 7.1.6: Implement getAllStates(allowedDistricts) → List<StateReportDTO>
-- [ ] 7.1.7: Implement getDistrictsByState(state, allowedDistricts) → List<DistrictReportDTO>
-- [ ] 7.1.8: Implement getSubDistrictsByDistrict(...) → List<SubDistrictReportDTO>
-- [ ] 7.1.9: Implement getVillagesBySubDistrict(...) → List<VillageReportDTO>
+- [ ] 7.1.1: Create DashboardService class with @Service annotation
+- [ ] 7.1.2: Inject DevoteeRepository, NamhattaRepository, NamhattaUpdateRepository
+- [ ] 7.1.3: Implement getDashboardSummary(userRole, userDistricts) → DashboardDTO:
+  - Count total devotees (filtered by districts if DISTRICT_SUPERVISOR)
+  - Count total namhattas (filtered by districts if DISTRICT_SUPERVISOR)
+  - Get recent updates (top 10) ordered by date desc
+  - Return DashboardDTO with totals and recent updates list
+- [ ] 7.1.4: Implement getStatusDistribution(userRole, userDistricts) → List<StatusDistributionDTO>:
+  - Query devotees grouped by devotionalStatus
+  - Filter by districts if DISTRICT_SUPERVISOR
+  - Count each status
+  - Return list of {statusName, count}
+- [ ] 7.1.5: Create ReportService class with @Service annotation
+- [ ] 7.1.6: Inject DevoteeRepository, NamhattaRepository, AddressRepository, DevoteeAddressRepository, NamhattaAddressRepository
+- [ ] 7.1.7: Implement getHierarchicalReports(userRole, userDistricts) → HierarchicalReportDTO:
+  - Aggregate devotee and namhatta counts by country, state, district
+  - Filter by userDistricts if DISTRICT_SUPERVISOR
+  - Build hierarchical structure
+  - Return nested structure
+- [ ] 7.1.8: Implement getAllStatesWithCounts(userRole, userDistricts) → List<StateReportDTO>:
+  - Query distinct states from devotee/namhatta addresses
+  - For each state, count devotees and namhattas
+  - Filter by userDistricts if DISTRICT_SUPERVISOR
+  - Return list
+- [ ] 7.1.9: Implement getDistrictsByState(state, userRole, userDistricts) → List<DistrictReportDTO>:
+  - Query districts in given state
+  - Count devotees and namhattas per district
+  - Filter by userDistricts if DISTRICT_SUPERVISOR
+  - Return list
+- [ ] 7.1.10: Implement getSubDistrictsByDistrict(state, district, userRole, userDistricts) → List<SubDistrictReportDTO>:
+  - Query sub-districts in given state and district
+  - Count devotees and namhattas
+  - Filter by userDistricts if DISTRICT_SUPERVISOR
+  - Return list
+- [ ] 7.1.11: Implement getVillagesBySubDistrict(state, district, subDistrict, userRole, userDistricts) → List<VillageReportDTO>:
+  - Query villages in given location
+  - Count devotees and namhattas
+  - Filter by userDistricts if DISTRICT_SUPERVISOR
+  - Return list
 
-#### Task 7.2: Simple CRUD Services
+#### Task 7.2: Map Data Service
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 7.1
-- [ ] 7.2.1: Create DevotionalStatusService with CRUD operations
-- [ ] 7.2.2: Create GurudevService with CRUD operations
-- [ ] 7.2.3: Create ShraddhakutirService with CRUD + district filter
-- [ ] 7.2.4: Create NamhattaUpdateService with create, getAll, getByNamhatta methods
-- [ ] 7.2.5: Create HierarchyService with getTopLevel and getByLevel methods
+- [ ] 7.2.1: Create MapDataService class with @Service annotation
+- [ ] 7.2.2: Inject NamhattaRepository, NamhattaAddressRepository, AddressRepository
+- [ ] 7.2.3: Implement getNamhattaCountsByCountry() → List<CountryCountDTO>:
+  - Query namhattas joined with addresses
+  - Group by country
+  - Count namhattas per country
+  - Return list of {country, count}
+- [ ] 7.2.4: Implement getNamhattaCountsByState() → List<StateCountDTO>:
+  - Group by state
+  - Count namhattas
+  - Return list
+- [ ] 7.2.5: Implement getNamhattaCountsByDistrict() → List<DistrictCountDTO>:
+  - Group by district
+  - Count namhattas
+  - Return list with {districtCode, districtName, count}
+- [ ] 7.2.6: Implement getNamhattaCountsBySubDistrict() → List<SubDistrictCountDTO>
+- [ ] 7.2.7: Implement getNamhattaCountsByVillage() → List<VillageCountDTO>
 
-#### Task 7.3: Validation Utilities
+#### Task 7.3: Simple CRUD Services
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 7.2
-- [ ] 7.3.1: Create ValidationUtils utility class
-- [ ] 7.3.2: Implement validateEmail(String email) method
-- [ ] 7.3.3: Implement validatePhone(String phone) method
-- [ ] 7.3.4: Implement validatePassword(String password) with complexity rules
-- [ ] 7.3.5: Implement validateUsername(String username) - alphanumeric + underscore
-- [ ] 7.3.6: Implement sanitizeInput(String input) - HTML escape
+- [ ] 7.3.1: Create DevotionalStatusService class with @Service annotation
+- [ ] 7.3.2: Inject DevotionalStatusRepository
+- [ ] 7.3.3: Implement getAllStatuses(), createStatus(name), renameStatus(id, newName) methods
+- [ ] 7.3.4: Create GurudevService class with @Service annotation
+- [ ] 7.3.5: Inject GurudevRepository
+- [ ] 7.3.6: Implement getAllGurudevs(), createGurudev(name, title) methods
+- [ ] 7.3.7: Create ShraddhakutirService class with @Service annotation
+- [ ] 7.3.8: Inject ShraddhakutirRepository
+- [ ] 7.3.9: Implement getAllShraddhakutirs(), getByDistrictCode(district), createShraddhakutir(name, districtCode) methods
+- [ ] 7.3.10: Create NamhattaUpdateService class with @Service annotation
+- [ ] 7.3.11: Inject NamhattaUpdateRepository
+- [ ] 7.3.12: Implement createUpdate(NamhattaUpdateRequest), getAllUpdates(), getByNamhatta(id) methods
+- [ ] 7.3.13: Create HierarchyService class with @Service annotation
+- [ ] 7.3.14: Inject LeaderRepository
+- [ ] 7.3.15: Implement getTopLevelLeaders() (where reportingTo is null), getLeadersByLevel(role) methods
+
+#### Task 7.4: Validation and Utility Classes
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 7.3
+- [ ] 7.4.1: Create ValidationUtils utility class
+- [ ] 7.4.2: Implement validateEmail(String email) method - regex pattern check
+- [ ] 7.4.3: Implement validatePhone(String phone) method - basic format check
+- [ ] 7.4.4: Implement validatePassword(String password) method - min 8, uppercase, lowercase, number
+- [ ] 7.4.5: Implement validateUsername(String username) method - alphanumeric + underscore, 3-50 chars
+- [ ] 7.4.6: Implement sanitizeInput(String input) method - HTML escape, trim whitespace
+- [ ] 7.4.7: Create DateUtils utility class
+- [ ] 7.4.8: Implement formatDate, parseDate methods for consistent date handling
+- [ ] 7.4.9: Create JsonUtils utility class (if needed)
+- [ ] 7.4.10: Implement methods to handle JSONB fields (devotionalCourses, imageUrls, location)
 
 ---
 
@@ -2423,196 +831,419 @@ function findOrCreateAddress(addressData):
 
 #### Task 8.1: DTOs and Request/Response Objects
 **Status**: NOT_STARTED  
-**Prerequisites**: Task 7.3
-- [ ] 8.1.1: Create request DTOs for all POST/PUT endpoints
-- [ ] 8.1.2: Create response DTOs for all endpoints
-- [ ] 8.1.3: Add @Valid annotations for validation
-- [ ] 8.1.4: Add JSR-303 constraints (@NotNull, @NotBlank, @Email, @Size, @Pattern)
-- [ ] 8.1.5: Create custom validators for password, username, leadership role
-- [ ] 8.1.6: Setup ModelMapper or MapStruct for entity-DTO conversion
+**Prerequisites**: Task 7.4
+- [ ] 8.1.1: Create LoginRequest DTO (username, password)
+- [ ] 8.1.2: Create LoginResponse DTO (user: UserDTO)
+- [ ] 8.1.3: Create UserDTO (id, username, fullName, email, role, districts, isActive)
+- [ ] 8.1.4: Create RegisterSupervisorRequest DTO with validation annotations
+- [ ] 8.1.5: Create DevoteeDTO with all fields including presentAddress and permanentAddress
+- [ ] 8.1.6: Create CreateDevoteeRequest and UpdateDevoteeRequest DTOs
+- [ ] 8.1.7: Create NamhattaDTO with address and all position fields
+- [ ] 8.1.8: Create CreateNamhattaRequest and UpdateNamhattaRequest DTOs
+- [ ] 8.1.9: Create ApproveNamhattaRequest DTO (registrationNo, registrationDate)
+- [ ] 8.1.10: Create PromoteDevoteeRequest, DemoteDevoteeRequest, RemoveRoleRequest DTOs
+- [ ] 8.1.11: Create TransferSubordinatesRequest DTO
+- [ ] 8.1.12: Add JSR-303 validation annotations (@NotNull, @NotBlank, @Email, @Size, @Pattern) to all request DTOs
+- [ ] 8.1.13: Create custom validators for complex fields (password, leadership role)
+- [ ] 8.1.14: Setup ModelMapper bean for entity-DTO conversion
+- [ ] 8.1.15: Create mapper methods in a MapperUtil class
 
 #### Task 8.2: Authentication Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.1
-- [ ] 8.2.1: Create AuthController with @RestController and @RequestMapping("/api/auth")
-- [ ] 8.2.2: Implement POST /login endpoint
-  - Accept LoginRequest
-  - Call AuthenticationService.login()
-  - Set JWT in HTTP-only cookie
-  - Return user info
-- [ ] 8.2.3: Implement POST /logout endpoint
-  - Extract token from cookie
-  - Call AuthenticationService.logout()
-  - Clear cookie
-- [ ] 8.2.4: Implement GET /verify endpoint
-  - Extract token from cookie
-  - Call AuthenticationService.verifyToken()
-  - Return user info
-- [ ] 8.2.5: Implement GET /user-districts endpoint
-  - Get authenticated user from SecurityContext
-  - Return user's districts
+- [ ] 8.2.1: Create AuthController class with @RestController and @RequestMapping("/api/auth")
+- [ ] 8.2.2: Inject AuthenticationService
+- [ ] 8.2.3: Implement POST /login endpoint:
+  - Accept @Valid @RequestBody LoginRequest
+  - Call authenticationService.login()
+  - Create ResponseCookie for JWT (name="auth_token", httpOnly=true, secure=true in prod, sameSite=Strict, maxAge=1 hour)
+  - Add cookie to response headers
+  - Return ResponseEntity with UserDTO
+- [ ] 8.2.4: Implement POST /logout endpoint:
+  - Extract JWT from cookie using @CookieValue("auth_token")
+  - Call authenticationService.logout(token)
+  - Create expired cookie to clear it
+  - Return success message
+- [ ] 8.2.5: Implement GET /verify endpoint:
+  - Extract JWT from cookie
+  - Call authenticationService.verifyToken(token)
+  - Return UserInfo
+  - Handle 401 for invalid/expired tokens
+- [ ] 8.2.6: Implement GET /user-districts endpoint:
+  - Get authenticated user from SecurityContext (Authentication.getPrincipal())
+  - Call userService.getUserDistricts(userId)
+  - Return list of {code, name}
 
 #### Task 8.3: System and Geography Controllers
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.2
-- [ ] 8.3.1: Create SystemController with @RestController
-- [ ] 8.3.2: Implement GET /api/health endpoint (no auth required)
-- [ ] 8.3.3: Implement GET /api/about endpoint (no auth required)
-- [ ] 8.3.4: Create GeographyController with @RestController and @RequestMapping("/api")
-- [ ] 8.3.5: Implement GET /countries endpoint
-- [ ] 8.3.6: Implement GET /states endpoint with country query param
-- [ ] 8.3.7: Implement GET /districts endpoint with state query param
-- [ ] 8.3.8: Implement GET /sub-districts endpoint
-- [ ] 8.3.9: Implement GET /villages endpoint
-- [ ] 8.3.10: Implement GET /pincodes endpoint
-- [ ] 8.3.11: Implement GET /pincodes/search endpoint with pagination
-- [ ] 8.3.12: Implement GET /address-by-pincode endpoint
+- [ ] 8.3.1: Create SystemController class with @RestController
+- [ ] 8.3.2: Implement GET /api/health endpoint (no auth):
+  - Return {status: "OK"}
+- [ ] 8.3.3: Implement GET /api/about endpoint (no auth):
+  - Return {name: "Namhatta Management System", version: "1.0.0", description: "..."}
+- [ ] 8.3.4: Create GeographyController class with @RestController and @RequestMapping("/api")
+- [ ] 8.3.5: Inject AddressService
+- [ ] 8.3.6: Implement GET /countries endpoint (no auth):
+  - Call addressService.getCountries()
+  - Return List<String>
+- [ ] 8.3.7: Implement GET /states endpoint with @RequestParam(required=false) country:
+  - Call addressService.getStates(country)
+  - Return List<String>
+- [ ] 8.3.8: Implement GET /districts endpoint with @RequestParam(required=false) state
+- [ ] 8.3.9: Implement GET /sub-districts endpoint with @RequestParam district, pincode
+- [ ] 8.3.10: Implement GET /villages endpoint with @RequestParam subDistrict, pincode
+- [ ] 8.3.11: Implement GET /pincodes endpoint with @RequestParam village, district, subDistrict
+- [ ] 8.3.12: Implement GET /pincodes/search endpoint (no auth):
+  - Accept @RequestParam country (required), search, page (default 1), limit (default 25, max 100)
+  - Call addressService.searchPincodes()
+  - Return {pincodes: [], total: number, hasMore: boolean}
+- [ ] 8.3.13: Implement GET /address-by-pincode endpoint (no auth):
+  - Accept @RequestParam pincode (required, 6 digits)
+  - Call addressService.getAddressByPincode()
+  - Return {country, state, district, subDistricts: [], villages: []}
 
 #### Task 8.4: Devotee Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.3
-- [ ] 8.4.1: Create DevoteeController with @RestController and @RequestMapping("/api/devotees")
-- [ ] 8.4.2: Implement GET / endpoint - list with pagination, filtering, district access
-- [ ] 8.4.3: Implement GET /:id endpoint - get single devotee
-- [ ] 8.4.4: Implement POST / endpoint - create devotee (ADMIN, OFFICE only)
-- [ ] 8.4.5: Implement POST /:namhattaId endpoint - create devotee for namhatta
-- [ ] 8.4.6: Implement PUT /:id endpoint - update devotee (with district check)
-- [ ] 8.4.7: Implement POST /:id/upgrade-status endpoint
-- [ ] 8.4.8: Implement POST /:id/assign-leadership endpoint
-- [ ] 8.4.9: Implement DELETE /:id/leadership endpoint
-- [ ] 8.4.10: Implement POST /:id/link-user endpoint (ADMIN only)
-- [ ] 8.4.11: Implement GET /available-officers endpoint
+- [ ] 8.4.1: Create DevoteeController class with @RestController and @RequestMapping("/api/devotees")
+- [ ] 8.4.2: Inject DevoteeService
+- [ ] 8.4.3: Implement GET / endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Accept Pageable, @RequestParam filters (search, country, state, district, statusId)
+  - Get user role and districts from SecurityContext
+  - Call devoteeService.getDevotees(pageable, filters, userRole, userDistricts)
+  - Return Page<DevoteeDTO>
+- [ ] 8.4.4: Implement GET /:id endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Call devoteeService.getDevotee(id)
+  - Return DevoteeDTO
+- [ ] 8.4.5: Implement POST / endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @Valid @RequestBody CreateDevoteeRequest
+  - Call devoteeService.createDevotee(request)
+  - Return 201 Created with DevoteeDTO
+- [ ] 8.4.6: Implement POST /:namhattaId endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept namhattaId from path, request body
+  - Set request.namhattaId = namhattaId
+  - Call devoteeService.createDevotee(request)
+  - Return 201 Created
+- [ ] 8.4.7: Implement PUT /:id endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
+  - Accept @PathVariable id, @Valid @RequestBody UpdateDevoteeRequest
+  - Get user role and districts from SecurityContext
+  - Call devoteeService.updateDevotee(id, request, userRole, userDistricts)
+  - Return DevoteeDTO
+  - Handle 403 if DISTRICT_SUPERVISOR lacks access
+- [ ] 8.4.8: Implement POST /:id/upgrade-status endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @RequestBody {newStatusId, notes}
+  - Call devoteeService.upgradeDevoteeStatus(id, newStatusId, notes)
+  - Return success message
+- [ ] 8.4.9: Implement POST /:id/assign-leadership endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @RequestBody LeadershipRequest (leadershipRole, reportingToDevoteeId, hasSystemAccess)
+  - Call devoteeService.assignLeadership(id, request)
+  - Return success message
+- [ ] 8.4.10: Implement DELETE /:id/leadership endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Call devoteeService.removeLeadership(id)
+  - Return success message
+- [ ] 8.4.11: Implement POST /:id/link-user endpoint (create user for devotee):
+  - Add @PreAuthorize("hasRole('ADMIN')")
+  - Accept @RequestBody CreateUserRequest (username, password, email, role, force)
+  - Call devoteeService.linkUserToDevotee(id, request)
+  - Return 201 Created with UserDTO
+- [ ] 8.4.12: Implement GET /available-officers endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Call devoteeService.getAvailableOfficers()
+  - Return List<DevoteeDTO>
 
 #### Task 8.5: Namhatta Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.4
-- [ ] 8.5.1: Create NamhattaController with @RestController and @RequestMapping("/api/namhattas")
-- [ ] 8.5.2: Implement GET / endpoint - list with pagination and filtering
-- [ ] 8.5.3: Implement GET /:id endpoint - get single namhatta
-- [ ] 8.5.4: Implement POST / endpoint - create namhatta
-- [ ] 8.5.5: Implement PUT /:id endpoint - update namhatta
-- [ ] 8.5.6: Implement GET /check-registration/:registrationNo endpoint
-- [ ] 8.5.7: Implement POST /:id/approve endpoint
-- [ ] 8.5.8: Implement POST /:id/reject endpoint
-- [ ] 8.5.9: Implement GET /:id/devotees endpoint
-- [ ] 8.5.10: Implement GET /:id/updates endpoint
-- [ ] 8.5.11: Implement GET /:id/devotee-status-count endpoint
-- [ ] 8.5.12: Implement GET /:id/status-history endpoint
+- [ ] 8.5.1: Create NamhattaController class with @RestController and @RequestMapping("/api/namhattas")
+- [ ] 8.5.2: Inject NamhattaService
+- [ ] 8.5.3: Implement GET / endpoint (NO AUTH REQUIRED):
+  - Accept Pageable, @RequestParam filters (search, country, state, district, status)
+  - Call namhattaService.getNamhattas(pageable, filters)
+  - Return Page<NamhattaDTO>
+- [ ] 8.5.4: Implement GET /:id endpoint (NO AUTH REQUIRED):
+  - Call namhattaService.getNamhatta(id)
+  - Return NamhattaDTO
+- [ ] 8.5.5: Implement POST / endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @Valid @RequestBody CreateNamhattaRequest
+  - Call namhattaService.createNamhatta(request)
+  - Return 201 Created with NamhattaDTO
+  - Handle 409 Conflict if code already exists
+- [ ] 8.5.6: Implement PUT /:id endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @PathVariable id, @Valid @RequestBody UpdateNamhattaRequest
+  - Call namhattaService.updateNamhatta(id, request)
+  - Return NamhattaDTO
+- [ ] 8.5.7: Implement GET /check-registration/:registrationNo endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Call namhattaService.checkRegistrationNo(registrationNo)
+  - Return {exists: boolean}
+- [ ] 8.5.8: Implement POST /:id/approve endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @RequestBody ApproveNamhattaRequest (registrationNo, registrationDate)
+  - Call namhattaService.approveNamhatta(id, request)
+  - Return success message
+  - Handle 400 if registrationNo already exists
+- [ ] 8.5.9: Implement POST /:id/reject endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE')")
+  - Accept @RequestBody {reason} (optional)
+  - Call namhattaService.rejectNamhatta(id, reason)
+  - Return success message
+- [ ] 8.5.10: Implement GET /:id/devotees endpoint (NO AUTH REQUIRED):
+  - Accept @PathVariable id, Pageable, @RequestParam statusId
+  - Call namhattaService.getDevoteesByNamhatta(id, pageable, statusId)
+  - Return Page<DevoteeDTO>
+- [ ] 8.5.11: Implement GET /:id/updates endpoint (NO AUTH REQUIRED):
+  - Call namhattaService.getNamhattaUpdates(id)
+  - Return List<UpdateDTO>
+- [ ] 8.5.12: Implement GET /:id/devotee-status-count endpoint (NO AUTH REQUIRED):
+  - Call namhattaService.getDevoteeStatusCount(id)
+  - Return Map<String, Integer>
+- [ ] 8.5.13: Implement GET /:id/status-history endpoint (NO AUTH REQUIRED):
+  - Accept Pageable
+  - Call namhattaService.getStatusHistory(id, pageable)
+  - Return Page<StatusHistoryDTO>
 
-#### Task 8.6: District Supervisor Controller
+#### Task 8.6: Senapoti Role Management Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.5
-- [ ] 8.6.1: Create DistrictSupervisorController with @RestController
-- [ ] 8.6.2: Implement GET /api/district-supervisors/all endpoint
-- [ ] 8.6.3: Implement GET /api/district-supervisors endpoint with district filter
-- [ ] 8.6.4: Implement GET /api/user/address-defaults endpoint
+- [ ] 8.6.1: Create SenapotiController class with @RestController and @RequestMapping("/api/senapoti")
+- [ ] 8.6.2: Inject RoleManagementService
+- [ ] 8.6.3: Implement POST /transfer-subordinates endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Accept @Valid @RequestBody TransferSubordinatesRequest
+  - Get userId from SecurityContext
+  - Call roleManagementService.transferSubordinates(request, userId)
+  - Return TransferResult
+- [ ] 8.6.4: Implement POST /promote endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Accept @Valid @RequestBody PromoteDevoteeRequest
+  - Get userId from SecurityContext
+  - Call roleManagementService.promoteDevotee(request, userId)
+  - Return RoleChangeResult
+- [ ] 8.6.5: Implement POST /demote endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Accept @Valid @RequestBody DemoteDevoteeRequest
+  - Get userId from SecurityContext
+  - Call roleManagementService.demoteDevotee(request, userId)
+  - Return RoleChangeResult
+- [ ] 8.6.6: Implement POST /remove-role endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Accept @Valid @RequestBody RemoveRoleRequest
+  - Get userId from SecurityContext
+  - Call roleManagementService.removeRole(request.devoteeId, request.reason, userId)
+  - Return RoleChangeResult
+- [ ] 8.6.7: Implement GET /available-supervisors/:districtCode/:targetRole endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Accept @PathVariable districtCode, targetRole, @RequestParam(required=false) excludeIds
+  - Call roleManagementService.getAvailableSupervisors(districtCode, targetRole, excludeIds)
+  - Return List<DevoteeDTO>
+- [ ] 8.6.8: Implement GET /subordinates/:devoteeId endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Call roleManagementService.getDirectSubordinates(devoteeId)
+  - Return {devoteeId, subordinates: [], count}
+- [ ] 8.6.9: Implement GET /subordinates/:devoteeId/all endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Call roleManagementService.getAllSubordinates(devoteeId)
+  - Return {devoteeId, allSubordinates: [], count}
+- [ ] 8.6.10: Implement GET /role-history/:devoteeId endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'DISTRICT_SUPERVISOR')")
+  - Accept Pageable
+  - Call roleManagementService.getRoleHistory(devoteeId, pageable)
+  - Return Page<RoleChangeHistoryDTO>
 
-#### Task 8.7: Dashboard and Reports Controller
+#### Task 8.7: Admin Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.6
-- [ ] 8.7.1: Create DashboardController with @RestController
-- [ ] 8.7.2: Implement GET /api/dashboard endpoint
-- [ ] 8.7.3: Implement GET /api/status-distribution endpoint
-- [ ] 8.7.4: Create ReportController with @RestController
-- [ ] 8.7.5: Implement GET /api/reports/hierarchical endpoint with district filtering
-- [ ] 8.7.6: Implement GET /api/reports/states endpoint
-- [ ] 8.7.7: Implement GET /api/reports/districts/:state endpoint
-- [ ] 8.7.8: Implement GET /api/reports/sub-districts/:state/:district endpoint
-- [ ] 8.7.9: Implement GET /api/reports/villages/:state/:district/:subdistrict endpoint
-- [ ] 8.7.10: Add Cache-Control headers (no-cache) to all report endpoints
+- [ ] 8.7.1: Create AdminController class with @RestController and @RequestMapping("/api/admin")
+- [ ] 8.7.2: Inject UserService
+- [ ] 8.7.3: Implement POST /register-supervisor endpoint:
+  - Add @PreAuthorize("hasRole('ADMIN')")
+  - Accept @Valid @RequestBody RegisterSupervisorRequest (username, password, email, fullName, districts: [{code, name}])
+  - Call userService.createDistrictSupervisor(request)
+  - Return 201 Created with UserDTO
+- [ ] 8.7.4: Implement GET /users endpoint:
+  - Add @PreAuthorize("hasRole('ADMIN')")
+  - Call userService.getAllUsers()
+  - Return List<UserDTO>
+- [ ] 8.7.5: Implement GET /available-districts endpoint:
+  - Add @PreAuthorize("hasRole('ADMIN')")
+  - Call userService.getAvailableDistricts()
+  - Return List<DistrictDTO>
+- [ ] 8.7.6: Implement PUT /users/:id endpoint:
+  - Add @PreAuthorize("hasRole('ADMIN')")
+  - Accept @PathVariable id, @Valid @RequestBody UpdateUserRequest
+  - Call userService.updateUser(id, request)
+  - Return UserDTO
+- [ ] 8.7.7: Implement DELETE /users/:id endpoint:
+  - Add @PreAuthorize("hasRole('ADMIN')")
+  - Call userService.deactivateUser(id)
+  - Return success message
 
-#### Task 8.8: Simple Entity Controllers
+#### Task 8.8: District Supervisor Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.7
-- [ ] 8.8.1: Create DevotionalStatusController with GET /, POST /, POST /:id/rename
-- [ ] 8.8.2: Create GurudevController with GET / and POST /
-- [ ] 8.8.3: Create ShraddhakutirController with GET / and POST /
-- [ ] 8.8.4: Create NamhattaUpdateController with POST / and GET /all
-- [ ] 8.8.5: Create HierarchyController with GET / and GET /:level
+- [ ] 8.8.1: Create DistrictSupervisorController class with @RestController and @RequestMapping("/api/district-supervisors")
+- [ ] 8.8.2: Inject UserService, UserDistrictRepository
+- [ ] 8.8.3: Implement GET /all endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Query all users with role=DISTRICT_SUPERVISOR
+  - Include their linked devotee info
+  - Return List<DistrictSupervisorDTO>
+- [ ] 8.8.4: Implement GET / endpoint (with ?district query param):
+  - Add @PreAuthorize("isAuthenticated()")
+  - Accept @RequestParam(required=true) district
+  - Query UserDistrict by districtCode
+  - Get users with role=DISTRICT_SUPERVISOR
+  - Return List<DistrictSupervisorDTO>
+- [ ] 8.8.5: Implement GET /user/address-defaults endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Get userId from SecurityContext
+  - If role=DISTRICT_SUPERVISOR:
+    - Get first assigned district
+    - Query address info for that district
+    - Return {country, state, district}
+  - Else return {country: null, state: null, district: null}
 
-#### Task 8.9: Admin User Management Controller
+#### Task 8.9: Dashboard and Report Controllers
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.8
-- [ ] 8.9.1: Create AdminController with @RestController and @RequestMapping("/api/admin")
-- [ ] 8.9.2: Implement POST /register-supervisor endpoint (ADMIN only)
-- [ ] 8.9.3: Implement GET /users endpoint (ADMIN only)
-- [ ] 8.9.4: Implement GET /available-districts endpoint (ADMIN only)
-- [ ] 8.9.5: Implement PUT /users/:id endpoint (ADMIN only)
-- [ ] 8.9.6: Implement DELETE /users/:id endpoint (ADMIN only) - soft delete
+- [ ] 8.9.1: Create DashboardController class with @RestController and @RequestMapping("/api")
+- [ ] 8.9.2: Inject DashboardService
+- [ ] 8.9.3: Implement GET /dashboard endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Get user role and districts from SecurityContext
+  - Call dashboardService.getDashboardSummary(userRole, userDistricts)
+  - Return {totalDevotees, totalNamhattas, recentUpdates: []}
+- [ ] 8.9.4: Implement GET /status-distribution endpoint:
+  - Add @PreAuthorize("isAuthenticated()")
+  - Get user role and districts from SecurityContext
+  - Call dashboardService.getStatusDistribution(userRole, userDistricts)
+  - Return List<{statusName, count}>
+- [ ] 8.9.5: Create ReportController class with @RestController and @RequestMapping("/api/reports")
+- [ ] 8.9.6: Inject ReportService
+- [ ] 8.9.7: Implement GET /hierarchical endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
+  - Get user role and districts from SecurityContext
+  - Call reportService.getHierarchicalReports(userRole, userDistricts)
+  - Add Cache-Control: no-cache headers
+  - Return hierarchical report structure
+- [ ] 8.9.8: Implement GET /states endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
+  - Get user context
+  - Call reportService.getAllStatesWithCounts(userRole, userDistricts)
+  - Return List<StateReportDTO>
+- [ ] 8.9.9: Implement GET /districts/:state endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
+  - Get user context
+  - Call reportService.getDistrictsByState(state, userRole, userDistricts)
+  - Return List<DistrictReportDTO>
+- [ ] 8.9.10: Implement GET /sub-districts/:state/:district endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
+  - Get user context
+  - Call reportService.getSubDistrictsByDistrict(state, district, userRole, userDistricts)
+  - Return List<SubDistrictReportDTO>
+- [ ] 8.9.11: Implement GET /villages/:state/:district/:subdistrict endpoint:
+  - Add @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
+  - Get user context
+  - Call reportService.getVillagesBySubDistrict(state, district, subdistrict, userRole, userDistricts)
+  - Return List<VillageReportDTO>
 
-#### Task 8.10: Senapoti Role Management Controller
+#### Task 8.10: Map Data Controller
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 8.9
-- [ ] 8.10.1: Create SenapotiRoleController with @RestController and @RequestMapping("/api/senapoti")
-- [ ] 8.10.2: Implement POST /transfer-subordinates endpoint
-- [ ] 8.10.3: Implement POST /promote endpoint
-- [ ] 8.10.4: Implement POST /demote endpoint
-- [ ] 8.10.5: Implement POST /remove-role endpoint
-- [ ] 8.10.6: Implement GET /available-supervisors/:districtCode/:targetRole endpoint
-- [ ] 8.10.7: Implement GET /subordinates/:devoteeId endpoint
-- [ ] 8.10.8: Implement GET /role-history/:devoteeId endpoint
-- [ ] 8.10.9: Implement GET /subordinates/:devoteeId/all endpoint (recursive)
+- [ ] 8.10.1: Create MapDataController class with @RestController and @RequestMapping("/api/map")
+- [ ] 8.10.2: Inject MapDataService
+- [ ] 8.10.3: Implement GET /countries endpoint (NO AUTH):
+  - Call mapDataService.getNamhattaCountsByCountry()
+  - Return List<{country, count}>
+- [ ] 8.10.4: Implement GET /states endpoint (NO AUTH):
+  - Call mapDataService.getNamhattaCountsByState()
+  - Return List<{state, count}>
+- [ ] 8.10.5: Implement GET /districts endpoint (NO AUTH):
+  - Call mapDataService.getNamhattaCountsByDistrict()
+  - Return List<{districtCode, districtName, count}>
+- [ ] 8.10.6: Implement GET /sub-districts endpoint (NO AUTH):
+  - Call mapDataService.getNamhattaCountsBySubDistrict()
+  - Return List<{subDistrict, count}>
+- [ ] 8.10.7: Implement GET /villages endpoint (NO AUTH):
+  - Call mapDataService.getNamhattaCountsByVillage()
+  - Return List<{village, count}>
+
+#### Task 8.11: Supporting CRUD Controllers
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 8.10
+- [ ] 8.11.1: Create DevotionalStatusController with @RestController and @RequestMapping("/api/statuses")
+- [ ] 8.11.2: Implement GET /, POST /, POST /:id/rename endpoints for DevotionalStatus
+- [ ] 8.11.3: Create GurudevController with @RestController and @RequestMapping("/api/gurudevs")
+- [ ] 8.11.4: Implement GET /, POST / endpoints for Gurudev
+- [ ] 8.11.5: Create ShraddhakutirController with @RestController and @RequestMapping("/api/shraddhakutirs")
+- [ ] 8.11.6: Implement GET / (with ?district filter), POST / endpoints for Shraddhakutir
+- [ ] 8.11.7: Create NamhattaUpdateController with @RestController and @RequestMapping("/api/updates")
+- [ ] 8.11.8: Implement POST /, GET /all endpoints for NamhattaUpdate
+- [ ] 8.11.9: Create HierarchyController with @RestController and @RequestMapping("/api/hierarchy")
+- [ ] 8.11.10: Implement GET / (top-level), GET /:level endpoints for Leader hierarchy
 
 ---
 
-### **PHASE 9: CROSS-CUTTING CONCERNS**
+### **PHASE 9: EXCEPTION HANDLING & VALIDATION**
 **Status**: NOT_STARTED  
-**Duration**: 2-3 days  
+**Duration**: 1 day  
 **Prerequisites**: Phase 8 completed
 
-#### Task 9.1: Rate Limiting
+#### Task 9.1: Global Exception Handler
 **Status**: NOT_STARTED  
-**Prerequisites**: Task 8.10
-- [ ] 9.1.1: Create RateLimitingFilter component
-- [ ] 9.1.2: Implement in-memory request tracking by IP (or Redis for distributed)
-- [ ] 9.1.3: Configure login endpoint: 5 requests per 15 minutes
-- [ ] 9.1.4: Configure modification endpoints: 10 requests per 1 minute
-- [ ] 9.1.5: Configure general API: 100 requests per 15 minutes
-- [ ] 9.1.6: Return 429 Too Many Requests with Retry-After header
-- [ ] 9.1.7: Add @RateLimit annotation for easy application
+**Prerequisites**: Task 8.11
+- [ ] 9.1.1: Create GlobalExceptionHandler class with @ControllerAdvice
+- [ ] 9.1.2: Create ErrorResponse DTO (error: string, details: string, timestamp: LocalDateTime)
+- [ ] 9.1.3: Add @ExceptionHandler for NotFoundException:
+  - Return 404 with ErrorResponse
+- [ ] 9.1.4: Add @ExceptionHandler for ConflictException (unique constraint violations):
+  - Return 409 with ErrorResponse
+- [ ] 9.1.5: Add @ExceptionHandler for ValidationException:
+  - Return 400 with ErrorResponse
+- [ ] 9.1.6: Add @ExceptionHandler for MethodArgumentNotValidException (JSR-303 validation failures):
+  - Extract field errors
+  - Return 400 with list of validation errors
+- [ ] 9.1.7: Add @ExceptionHandler for AccessDeniedException:
+  - Return 403 with ErrorResponse
+- [ ] 9.1.8: Add @ExceptionHandler for BadCredentialsException:
+  - Return 401 with ErrorResponse
+- [ ] 9.1.9: Add @ExceptionHandler for generic Exception:
+  - Log error with stack trace
+  - Return 500 with generic "Internal server error" (don't expose details)
 
-#### Task 9.2: CORS Configuration
+#### Task 9.2: Custom Exceptions
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 9.1
-- [ ] 9.2.1: Create CorsConfig class with @Configuration
-- [ ] 9.2.2: Create CorsConfigurationSource bean
-- [ ] 9.2.3: For development: allow all origins
-- [ ] 9.2.4: For production: whitelist specific domains from environment variable
-- [ ] 9.2.5: Allow credentials: true (for cookies)
-- [ ] 9.2.6: Configure allowed methods: GET, POST, PUT, DELETE, PATCH
-- [ ] 9.2.7: Configure allowed headers: Content-Type, Authorization, etc.
+- [ ] 9.2.1: Create NotFoundException extends RuntimeException
+- [ ] 9.2.2: Create ConflictException extends RuntimeException
+- [ ] 9.2.3: Create ValidationException extends RuntimeException
+- [ ] 9.2.4: Create CircularReferenceException extends ValidationException
+- [ ] 9.2.5: Create InsufficientPermissionException extends RuntimeException
+- [ ] 9.2.6: Use these exceptions throughout service layer instead of generic RuntimeException
 
-#### Task 9.3: Global Exception Handler
+#### Task 9.3: Input Validation and Sanitization
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 9.2
-- [ ] 9.3.1: Create GlobalExceptionHandler with @ControllerAdvice
-- [ ] 9.3.2: Handle ValidationException → 400 Bad Request
-- [ ] 9.3.3: Handle UnauthorizedException → 401 Unauthorized
-- [ ] 9.3.4: Handle ForbiddenException → 403 Forbidden
-- [ ] 9.3.5: Handle NotFoundException → 404 Not Found
-- [ ] 9.3.6: Handle ConflictException → 409 Conflict
-- [ ] 9.3.7: Handle generic Exception → 500 Internal Server Error
-- [ ] 9.3.8: Sanitize error messages (don't expose internal details)
-- [ ] 9.3.9: Log full stack trace server-side only
-
-#### Task 9.4: Request Logging
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 9.3
-- [ ] 9.4.1: Create RequestLoggingFilter component
-- [ ] 9.4.2: Log method, URL, status code, duration for each request
-- [ ] 9.4.3: Log user ID if authenticated
-- [ ] 9.4.4: Sanitize sensitive data (passwords, tokens) from logs
-- [ ] 9.4.5: Configure logback.xml with appropriate log levels and patterns
-- [ ] 9.4.6: Setup log rotation and retention
-
-#### Task 9.5: Input Sanitization
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 9.4
-- [ ] 9.5.1: Create InputSanitizationFilter for POST/PUT/PATCH requests
-- [ ] 9.5.2: Trim all string inputs
-- [ ] 9.5.3: HTML-escape special characters
-- [ ] 9.5.4: Handle nested objects and arrays recursively
-- [ ] 9.5.5: Apply before validation
+- [ ] 9.3.1: Create @ValidPassword custom annotation with validator
+- [ ] 9.3.2: Create @ValidUsername custom annotation with validator
+- [ ] 9.3.3: Create @ValidLeadershipRole custom annotation
+- [ ] 9.3.4: Apply custom annotations to request DTOs
+- [ ] 9.3.5: Create InputSanitizerAspect with @Aspect
+- [ ] 9.3.6: Add @Before advice on controller methods to sanitize string inputs:
+  - Trim whitespace
+  - HTML escape using OWASP library or custom implementation
+- [ ] 9.3.7: Test sanitization with sample payloads
 
 ---
 
@@ -2621,366 +1252,344 @@ function findOrCreateAddress(addressData):
 **Duration**: 3-4 days  
 **Prerequisites**: Phase 9 completed
 
-#### Task 10.1: Unit Tests - Services
+#### Task 10.1: Unit Tests - Service Layer
 **Status**: NOT_STARTED  
-**Prerequisites**: Task 9.5
-- [ ] 10.1.1: Write tests for AuthenticationService (login, logout, verify)
-- [ ] 10.1.2: Write tests for UserService (CRUD, district assignment)
-- [ ] 10.1.3: Write tests for DevoteeService (CRUD, status upgrade, leadership)
-- [ ] 10.1.4: Write tests for NamhattaService (CRUD, approval workflow)
-- [ ] 10.1.5: Write tests for RoleManagementService (promotion, demotion, transfers)
-- [ ] 10.1.6: Write tests for AddressService (find-or-create logic)
-- [ ] 10.1.7: Use @MockBean for repositories in service tests
+**Prerequisites**: Task 9.3
+- [ ] 10.1.1: Setup test dependencies (JUnit 5, Mockito, AssertJ)
+- [ ] 10.1.2: Create AuthenticationServiceTest:
+  - Test successful login
+  - Test login with invalid credentials
+  - Test logout
+  - Test token verification
+- [ ] 10.1.3: Create DevoteeServiceTest:
+  - Test create devotee
+  - Test update devotee with district access check
+  - Test get devotees with pagination
+  - Test upgrade status
+- [ ] 10.1.4: Create RoleManagementServiceTest:
+  - Test promotion validation
+  - Test demotion validation
+  - Test circular reference detection
+  - Test subordinate transfer
+- [ ] 10.1.5: Create NamhattaServiceTest:
+  - Test create namhatta with unique code
+  - Test approval workflow
+  - Test rejection
 
-#### Task 10.2: Integration Tests - Controllers
+#### Task 10.2: Integration Tests - API Layer
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 10.1
-- [ ] 10.2.1: Write integration tests for authentication flow (login → verify → logout)
-- [ ] 10.2.2: Write integration tests for devotee CRUD with district filtering
-- [ ] 10.2.3: Write integration tests for namhatta approval workflow
-- [ ] 10.2.4: Write integration tests for role management operations
-- [ ] 10.2.5: Write integration tests for report generation
-- [ ] 10.2.6: Use @SpringBootTest and @AutoConfigureMockMvc
-- [ ] 10.2.7: Use test database (H2 or test PostgreSQL)
+- [ ] 10.2.1: Setup @SpringBootTest with @AutoConfigureMockMvc
+- [ ] 10.2.2: Create AuthControllerIntegrationTest:
+  - Test POST /api/auth/login
+  - Test POST /api/auth/logout
+  - Test GET /api/auth/verify
+- [ ] 10.2.3: Create DevoteeControllerIntegrationTest:
+  - Test GET /api/devotees with pagination
+  - Test POST /api/devotees (ADMIN/OFFICE only)
+  - Test PUT /api/devotees/:id with district access
+- [ ] 10.2.4: Create NamhattaControllerIntegrationTest:
+  - Test GET /api/namhattas (public)
+  - Test POST /api/namhattas (auth required)
+  - Test approval endpoints
+- [ ] 10.2.5: Create SenapotiControllerIntegrationTest:
+  - Test promote endpoint
+  - Test demote endpoint
+  - Test transfer subordinates
+- [ ] 10.2.6: Use @WithMockUser to simulate different roles in tests
 
 #### Task 10.3: Security Tests
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 10.2
-- [ ] 10.3.1: Test JWT generation and validation
-- [ ] 10.3.2: Test password hashing and verification
-- [ ] 10.3.3: Test session single-login enforcement
-- [ ] 10.3.4: Test token blacklisting
-- [ ] 10.3.5: Test role-based access control (@PreAuthorize)
-- [ ] 10.3.6: Test district access filtering for DISTRICT_SUPERVISOR
-- [ ] 10.3.7: Test unauthorized access returns 401/403
+- [ ] 10.3.1: Test JWT filter with valid token
+- [ ] 10.3.2: Test JWT filter with blacklisted token
+- [ ] 10.3.3: Test JWT filter with expired token
+- [ ] 10.3.4: Test session validation with mismatched sessionToken
+- [ ] 10.3.5: Test role-based authorization with @PreAuthorize
+- [ ] 10.3.6: Test district access validation for DISTRICT_SUPERVISOR
 
-#### Task 10.4: Repository Tests
+#### Task 10.4: Database Tests
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 10.3
-- [ ] 10.4.1: Test custom query methods in repositories
-- [ ] 10.4.2: Test pagination functionality
-- [ ] 10.4.3: Test complex filters and joins
-- [ ] 10.4.4: Test cascading operations
-- [ ] 10.4.5: Use @DataJpaTest for repository layer tests
+- [ ] 10.4.1: Setup @DataJpaTest for repository layer tests
+- [ ] 10.4.2: Test DevoteeRepository custom queries
+- [ ] 10.4.3: Test NamhattaRepository unique constraints
+- [ ] 10.4.4: Test Address exact match query
+- [ ] 10.4.5: Test RoleChangeHistory queries
+- [ ] 10.4.6: Use H2 in-memory database for tests or Testcontainers with PostgreSQL
 
 ---
 
-### **PHASE 11: DEPLOYMENT PREPARATION**
-**Status**: NOT_STARTED  
-**Duration**: 2-3 days  
-**Prerequisites**: Phase 10 completed
-
-#### Task 11.1: Configuration Externalization
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 10.4
-- [ ] 11.1.1: Move all secrets to environment variables (DATABASE_URL, JWT_SECRET, SESSION_SECRET)
-- [ ] 11.1.2: Create comprehensive application-prod.properties
-- [ ] 11.1.3: Setup Spring Profiles for environment switching
-- [ ] 11.1.4: Document all required environment variables
-- [ ] 11.1.5: Create .env.example file
-
-#### Task 11.2: Database Migration Setup
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 11.1
-- [ ] 11.2.1: Choose migration tool (Flyway or Liquibase)
-- [ ] 11.2.2: Create initial schema migration script (V1__initial_schema.sql)
-- [ ] 11.2.3: Create seed data migration (V2__seed_data.sql)
-  - Insert devotional statuses
-  - Insert gurudevs
-  - Insert leaders
-  - Create admin user
-- [ ] 11.2.4: Test migration on fresh database
-- [ ] 11.2.5: Test rollback capability
-
-#### Task 11.3: Scheduled Jobs Configuration
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 11.2
-- [ ] 11.3.1: Enable @EnableScheduling in main application class
-- [ ] 11.3.2: Configure JWT blacklist cleanup job (daily at 2 AM)
-- [ ] 11.3.3: Configure session cleanup job (hourly)
-- [ ] 11.3.4: Ensure jobs are idempotent (safe on multiple instances)
-- [ ] 11.3.5: Add logging for scheduled job execution
-
-#### Task 11.4: Health Checks and Metrics
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 11.3
-- [ ] 11.4.1: Add Spring Actuator dependency
-- [ ] 11.4.2: Configure /actuator/health endpoint
-- [ ] 11.4.3: Create custom health indicator for database connectivity
-- [ ] 11.4.4: Add custom metrics: login attempts, active sessions, API requests
-- [ ] 11.4.5: Add custom metrics: role management operations
-- [ ] 11.4.6: Configure metrics export (Prometheus/Micrometer)
-
-#### Task 11.5: Docker Configuration
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 11.4
-- [ ] 11.5.1: Create Dockerfile with multi-stage build
-  - Stage 1: Maven build
-  - Stage 2: JRE runtime with JAR
-- [ ] 11.5.2: Expose port 8080
-- [ ] 11.5.3: Create docker-compose.yml for local testing
-  - App container
-  - PostgreSQL container
-  - Environment variables
-- [ ] 11.5.4: Create .dockerignore file
-- [ ] 11.5.5: Test Docker build and run
-
-#### Task 11.6: Documentation
-**Status**: NOT_STARTED  
-**Prerequisites**: Task 11.5
-- [ ] 11.6.1: Create deployment guide (DEPLOYMENT.md)
-  - Environment setup
-  - Database setup
-  - Migration steps
-  - Running the application
-- [ ] 11.6.2: Document all environment variables
-- [ ] 11.6.3: Create API documentation (Swagger/OpenAPI)
-- [ ] 11.6.4: Update README with setup instructions
-- [ ] 11.6.5: Document known issues and troubleshooting
-
----
-
-### **PHASE 12: FINAL VERIFICATION & DEPLOYMENT**
+### **PHASE 11: CONFIGURATION & DEPLOYMENT PREP**
 **Status**: NOT_STARTED  
 **Duration**: 1-2 days  
+**Prerequisites**: Phase 10 completed
+
+#### Task 11.1: Environment Configuration
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 10.4
+- [ ] 11.1.1: Configure application-dev.properties:
+  - Set logging.level.root=INFO
+  - Set logging.level.com.namhatta=DEBUG
+  - Set spring.jpa.show-sql=true
+  - Set server.port=5000
+- [ ] 11.1.2: Configure application-prod.properties:
+  - Set logging.level.root=WARN
+  - Set logging.level.com.namhatta=INFO
+  - Set spring.jpa.show-sql=false
+  - Disable dev endpoints
+- [ ] 11.1.3: Externalize sensitive config to environment variables:
+  - DATABASE_URL, DB_USERNAME, DB_PASSWORD
+  - JWT_SECRET
+- [ ] 11.1.4: Add validation for required environment variables at startup
+
+#### Task 11.2: CORS and Security Headers
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 11.1
+- [ ] 11.2.1: Configure CORS in SecurityConfig:
+  - Allow credentials
+  - Allowed origins: same-origin + configured domains
+  - Allowed methods: GET, POST, PUT, DELETE, PATCH
+  - Allowed headers: Content-Type, Authorization, X-Requested-With, Cache-Control
+  - Max age: 86400 (24 hours)
+- [ ] 11.2.2: Add security headers in SecurityConfig:
+  - X-Content-Type-Options: nosniff
+  - X-Frame-Options: DENY
+  - X-XSS-Protection: 1; mode=block
+  - Content-Security-Policy (appropriate for app)
+
+#### Task 11.3: Rate Limiting
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 11.2
+- [ ] 11.3.1: Add Bucket4j or similar rate limiting library dependency
+- [ ] 11.3.2: Create RateLimitFilter for login endpoint:
+  - 5 requests per 15 minutes per IP
+  - Return 429 Too Many Requests if exceeded
+- [ ] 11.3.3: Create RateLimitFilter for data modification endpoints:
+  - 10 requests per minute per IP
+  - Apply to POST, PUT, DELETE methods
+
+#### Task 11.4: Logging and Monitoring
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 11.3
+- [ ] 11.4.1: Configure logback-spring.xml with:
+  - Console appender for dev
+  - File appender for prod (rolling files)
+  - JSON format for structured logging (optional)
+- [ ] 11.4.2: Add request/response logging filter:
+  - Log method, path, status code, duration for /api/** requests
+  - Truncate long responses (max 80 chars)
+- [ ] 11.4.3: Add MDC (Mapped Diagnostic Context) for userId in requests
+- [ ] 11.4.4: Setup health check actuator endpoints (optional):
+  - /actuator/health
+  - /actuator/info
+
+#### Task 11.5: Documentation
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 11.4
+- [ ] 11.5.1: Add SpringDoc OpenAPI dependency (springdoc-openapi-starter-webmvc-ui)
+- [ ] 11.5.2: Configure OpenAPI info (title, version, description)
+- [ ] 11.5.3: Add @Operation and @ApiResponse annotations to key endpoints
+- [ ] 11.5.4: Group endpoints by tag (@Tag annotation on controllers)
+- [ ] 11.5.5: Access Swagger UI at /swagger-ui.html for API documentation
+
+---
+
+### **PHASE 12: MIGRATION VALIDATION & CUTOVER**
+**Status**: NOT_STARTED  
+**Duration**: 2-3 days  
 **Prerequisites**: Phase 11 completed
 
-#### Task 12.1: End-to-End Testing
+#### Task 12.1: API Contract Validation
 **Status**: NOT_STARTED  
-**Prerequisites**: Task 11.6
-- [ ] 12.1.1: Test complete authentication flow
-- [ ] 12.1.2: Test devotee management with all roles
-- [ ] 12.1.3: Test namhatta creation and approval
-- [ ] 12.1.4: Test role management (promotions, demotions, transfers)
-- [ ] 12.1.5: Test district-based access control
-- [ ] 12.1.6: Test all reports generation
-- [ ] 12.1.7: Verify all APIs work as documented
+**Prerequisites**: Task 11.5
+- [ ] 12.1.1: Create comparison checklist of all Node.js endpoints vs Spring Boot endpoints
+- [ ] 12.1.2: Validate request/response formats match exactly for each endpoint
+- [ ] 12.1.3: Test with actual frontend application
+- [ ] 12.1.4: Validate error responses match expected formats
+- [ ] 12.1.5: Check cookie handling (JWT in auth_token cookie)
 
-#### Task 12.2: Performance Testing
+#### Task 12.2: Data Integrity Verification
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 12.1
-- [ ] 12.2.1: Test with sample dataset (1000+ devotees, 100+ namhattas)
-- [ ] 12.2.2: Verify pagination performance
-- [ ] 12.2.3: Verify complex query performance (reports)
-- [ ] 12.2.4: Test concurrent user sessions
-- [ ] 12.2.5: Verify rate limiting works correctly
+- [ ] 12.2.1: Run both Node.js and Spring Boot against same database
+- [ ] 12.2.2: Compare query results for:
+  - GET /api/devotees
+  - GET /api/namhattas
+  - GET /api/dashboard
+  - GET /api/reports/hierarchical
+- [ ] 12.2.3: Verify data mutations (create, update) produce identical database state
+- [ ] 12.2.4: Test complex flows: create devotee → assign leadership → promote → transfer subordinates
 
-#### Task 12.3: Security Audit
+#### Task 12.3: Performance Testing
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 12.2
-- [ ] 12.3.1: Verify all sensitive endpoints require authentication
-- [ ] 12.3.2: Verify role-based access control is enforced
-- [ ] 12.3.3: Verify district access filtering works correctly
-- [ ] 12.3.4: Check for SQL injection vulnerabilities
-- [ ] 12.3.5: Check for XSS vulnerabilities
-- [ ] 12.3.6: Verify secrets are not exposed in logs or responses
-- [ ] 12.3.7: Verify CORS configuration is secure
+- [ ] 12.3.1: Setup JMeter or Gatling for load testing
+- [ ] 12.3.2: Test authentication endpoint (login) under load
+- [ ] 12.3.3: Test devotee list endpoint with pagination under load
+- [ ] 12.3.4: Test report endpoints with large datasets
+- [ ] 12.3.5: Compare performance metrics with Node.js version
+- [ ] 12.3.6: Optimize slow queries if needed (add indexes, improve JOINs)
 
-#### Task 12.4: Production Deployment
+#### Task 12.4: Security Audit
 **Status**: NOT_STARTED  
 **Prerequisites**: Task 12.3
-- [ ] 12.4.1: Setup production database (PostgreSQL)
-- [ ] 12.4.2: Run database migrations
-- [ ] 12.4.3: Configure environment variables
-- [ ] 12.4.4: Deploy application to production server
-- [ ] 12.4.5: Verify application starts successfully
-- [ ] 12.4.6: Test critical flows in production
-- [ ] 12.4.7: Setup monitoring and alerting
+- [ ] 12.4.1: Verify all sensitive endpoints require authentication
+- [ ] 12.4.2: Verify role-based authorization works correctly
+- [ ] 12.4.3: Test JWT expiration and refresh
+- [ ] 12.4.4: Test single login enforcement (logout old session on new login)
+- [ ] 12.4.5: Test token blacklisting on logout
+- [ ] 12.4.6: Verify SQL injection protection (use parameterized queries)
+- [ ] 12.4.7: Verify XSS protection (input sanitization)
+
+#### Task 12.5: Deployment Preparation
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 12.4
+- [ ] 12.5.1: Build production JAR: `mvn clean package -DskipTests` or `gradle build`
+- [ ] 12.5.2: Test production JAR locally with prod profile
+- [ ] 12.5.3: Verify all environment variables are documented
+- [ ] 12.5.4: Create deployment guide:
+  - Prerequisites (Java 17, PostgreSQL access)
+  - Environment variables to set
+  - Command to run JAR: `java -jar app.jar --spring.profiles.active=prod`
+- [ ] 12.5.5: Configure process manager (systemd service file or equivalent)
+- [ ] 12.5.6: Setup reverse proxy (Nginx/Apache) if needed
+- [ ] 12.5.7: Bind Spring Boot to port 5000 (matching current setup)
+
+#### Task 12.6: Cutover and Rollback Plan
+**Status**: NOT_STARTED  
+**Prerequisites**: Task 12.5
+- [ ] 12.6.1: Document cutover steps:
+  1. Stop Node.js application
+  2. Backup database
+  3. Start Spring Boot application
+  4. Verify health endpoint
+  5. Test critical flows
+- [ ] 12.6.2: Document rollback steps:
+  1. Stop Spring Boot application
+  2. Restore database if needed
+  3. Start Node.js application
+  4. Verify functionality
+- [ ] 12.6.3: Identify critical success criteria:
+  - Login works
+  - Devotee and Namhatta lists load
+  - Dashboard shows correct data
+  - Role management functions
+- [ ] 12.6.4: Schedule cutover window (low-traffic period)
+- [ ] 12.6.5: Execute cutover
+- [ ] 12.6.6: Monitor application for 24-48 hours
+- [ ] 12.6.7: Address any issues found
+- [ ] 12.6.8: Declare migration complete
 
 ---
 
-## Implementation Progress Tracking
+## APPENDIX: API REFERENCE
 
-### Overall Progress
-- **Total Phases**: 12
-- **Completed Phases**: 0
-- **In Progress Phases**: 0
-- **Total Tasks**: 140+
-- **Completed Tasks**: 0
+### Authentication APIs
+- POST `/api/auth/login` - Authenticate user, return JWT in cookie
+- POST `/api/auth/logout` - Blacklist token, remove session
+- GET `/api/auth/verify` - Verify JWT validity
+- GET `/api/auth/user-districts` - Get authenticated user's districts
 
-### Phase Status Summary
+### System APIs
+- GET `/api/health` - Health check
+- GET `/api/about` - System metadata
 
-| Phase | Name | Status | Tasks | Completed |
-|-------|------|--------|-------|-----------|
-| 1 | Project Setup & Configuration | NOT_STARTED | 12 | 0 |
-| 2 | Data Model & Entities | NOT_STARTED | 30 | 0 |
-| 3 | Repository Layer | NOT_STARTED | 20 | 0 |
-| 4 | Security Implementation | NOT_STARTED | 25 | 0 |
-| 5 | Service Layer - Core | NOT_STARTED | 35 | 0 |
-| 6 | Service Layer - Role Management | NOT_STARTED | 15 | 0 |
-| 7 | Service Layer - Supporting | NOT_STARTED | 12 | 0 |
-| 8 | Controller Layer | NOT_STARTED | 45 | 0 |
-| 9 | Cross-Cutting Concerns | NOT_STARTED | 15 | 0 |
-| 10 | Testing | NOT_STARTED | 16 | 0 |
-| 11 | Deployment Preparation | NOT_STARTED | 20 | 0 |
-| 12 | Final Verification | NOT_STARTED | 12 | 0 |
+### Geography APIs
+- GET `/api/countries` - List countries
+- GET `/api/states?country=X` - List states
+- GET `/api/districts?state=X` - List districts
+- GET `/api/sub-districts?district=X&pincode=Y` - List sub-districts
+- GET `/api/villages?subDistrict=X&pincode=Y` - List villages
+- GET `/api/pincodes?village=X&district=Y&subDistrict=Z` - List pincodes
+- GET `/api/pincodes/search?country=X&search=Y&page=1&limit=25` - Search pincodes with pagination
+- GET `/api/address-by-pincode?pincode=X` - Get address details by pincode
 
-### Critical Path
-1. Phase 1 → Phase 2 → Phase 3 → Phase 4 (Security is critical)
-2. Phase 4 → Phase 5 → Phase 6 → Phase 7 (Services build on security)
-3. Phase 7 → Phase 8 (Controllers need services)
-4. Phase 8 → Phase 9 → Phase 10 (Testing needs implementation)
-5. Phase 10 → Phase 11 → Phase 12 (Deployment needs tested code)
+### Devotee Management APIs
+- GET `/api/devotees` - List devotees with pagination/filtering
+- GET `/api/devotees/:id` - Get devotee by ID
+- POST `/api/devotees` - Create devotee
+- POST `/api/devotees/:namhattaId` - Create devotee for namhatta
+- PUT `/api/devotees/:id` - Update devotee
+- POST `/api/devotees/:id/upgrade-status` - Upgrade devotional status
+- POST `/api/devotees/:id/assign-leadership` - Assign leadership role
+- DELETE `/api/devotees/:id/leadership` - Remove leadership role
+- POST `/api/devotees/:id/link-user` - Create user account for devotee
+- GET `/api/devotees/available-officers` - Get devotees eligible for officer positions
 
-### Agent Instructions
-1. Start with Phase 1, Task 1.1
-2. Complete each subtask in order
-3. Update task status when starting (IN_PROGRESS) and completing (COMPLETED)
-4. Do not proceed to next phase until all tasks in current phase are COMPLETED
-5. Run tests after each major component
-6. Commit code after each completed task
-7. Document any deviations or issues encountered
+### Namhatta Management APIs
+- GET `/api/namhattas` - List namhattas with pagination/filtering
+- GET `/api/namhattas/:id` - Get namhatta by ID
+- POST `/api/namhattas` - Create namhatta
+- PUT `/api/namhattas/:id` - Update namhatta
+- GET `/api/namhattas/check-registration/:registrationNo` - Check if registration number exists
+- POST `/api/namhattas/:id/approve` - Approve namhatta
+- POST `/api/namhattas/:id/reject` - Reject namhatta
+- GET `/api/namhattas/:id/devotees` - Get devotees in namhatta
+- GET `/api/namhattas/:id/updates` - Get activity updates
+- GET `/api/namhattas/:id/devotee-status-count` - Get devotee count by status
+- GET `/api/namhattas/:id/status-history` - Get status history
 
----
-## 7. Assumptions / Clarifications
+### Senapoti Role Management APIs
+- POST `/api/senapoti/transfer-subordinates` - Transfer subordinates between supervisors
+- POST `/api/senapoti/promote` - Promote devotee to higher role
+- POST `/api/senapoti/demote` - Demote devotee to lower role
+- POST `/api/senapoti/remove-role` - Remove leadership role
+- GET `/api/senapoti/available-supervisors/:districtCode/:targetRole` - Get available supervisors
+- GET `/api/senapoti/subordinates/:devoteeId` - Get direct subordinates
+- GET `/api/senapoti/subordinates/:devoteeId/all` - Get all subordinates (recursive)
+- GET `/api/senapoti/role-history/:devoteeId` - Get role change history
 
-### 7.1 Ambiguities Requiring Stakeholder Input
+### Admin APIs
+- POST `/api/admin/register-supervisor` - Register district supervisor
+- GET `/api/admin/users` - Get all users
+- GET `/api/admin/available-districts` - Get available districts
+- PUT `/api/admin/users/:id` - Update user
+- DELETE `/api/admin/users/:id` - Deactivate user
 
-#### 7.1.1 Data Model Clarifications
-- **Leader vs Devotee Hierarchy**:
-  - Current system has separate `leaders` table for GBC/Regional Directors
-  - Is this separate from devotee hierarchy, or should be unified?
-  - Recommend: Keep separate for organizational vs operational hierarchy
+### Dashboard & Report APIs
+- GET `/api/dashboard` - Get dashboard summary
+- GET `/api/status-distribution` - Get devotee status distribution
+- GET `/api/reports/hierarchical` - Get hierarchical reports
+- GET `/api/reports/states` - Get states with counts (lazy loading)
+- GET `/api/reports/districts/:state` - Get districts with counts
+- GET `/api/reports/sub-districts/:state/:district` - Get sub-districts with counts
+- GET `/api/reports/villages/:state/:district/:subdistrict` - Get villages with counts
 
-- **Namhatta Officer Positions**:
-  - Can a devotee hold multiple officer positions in same Namhatta?
-  - Can a devotee be officer in multiple Namhattas?
-  - Current assumption: Same devotee cannot hold multiple positions in one Namhatta, but can in different Namhattas
+### Map Data APIs
+- GET `/api/map/countries` - Get namhatta counts by country
+- GET `/api/map/states` - Get namhatta counts by state
+- GET `/api/map/districts` - Get namhatta counts by district
+- GET `/api/map/sub-districts` - Get namhatta counts by sub-district
+- GET `/api/map/villages` - Get namhatta counts by village
 
-- **Address Normalization**:
-  - Should identical addresses with different landmarks be separate or linked?
-  - Current approach: Separate address for each unique combination (including nulls), landmark stored in junction table
-
-#### 7.1.2 Business Rules Requiring Confirmation
-
-- **Devotee Deletion**:
-  - Hard delete or soft delete?
-  - What happens to linked Namhatta positions?
-  - Recommendation: Soft delete (isActive flag), prevent if holding active position
-
-- **Status Progression**:
-  - Is there a fixed progression path for devotional statuses?
-  - Can devotees skip levels?
-  - Can devotees regress?
-  - Current assumption: Flexible progression, any status can upgrade to any other
-
-- **Role Removal Without Replacement**:
-  - If removing a role, is specifying replacement supervisor mandatory?
-  - Current assumption: Yes, all subordinates must be reassigned before removal
-
-- **District Boundary Crossing**:
-  - Can a devotee be transferred between districts?
-  - Does this require special permission?
-  - Current assumption: Not explicitly prevented, but role changes stay within district for DISTRICT_SUPERVISOR
-
-#### 7.1.3 Security & Authorization
-
-- **Public Endpoints**:
-  - Geography APIs currently public - should they require authentication?
-  - Map data APIs public - security concern for exposing counts?
-  - Recommendation: Keep geography public, require auth for maps
-
-- **Status & Gurudev Management**:
-  - Who can create/edit devotional statuses?
-  - Who can add Gurudevs?
-  - Current implementation: No auth check (needs restriction to ADMIN)
-
-- **Updates Creation**:
-  - Who can create Namhatta updates?
-  - Should updates be editable/deletable?
-  - Current: No auth required (needs fixing)
-
-#### 7.1.4 Performance & Scale
-
-- **Expected Load**:
-  - Number of concurrent users?
-  - Total devotees/Namhattas expected?
-  - Current pagination: 10 items default, 100 max - sufficient?
-
-- **Report Caching**:
-  - Hierarchical reports set to no-cache - is real-time data required?
-  - Can we cache for 5-15 minutes to improve performance?
-
-#### 7.1.5 Missing Functionality
-
-- **User Profile Management**:
-  - Can users update their own profile?
-  - Password reset/forgot password flow?
-  - Email verification?
-
-- **Audit Trail**:
-  - RoleChangeHistory exists, but what about:
-    - Devotee edit history?
-    - Namhatta approval history?
-    - User action logs?
-
-- **Notifications**:
-  - Email notifications on approval/rejection?
-  - Alerts for role changes?
-  - System notifications?
-
-- **File Upload**:
-  - NamhattaUpdate has imageUrls - where are images stored?
-  - Size limits?
-  - Allowed formats?
-
-#### 7.1.6 Data Migration
-
-- **Existing Data**:
-  - Is there existing data to migrate from another system?
-  - If yes, what format (CSV, SQL dump, API)?
-  - Data cleaning/validation requirements?
-
-- **Seed Data**:
-  - Should system come pre-populated with:
-    - Devotional statuses?
-    - Gurudevs?
-    - Leaders?
-    - Admin user?
-
-### 7.2 Recommended Enhancements (Out of Scope for Initial Implementation)
-
-1. **Two-Factor Authentication (2FA)** for admin users
-2. **Password Reset Flow** via email
-3. **Email Verification** on user registration
-4. **Comprehensive Audit Logging** for all data changes
-5. **File Upload Service** for Namhatta update images
-6. **Notification System** (email/SMS) for key events
-7. **Advanced Search** with full-text search on devotee names
-8. **Export Functionality** (CSV/Excel) for reports
-9. **Batch Operations** (bulk upload, bulk update)
-10. **Mobile App APIs** (additional endpoints optimized for mobile)
-11. **WebSocket Support** for real-time updates
-12. **Advanced Analytics** dashboard with charts
+### Supporting APIs
+- GET `/api/statuses` - Get all devotional statuses
+- POST `/api/statuses` - Create devotional status
+- POST `/api/statuses/:id/rename` - Rename status
+- GET `/api/gurudevs` - Get all gurudevs
+- POST `/api/gurudevs` - Create gurudev
+- GET `/api/shraddhakutirs` - Get shraddhakutirs (with district filter)
+- POST `/api/shraddhakutirs` - Create shraddhakutir
+- POST `/api/updates` - Create namhatta update
+- GET `/api/updates/all` - Get all namhatta updates
+- GET `/api/hierarchy` - Get top-level organizational hierarchy
+- GET `/api/hierarchy/:level` - Get leaders by hierarchical level
+- GET `/api/district-supervisors/all` - Get all district supervisors
+- GET `/api/district-supervisors?district=X` - Get supervisors for district
+- GET `/api/user/address-defaults` - Get user's default address
 
 ---
 
-## Document End
+## END OF DOCUMENT
 
-**Next Steps**:
-1. Review this specification with stakeholders
-2. Clarify ambiguities listed in Section 7
-3. Prioritize enhancements for future phases
-4. Begin Spring Boot implementation following task breakdown in Section 6
-5. Establish continuous integration/deployment pipeline
-6. Plan user acceptance testing (UAT) phase
+**Total Estimated Duration:** 20-25 working days  
+**Number of Tasks:** 12 Phases, 350+ individual subtasks  
+**Implementation Order:** Sequential by phase, parallel within phases where possible
 
-**Implementation Timeline**:
-- Week 1-2: Setup + Data Layer
-- Week 2-3: Security Layer
-- Week 3-4: Service Layer
-- Week 4-5: Controller Layer
-- Week 5: Cross-cutting Concerns
-- Week 6: Testing
-- Week 7: Deployment Prep
-
-**Total Estimated Duration**: 7 weeks (full-time development)
-
-**Success Criteria**:
-- All APIs functional and tested
-- Security measures in place (JWT, RBAC, rate limiting)
-- District-based access control working
-- Role management system operational
-- Data integrity maintained
-- Performance targets met
-- Production-ready deployment
+**REMEMBER:**
+- Update task status as you progress
+- Test thoroughly after each phase
+- No database schema modifications allowed
+- Maintain exact API compatibility with Node.js version
+- Use provided JDBC connection string
