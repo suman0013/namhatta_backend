@@ -2,6 +2,7 @@ package com.namhatta.service;
 
 import com.namhatta.dto.DistrictDTO;
 import com.namhatta.dto.RegisterRequest;
+import com.namhatta.dto.UpdateUserRequest;
 import com.namhatta.dto.UserDTO;
 import com.namhatta.model.entity.User;
 import com.namhatta.model.entity.UserDistrict;
@@ -94,7 +95,7 @@ public class UserService {
      * Update user
      */
     @Transactional
-    public UserDTO updateUser(Long id, UserDTO updateRequest) {
+    public UserDTO updateUser(Long id, UpdateUserRequest updateRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         
