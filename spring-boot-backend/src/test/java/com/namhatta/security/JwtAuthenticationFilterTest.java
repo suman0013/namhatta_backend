@@ -7,7 +7,8 @@ import com.namhatta.repository.UserDistrictRepository;
 import com.namhatta.repository.UserRepository;
 import com.namhatta.service.SessionService;
 import com.namhatta.service.TokenBlacklistService;
-import io.jsonwebtoken.impl.DefaultClaims;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +82,7 @@ class JwtAuthenticationFilterTest {
         Cookie authCookie = new Cookie("auth_token", token);
         request.setCookies(authCookie);
 
-        DefaultClaims claims = new DefaultClaims();
+        Claims claims = Jwts.claims();
         claims.put("sessionToken", sessionToken);
 
         when(jwtTokenProvider.validateToken(token)).thenReturn(true);
@@ -124,7 +125,7 @@ class JwtAuthenticationFilterTest {
         Cookie authCookie = new Cookie("auth_token", token);
         request.setCookies(authCookie);
 
-        DefaultClaims claims = new DefaultClaims();
+        Claims claims = Jwts.claims();
         claims.put("sessionToken", sessionToken);
 
         when(jwtTokenProvider.validateToken(token)).thenReturn(true);
@@ -148,7 +149,7 @@ class JwtAuthenticationFilterTest {
         Cookie authCookie = new Cookie("auth_token", token);
         request.setCookies(authCookie);
 
-        DefaultClaims claims = new DefaultClaims();
+        Claims claims = Jwts.claims();
         claims.put("sessionToken", sessionToken);
 
         testUser.setIsActive(false);
