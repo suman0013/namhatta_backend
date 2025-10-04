@@ -41,4 +41,10 @@ public interface DevoteeRepository extends JpaRepository<Devotee, Long> {
         @Param("statusId") Long statusId,
         Pageable pageable
     );
+    
+    @Query("SELECT COALESCE(ds.name, 'Unknown') as statusName, COUNT(d.id) as count " +
+           "FROM Devotee d " +
+           "LEFT JOIN DevotionalStatus ds ON d.devotionalStatusId = ds.id " +
+           "GROUP BY ds.name")
+    List<Object[]> countByDevotionalStatus();
 }

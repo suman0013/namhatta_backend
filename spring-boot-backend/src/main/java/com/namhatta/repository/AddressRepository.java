@@ -77,4 +77,18 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     Page<Address> searchPincodes(@Param("country") String country, @Param("search") String search, Pageable pageable);
     
     List<Address> findByPincode(String pincode);
+    
+    List<Address> findByStateNameEnglish(String state);
+    
+    List<Address> findByStateNameEnglishAndDistrictNameEnglish(String state, String district);
+    
+    @Query("SELECT a FROM Address a WHERE " +
+           "a.stateNameEnglish = :state AND " +
+           "a.districtNameEnglish = :district AND " +
+           "a.subdistrictNameEnglish = :subDistrict")
+    List<Address> findByStateAndDistrictAndSubdistrict(
+        @Param("state") String state,
+        @Param("district") String district,
+        @Param("subDistrict") String subDistrict
+    );
 }
