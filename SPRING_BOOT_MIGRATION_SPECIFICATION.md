@@ -1409,6 +1409,7 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 12.1.4: Validate error responses match expected formats (format differences documented)
 - [x] 12.1.5: Check cookie handling (JWT in auth_token cookie - verified compatible)
 - [x] 12.1.6: Fix Spring Boot compilation errors - **COMPLETED**: Main source code compiles successfully. Test files have minor remaining issues that don't block the application.
+- [x] 12.1.7: **Swagger/OpenAPI Integration** - SpringDoc OpenAPI v2.5.0 integrated with JWT cookie authentication support
 
 #### Task 12.2: Data Integrity Verification
 **Status**: BLOCKED - Schema Validation Issues  
