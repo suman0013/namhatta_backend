@@ -81,7 +81,7 @@ class AuthenticationServiceTest {
         when(passwordService.verifyPassword("password123", "hashedPassword123")).thenReturn(true);
         when(sessionService.createSession(1L)).thenReturn("session-token-123");
         when(userDistrictRepository.findByUserId(1L)).thenReturn(List.of(testDistrict));
-        when(jwtTokenProvider.generateToken(any(), anyList(), eq("session-token-123")))
+        when(jwtTokenProvider.generateToken(eq(1L), eq("testuser"), eq("DISTRICT_SUPERVISOR"), anyList(), eq("session-token-123")))
                 .thenReturn("jwt-token-123");
 
         LoginResponse response = authenticationService.login(loginRequest);
@@ -97,7 +97,7 @@ class AuthenticationServiceTest {
         verify(userRepository).findByUsername("testuser");
         verify(passwordService).verifyPassword("password123", "hashedPassword123");
         verify(sessionService).createSession(1L);
-        verify(jwtTokenProvider).generateToken(any(), anyList(), eq("session-token-123"));
+        verify(jwtTokenProvider).generateToken(eq(1L), eq("testuser"), eq("DISTRICT_SUPERVISOR"), anyList(), eq("session-token-123"));
     }
 
     @Test
