@@ -363,16 +363,16 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 5: SERVICE LAYER - CORE SERVICES**
-**Status**: NOT_STARTED  
+**Status**: IN_PROGRESS  
 **Duration**: 4-5 days  
 **Prerequisites**: Phase 4 completed
 
 #### Task 5.1: Authentication Service
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.8
-- [ ] 5.1.1: Create AuthenticationService class with @Service annotation
-- [ ] 5.1.2: Inject UserRepository, UserDistrictRepository, PasswordService, JwtTokenProvider, SessionService
-- [ ] 5.1.3: Implement login(LoginRequest) → LoginResponse method:
+- [x] 5.1.1: Create AuthenticationService class with @Service annotation
+- [x] 5.1.2: Inject UserRepository, UserDistrictRepository, PasswordService, JwtTokenProvider, SessionService
+- [x] 5.1.3: Implement login(LoginRequest) → LoginResponse method:
   - Validate username and password not empty
   - Find user by username
   - Check if user exists and isActive=true
@@ -382,11 +382,11 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Get user districts from UserDistrictRepository
   - Generate JWT using JwtTokenProvider with userId, username, role, districts, sessionToken
   - Return LoginResponse with user info (id, username, role, districts) and token
-- [ ] 5.1.4: Implement logout(String token) method:
+- [x] 5.1.4: Implement logout(String token) method:
   - Blacklist token using TokenBlacklistService
   - Get userId from token
   - Remove session using SessionService.removeSession(userId)
-- [ ] 5.1.5: Implement verifyToken(String token) → UserInfo method:
+- [x] 5.1.5: Implement verifyToken(String token) → UserInfo method:
   - Validate JWT using JwtTokenProvider
   - Check if blacklisted
   - Get userId and sessionToken from claims
@@ -396,15 +396,15 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Return UserInfo with id, username, role, districts
 
 #### Task 5.2: User Management Service
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 5.1
-- [ ] 5.2.1: Create UserService class with @Service annotation
-- [ ] 5.2.2: Inject UserRepository, UserDistrictRepository, PasswordService
-- [ ] 5.2.3: Implement getAllUsers() → List<UserDTO> method:
+- [x] 5.2.1: Create UserService class with @Service annotation
+- [x] 5.2.2: Inject UserRepository, UserDistrictRepository, PasswordService
+- [x] 5.2.3: Implement getAllUsers() → List<UserDTO> method:
   - Get all users
   - Convert to DTOs (hide passwordHash)
   - Return list
-- [ ] 5.2.4: Implement createDistrictSupervisor(RegisterRequest) → UserDTO method:
+- [x] 5.2.4: Implement createDistrictSupervisor(RegisterRequest) → UserDTO method:
   - Validate request (username unique, email unique, password strength)
   - Hash password using PasswordService
   - Create User entity with role=DISTRICT_SUPERVISOR, isActive=true
@@ -412,25 +412,25 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Create UserDistrict entries for each assigned district
   - Save UserDistricts
   - Return UserDTO
-- [ ] 5.2.5: Implement updateUser(Long id, UpdateRequest) → UserDTO method:
+- [x] 5.2.5: Implement updateUser(Long id, UpdateRequest) → UserDTO method:
   - Find user by id
   - Update allowed fields (fullName, email, role)
   - If districts changed, update UserDistrict entries
   - Save and return DTO
-- [ ] 5.2.6: Implement deactivateUser(Long id) method:
+- [x] 5.2.6: Implement deactivateUser(Long id) method:
   - Find user by id
   - Set isActive=false (soft delete)
   - Save user
-- [ ] 5.2.7: Implement getUserDistricts(Long userId) → List<DistrictDTO> method:
+- [x] 5.2.7: Implement getUserDistricts(Long userId) → List<DistrictDTO> method:
   - Find UserDistricts by userId
   - Map to DTOs with code and name
   - Return list
-- [ ] 5.2.8: Implement getAvailableDistricts() → List<DistrictDTO> method:
+- [x] 5.2.8: Implement getAvailableDistricts() → List<DistrictDTO> method:
   - Query distinct districts from addresses table
   - Return list of district codes and names
 
 #### Task 5.3: Address Service
-**Status**: NOT_STARTED  
+**Status**: IN_PROGRESS  
 **Prerequisites**: Task 5.2
 - [ ] 5.3.1: Create AddressService class with @Service annotation
 - [ ] 5.3.2: Inject AddressRepository, DevoteeAddressRepository, NamhattaAddressRepository
