@@ -77,7 +77,7 @@ public class GeographyController {
     }
 
     @GetMapping("/address-by-pincode")
-    public AddressDTO getAddressByPincode(@RequestParam String pincode) {
+    public AddressDetails getAddressByPincode(@RequestParam String pincode) {
         if (pincode == null || !pincode.matches("^[0-9]{6}$")) {
             throw new IllegalArgumentException("Pincode must be 6 digits");
         }
