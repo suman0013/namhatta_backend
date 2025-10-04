@@ -156,7 +156,7 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 3: REPOSITORY LAYER**
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Duration**: 1-2 days  
 **Prerequisites**: Phase 2 completed
 
@@ -229,15 +229,15 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 3.3.28: Add @Query for paginated role history by devoteeId
 
 #### Task 3.4: Create Database Indexes (Verification Only)
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 3.3
-- [ ] 3.4.1: Verify index exists on users(username) - for login performance
-- [ ] 3.4.2: Verify index exists on users(email) - for uniqueness check
-- [ ] 3.4.3: Verify indexes exist on devotees(legal_name, email, namhatta_id, leadership_role, reporting_to_devotee_id)
-- [ ] 3.4.4: Verify indexes exist on namhattas(code, registration_no, district_supervisor_id, status)
-- [ ] 3.4.5: Verify indexes exist on addresses(country, state_name_english, district_name_english, pincode)
-- [ ] 3.4.6: Verify index exists on jwt_blacklist(token_hash, expired_at) - for cleanup
-- [ ] 3.4.7: **IMPORTANT**: Do NOT create new indexes - only verify existing ones
+- [x] 3.4.1: Verify index exists on users(username) - for login performance
+- [x] 3.4.2: Verify index exists on users(email) - for uniqueness check
+- [x] 3.4.3: Verify indexes exist on devotees(legal_name, email, namhatta_id, leadership_role, reporting_to_devotee_id)
+- [x] 3.4.4: Verify indexes exist on namhattas(code, registration_no, district_supervisor_id, status)
+- [x] 3.4.5: Verify indexes exist on addresses(country, state_name_english, district_name_english, pincode)
+- [x] 3.4.6: Verify index exists on jwt_blacklist(token_hash, expired_at) - for cleanup
+- [x] 3.4.7: **IMPORTANT**: Do NOT create new indexes - only verify existing ones
 
 ---
 
