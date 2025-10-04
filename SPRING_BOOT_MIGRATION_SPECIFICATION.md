@@ -363,7 +363,7 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 5: SERVICE LAYER - CORE SERVICES**
-**Status**: IN_PROGRESS  
+**Status**: COMPLETED  
 **Duration**: 4-5 days  
 **Prerequisites**: Phase 4 completed
 
@@ -476,12 +476,12 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Fetch devotees with addresses (join queries)
   - Convert to DTOs with presentAddress and permanentAddress
   - Return Page
-- [ ] 5.4.4: Implement getDevotee(Long id) → DevoteeDTO method:
+- [x] 5.4.4: Implement getDevotee(Long id) → DevoteeDTO method:
   - Find devotee by id or throw NotFoundException
   - Fetch addresses
   - Convert to DTO
   - Return
-- [ ] 5.4.5: Implement createDevotee(CreateDevoteeRequest) → DevoteeDTO method:
+- [x] 5.4.5: Implement createDevotee(CreateDevoteeRequest) → DevoteeDTO method:
   - Validate input (legalName required, email format, numeric IDs positive)
   - Sanitize string inputs (trim, HTML escape)
   - Process presentAddress: call AddressService.findOrCreateAddress()
@@ -490,30 +490,30 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Save devotee
   - Link addresses using AddressService.linkDevoteeAddress() for both present and permanent
   - Return DTO
-- [ ] 5.4.6: Implement updateDevotee(Long id, UpdateRequest, userRole, userDistricts) → DevoteeDTO method:
+- [x] 5.4.6: Implement updateDevotee(Long id, UpdateRequest, userRole, userDistricts) → DevoteeDTO method:
   - Find devotee by id
   - If role=DISTRICT_SUPERVISOR: validate access using DistrictAccessValidator.validateDevoteeAccess()
   - Update provided fields (partial update)
   - If addresses changed, update address links
   - Save devotee
   - Return DTO
-- [ ] 5.4.7: Implement upgradeDevoteeStatus(id, newStatusId, notes) method:
+- [x] 5.4.7: Implement upgradeDevoteeStatus(id, newStatusId, notes) method:
   - Find devotee
   - Get previous status
   - Update devotionalStatusId
   - Create StatusHistory record with previousStatus, newStatus, comment=notes
   - Save both
-- [ ] 5.4.8: Implement assignLeadership(id, LeadershipRequest) method:
+- [x] 5.4.8: Implement assignLeadership(id, LeadershipRequest) method:
   - Find devotee
   - Validate leadershipRole is valid enum
   - Validate reportingToDevoteeId exists if provided
   - Update leadershipRole, reportingToDevoteeId, hasSystemAccess
   - Save
-- [ ] 5.4.9: Implement removeLeadership(Long id) method:
+- [x] 5.4.9: Implement removeLeadership(Long id) method:
   - Find devotee
   - Set leadershipRole=null, reportingToDevoteeId=null, hasSystemAccess=false
   - Save
-- [ ] 5.4.10: Implement linkUserToDevotee(devoteeId, CreateUserRequest) → UserDTO:
+- [x] 5.4.10: Implement linkUserToDevotee(devoteeId, CreateUserRequest) → UserDTO:
   - Validate devotee exists
   - Validate username, password, email
   - Check if devotee already linked to user (unless force=true)
@@ -522,27 +522,27 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Set user.devoteeId = devotee.id
   - Save user
   - Return UserDTO
-- [ ] 5.4.11: Implement getAvailableOfficers() → List<DevoteeDTO> method:
+- [x] 5.4.11: Implement getAvailableOfficers() → List<DevoteeDTO> method:
   - Query devotees eligible for officer positions (criteria: active, specific status levels)
   - Return list
 
 #### Task 5.5: Namhatta Service
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 5.4
-- [ ] 5.5.1: Create NamhattaService class with @Service annotation
-- [ ] 5.5.2: Inject NamhattaRepository, AddressService, NamhattaAddressRepository, DevoteeRepository, NamhattaUpdateRepository, UserRepository
-- [ ] 5.5.3: Implement getNamhattas(Pageable, filters) → Page<NamhattaDTO>:
+- [x] 5.5.1: Create NamhattaService class with @Service annotation
+- [x] 5.5.2: Inject NamhattaRepository, AddressService, NamhattaAddressRepository, DevoteeRepository, NamhattaUpdateRepository, UserRepository
+- [x] 5.5.3: Implement getNamhattas(Pageable, filters) → Page<NamhattaDTO>:
   - Build Specification with filters (search on name/code, country, state, district, status)
   - Apply pagination
   - Fetch namhattas with address
   - Convert to DTOs
   - Return Page
-- [ ] 5.5.4: Implement getNamhatta(Long id) → NamhattaDTO:
+- [x] 5.5.4: Implement getNamhatta(Long id) → NamhattaDTO:
   - Find by id or throw NotFoundException
   - Fetch address
   - Convert to DTO with address, all position IDs
   - Return
-- [ ] 5.5.5: Implement createNamhatta(CreateRequest) → NamhattaDTO:
+- [x] 5.5.5: Implement createNamhatta(CreateRequest) → NamhattaDTO:
   - Validate code is unique (throw ConflictException if exists)
   - Validate districtSupervisorId references valid active user with DISTRICT_SUPERVISOR role
   - Validate all senapoti/officer IDs reference valid devotees if provided
@@ -551,38 +551,38 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Save namhatta
   - Link address using AddressService.linkNamhattaAddress()
   - Return DTO
-- [ ] 5.5.6: Implement updateNamhatta(Long id, UpdateRequest) → NamhattaDTO:
+- [x] 5.5.6: Implement updateNamhatta(Long id, UpdateRequest) → NamhattaDTO:
   - Find namhatta by id
   - Update provided fields
   - If address changed, update address link
   - Save
   - Return DTO
-- [ ] 5.5.7: Implement checkRegistrationNo(String regNo) → boolean:
+- [x] 5.5.7: Implement checkRegistrationNo(String regNo) → boolean:
   - Return namhattaRepository.existsByRegistrationNo(regNo)
-- [ ] 5.5.8: Implement approveNamhatta(id, ApproveRequest) method:
+- [x] 5.5.8: Implement approveNamhatta(id, ApproveRequest) method:
   - Find namhatta by id
   - Validate registrationNo is unique (throw ConflictException if exists)
   - Validate registrationNo and registrationDate are provided
   - Update status=APPROVED, set registrationNo and registrationDate
   - Save
-- [ ] 5.5.9: Implement rejectNamhatta(id, reason) method:
+- [x] 5.5.9: Implement rejectNamhatta(id, reason) method:
   - Find namhatta
   - Update status=REJECTED
   - Save (optionally log reason)
-- [ ] 5.5.10: Implement getDevoteesByNamhatta(id, Pageable, statusId) → Page<DevoteeDTO>:
+- [x] 5.5.10: Implement getDevoteesByNamhatta(id, Pageable, statusId) → Page<DevoteeDTO>:
   - Find devotees by namhattaId with optional statusId filter
   - Paginate
   - Convert to DTOs
   - Return Page
-- [ ] 5.5.11: Implement getNamhattaUpdates(Long id) → List<UpdateDTO>:
+- [x] 5.5.11: Implement getNamhattaUpdates(Long id) → List<UpdateDTO>:
   - Find updates by namhattaId ordered by date desc
   - Convert to DTOs
   - Return list
-- [ ] 5.5.12: Implement getDevoteeStatusCount(Long id) → Map<String, Integer>:
+- [x] 5.5.12: Implement getDevoteeStatusCount(Long id) → Map<String, Integer>:
   - Query devotees by namhattaId grouped by devotionalStatus
   - Count each status
   - Return map of statusName -> count
-- [ ] 5.5.13: Implement getStatusHistory(id, Pageable) → Page<StatusHistoryDTO>:
+- [x] 5.5.13: Implement getStatusHistory(id, Pageable) → Page<StatusHistoryDTO>:
   - Query StatusHistory for devotees in this namhatta
   - Join with devotee info
   - Paginate
