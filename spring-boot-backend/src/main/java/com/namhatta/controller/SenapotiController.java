@@ -75,7 +75,8 @@ public class SenapotiController {
         RoleChangeResult result = roleManagementService.removeRole(
                 request.getDevoteeId(), 
                 request.getReason(), 
-                userId
+                userId,
+                request.getNewSupervisorId()
         );
         return ResponseEntity.ok(result);
     }

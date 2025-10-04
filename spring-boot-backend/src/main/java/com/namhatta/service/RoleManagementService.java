@@ -204,6 +204,12 @@ public class RoleManagementService {
     }
 
     @Transactional
+    public TransferResult transferSubordinates(com.namhatta.dto.TransferSubordinatesRequest request, Long userId) {
+        return transferSubordinates(request.getFromDevoteeId(), request.getToDevoteeId(), 
+                                   request.getSubordinateIds(), request.getReason(), userId);
+    }
+
+    @Transactional
     public TransferResult transferSubordinates(Long fromDevoteeId, Long toDevoteeId, 
                                               List<Long> subordinateIds, String reason, Long userId) {
         ValidationResult validation = validateSubordinateTransfer(fromDevoteeId, toDevoteeId, subordinateIds);
@@ -235,6 +241,12 @@ public class RoleManagementService {
         }
 
         return new TransferResult(updatedSubordinates.size(), updatedSubordinates);
+    }
+
+    @Transactional
+    public RoleChangeResult promoteDevotee(com.namhatta.dto.PromoteDevoteeRequest request, Long userId) {
+        return promoteDevotee(request.getDevoteeId(), request.getTargetRole(), 
+                            request.getNewReportingToId(), request.getReason(), userId);
     }
 
     @Transactional
@@ -280,6 +292,12 @@ public class RoleManagementService {
         roleChangeHistoryRepository.save(history);
 
         return new RoleChangeResult(devotee, subordinatesTransferredCount, history);
+    }
+
+    @Transactional
+    public RoleChangeResult demoteDevotee(com.namhatta.dto.DemoteDevoteeRequest request, Long userId) {
+        return demoteDevotee(request.getDevoteeId(), request.getTargetRole(), 
+                           request.getNewReportingToId(), request.getReason(), userId);
     }
 
     @Transactional
