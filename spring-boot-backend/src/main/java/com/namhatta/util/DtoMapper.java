@@ -51,7 +51,7 @@ public class DtoMapper {
         dto.setDevotionalStatusId(devotee.getDevotionalStatusId());
         if (devotee.getDevotionalStatusId() != null) {
             devotionalStatusRepository.findById(devotee.getDevotionalStatusId())
-                .ifPresent(status -> dto.setDevotionalStatusName(status.getStatusName()));
+                .ifPresent(status -> dto.setDevotionalStatusName(status.getName()));
         }
         
         dto.setNamhattaId(devotee.getNamhattaId());
