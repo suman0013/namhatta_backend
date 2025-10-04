@@ -118,14 +118,14 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 2.3.8: Add @ManyToOne relationships (namhattaId, devotionalStatusId, gurudevs, shraddhakutirId, appointedBy)
 
 #### Task 2.4: Create Address Entities
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 2.3
-- [ ] 2.4.1: Create Address entity (table="addresses") with country, stateCode, stateNameEnglish, districtCode, districtNameEnglish, subdistrictCode, subdistrictNameEnglish, villageCode, villageNameEnglish, pincode
-- [ ] 2.4.2: Set @ColumnDefault("India") for country field
-- [ ] 2.4.3: Create DevoteeAddress junction entity (table="devotee_addresses") with devoteeId, addressId, addressType (enum), landmark
-- [ ] 2.4.4: Add @ManyToOne relationships in DevoteeAddress to Devotee and Address
-- [ ] 2.4.5: Create NamhattaAddress junction entity (table="namhatta_addresses") with namhattaId, addressId, landmark
-- [ ] 2.4.6: Add @ManyToOne relationships in NamhattaAddress to Namhatta and Address
+- [x] 2.4.1: Create Address entity (table="addresses") with country, stateCode, stateNameEnglish, districtCode, districtNameEnglish, subdistrictCode, subdistrictNameEnglish, villageCode, villageNameEnglish, pincode
+- [x] 2.4.2: Set @ColumnDefault("India") for country field
+- [x] 2.4.3: Create DevoteeAddress junction entity (table="devotee_addresses") with devoteeId, addressId, addressType (enum), landmark
+- [x] 2.4.4: Add @ManyToOne relationships in DevoteeAddress to Devotee and Address
+- [x] 2.4.5: Create NamhattaAddress junction entity (table="namhatta_addresses") with namhattaId, addressId, landmark
+- [x] 2.4.6: Add @ManyToOne relationships in NamhattaAddress to Namhatta and Address
 
 #### Task 2.5: Create Namhatta Entity
 **Status**: NOT_STARTED  
