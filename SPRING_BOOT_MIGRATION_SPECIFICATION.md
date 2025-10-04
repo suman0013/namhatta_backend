@@ -93,17 +93,17 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 2.1.8: Create LeaderRole enum (FOUNDER_ACHARYA, GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR)
 
 #### Task 2.2: Create User-Related Entities
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 2.1
-- [ ] 2.2.1: Create User entity (@Entity, table="users") with all fields (id, username, passwordHash, fullName, email, role, devoteeId, isActive, timestamps)
-- [ ] 2.2.2: Add @Column annotations with constraints (unique username, unique email, nullable, length)
-- [ ] 2.2.3: Add @ManyToOne relationship to Devotee (devoteeId, nullable)
-- [ ] 2.2.4: Create UserDistrict entity (table="user_districts") with userId, districtCode, districtNameEnglish, isDefaultDistrictSupervisor
-- [ ] 2.2.5: Add @ManyToOne relationship from UserDistrict to User
-- [ ] 2.2.6: Add unique constraint on (userId, districtCode) in UserDistrict
-- [ ] 2.2.7: Create UserSession entity (table="user_sessions") with userId (unique), sessionToken, expiresAt
-- [ ] 2.2.8: Add @OneToOne relationship from UserSession to User
-- [ ] 2.2.9: Create JwtBlacklist entity (table="jwt_blacklist") with tokenHash, expiredAt
+- [x] 2.2.1: Create User entity (@Entity, table="users") with all fields (id, username, passwordHash, fullName, email, role, devoteeId, isActive, timestamps)
+- [x] 2.2.2: Add @Column annotations with constraints (unique username, unique email, nullable, length)
+- [x] 2.2.3: Add @ManyToOne relationship to Devotee (devoteeId, nullable)
+- [x] 2.2.4: Create UserDistrict entity (table="user_districts") with userId, districtCode, districtNameEnglish, isDefaultDistrictSupervisor
+- [x] 2.2.5: Add @ManyToOne relationship from UserDistrict to User
+- [x] 2.2.6: Add unique constraint on (userId, districtCode) in UserDistrict
+- [x] 2.2.7: Create UserSession entity (table="user_sessions") with userId (unique), sessionToken, expiresAt
+- [x] 2.2.8: Add @OneToOne relationship from UserSession to User
+- [x] 2.2.9: Create JwtBlacklist entity (table="jwt_blacklist") with tokenHash, expiredAt
 
 #### Task 2.3: Create Devotee Entity
 **Status**: NOT_STARTED  
