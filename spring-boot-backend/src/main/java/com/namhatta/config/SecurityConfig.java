@@ -1,6 +1,7 @@
 package com.namhatta.config;
 
 import com.namhatta.security.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,21 @@ import java.util.List;
 public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+    @Value("${cors.allowed-origins}")
+    private String allowedOrigins;
+    
+    @Value("${cors.allowed-methods}")
+    private String allowedMethods;
+    
+    @Value("${cors.allowed-headers}")
+    private String allowedHeaders;
+    
+    @Value("${cors.allow-credentials}")
+    private boolean allowCredentials;
+    
+    @Value("${cors.max-age}")
+    private long maxAge;
     
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
@@ -77,9 +93,28 @@ public class SecurityConfig {
             
             // Security headers
             .headers(headers -> headers
+                // X-Content-Type-Options: nosniff
+                .contentTypeOptions(contentType -> contentType.disable())
                 .contentTypeOptions(contentType -> {})
-                .xssProtection(xss -> {})
+                
+                // X-XSS-Protection: 1; mode=block
+                .xssProtection(xss -> xss.headerValue(
+                    org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK
+                ))
+                
+                // X-Frame-Options: DENY
                 .frameOptions(frame -> frame.deny())
+                
+                // Content-Security-Policy
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                    "default-src 'self'; " +
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                    "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; " +
+                    "font-src 'self' https://fonts.gstatic.com; " +
+                    "img-src 'self' data: https:; " +
+                    "connect-src 'self'; " +
+                    "frame-ancestors 'none'"
+                ))
             );
         
         return http.build();
@@ -90,24 +125,25 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         
         // Allow credentials
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(allowCredentials);
         
-        // Allowed origins (configure based on environment)
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Allowed origins from properties
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        configuration.setAllowedOrigins(origins);
         
-        // Allowed methods
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        // Allowed methods from properties
+        List<String> methods = Arrays.asList(allowedMethods.split(","));
+        configuration.setAllowedMethods(methods);
         
-        // Allowed headers
-        configuration.setAllowedHeaders(Arrays.asList(
-            "Content-Type",
-            "Authorization",
-            "X-Requested-With",
-            "Cache-Control"
-        ));
+        // Allowed headers from properties
+        List<String> headers = Arrays.asList(allowedHeaders.split(","));
+        configuration.setAllowedHeaders(headers);
         
-        // Max age
-        configuration.setMaxAge(86400L); // 24 hours
+        // Expose headers for client access
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
+        
+        // Max age from properties
+        configuration.setMaxAge(maxAge);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
