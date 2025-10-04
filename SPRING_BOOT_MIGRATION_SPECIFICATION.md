@@ -161,24 +161,24 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 **Prerequisites**: Phase 2 completed
 
 #### Task 3.1: Create User Repositories
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 2.6
-- [ ] 3.1.1: Create UserRepository extends JpaRepository<User, Long>
-- [ ] 3.1.2: Add method: Optional<User> findByUsername(String username)
-- [ ] 3.1.3: Add method: Optional<User> findByEmail(String email)
-- [ ] 3.1.4: Add method: List<User> findByIsActiveTrue()
-- [ ] 3.1.5: Add method: List<User> findByRole(UserRole role)
-- [ ] 3.1.6: Create UserDistrictRepository extends JpaRepository<UserDistrict, Long>
-- [ ] 3.1.7: Add method: List<UserDistrict> findByUserId(Long userId)
-- [ ] 3.1.8: Add method: List<UserDistrict> findByDistrictCode(String districtCode)
-- [ ] 3.1.9: Add method: Optional<UserDistrict> findByUserIdAndDistrictCode(Long userId, String districtCode)
-- [ ] 3.1.10: Create UserSessionRepository extends JpaRepository<UserSession, Long>
-- [ ] 3.1.11: Add method: Optional<UserSession> findByUserId(Long userId)
-- [ ] 3.1.12: Add method: void deleteByUserId(Long userId)
-- [ ] 3.1.13: Add method: void deleteByExpiresAtBefore(LocalDateTime dateTime)
-- [ ] 3.1.14: Create JwtBlacklistRepository extends JpaRepository<JwtBlacklist, Long>
-- [ ] 3.1.15: Add method: boolean existsByTokenHash(String tokenHash)
-- [ ] 3.1.16: Add method: void deleteByExpiredAtBefore(LocalDateTime dateTime)
+- [x] 3.1.1: Create UserRepository extends JpaRepository<User, Long>
+- [x] 3.1.2: Add method: Optional<User> findByUsername(String username)
+- [x] 3.1.3: Add method: Optional<User> findByEmail(String email)
+- [x] 3.1.4: Add method: List<User> findByIsActiveTrue()
+- [x] 3.1.5: Add method: List<User> findByRole(UserRole role)
+- [x] 3.1.6: Create UserDistrictRepository extends JpaRepository<UserDistrict, Long>
+- [x] 3.1.7: Add method: List<UserDistrict> findByUserId(Long userId)
+- [x] 3.1.8: Add method: List<UserDistrict> findByDistrictCode(String districtCode)
+- [x] 3.1.9: Add method: Optional<UserDistrict> findByUserIdAndDistrictCode(Long userId, String districtCode)
+- [x] 3.1.10: Create UserSessionRepository extends JpaRepository<UserSession, Long>
+- [x] 3.1.11: Add method: Optional<UserSession> findByUserId(Long userId)
+- [x] 3.1.12: Add method: void deleteByUserId(Long userId)
+- [x] 3.1.13: Add method: void deleteByExpiresAtBefore(LocalDateTime dateTime)
+- [x] 3.1.14: Create JwtBlacklistRepository extends JpaRepository<JwtBlacklist, Long>
+- [x] 3.1.15: Add method: boolean existsByTokenHash(String tokenHash)
+- [x] 3.1.16: Add method: void deleteByExpiredAtBefore(LocalDateTime dateTime)
 
 #### Task 3.2: Create Devotee and Namhatta Repositories
 **Status**: NOT_STARTED  
