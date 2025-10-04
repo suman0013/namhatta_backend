@@ -39,7 +39,7 @@ public class DevoteeController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
-        UserRole userRole = userDetails.getUserRole();
+        String userRole = userDetails.getUserRole().name();
         List<String> userDistricts = userDetails.getDistricts();
         
         return devoteeService.getDevotees(pageable, search, country, state, district, statusId, userRole, userDistricts);
@@ -79,7 +79,7 @@ public class DevoteeController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
-        UserRole userRole = userDetails.getUserRole();
+        String userRole = userDetails.getUserRole().name();
         List<String> userDistricts = userDetails.getDistricts();
         
         DevoteeDTO devotee = devoteeService.updateDevotee(id, request, userRole, userDistricts);

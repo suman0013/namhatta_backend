@@ -5,17 +5,21 @@ import com.namhatta.dto.AddressDTO;
 import com.namhatta.dto.CreateUserRequest;
 import com.namhatta.dto.DevoteeDTO;
 import com.namhatta.dto.LeadershipRequest;
+import com.namhatta.dto.UserDTO;
 import com.namhatta.model.entity.Address;
 import com.namhatta.model.entity.Devotee;
 import com.namhatta.model.entity.DevoteeAddress;
 import com.namhatta.model.entity.StatusHistory;
+import com.namhatta.model.entity.User;
 import com.namhatta.model.enums.AddressType;
 import com.namhatta.model.enums.Gender;
 import com.namhatta.model.enums.LeadershipRole;
 import com.namhatta.model.enums.MaritalStatus;
+import com.namhatta.model.enums.UserRole;
 import com.namhatta.repository.DevoteeAddressRepository;
 import com.namhatta.repository.DevoteeRepository;
 import com.namhatta.repository.StatusHistoryRepository;
+import com.namhatta.repository.UserRepository;
 import com.namhatta.security.DistrictAccessValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,17 +40,23 @@ public class DevoteeService {
     private final DevoteeAddressRepository devoteeAddressRepository;
     private final StatusHistoryRepository statusHistoryRepository;
     private final DistrictAccessValidator districtAccessValidator;
+    private final UserRepository userRepository;
+    private final PasswordService passwordService;
     
     public DevoteeService(DevoteeRepository devoteeRepository,
                          AddressService addressService,
                          DevoteeAddressRepository devoteeAddressRepository,
                          StatusHistoryRepository statusHistoryRepository,
-                         DistrictAccessValidator districtAccessValidator) {
+                         DistrictAccessValidator districtAccessValidator,
+                         UserRepository userRepository,
+                         PasswordService passwordService) {
         this.devoteeRepository = devoteeRepository;
         this.addressService = addressService;
         this.devoteeAddressRepository = devoteeAddressRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.districtAccessValidator = districtAccessValidator;
+        this.userRepository = userRepository;
+        this.passwordService = passwordService;
     }
     
     /**
@@ -240,6 +250,51 @@ public class DevoteeService {
         return devotees.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Link user to devotee
+     * Task 5.4.12
+     */
+    @Transactional
+    public UserDTO linkUserToDevotee(Long devoteeId, CreateUserRequest request) {
+        // Find devotee
+        Devotee devotee = devoteeRepository.findById(devoteeId)
+                .orElseThrow(() -> new IllegalArgumentException("Devotee not found with id: " + devoteeId));
+        
+        // Check if username already exists
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists: " + request.getUsername());
+        }
+        
+        // Check if email already exists
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+        }
+        
+        // Create new user
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setPasswordHash(passwordService.hashPassword(request.getPassword()));
+        user.setEmail(request.getEmail());
+        user.setFullName(devotee.getName());
+        user.setRole(request.getRole());
+        user.setDevoteeId(devoteeId);
+        user.setIsActive(true);
+        
+        user = userRepository.save(user);
+        
+        // Convert to DTO
+        UserDTO dto = new UserDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole().name());
+        dto.setDevoteeId(user.getDevoteeId());
+        dto.setIsActive(user.getIsActive());
+        
+        return dto;
     }
     
     /**
