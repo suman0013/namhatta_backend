@@ -42,4 +42,39 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     @Query("SELECT a FROM Address a WHERE " +
            ":pincode IS NOT NULL AND a.pincode = :pincode")
     Page<Address> findByPincode(@Param("pincode") String pincode, Pageable pageable);
+    
+    @Query("SELECT DISTINCT a.districtCode, a.districtNameEnglish FROM Address a WHERE a.districtCode IS NOT NULL ORDER BY a.districtNameEnglish")
+    List<Object[]> findDistinctDistricts();
+    
+    @Query("SELECT DISTINCT a.subdistrictNameEnglish FROM Address a WHERE " +
+           "(:district IS NULL OR a.districtNameEnglish = :district) AND " +
+           "(:pincode IS NULL OR a.pincode = :pincode) AND " +
+           "a.subdistrictNameEnglish IS NOT NULL " +
+           "ORDER BY a.subdistrictNameEnglish")
+    List<String> findDistinctSubDistricts(@Param("district") String district, @Param("pincode") String pincode);
+    
+    @Query("SELECT DISTINCT a.villageNameEnglish FROM Address a WHERE " +
+           "(:subDistrict IS NULL OR a.subdistrictNameEnglish = :subDistrict) AND " +
+           "(:pincode IS NULL OR a.pincode = :pincode) AND " +
+           "a.villageNameEnglish IS NOT NULL " +
+           "ORDER BY a.villageNameEnglish")
+    List<String> findDistinctVillages(@Param("subDistrict") String subDistrict, @Param("pincode") String pincode);
+    
+    @Query("SELECT DISTINCT a.pincode FROM Address a WHERE " +
+           "(:village IS NULL OR a.villageNameEnglish = :village) AND " +
+           "(:district IS NULL OR a.districtNameEnglish = :district) AND " +
+           "(:subDistrict IS NULL OR a.subdistrictNameEnglish = :subDistrict) AND " +
+           "a.pincode IS NOT NULL " +
+           "ORDER BY a.pincode")
+    List<String> findDistinctPincodes(@Param("village") String village, @Param("district") String district, @Param("subDistrict") String subDistrict);
+    
+    @Query("SELECT a FROM Address a WHERE " +
+           "a.country = :country AND " +
+           "(a.pincode LIKE %:search% OR " +
+           "a.villageNameEnglish LIKE %:search% OR " +
+           "a.districtNameEnglish LIKE %:search% OR " +
+           "a.subdistrictNameEnglish LIKE %:search%)")
+    Page<Address> searchPincodes(@Param("country") String country, @Param("search") String search, Pageable pageable);
+    
+    List<Address> findByPincode(String pincode);
 }
