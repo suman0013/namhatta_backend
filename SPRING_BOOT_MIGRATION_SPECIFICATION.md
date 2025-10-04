@@ -197,36 +197,36 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 3.2.12: Add @Query method for pagination and filtering by search, country, state, district, status
 
 #### Task 3.3: Create Address and Supporting Repositories
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 3.2
-- [ ] 3.3.1: Create AddressRepository extends JpaRepository<Address, Long>
-- [ ] 3.3.2: Add @Query method for exact match (country, stateCode, districtCode, subdistrictCode, villageCode, pincode - handle nulls)
-- [ ] 3.3.3: Add method: List<String> findDistinctCountries()
-- [ ] 3.3.4: Add method: List<String> findDistinctStatesByCountry(String country)
-- [ ] 3.3.5: Add method: List<String> findDistinctDistrictsByState(String state)
-- [ ] 3.3.6: Add @Query for pincode search with pagination
-- [ ] 3.3.7: Create DevoteeAddressRepository extends JpaRepository<DevoteeAddress, Long>
-- [ ] 3.3.8: Add method: List<DevoteeAddress> findByDevoteeId(Long devoteeId)
-- [ ] 3.3.9: Add method: Optional<DevoteeAddress> findByDevoteeIdAndAddressType(Long devoteeId, AddressType type)
-- [ ] 3.3.10: Create NamhattaAddressRepository extends JpaRepository<NamhattaAddress, Long>
-- [ ] 3.3.11: Add method: Optional<NamhattaAddress> findByNamhattaId(Long namhattaId)
-- [ ] 3.3.12: Create DevotionalStatusRepository extends JpaRepository<DevotionalStatus, Long>
-- [ ] 3.3.13: Add method: Optional<DevotionalStatus> findByName(String name)
-- [ ] 3.3.14: Create StatusHistoryRepository extends JpaRepository<StatusHistory, Long>
-- [ ] 3.3.15: Add method: List<StatusHistory> findByDevoteeIdOrderByUpdatedAtDesc(Long devoteeId)
-- [ ] 3.3.16: Add @Query for paginated status history with devotee info
-- [ ] 3.3.17: Create GurudevRepository extends JpaRepository<Gurudev, Long>
-- [ ] 3.3.18: Add method: Optional<Gurudev> findByName(String name)
-- [ ] 3.3.19: Create ShraddhakutirRepository extends JpaRepository<Shraddhakutir, Long>
-- [ ] 3.3.20: Add method: List<Shraddhakutir> findByDistrictCode(String districtCode)
-- [ ] 3.3.21: Create NamhattaUpdateRepository extends JpaRepository<NamhattaUpdate, Long>
-- [ ] 3.3.22: Add method: List<NamhattaUpdate> findByNamhattaIdOrderByDateDesc(Long namhattaId)
-- [ ] 3.3.23: Add method: List<NamhattaUpdate> findAllByOrderByDateDesc()
-- [ ] 3.3.24: Create LeaderRepository extends JpaRepository<Leader, Long>
-- [ ] 3.3.25: Add method: List<Leader> findByRole(LeaderRole role)
-- [ ] 3.3.26: Add method: List<Leader> findByReportingToIsNull() (top-level leaders)
-- [ ] 3.3.27: Create RoleChangeHistoryRepository extends JpaRepository<RoleChangeHistory, Long>
-- [ ] 3.3.28: Add @Query for paginated role history by devoteeId
+- [x] 3.3.1: Create AddressRepository extends JpaRepository<Address, Long>
+- [x] 3.3.2: Add @Query method for exact match (country, stateCode, districtCode, subdistrictCode, villageCode, pincode - handle nulls)
+- [x] 3.3.3: Add method: List<String> findDistinctCountries()
+- [x] 3.3.4: Add method: List<String> findDistinctStatesByCountry(String country)
+- [x] 3.3.5: Add method: List<String> findDistinctDistrictsByState(String state)
+- [x] 3.3.6: Add @Query for pincode search with pagination
+- [x] 3.3.7: Create DevoteeAddressRepository extends JpaRepository<DevoteeAddress, Long>
+- [x] 3.3.8: Add method: List<DevoteeAddress> findByDevoteeId(Long devoteeId)
+- [x] 3.3.9: Add method: Optional<DevoteeAddress> findByDevoteeIdAndAddressType(Long devoteeId, AddressType type)
+- [x] 3.3.10: Create NamhattaAddressRepository extends JpaRepository<NamhattaAddress, Long>
+- [x] 3.3.11: Add method: Optional<NamhattaAddress> findByNamhattaId(Long namhattaId)
+- [x] 3.3.12: Create DevotionalStatusRepository extends JpaRepository<DevotionalStatus, Long>
+- [x] 3.3.13: Add method: Optional<DevotionalStatus> findByName(String name)
+- [x] 3.3.14: Create StatusHistoryRepository extends JpaRepository<StatusHistory, Long>
+- [x] 3.3.15: Add method: List<StatusHistory> findByDevoteeIdOrderByUpdatedAtDesc(Long devoteeId)
+- [x] 3.3.16: Add @Query for paginated status history with devotee info
+- [x] 3.3.17: Create GurudevRepository extends JpaRepository<Gurudev, Long>
+- [x] 3.3.18: Add method: Optional<Gurudev> findByName(String name)
+- [x] 3.3.19: Create ShraddhakutirRepository extends JpaRepository<Shraddhakutir, Long>
+- [x] 3.3.20: Add method: List<Shraddhakutir> findByDistrictCode(String districtCode)
+- [x] 3.3.21: Create NamhattaUpdateRepository extends JpaRepository<NamhattaUpdate, Long>
+- [x] 3.3.22: Add method: List<NamhattaUpdate> findByNamhattaIdOrderByDateDesc(Long namhattaId)
+- [x] 3.3.23: Add method: List<NamhattaUpdate> findAllByOrderByDateDesc()
+- [x] 3.3.24: Create LeaderRepository extends JpaRepository<Leader, Long>
+- [x] 3.3.25: Add method: List<Leader> findByRole(LeaderRole role)
+- [x] 3.3.26: Add method: List<Leader> findByReportingToIsNull() (top-level leaders)
+- [x] 3.3.27: Create RoleChangeHistoryRepository extends JpaRepository<RoleChangeHistory, Long>
+- [x] 3.3.28: Add @Query for paginated role history by devoteeId
 
 #### Task 3.4: Create Database Indexes (Verification Only)
 **Status**: NOT_STARTED  
