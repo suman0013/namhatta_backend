@@ -1,6 +1,8 @@
 package com.namhatta.config;
 
 import com.namhatta.security.JwtAuthenticationFilter;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -63,7 +63,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public authentication endpoints
                 .requestMatchers("/api/auth/login", "/api/auth/logout", "/api/auth/dev/**").permitAll()
-                
+                //swagger
+                .requestMatchers("/swagger-ui/**", "v3/api-docs/**").permitAll()
                 // Public system endpoints
                 .requestMatchers("/api/health", "/api/about").permitAll()
                 

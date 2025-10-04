@@ -16,12 +16,12 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 42653
-externalPort = 3000
+localPort = 8080
+externalPort = 8080
 
 [[ports]]
-localPort = 46207
-externalPort = 3001
+localPort = 41987
+externalPort = 3000
 
 [[ports]]
 localPort = 46813
@@ -37,19 +37,35 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Start application"
+args = "Frontend (Vite)"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Spring Boot Backend"
 
 [[workflows.workflow]]
-name = "Start application"
+name = "Frontend (Vite)"
 author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "export VITE_API_BASE_URL=http://localhost:8080 && npm run dev -- --port 5000 --host 0.0.0.0"
+waitForPort = 5000
 
 [workflows.workflow.metadata]
 outputType = "webview"
 
+[[workflows.workflow]]
+name = "Spring Boot Backend"
+author = "agent"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
+args = "bash start-springboot.sh"
+waitForPort = 8080
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [agent]
 expertMode = true
