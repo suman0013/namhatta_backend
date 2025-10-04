@@ -9,15 +9,15 @@ packages = ["mysql80", "sqlite", "jdk17", "maven"]
 [deployment]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
-run = ["npm", "run", "start"]
+run = ["npm", "start"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 45743
-externalPort = 5000
+localPort = 42653
+externalPort = 3000
 
 [[ports]]
 localPort = 46207
