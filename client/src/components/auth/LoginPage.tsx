@@ -110,6 +110,7 @@ export default function LoginPage() {
                 placeholder="Enter your username"
                 disabled={isLoading}
                 className="glass border-0"
+                autoComplete="username"
               />
             </div>
 
@@ -125,6 +126,7 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   disabled={isLoading}
                   className="glass border-0 pr-10"
+                  autoComplete="current-password"
                 />
                 <Button
                   type="button"
