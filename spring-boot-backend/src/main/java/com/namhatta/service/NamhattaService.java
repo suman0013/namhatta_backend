@@ -2,8 +2,10 @@ package com.namhatta.service;
 
 import com.namhatta.dto.AddressData;
 import com.namhatta.dto.ApproveNamhattaRequest;
+import com.namhatta.dto.CreateNamhattaRequest;
 import com.namhatta.dto.DevoteeDTO;
 import com.namhatta.dto.NamhattaDTO;
+import com.namhatta.dto.UpdateNamhattaRequest;
 import com.namhatta.model.entity.Devotee;
 import com.namhatta.model.entity.Namhatta;
 import com.namhatta.model.entity.NamhattaAddress;
@@ -94,9 +96,9 @@ public class NamhattaService {
      * Task 5.5.5
      */
     @Transactional
-    public NamhattaDTO createNamhatta(Map<String, Object> request) {
+    public NamhattaDTO createNamhatta(CreateNamhattaRequest request) {
         // Validate code is unique
-        String code = getString(request, "code");
+        String code = request.getCode();
         if (code == null || code.trim().isEmpty()) {
             throw new IllegalArgumentException("Code is required");
         }
@@ -106,7 +108,7 @@ public class NamhattaService {
         }
         
         // Validate districtSupervisorId
-        Long districtSupervisorId = getLongValue(request.get("districtSupervisorId"));
+        Long districtSupervisorId = request.getDistrictSupervisorId();
         if (districtSupervisorId == null) {
             throw new IllegalArgumentException("District supervisor is required");
         }
@@ -124,16 +126,16 @@ public class NamhattaService {
         // Create Namhatta entity
         Namhatta namhatta = new Namhatta();
         namhatta.setCode(code);
-        namhatta.setName(getString(request, "name"));
-        namhatta.setMeetingDay(getString(request, "meetingDay"));
-        namhatta.setMeetingTime(getString(request, "meetingTime"));
-        namhatta.setMalaSenapotiId(getLongValue(request.get("malaSenapotiId")));
-        namhatta.setMahaChakraSenapotiId(getLongValue(request.get("mahaChakraSenapotiId")));
-        namhatta.setChakraSenapotiId(getLongValue(request.get("chakraSenapotiId")));
-        namhatta.setUpaChakraSenapotiId(getLongValue(request.get("upaChakraSenapotiId")));
-        namhatta.setSecretaryId(getLongValue(request.get("secretaryId")));
-        namhatta.setPresidentId(getLongValue(request.get("presidentId")));
-        namhatta.setAccountantId(getLongValue(request.get("accountantId")));
+        namhatta.setName(request.getName());
+        namhatta.setMeetingDay(request.getMeetingDay());
+        namhatta.setMeetingTime(request.getMeetingTime() != null ? request.getMeetingTime().toString() : null);
+        namhatta.setMalaSenapotiId(request.getMalaSenapotiId());
+        namhatta.setMahaChakraSenapotiId(request.getMahaChakraSenapotiId());
+        namhatta.setChakraSenapotiId(request.getChakraSenapotiId());
+        namhatta.setUpaChakraSenapotiId(request.getUpaChakraSenapotiId());
+        namhatta.setSecretaryId(request.getSecretaryId());
+        namhatta.setPresidentId(request.getPresidentId());
+        namhatta.setAccountantId(request.getAccountantId());
         namhatta.setDistrictSupervisorId(districtSupervisorId);
         namhatta.setStatus(NamhattaStatus.PENDING_APPROVAL);
         
@@ -141,13 +143,10 @@ public class NamhattaService {
         namhatta = namhattaRepository.save(namhatta);
         
         // Process address
-        if (request.containsKey("address") && request.get("address") != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> addressMap = (Map<String, Object>) request.get("address");
-            AddressData addressData = mapToAddressData(addressMap);
+        if (request.getAddress() != null) {
+            AddressData addressData = request.getAddress();
             Long addressId = addressService.findOrCreateAddress(addressData);
-            String landmark = getString(addressMap, "landmark");
-            addressService.linkNamhattaAddress(namhatta.getId(), addressId, landmark);
+            addressService.linkNamhattaAddress(namhatta.getId(), addressId, null);
         }
         
         return convertToDTO(namhatta);
@@ -158,53 +157,50 @@ public class NamhattaService {
      * Task 5.5.6
      */
     @Transactional
-    public NamhattaDTO updateNamhatta(Long id, Map<String, Object> request) {
+    public NamhattaDTO updateNamhatta(Long id, UpdateNamhattaRequest request) {
         Namhatta namhatta = namhattaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Namhatta not found with id: " + id));
         
         // Update provided fields
-        if (request.containsKey("name")) {
-            namhatta.setName(getString(request, "name"));
+        if (request.getName() != null) {
+            namhatta.setName(request.getName());
         }
-        if (request.containsKey("meetingDay")) {
-            namhatta.setMeetingDay(getString(request, "meetingDay"));
+        if (request.getMeetingDay() != null) {
+            namhatta.setMeetingDay(request.getMeetingDay());
         }
-        if (request.containsKey("meetingTime")) {
-            namhatta.setMeetingTime(getString(request, "meetingTime"));
+        if (request.getMeetingTime() != null) {
+            namhatta.setMeetingTime(request.getMeetingTime().toString());
         }
-        if (request.containsKey("malaSenapotiId")) {
-            namhatta.setMalaSenapotiId(getLongValue(request.get("malaSenapotiId")));
+        if (request.getMalaSenapotiId() != null) {
+            namhatta.setMalaSenapotiId(request.getMalaSenapotiId());
         }
-        if (request.containsKey("mahaChakraSenapotiId")) {
-            namhatta.setMahaChakraSenapotiId(getLongValue(request.get("mahaChakraSenapotiId")));
+        if (request.getMahaChakraSenapotiId() != null) {
+            namhatta.setMahaChakraSenapotiId(request.getMahaChakraSenapotiId());
         }
-        if (request.containsKey("chakraSenapotiId")) {
-            namhatta.setChakraSenapotiId(getLongValue(request.get("chakraSenapotiId")));
+        if (request.getChakraSenapotiId() != null) {
+            namhatta.setChakraSenapotiId(request.getChakraSenapotiId());
         }
-        if (request.containsKey("upaChakraSenapotiId")) {
-            namhatta.setUpaChakraSenapotiId(getLongValue(request.get("upaChakraSenapotiId")));
+        if (request.getUpaChakraSenapotiId() != null) {
+            namhatta.setUpaChakraSenapotiId(request.getUpaChakraSenapotiId());
         }
-        if (request.containsKey("secretaryId")) {
-            namhatta.setSecretaryId(getLongValue(request.get("secretaryId")));
+        if (request.getSecretaryId() != null) {
+            namhatta.setSecretaryId(request.getSecretaryId());
         }
-        if (request.containsKey("presidentId")) {
-            namhatta.setPresidentId(getLongValue(request.get("presidentId")));
+        if (request.getPresidentId() != null) {
+            namhatta.setPresidentId(request.getPresidentId());
         }
-        if (request.containsKey("accountantId")) {
-            namhatta.setAccountantId(getLongValue(request.get("accountantId")));
+        if (request.getAccountantId() != null) {
+            namhatta.setAccountantId(request.getAccountantId());
         }
         
         // Save
         namhatta = namhattaRepository.save(namhatta);
         
         // Update address if changed
-        if (request.containsKey("address") && request.get("address") != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> addressMap = (Map<String, Object>) request.get("address");
-            AddressData addressData = mapToAddressData(addressMap);
+        if (request.getAddress() != null) {
+            AddressData addressData = request.getAddress();
             Long addressId = addressService.findOrCreateAddress(addressData);
-            String landmark = getString(addressMap, "landmark");
-            addressService.linkNamhattaAddress(namhatta.getId(), addressId, landmark);
+            addressService.linkNamhattaAddress(namhatta.getId(), addressId, null);
         }
         
         return convertToDTO(namhatta);
