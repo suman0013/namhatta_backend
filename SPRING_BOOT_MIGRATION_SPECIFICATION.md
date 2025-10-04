@@ -128,15 +128,15 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 2.4.6: Add @ManyToOne relationships in NamhattaAddress to Namhatta and Address
 
 #### Task 2.5: Create Namhatta Entity
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 2.4
-- [ ] 2.5.1: Create Namhatta entity (table="namhattas") with code (unique), name, meetingDay, meetingTime
-- [ ] 2.5.2: Add leadership position fields (malaSenapotiId, mahaChakraSenapotiId, chakraSenapotiId, upaChakraSenapotiId)
-- [ ] 2.5.3: Add officer fields (secretaryId, presidentId, accountantId)
-- [ ] 2.5.4: Add districtSupervisorId (required, references User), status (enum, default PENDING_APPROVAL), registrationNo (unique), registrationDate
-- [ ] 2.5.5: Add @ManyToOne relationships for all devotee position foreign keys
-- [ ] 2.5.6: Add @ManyToOne relationship to User (districtSupervisorId)
-- [ ] 2.5.7: Add unique constraints on code and registrationNo
+- [x] 2.5.1: Create Namhatta entity (table="namhattas") with code (unique), name, meetingDay, meetingTime
+- [x] 2.5.2: Add leadership position fields (malaSenapotiId, mahaChakraSenapotiId, chakraSenapotiId, upaChakraSenapotiId)
+- [x] 2.5.3: Add officer fields (secretaryId, presidentId, accountantId)
+- [x] 2.5.4: Add districtSupervisorId (required, references User), status (enum, default PENDING_APPROVAL), registrationNo (unique), registrationDate
+- [x] 2.5.5: Add @ManyToOne relationships for all devotee position foreign keys
+- [x] 2.5.6: Add @ManyToOne relationship to User (districtSupervisorId)
+- [x] 2.5.7: Add unique constraints on code and registrationNo
 
 #### Task 2.6: Create Supporting Entities
 **Status**: NOT_STARTED  
