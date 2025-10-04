@@ -825,80 +825,80 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 8: CONTROLLER LAYER**
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Duration**: 4-5 days  
 **Prerequisites**: Phase 7 completed
 
 #### Task 8.1: DTOs and Request/Response Objects
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 7.4
-- [ ] 8.1.1: Create LoginRequest DTO (username, password)
-- [ ] 8.1.2: Create LoginResponse DTO (user: UserDTO)
-- [ ] 8.1.3: Create UserDTO (id, username, fullName, email, role, districts, isActive)
-- [ ] 8.1.4: Create RegisterSupervisorRequest DTO with validation annotations
-- [ ] 8.1.5: Create DevoteeDTO with all fields including presentAddress and permanentAddress
-- [ ] 8.1.6: Create CreateDevoteeRequest and UpdateDevoteeRequest DTOs
-- [ ] 8.1.7: Create NamhattaDTO with address and all position fields
-- [ ] 8.1.8: Create CreateNamhattaRequest and UpdateNamhattaRequest DTOs
-- [ ] 8.1.9: Create ApproveNamhattaRequest DTO (registrationNo, registrationDate)
-- [ ] 8.1.10: Create PromoteDevoteeRequest, DemoteDevoteeRequest, RemoveRoleRequest DTOs
-- [ ] 8.1.11: Create TransferSubordinatesRequest DTO
-- [ ] 8.1.12: Add JSR-303 validation annotations (@NotNull, @NotBlank, @Email, @Size, @Pattern) to all request DTOs
-- [ ] 8.1.13: Create custom validators for complex fields (password, leadership role)
-- [ ] 8.1.14: Setup ModelMapper bean for entity-DTO conversion
-- [ ] 8.1.15: Create mapper methods in a MapperUtil class
+- [x] 8.1.1: Create LoginRequest DTO (username, password)
+- [x] 8.1.2: Create LoginResponse DTO (user: UserDTO)
+- [x] 8.1.3: Create UserDTO (id, username, fullName, email, role, districts, isActive)
+- [x] 8.1.4: Create RegisterSupervisorRequest DTO with validation annotations
+- [x] 8.1.5: Create DevoteeDTO with all fields including presentAddress and permanentAddress
+- [x] 8.1.6: Create CreateDevoteeRequest and UpdateDevoteeRequest DTOs
+- [x] 8.1.7: Create NamhattaDTO with address and all position fields
+- [x] 8.1.8: Create CreateNamhattaRequest and UpdateNamhattaRequest DTOs
+- [x] 8.1.9: Create ApproveNamhattaRequest DTO (registrationNo, registrationDate)
+- [x] 8.1.10: Create PromoteDevoteeRequest, DemoteDevoteeRequest, RemoveRoleRequest DTOs
+- [x] 8.1.11: Create TransferSubordinatesRequest DTO
+- [x] 8.1.12: Add JSR-303 validation annotations (@NotNull, @NotBlank, @Email, @Size, @Pattern) to all request DTOs
+- [x] 8.1.13: Create custom validators for complex fields (password, leadership role)
+- [x] 8.1.14: Setup ModelMapper bean for entity-DTO conversion
+- [x] 8.1.15: Create mapper methods in a MapperUtil class
 
 #### Task 8.2: Authentication Controller
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 8.1
-- [ ] 8.2.1: Create AuthController class with @RestController and @RequestMapping("/api/auth")
-- [ ] 8.2.2: Inject AuthenticationService
-- [ ] 8.2.3: Implement POST /login endpoint:
+- [x] 8.2.1: Create AuthController class with @RestController and @RequestMapping("/api/auth")
+- [x] 8.2.2: Inject AuthenticationService
+- [x] 8.2.3: Implement POST /login endpoint:
   - Accept @Valid @RequestBody LoginRequest
   - Call authenticationService.login()
   - Create ResponseCookie for JWT (name="auth_token", httpOnly=true, secure=true in prod, sameSite=Strict, maxAge=1 hour)
   - Add cookie to response headers
   - Return ResponseEntity with UserDTO
-- [ ] 8.2.4: Implement POST /logout endpoint:
+- [x] 8.2.4: Implement POST /logout endpoint:
   - Extract JWT from cookie using @CookieValue("auth_token")
   - Call authenticationService.logout(token)
   - Create expired cookie to clear it
   - Return success message
-- [ ] 8.2.5: Implement GET /verify endpoint:
+- [x] 8.2.5: Implement GET /verify endpoint:
   - Extract JWT from cookie
   - Call authenticationService.verifyToken(token)
   - Return UserInfo
   - Handle 401 for invalid/expired tokens
-- [ ] 8.2.6: Implement GET /user-districts endpoint:
+- [x] 8.2.6: Implement GET /user-districts endpoint:
   - Get authenticated user from SecurityContext (Authentication.getPrincipal())
   - Call userService.getUserDistricts(userId)
   - Return list of {code, name}
 
 #### Task 8.3: System and Geography Controllers
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 8.2
-- [ ] 8.3.1: Create SystemController class with @RestController
-- [ ] 8.3.2: Implement GET /api/health endpoint (no auth):
+- [x] 8.3.1: Create SystemController class with @RestController
+- [x] 8.3.2: Implement GET /api/health endpoint (no auth):
   - Return {status: "OK"}
-- [ ] 8.3.3: Implement GET /api/about endpoint (no auth):
+- [x] 8.3.3: Implement GET /api/about endpoint (no auth):
   - Return {name: "Namhatta Management System", version: "1.0.0", description: "..."}
-- [ ] 8.3.4: Create GeographyController class with @RestController and @RequestMapping("/api")
-- [ ] 8.3.5: Inject AddressService
-- [ ] 8.3.6: Implement GET /countries endpoint (no auth):
+- [x] 8.3.4: Create GeographyController class with @RestController and @RequestMapping("/api")
+- [x] 8.3.5: Inject AddressService
+- [x] 8.3.6: Implement GET /countries endpoint (no auth):
   - Call addressService.getCountries()
   - Return List<String>
-- [ ] 8.3.7: Implement GET /states endpoint with @RequestParam(required=false) country:
+- [x] 8.3.7: Implement GET /states endpoint with @RequestParam(required=false) country:
   - Call addressService.getStates(country)
   - Return List<String>
-- [ ] 8.3.8: Implement GET /districts endpoint with @RequestParam(required=false) state
-- [ ] 8.3.9: Implement GET /sub-districts endpoint with @RequestParam district, pincode
-- [ ] 8.3.10: Implement GET /villages endpoint with @RequestParam subDistrict, pincode
-- [ ] 8.3.11: Implement GET /pincodes endpoint with @RequestParam village, district, subDistrict
-- [ ] 8.3.12: Implement GET /pincodes/search endpoint (no auth):
+- [x] 8.3.8: Implement GET /districts endpoint with @RequestParam(required=false) state
+- [x] 8.3.9: Implement GET /sub-districts endpoint with @RequestParam district, pincode
+- [x] 8.3.10: Implement GET /villages endpoint with @RequestParam subDistrict, pincode
+- [x] 8.3.11: Implement GET /pincodes endpoint with @RequestParam village, district, subDistrict
+- [x] 8.3.12: Implement GET /pincodes/search endpoint (no auth):
   - Accept @RequestParam country (required), search, page (default 1), limit (default 25, max 100)
   - Call addressService.searchPincodes()
   - Return {pincodes: [], total: number, hasMore: boolean}
-- [ ] 8.3.13: Implement GET /address-by-pincode endpoint (no auth):
+- [x] 8.3.13: Implement GET /address-by-pincode endpoint (no auth):
   - Accept @RequestParam pincode (required, 6 digits)
   - Call addressService.getAddressByPincode()
   - Return {country, state, district, subDistricts: [], villages: []}
