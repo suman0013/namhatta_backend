@@ -115,9 +115,7 @@ public class DevoteeDTO {
     public void setHarinamDate(String harinamDate) { this.harinamDate = harinamDate; }
     
     public String getPancharatrikDate() { return pancharatrikDate; }
-    public void setP
-
-ancharatrikDate(String pancharatrikDate) { this.pancharatrikDate = pancharatrikDate; }
+    public void setPancharatrikDate(String pancharatrikDate) { this.pancharatrikDate = pancharatrikDate; }
     
     public String getEducation() { return education; }
     public void setEducation(String education) { this.education = education; }
