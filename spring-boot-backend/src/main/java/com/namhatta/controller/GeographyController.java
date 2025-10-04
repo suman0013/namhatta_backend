@@ -1,6 +1,7 @@
 package com.namhatta.controller;
 
 import com.namhatta.dto.AddressDTO;
+import com.namhatta.dto.AddressDetails;
 import com.namhatta.dto.PincodeSearchResult;
 import com.namhatta.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;

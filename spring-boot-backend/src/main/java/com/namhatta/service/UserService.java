@@ -114,7 +114,7 @@ public class UserService {
         }
         
         if (updateRequest.getRole() != null) {
-            user.setRole(UserRole.valueOf(updateRequest.getRole()));
+            user.setRole(updateRequest.getRole());
         }
         
         user = userRepository.save(user);

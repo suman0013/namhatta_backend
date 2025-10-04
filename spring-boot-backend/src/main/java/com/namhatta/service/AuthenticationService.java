@@ -1,7 +1,9 @@
 package com.namhatta.service;
 
+import com.namhatta.dto.DistrictDTO;
 import com.namhatta.dto.LoginRequest;
 import com.namhatta.dto.LoginResponse;
+import com.namhatta.dto.UserDTO;
 import com.namhatta.dto.UserInfo;
 import com.namhatta.model.entity.User;
 import com.namhatta.model.entity.UserDistrict;
