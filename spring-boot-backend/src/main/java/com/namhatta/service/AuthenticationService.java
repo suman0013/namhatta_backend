@@ -77,8 +77,12 @@ public class AuthenticationService {
         
         // Get user districts
         List<UserDistrict> userDistricts = userDistrictRepository.findByUserId(user.getId());
-        List<String> districts = userDistricts.stream()
+        List<String> districtCodes = userDistricts.stream()
                 .map(UserDistrict::getDistrictCode)
+                .collect(Collectors.toList());
+        
+        List<DistrictDTO> districts = userDistricts.stream()
+                .map(ud -> new DistrictDTO(ud.getDistrictCode(), ud.getDistrictNameEnglish()))
                 .collect(Collectors.toList());
         
         // Generate JWT token
@@ -86,18 +90,23 @@ public class AuthenticationService {
                 user.getId(),
                 user.getUsername(),
                 user.getRole().name(),
-                districts,
+                districtCodes,
                 sessionToken
         );
         
+        // Create UserDTO
+        UserDTO userDto = new UserDTO();
+        userDto.setId(user.getId());
+        userDto.setUsername(user.getUsername());
+        userDto.setFullName(user.getFullName());
+        userDto.setEmail(user.getEmail());
+        userDto.setRole(user.getRole().name());
+        userDto.setDevoteeId(user.getDevoteeId());
+        userDto.setIsActive(user.getIsActive());
+        userDto.setDistricts(districts);
+        
         // Return login response
-        return new LoginResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getRole().name(),
-                districts,
-                jwt
-        );
+        return new LoginResponse(userDto, jwt);
     }
     
     /**
