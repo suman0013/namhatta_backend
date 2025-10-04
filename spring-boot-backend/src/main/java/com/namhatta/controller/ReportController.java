@@ -24,14 +24,14 @@ public class ReportController {
 
     @GetMapping("/hierarchical")
     @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
-    public ResponseEntity<Map<String, Object>> getHierarchicalReports() {
+    public ResponseEntity<ReportService.HierarchicalReportDTO> getHierarchicalReports() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        Map<String, Object> reports = reportService.getHierarchicalReports(userRole, userDistricts);
+        ReportService.HierarchicalReportDTO reports = reportService.getHierarchicalReports(userRole, userDistricts);
         
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.noCache())
@@ -40,33 +40,33 @@ public class ReportController {
 
     @GetMapping("/states")
     @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
-    public ResponseEntity<List<Map<String, Object>>> getAllStates() {
+    public ResponseEntity<List<ReportService.StateReportDTO>> getAllStates() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        List<Map<String, Object>> states = reportService.getAllStatesWithCounts(userRole, userDistricts);
+        List<ReportService.StateReportDTO> states = reportService.getAllStatesWithCounts(userRole, userDistricts);
         return ResponseEntity.ok(states);
     }
 
     @GetMapping("/districts/{state}")
     @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
-    public ResponseEntity<List<Map<String, Object>>> getDistrictsByState(@PathVariable String state) {
+    public ResponseEntity<List<ReportService.DistrictReportDTO>> getDistrictsByState(@PathVariable String state) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        List<Map<String, Object>> districts = reportService.getDistrictsByState(state, userRole, userDistricts);
+        List<ReportService.DistrictReportDTO> districts = reportService.getDistrictsByState(state, userRole, userDistricts);
         return ResponseEntity.ok(districts);
     }
 
     @GetMapping("/sub-districts/{state}/{district}")
     @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
-    public ResponseEntity<List<Map<String, Object>>> getSubDistrictsByDistrict(
+    public ResponseEntity<List<ReportService.SubDistrictReportDTO>> getSubDistrictsByDistrict(
             @PathVariable String state,
             @PathVariable String district) {
         
@@ -76,13 +76,13 @@ public class ReportController {
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        List<Map<String, Object>> subDistricts = reportService.getSubDistrictsByDistrict(state, district, userRole, userDistricts);
+        List<ReportService.SubDistrictReportDTO> subDistricts = reportService.getSubDistrictsByDistrict(state, district, userRole, userDistricts);
         return ResponseEntity.ok(subDistricts);
     }
 
     @GetMapping("/villages/{state}/{district}/{subdistrict}")
     @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
-    public ResponseEntity<List<Map<String, Object>>> getVillagesBySubDistrict(
+    public ResponseEntity<List<ReportService.VillageReportDTO>> getVillagesBySubDistrict(
             @PathVariable String state,
             @PathVariable String district,
             @PathVariable String subdistrict) {
@@ -93,7 +93,7 @@ public class ReportController {
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        List<Map<String, Object>> villages = reportService.getVillagesBySubDistrict(state, district, subdistrict, userRole, userDistricts);
+        List<ReportService.VillageReportDTO> villages = reportService.getVillagesBySubDistrict(state, district, subdistrict, userRole, userDistricts);
         return ResponseEntity.ok(villages);
     }
 }

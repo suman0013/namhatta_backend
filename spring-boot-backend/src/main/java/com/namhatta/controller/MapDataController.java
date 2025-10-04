@@ -16,32 +16,32 @@ public class MapDataController {
     private MapDataService mapDataService;
 
     @GetMapping("/countries")
-    public ResponseEntity<List<Map<String, Object>>> getNamhattaCountsByCountry() {
-        List<Map<String, Object>> counts = mapDataService.getNamhattaCountsByCountry();
+    public ResponseEntity<List<MapDataService.CountryCountDTO>> getNamhattaCountsByCountry() {
+        List<MapDataService.CountryCountDTO> counts = mapDataService.getNamhattaCountsByCountry();
         return ResponseEntity.ok(counts);
     }
 
     @GetMapping("/states")
-    public ResponseEntity<List<Map<String, Object>>> getNamhattaCountsByState() {
-        List<Map<String, Object>> counts = mapDataService.getNamhattaCountsByState();
+    public ResponseEntity<List<MapDataService.StateCountDTO>> getNamhattaCountsByState() {
+        List<MapDataService.StateCountDTO> counts = mapDataService.getNamhattaCountsByState();
         return ResponseEntity.ok(counts);
     }
 
     @GetMapping("/districts")
-    public ResponseEntity<List<Map<String, Object>>> getNamhattaCountsByDistrict() {
-        List<Map<String, Object>> counts = mapDataService.getNamhattaCountsByDistrict();
+    public ResponseEntity<List<MapDataService.DistrictCountDTO>> getNamhattaCountsByDistrict() {
+        List<MapDataService.DistrictCountDTO> counts = mapDataService.getNamhattaCountsByDistrict();
         return ResponseEntity.ok(counts);
     }
 
     @GetMapping("/sub-districts")
-    public ResponseEntity<List<Map<String, Object>>> getNamhattaCountsBySubDistrict() {
-        List<Map<String, Object>> counts = mapDataService.getNamhattaCountsBySubDistrict();
+    public ResponseEntity<List<MapDataService.SubDistrictCountDTO>> getNamhattaCountsBySubDistrict() {
+        List<MapDataService.SubDistrictCountDTO> counts = mapDataService.getNamhattaCountsBySubDistrict();
         return ResponseEntity.ok(counts);
     }
 
     @GetMapping("/villages")
-    public ResponseEntity<List<Map<String, Object>>> getNamhattaCountsByVillage() {
-        List<Map<String, Object>> counts = mapDataService.getNamhattaCountsByVillage();
+    public ResponseEntity<List<MapDataService.VillageCountDTO>> getNamhattaCountsByVillage() {
+        List<MapDataService.VillageCountDTO> counts = mapDataService.getNamhattaCountsByVillage();
         return ResponseEntity.ok(counts);
     }
 }

@@ -22,27 +22,27 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> getDashboard() {
+    public ResponseEntity<DashboardService.DashboardDTO> getDashboard() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        Map<String, Object> dashboard = dashboardService.getDashboardSummary(userRole, userDistricts);
+        DashboardService.DashboardDTO dashboard = dashboardService.getDashboardSummary(userRole, userDistricts);
         return ResponseEntity.ok(dashboard);
     }
 
     @GetMapping("/status-distribution")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Map<String, Object>>> getStatusDistribution() {
+    public ResponseEntity<List<DashboardService.StatusDistributionDTO>> getStatusDistribution() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         
         UserRole userRole = userDetails.getUserRole();
         List<String> userDistricts = userDetails.getDistricts();
         
-        List<Map<String, Object>> distribution = dashboardService.getStatusDistribution(userRole, userDistricts);
+        List<DashboardService.StatusDistributionDTO> distribution = dashboardService.getStatusDistribution(userRole, userDistricts);
         return ResponseEntity.ok(distribution);
     }
 }
