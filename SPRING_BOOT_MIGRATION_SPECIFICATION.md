@@ -242,87 +242,87 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 4: SECURITY IMPLEMENTATION**
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Duration**: 3-4 days  
 **Prerequisites**: Phase 3 completed
 
 #### Task 4.1: Password Management
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 3.4
-- [ ] 4.1.1: Create PasswordService class with @Service annotation
-- [ ] 4.1.2: Configure BCryptPasswordEncoder bean in SecurityConfig
-- [ ] 4.1.3: Implement hashPassword(String plainPassword) method using BCrypt
-- [ ] 4.1.4: Implement verifyPassword(String plain, String hashed) method
-- [ ] 4.1.5: Create password validation regex: min 8 chars, must contain uppercase, lowercase, number
-- [ ] 4.1.6: Implement validatePasswordStrength(String password) method
-- [ ] 4.1.7: Throw ValidationException if password doesn't meet criteria
+- [x] 4.1.1: Create PasswordService class with @Service annotation
+- [x] 4.1.2: Configure BCryptPasswordEncoder bean in SecurityConfig
+- [x] 4.1.3: Implement hashPassword(String plainPassword) method using BCrypt
+- [x] 4.1.4: Implement verifyPassword(String plain, String hashed) method
+- [x] 4.1.5: Create password validation regex: min 8 chars, must contain uppercase, lowercase, number
+- [x] 4.1.6: Implement validatePasswordStrength(String password) method
+- [x] 4.1.7: Throw ValidationException if password doesn't meet criteria
 
 #### Task 4.2: JWT Token Management
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.1
-- [ ] 4.2.1: Create JwtTokenProvider class with @Component annotation
-- [ ] 4.2.2: Configure JWT secret from environment variable (JWT_SECRET)
-- [ ] 4.2.3: Implement generateToken(UserDetails, List<String> districts, String sessionToken) method
-- [ ] 4.2.4: Set JWT payload: userId, username, role, districts, sessionToken
-- [ ] 4.2.5: Set token expiration to 1 hour (3600000ms)
-- [ ] 4.2.6: Implement validateToken(String token) method - verify signature and expiration
-- [ ] 4.2.7: Implement getUserIdFromToken(String token) method
-- [ ] 4.2.8: Implement getClaimsFromToken(String token) method
-- [ ] 4.2.9: Implement hashToken(String token) method using SHA-256 for blacklist storage
+- [x] 4.2.1: Create JwtTokenProvider class with @Component annotation
+- [x] 4.2.2: Configure JWT secret from environment variable (JWT_SECRET)
+- [x] 4.2.3: Implement generateToken(UserDetails, List<String> districts, String sessionToken) method
+- [x] 4.2.4: Set JWT payload: userId, username, role, districts, sessionToken
+- [x] 4.2.5: Set token expiration to 1 hour (3600000ms)
+- [x] 4.2.6: Implement validateToken(String token) method - verify signature and expiration
+- [x] 4.2.7: Implement getUserIdFromToken(String token) method
+- [x] 4.2.8: Implement getClaimsFromToken(String token) method
+- [x] 4.2.9: Implement hashToken(String token) method using SHA-256 for blacklist storage
 
 #### Task 4.3: Token Blacklist Service
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.2
-- [ ] 4.3.1: Create TokenBlacklistService class with @Service annotation
-- [ ] 4.3.2: Inject JwtBlacklistRepository
-- [ ] 4.3.3: Implement blacklistToken(String token) method - hash token with SHA-256 and store
-- [ ] 4.3.4: Implement isTokenBlacklisted(String tokenHash) method - check repository
-- [ ] 4.3.5: Implement cleanupExpiredTokens() method - delete where expiredAt < now
-- [ ] 4.3.6: Add @Scheduled(cron = "0 0 2 * * ?") annotation for daily cleanup at 2 AM
+- [x] 4.3.1: Create TokenBlacklistService class with @Service annotation
+- [x] 4.3.2: Inject JwtBlacklistRepository
+- [x] 4.3.3: Implement blacklistToken(String token) method - hash token with SHA-256 and store
+- [x] 4.3.4: Implement isTokenBlacklisted(String tokenHash) method - check repository
+- [x] 4.3.5: Implement cleanupExpiredTokens() method - delete where expiredAt < now
+- [x] 4.3.6: Add @Scheduled(cron = "0 0 2 * * ?") annotation for daily cleanup at 2 AM
 
 #### Task 4.4: Session Management
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.3
-- [ ] 4.4.1: Create SessionService class with @Service annotation
-- [ ] 4.4.2: Inject UserSessionRepository
-- [ ] 4.4.3: Implement createSession(Long userId) method:
+- [x] 4.4.1: Create SessionService class with @Service annotation
+- [x] 4.4.2: Inject UserSessionRepository
+- [x] 4.4.3: Implement createSession(Long userId) method:
   - Delete existing session for userId (single login enforcement)
   - Generate random sessionToken (UUID or SecureRandom hex)
   - Set expiresAt to current time + 1 hour
   - Save new UserSession
   - Return sessionToken
-- [ ] 4.4.4: Implement validateSession(Long userId, String sessionToken) method:
+- [x] 4.4.4: Implement validateSession(Long userId, String sessionToken) method:
   - Find UserSession by userId
   - Check if sessionToken matches
   - Check if not expired
   - Return true/false
-- [ ] 4.4.5: Implement removeSession(Long userId) method - delete session
-- [ ] 4.4.6: Implement cleanupExpiredSessions() method
-- [ ] 4.4.7: Add @Scheduled(cron = "0 0 * * * ?") annotation for hourly cleanup
+- [x] 4.4.5: Implement removeSession(Long userId) method - delete session
+- [x] 4.4.6: Implement cleanupExpiredSessions() method
+- [x] 4.4.7: Add @Scheduled(cron = "0 0 * * * ?") annotation for hourly cleanup
 
 #### Task 4.5: Spring Security Configuration
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.4
-- [ ] 4.5.1: Create SecurityConfig class with @Configuration and @EnableWebSecurity
-- [ ] 4.5.2: Create SecurityFilterChain bean
-- [ ] 4.5.3: Configure public endpoints (permitAll):
+- [x] 4.5.1: Create SecurityConfig class with @Configuration and @EnableWebSecurity
+- [x] 4.5.2: Create SecurityFilterChain bean
+- [x] 4.5.3: Configure public endpoints (permitAll):
   - /api/auth/login, /api/auth/logout, /api/auth/dev/**
   - /api/health, /api/about
   - /api/countries, /api/states, /api/districts, /api/sub-districts, /api/villages, /api/pincodes/**, /api/address-by-pincode
   - /api/map/** (all map endpoints)
   - GET /api/namhattas, GET /api/namhattas/{id}
-- [ ] 4.5.4: Configure authenticated endpoints (all others) - anyRequest().authenticated()
-- [ ] 4.5.5: Disable CSRF (using JWT, stateless)
-- [ ] 4.5.6: Set session management to STATELESS
-- [ ] 4.5.7: Configure CORS to allow credentials and specific origins
-- [ ] 4.5.8: Add security headers (Helmet-like): XSS protection, Content-Type options, Frame options
+- [x] 4.5.4: Configure authenticated endpoints (all others) - anyRequest().authenticated()
+- [x] 4.5.5: Disable CSRF (using JWT, stateless)
+- [x] 4.5.6: Set session management to STATELESS
+- [x] 4.5.7: Configure CORS to allow credentials and specific origins
+- [x] 4.5.8: Add security headers (Helmet-like): XSS protection, Content-Type options, Frame options
 
 #### Task 4.6: JWT Authentication Filter
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.5
-- [ ] 4.6.1: Create JwtAuthenticationFilter extends OncePerRequestFilter
-- [ ] 4.6.2: Inject JwtTokenProvider, TokenBlacklistService, SessionService, UserRepository, UserDistrictRepository
-- [ ] 4.6.3: In doFilterInternal:
+- [x] 4.6.1: Create JwtAuthenticationFilter extends OncePerRequestFilter
+- [x] 4.6.2: Inject JwtTokenProvider, TokenBlacklistService, SessionService, UserRepository, UserDistrictRepository
+- [x] 4.6.3: In doFilterInternal:
   - Extract JWT from cookie named "auth_token"
   - If no token, continue filter chain (public endpoints allowed)
   - Validate JWT using JwtTokenProvider.validateToken()
@@ -336,29 +336,29 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Create UsernamePasswordAuthenticationToken with authorities
   - Set authentication in SecurityContext
   - Continue filter chain
-- [ ] 4.6.4: Handle exceptions and return 401 for invalid/expired/blacklisted tokens
-- [ ] 4.6.5: Register filter in SecurityConfig before UsernamePasswordAuthenticationFilter
+- [x] 4.6.4: Handle exceptions and return 401 for invalid/expired/blacklisted tokens
+- [x] 4.6.5: Register filter in SecurityConfig before UsernamePasswordAuthenticationFilter
 
 #### Task 4.7: Custom UserDetailsService (if needed)
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.6
-- [ ] 4.7.1: Create CustomUserDetails class implements UserDetails
-- [ ] 4.7.2: Add fields: userId, username, role, districts
-- [ ] 4.7.3: Implement getAuthorities() to return role-based authority
-- [ ] 4.7.4: Create constructor to build from User entity and district list
+- [x] 4.7.1: Create CustomUserDetails class implements UserDetails
+- [x] 4.7.2: Add fields: userId, username, role, districts
+- [x] 4.7.3: Implement getAuthorities() to return role-based authority
+- [x] 4.7.4: Create constructor to build from User entity and district list
 
 #### Task 4.8: Authorization Components
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 4.7
-- [ ] 4.8.1: Enable method security with @EnableMethodSecurity in SecurityConfig
-- [ ] 4.8.2: Create DistrictAccessValidator component with @Component annotation
-- [ ] 4.8.3: Implement validateDevoteeAccess(Long devoteeId, List<String> userDistricts) method:
+- [x] 4.8.1: Enable method security with @EnableMethodSecurity in SecurityConfig
+- [x] 4.8.2: Create DistrictAccessValidator component with @Component annotation
+- [x] 4.8.3: Implement validateDevoteeAccess(Long devoteeId, List<String> userDistricts) method:
   - Get devotee's address districts
   - Check if any match userDistricts
   - Throw AccessDeniedException if no match
-- [ ] 4.8.4: Implement filterByDistricts(Specification, List<String> districts) method for queries
-- [ ] 4.8.5: Create utility method to get current user's districts from SecurityContext
-- [ ] 4.8.6: Create @PreAuthorize helpers for common role checks
+- [x] 4.8.4: Implement filterByDistricts(Specification, List<String> districts) method for queries
+- [x] 4.8.5: Create utility method to get current user's districts from SecurityContext
+- [x] 4.8.6: Create @PreAuthorize helpers for common role checks
 
 ---
 
