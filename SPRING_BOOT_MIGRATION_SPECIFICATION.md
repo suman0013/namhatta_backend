@@ -76,7 +76,7 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 2: DATA MODEL & ENTITIES**
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Duration**: 2-3 days  
 **Prerequisites**: Phase 1 completed
 
@@ -139,19 +139,19 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 2.5.7: Add unique constraints on code and registrationNo
 
 #### Task 2.6: Create Supporting Entities
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 2.5
-- [ ] 2.6.1: Create DevotionalStatus entity (table="devotional_statuses") with id, name (unique), createdAt
-- [ ] 2.6.2: Create StatusHistory entity (table="status_history") with devoteeId, previousStatus, newStatus, comment, updatedAt
-- [ ] 2.6.3: Add @ManyToOne relationship from StatusHistory to Devotee
-- [ ] 2.6.4: Create Gurudev entity (table="gurudevs") with id, name (unique), title, createdAt
-- [ ] 2.6.5: Create Shraddhakutir entity (table="shraddhakutirs") with id, name, districtCode, createdAt
-- [ ] 2.6.6: Create NamhattaUpdate entity (table="namhatta_updates") with namhattaId, programType, date, attendance, prasadDistribution, nagarKirtan, bookDistribution, chanting, arati, bhagwatPath, specialAttraction, imageUrls (JSONB), facebookLink, youtubeLink, createdAt
-- [ ] 2.6.7: Add @ManyToOne relationship from NamhattaUpdate to Namhatta
-- [ ] 2.6.8: Create Leader entity (table="leaders") with id, name, role (enum), reportingTo (self-reference), location (JSONB), createdAt
-- [ ] 2.6.9: Add self-referencing @ManyToOne for Leader hierarchy
-- [ ] 2.6.10: Create RoleChangeHistory entity (table="role_change_history") with devoteeId, previousRole, newRole, previousReportingTo, newReportingTo, changedBy (userId), reason, districtCode, subordinatesTransferred, createdAt
-- [ ] 2.6.11: Add @ManyToOne relationships from RoleChangeHistory to Devotee and User
+- [x] 2.6.1: Create DevotionalStatus entity (table="devotional_statuses") with id, name (unique), createdAt
+- [x] 2.6.2: Create StatusHistory entity (table="status_history") with devoteeId, previousStatus, newStatus, comment, updatedAt
+- [x] 2.6.3: Add @ManyToOne relationship from StatusHistory to Devotee
+- [x] 2.6.4: Create Gurudev entity (table="gurudevs") with id, name (unique), title, createdAt
+- [x] 2.6.5: Create Shraddhakutir entity (table="shraddhakutirs") with id, name, districtCode, createdAt
+- [x] 2.6.6: Create NamhattaUpdate entity (table="namhatta_updates") with namhattaId, programType, date, attendance, prasadDistribution, nagarKirtan, bookDistribution, chanting, arati, bhagwatPath, specialAttraction, imageUrls (JSONB), facebookLink, youtubeLink, createdAt
+- [x] 2.6.7: Add @ManyToOne relationship from NamhattaUpdate to Namhatta
+- [x] 2.6.8: Create Leader entity (table="leaders") with id, name, role (enum), reportingTo (self-reference), location (JSONB), createdAt
+- [x] 2.6.9: Add self-referencing @ManyToOne for Leader hierarchy
+- [x] 2.6.10: Create RoleChangeHistory entity (table="role_change_history") with devoteeId, previousRole, newRole, previousReportingTo, newReportingTo, changedBy (userId), reason, districtCode, subordinatesTransferred, createdAt
+- [x] 2.6.11: Add @ManyToOne relationships from RoleChangeHistory to Devotee and User
 
 ---
 
