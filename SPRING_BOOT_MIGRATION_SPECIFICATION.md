@@ -81,16 +81,16 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 **Prerequisites**: Phase 1 completed
 
 #### Task 2.1: Create Base Entity and Enums
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 1.3
-- [ ] 2.1.1: Create BaseEntity abstract class with id, createdAt, updatedAt fields
-- [ ] 2.1.2: Create UserRole enum (ADMIN, OFFICE, DISTRICT_SUPERVISOR)
-- [ ] 2.1.3: Create LeadershipRole enum (MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI)
-- [ ] 2.1.4: Create Gender enum (MALE, FEMALE, OTHER)
-- [ ] 2.1.5: Create MaritalStatus enum (MARRIED, UNMARRIED, WIDOWED)
-- [ ] 2.1.6: Create NamhattaStatus enum (PENDING_APPROVAL, APPROVED, REJECTED)
-- [ ] 2.1.7: Create AddressType enum (PRESENT, PERMANENT)
-- [ ] 2.1.8: Create LeaderRole enum (FOUNDER_ACHARYA, GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR)
+- [x] 2.1.1: Create BaseEntity abstract class with id, createdAt, updatedAt fields
+- [x] 2.1.2: Create UserRole enum (ADMIN, OFFICE, DISTRICT_SUPERVISOR)
+- [x] 2.1.3: Create LeadershipRole enum (MALA_SENAPOTI, MAHA_CHAKRA_SENAPOTI, CHAKRA_SENAPOTI, UPA_CHAKRA_SENAPOTI)
+- [x] 2.1.4: Create Gender enum (MALE, FEMALE, OTHER)
+- [x] 2.1.5: Create MaritalStatus enum (MARRIED, UNMARRIED, WIDOWED)
+- [x] 2.1.6: Create NamhattaStatus enum (PENDING_APPROVAL, APPROVED, REJECTED)
+- [x] 2.1.7: Create AddressType enum (PRESENT, PERMANENT)
+- [x] 2.1.8: Create LeaderRole enum (FOUNDER_ACHARYA, GBC, REGIONAL_DIRECTOR, CO_REGIONAL_DIRECTOR, DISTRICT_SUPERVISOR)
 
 #### Task 2.2: Create User-Related Entities
 **Status**: NOT_STARTED  
