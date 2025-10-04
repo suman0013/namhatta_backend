@@ -2,7 +2,9 @@ package com.namhatta.service;
 
 import com.namhatta.dto.AddressData;
 import com.namhatta.dto.AddressDTO;
+import com.namhatta.dto.CreateUserRequest;
 import com.namhatta.dto.DevoteeDTO;
+import com.namhatta.dto.LeadershipRequest;
 import com.namhatta.model.entity.Address;
 import com.namhatta.model.entity.Devotee;
 import com.namhatta.model.entity.DevoteeAddress;
@@ -189,17 +191,16 @@ public class DevoteeService {
      * Task 5.4.8
      */
     @Transactional
-    public void assignLeadership(Long id, String leadershipRole, Long reportingToDevoteeId, Boolean hasSystemAccess) {
+    public void assignLeadership(Long id, LeadershipRequest request) {
         Devotee devotee = devoteeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Devotee not found with id: " + id));
         
-        // Validate leadershipRole
-        try {
-            LeadershipRole role = LeadershipRole.valueOf(leadershipRole);
-            devotee.setLeadershipRole(role);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid leadership role: " + leadershipRole);
-        }
+        LeadershipRole leadershipRole = request.getLeadershipRole();
+        Long reportingToDevoteeId = request.getReportingToDevoteeId();
+        Boolean hasSystemAccess = request.getHasSystemAccess();
+        
+        // Set leadership role
+        devotee.setLeadershipRole(leadershipRole);
         
         // Validate reportingToDevoteeId exists if provided
         if (reportingToDevoteeId != null) {
