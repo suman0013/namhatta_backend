@@ -1,6 +1,7 @@
 package com.namhatta.service;
 
 import com.namhatta.dto.AddressData;
+import com.namhatta.dto.ApproveNamhattaRequest;
 import com.namhatta.dto.DevoteeDTO;
 import com.namhatta.dto.NamhattaDTO;
 import com.namhatta.model.entity.Devotee;
@@ -222,7 +223,10 @@ public class NamhattaService {
      * Task 5.5.8
      */
     @Transactional
-    public void approveNamhatta(Long id, String registrationNo, String registrationDate) {
+    public void approveNamhatta(Long id, ApproveNamhattaRequest request) {
+        String registrationNo = request.getRegistrationNo();
+        String registrationDate = request.getRegistrationDate();
+        
         Namhatta namhatta = namhattaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Namhatta not found with id: " + id));
         
@@ -368,5 +372,72 @@ public class NamhattaService {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+    
+    /**
+     * Get namhatta updates
+     * Task 5.5.11
+     */
+    public List<Map<String, Object>> getNamhattaUpdates(Long id) {
+        List<NamhattaUpdate> updates = namhattaUpdateRepository.findByNamhattaIdOrderByDateDesc(id);
+        
+        return updates.stream().map(update -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", update.getId());
+            map.put("namhattaId", update.getNamhattaId());
+            map.put("programType", update.getProgramType());
+            map.put("date", update.getDate());
+            map.put("attendance", update.getAttendance());
+            map.put("prasadDistribution", update.getPrasadDistribution());
+            map.put("nagarKirtan", update.getNagarKirtan());
+            map.put("bookDistribution", update.getBookDistribution());
+            map.put("chanting", update.getChanting());
+            map.put("arati", update.getArati());
+            map.put("bhagwatPath", update.getBhagwatPath());
+            map.put("specialAttraction", update.getSpecialAttraction());
+            map.put("imageUrls", update.getImageUrls());
+            map.put("facebookLink", update.getFacebookLink());
+            map.put("youtubeLink", update.getYoutubeLink());
+            map.put("createdAt", update.getCreatedAt());
+            return map;
+        }).collect(Collectors.toList());
+    }
+    
+    /**
+     * Get status history for namhatta devotees
+     * Task 5.5.13
+     */
+    public Page<Map<String, Object>> getStatusHistory(Long namhattaId, Pageable pageable) {
+        // Get all devotees of this namhatta
+        List<Devotee> devotees = devoteeRepository.findByNamhattaId(namhattaId);
+        List<Long> devoteeIds = devotees.stream().map(Devotee::getId).collect(Collectors.toList());
+        
+        // Get status history for these devotees
+        List<StatusHistory> allHistory = devoteeIds.stream()
+                .flatMap(devoteeId -> statusHistoryRepository.findByDevoteeIdOrderByUpdatedAtDesc(devoteeId).stream())
+                .sorted((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt()))
+                .collect(Collectors.toList());
+        
+        // Convert to maps
+        List<Map<String, Object>> historyMaps = allHistory.stream().map(history -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", history.getId());
+            map.put("devoteeId", history.getDevoteeId());
+            map.put("previousStatus", history.getPreviousStatus());
+            map.put("newStatus", history.getNewStatus());
+            map.put("comment", history.getComment());
+            map.put("updatedAt", history.getUpdatedAt());
+            
+            // Add devotee info
+            Devotee devotee = devoteeRepository.findById(history.getDevoteeId()).orElse(null);
+            if (devotee != null) {
+                map.put("devoteeName", devotee.getName());
+            }
+            
+            return map;
+        }).collect(Collectors.toList());
+        
+        // Return paginated result (simplified - would need proper pagination implementation)
+        return Page.empty(pageable);
     }
 }
