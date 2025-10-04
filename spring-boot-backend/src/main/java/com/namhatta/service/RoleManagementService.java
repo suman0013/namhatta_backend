@@ -1,10 +1,14 @@
 package com.namhatta.service;
 
+import com.namhatta.dto.DevoteeDTO;
+import com.namhatta.dto.RoleChangeResult;
+import com.namhatta.dto.TransferResult;
 import com.namhatta.model.entity.Devotee;
 import com.namhatta.model.entity.RoleChangeHistory;
 import com.namhatta.model.enums.LeadershipRole;
 import com.namhatta.repository.DevoteeRepository;
 import com.namhatta.repository.RoleChangeHistoryRepository;
+import com.namhatta.util.DtoMapper;
 import com.namhatta.util.RoleHierarchyRules;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -21,13 +25,16 @@ public class RoleManagementService {
     private final DevoteeRepository devoteeRepository;
     private final RoleChangeHistoryRepository roleChangeHistoryRepository;
     private final RoleHierarchyRules roleHierarchyRules;
+    private final DtoMapper dtoMapper;
 
     public RoleManagementService(DevoteeRepository devoteeRepository,
                                 RoleChangeHistoryRepository roleChangeHistoryRepository,
-                                RoleHierarchyRules roleHierarchyRules) {
+                                RoleHierarchyRules roleHierarchyRules,
+                                DtoMapper dtoMapper) {
         this.devoteeRepository = devoteeRepository;
         this.roleChangeHistoryRepository = roleChangeHistoryRepository;
         this.roleHierarchyRules = roleHierarchyRules;
+        this.dtoMapper = dtoMapper;
     }
 
     public static class ValidationResult {
@@ -60,11 +67,11 @@ public class RoleManagementService {
         }
     }
 
-    public static class TransferResult {
+    private static class InternalTransferResult {
         private final int count;
         private final List<Devotee> updatedSubordinates;
 
-        public TransferResult(int count, List<Devotee> updatedSubordinates) {
+        public InternalTransferResult(int count, List<Devotee> updatedSubordinates) {
             this.count = count;
             this.updatedSubordinates = updatedSubordinates;
         }
@@ -73,12 +80,12 @@ public class RoleManagementService {
         public List<Devotee> getUpdatedSubordinates() { return updatedSubordinates; }
     }
 
-    public static class RoleChangeResult {
+    private static class InternalRoleChangeResult {
         private final Devotee devotee;
         private final int subordinatesTransferred;
         private final RoleChangeHistory roleChangeRecord;
 
-        public RoleChangeResult(Devotee devotee, int subordinatesTransferred, RoleChangeHistory roleChangeRecord) {
+        public InternalRoleChangeResult(Devotee devotee, int subordinatesTransferred, RoleChangeHistory roleChangeRecord) {
             this.devotee = devotee;
             this.subordinatesTransferred = subordinatesTransferred;
             this.roleChangeRecord = roleChangeRecord;
@@ -165,7 +172,14 @@ public class RoleManagementService {
         return false;
     }
 
-    public List<Devotee> getDirectSubordinates(Long devoteeId) {
+    public List<DevoteeDTO> getDirectSubordinates(Long devoteeId) {
+        List<Devotee> subordinates = devoteeRepository.findByReportingToDevoteeId(devoteeId);
+        return subordinates.stream()
+                .map(dtoMapper::toDevoteeDTO)
+                .collect(Collectors.toList());
+    }
+    
+    public List<Devotee> getDirectSubordinatesEntities(Long devoteeId) {
         return devoteeRepository.findByReportingToDevoteeId(devoteeId);
     }
 
@@ -205,12 +219,18 @@ public class RoleManagementService {
 
     @Transactional
     public TransferResult transferSubordinates(com.namhatta.dto.TransferSubordinatesRequest request, Long userId) {
-        return transferSubordinates(request.getFromDevoteeId(), request.getToDevoteeId(), 
+        InternalTransferResult result = transferSubordinatesInternal(request.getFromDevoteeId(), request.getToDevoteeId(), 
                                    request.getSubordinateIds(), request.getReason(), userId);
+        
+        List<DevoteeDTO> devoteeSubordinates = result.getUpdatedSubordinates().stream()
+                .map(dtoMapper::toDevoteeDTO)
+                .collect(Collectors.toList());
+        
+        return new TransferResult(result.getCount(), devoteeSubordinates, "Subordinates transferred successfully");
     }
 
     @Transactional
-    public TransferResult transferSubordinates(Long fromDevoteeId, Long toDevoteeId, 
+    private InternalTransferResult transferSubordinatesInternal(Long fromDevoteeId, Long toDevoteeId, 
                                               List<Long> subordinateIds, String reason, Long userId) {
         ValidationResult validation = validateSubordinateTransfer(fromDevoteeId, toDevoteeId, subordinateIds);
         if (!validation.isValid()) {
@@ -240,17 +260,24 @@ public class RoleManagementService {
             updatedSubordinates.add(subordinate);
         }
 
-        return new TransferResult(updatedSubordinates.size(), updatedSubordinates);
+        return new InternalTransferResult(updatedSubordinates.size(), updatedSubordinates);
     }
 
     @Transactional
     public RoleChangeResult promoteDevotee(com.namhatta.dto.PromoteDevoteeRequest request, Long userId) {
-        return promoteDevotee(request.getDevoteeId(), request.getTargetRole(), 
+        InternalRoleChangeResult result = promoteDevoteeInternal(request.getDevoteeId(), request.getTargetRole(), 
                             request.getNewReportingToId(), request.getReason(), userId);
+        
+        return new RoleChangeResult(
+                dtoMapper.toDevoteeDTO(result.getDevotee()),
+                result.getSubordinatesTransferred(),
+                result.getRoleChangeRecord().getId(),
+                "Devotee promoted successfully"
+        );
     }
 
     @Transactional
-    public RoleChangeResult promoteDevotee(Long devoteeId, LeadershipRole targetRole, 
+    private InternalRoleChangeResult promoteDevoteeInternal(Long devoteeId, LeadershipRole targetRole, 
                                           Long newReportingTo, String reason, Long userId) {
         Devotee devotee = devoteeRepository.findById(devoteeId)
                 .orElseThrow(() -> new EntityNotFoundException("Devotee not found: " + devoteeId));
@@ -266,12 +293,12 @@ public class RoleManagementService {
             throw new IllegalArgumentException("Cannot promote: would create circular reference");
         }
 
-        List<Devotee> subordinates = getDirectSubordinates(devoteeId);
+        List<Devotee> subordinates = getDirectSubordinatesEntities(devoteeId);
         int subordinatesTransferredCount = 0;
 
         if (!subordinates.isEmpty() && roleHierarchyRules.getRoleLevel(targetRole) < roleHierarchyRules.getRoleLevel(currentRole)) {
             List<Long> subordinateIds = subordinates.stream().map(Devotee::getId).collect(Collectors.toList());
-            transferSubordinates(devoteeId, newReportingTo, subordinateIds, "Automatic transfer due to promotion", userId);
+            transferSubordinatesInternal(devoteeId, newReportingTo, subordinateIds, "Automatic transfer due to promotion", userId);
             subordinatesTransferredCount = subordinates.size();
         }
 
@@ -291,17 +318,24 @@ public class RoleManagementService {
         history.setSubordinatesTransferred(subordinatesTransferredCount);
         roleChangeHistoryRepository.save(history);
 
-        return new RoleChangeResult(devotee, subordinatesTransferredCount, history);
+        return new InternalRoleChangeResult(devotee, subordinatesTransferredCount, history);
     }
 
     @Transactional
     public RoleChangeResult demoteDevotee(com.namhatta.dto.DemoteDevoteeRequest request, Long userId) {
-        return demoteDevotee(request.getDevoteeId(), request.getTargetRole(), 
+        InternalRoleChangeResult result = demoteDevoteeInternal(request.getDevoteeId(), request.getTargetRole(), 
                            request.getNewReportingToId(), request.getReason(), userId);
+        
+        return new RoleChangeResult(
+                dtoMapper.toDevoteeDTO(result.getDevotee()),
+                result.getSubordinatesTransferred(),
+                result.getRoleChangeRecord().getId(),
+                "Devotee demoted successfully"
+        );
     }
 
     @Transactional
-    public RoleChangeResult demoteDevotee(Long devoteeId, LeadershipRole targetRole, 
+    private InternalRoleChangeResult demoteDevoteeInternal(Long devoteeId, LeadershipRole targetRole, 
                                          Long newReportingTo, String reason, Long userId) {
         Devotee devotee = devoteeRepository.findById(devoteeId)
                 .orElseThrow(() -> new EntityNotFoundException("Devotee not found: " + devoteeId));
@@ -317,7 +351,7 @@ public class RoleManagementService {
             throw new IllegalArgumentException("Cannot demote: would create circular reference");
         }
 
-        List<Devotee> subordinates = getDirectSubordinates(devoteeId);
+        List<Devotee> subordinates = getDirectSubordinatesEntities(devoteeId);
         int subordinatesTransferredCount = 0;
 
         if (!subordinates.isEmpty()) {
@@ -325,7 +359,7 @@ public class RoleManagementService {
                 throw new IllegalArgumentException("Cannot demote: must provide new supervisor for subordinates");
             }
             List<Long> subordinateIds = subordinates.stream().map(Devotee::getId).collect(Collectors.toList());
-            transferSubordinates(devoteeId, newReportingTo, subordinateIds, "Automatic transfer due to demotion", userId);
+            transferSubordinatesInternal(devoteeId, newReportingTo, subordinateIds, "Automatic transfer due to demotion", userId);
             subordinatesTransferredCount = subordinates.size();
         }
 
@@ -345,7 +379,7 @@ public class RoleManagementService {
         history.setSubordinatesTransferred(subordinatesTransferredCount);
         roleChangeHistoryRepository.save(history);
 
-        return new RoleChangeResult(devotee, subordinatesTransferredCount, history);
+        return new InternalRoleChangeResult(devotee, subordinatesTransferredCount, history);
     }
 
     @Transactional
@@ -360,7 +394,7 @@ public class RoleManagementService {
             throw new IllegalArgumentException("Role removal validation failed: " + String.join(", ", validation.getErrors()));
         }
 
-        List<Devotee> subordinates = getDirectSubordinates(devoteeId);
+        List<Devotee> subordinates = getDirectSubordinatesEntities(devoteeId);
         int subordinatesTransferredCount = 0;
 
         if (!subordinates.isEmpty()) {
@@ -368,7 +402,7 @@ public class RoleManagementService {
                 throw new IllegalArgumentException("Cannot remove role: must provide new supervisor for subordinates");
             }
             List<Long> subordinateIds = subordinates.stream().map(Devotee::getId).collect(Collectors.toList());
-            transferSubordinates(devoteeId, newSupervisorId, subordinateIds, "Automatic transfer due to role removal", userId);
+            transferSubordinatesInternal(devoteeId, newSupervisorId, subordinateIds, "Automatic transfer due to role removal", userId);
             subordinatesTransferredCount = subordinates.size();
         }
 
@@ -389,10 +423,22 @@ public class RoleManagementService {
         history.setSubordinatesTransferred(subordinatesTransferredCount);
         roleChangeHistoryRepository.save(history);
 
-        return new RoleChangeResult(devotee, subordinatesTransferredCount, history);
+        return new RoleChangeResult(
+                dtoMapper.toDevoteeDTO(devotee),
+                subordinatesTransferredCount,
+                history.getId(),
+                "Role removed successfully"
+        );
     }
 
-    public List<Devotee> getAvailableSupervisors(String districtCode, LeadershipRole targetRole, List<Long> excludeIds) {
+    public List<DevoteeDTO> getAvailableSupervisors(String districtCode, String targetRoleStr, List<Long> excludeIds) {
+        LeadershipRole targetRole;
+        try {
+            targetRole = LeadershipRole.valueOf(targetRoleStr);
+        } catch (IllegalArgumentException e) {
+            return Collections.emptyList();
+        }
+        
         String requiredSupervisorRole = roleHierarchyRules.getReportingRole(targetRole);
         
         if (requiredSupervisorRole == null) {
@@ -414,10 +460,12 @@ public class RoleManagementService {
                     .collect(Collectors.toList());
         }
 
-        return devotees;
+        return devotees.stream()
+                .map(dtoMapper::toDevoteeDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<Devotee> getAllSubordinates(Long devoteeId) {
+    public List<DevoteeDTO> getAllSubordinates(Long devoteeId) {
         Set<Devotee> allSubordinates = new HashSet<>();
         Queue<Long> queue = new LinkedList<>();
         queue.add(devoteeId);
@@ -430,14 +478,16 @@ public class RoleManagementService {
             }
             visited.add(currentId);
 
-            List<Devotee> directSubordinates = getDirectSubordinates(currentId);
+            List<Devotee> directSubordinates = getDirectSubordinatesEntities(currentId);
             for (Devotee subordinate : directSubordinates) {
                 allSubordinates.add(subordinate);
                 queue.add(subordinate.getId());
             }
         }
 
-        return new ArrayList<>(allSubordinates);
+        return allSubordinates.stream()
+                .map(dtoMapper::toDevoteeDTO)
+                .collect(Collectors.toList());
     }
 
     public Page<RoleChangeHistory> getRoleHistory(Long devoteeId, Pageable pageable) {
