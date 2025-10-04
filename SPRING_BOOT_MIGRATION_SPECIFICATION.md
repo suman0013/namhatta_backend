@@ -465,11 +465,11 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Return country, state, district, subDistricts array, villages array
 
 #### Task 5.4: Devotee Service
-**Status**: IN_PROGRESS  
+**Status**: COMPLETED  
 **Prerequisites**: Task 5.3
-- [ ] 5.4.1: Create DevoteeService class with @Service annotation
-- [ ] 5.4.2: Inject DevoteeRepository, AddressService, DevoteeAddressRepository, StatusHistoryRepository, DistrictAccessValidator
-- [ ] 5.4.3: Implement getDevotees(Pageable, filters, userRole, userDistricts) → Page<DevoteeDTO> method:
+- [x] 5.4.1: Create DevoteeService class with @Service annotation
+- [x] 5.4.2: Inject DevoteeRepository, AddressService, DevoteeAddressRepository, StatusHistoryRepository, DistrictAccessValidator
+- [x] 5.4.3: Implement getDevotees(Pageable, filters, userRole, userDistricts) → Page<DevoteeDTO> method:
   - Build Specification with filters (search on legalName/name/email, country, state, district, statusId)
   - If role=DISTRICT_SUPERVISOR, add district filter using userDistricts
   - Apply pagination and sorting
