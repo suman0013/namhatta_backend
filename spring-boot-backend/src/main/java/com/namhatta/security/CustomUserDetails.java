@@ -36,6 +36,10 @@ public class CustomUserDetails implements UserDetails {
         return role;
     }
     
+    public UserRole getUserRole() {
+        return role;
+    }
+    
     public List<String> getDistricts() {
         return districts;
     }

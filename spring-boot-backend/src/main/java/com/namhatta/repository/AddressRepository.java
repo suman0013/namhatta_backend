@@ -91,4 +91,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
         @Param("district") String district,
         @Param("subDistrict") String subDistrict
     );
+    
+    @Query("SELECT a.country, a.stateNameEnglish, a.districtNameEnglish FROM Address a WHERE a.districtNameEnglish = :district")
+    List<Object[]> findDistrictInfo(@Param("district") String district);
 }
