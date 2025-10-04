@@ -181,20 +181,20 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 3.1.16: Add method: void deleteByExpiredAtBefore(LocalDateTime dateTime)
 
 #### Task 3.2: Create Devotee and Namhatta Repositories
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 3.1
-- [ ] 3.2.1: Create DevoteeRepository extends JpaRepository<Devotee, Long>
-- [ ] 3.2.2: Add @Query method for pagination and filtering by search term, country, state, district, statusId
-- [ ] 3.2.3: Add method: List<Devotee> findByNamhattaId(Long namhattaId)
-- [ ] 3.2.4: Add method: List<Devotee> findByReportingToDevoteeId(Long id)
-- [ ] 3.2.5: Add method: List<Devotee> findByLeadershipRoleNotNull()
-- [ ] 3.2.6: Add method: List<Devotee> findByLeadershipRole(LeadershipRole role)
-- [ ] 3.2.7: Create NamhattaRepository extends JpaRepository<Namhatta, Long>
-- [ ] 3.2.8: Add method: Optional<Namhatta> findByCode(String code)
-- [ ] 3.2.9: Add method: Optional<Namhatta> findByRegistrationNo(String registrationNo)
-- [ ] 3.2.10: Add method: boolean existsByCode(String code)
-- [ ] 3.2.11: Add method: boolean existsByRegistrationNo(String registrationNo)
-- [ ] 3.2.12: Add @Query method for pagination and filtering by search, country, state, district, status
+- [x] 3.2.1: Create DevoteeRepository extends JpaRepository<Devotee, Long>
+- [x] 3.2.2: Add @Query method for pagination and filtering by search term, country, state, district, statusId
+- [x] 3.2.3: Add method: List<Devotee> findByNamhattaId(Long namhattaId)
+- [x] 3.2.4: Add method: List<Devotee> findByReportingToDevoteeId(Long id)
+- [x] 3.2.5: Add method: List<Devotee> findByLeadershipRoleNotNull()
+- [x] 3.2.6: Add method: List<Devotee> findByLeadershipRole(LeadershipRole role)
+- [x] 3.2.7: Create NamhattaRepository extends JpaRepository<Namhatta, Long>
+- [x] 3.2.8: Add method: Optional<Namhatta> findByCode(String code)
+- [x] 3.2.9: Add method: Optional<Namhatta> findByRegistrationNo(String registrationNo)
+- [x] 3.2.10: Add method: boolean existsByCode(String code)
+- [x] 3.2.11: Add method: boolean existsByRegistrationNo(String registrationNo)
+- [x] 3.2.12: Add @Query method for pagination and filtering by search, country, state, district, status
 
 #### Task 3.3: Create Address and Supporting Repositories
 **Status**: NOT_STARTED  
