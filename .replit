@@ -4,7 +4,7 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["mysql80", "sqlite"]
+packages = ["mysql80", "sqlite", "jdk17", "maven"]
 
 [deployment]
 deploymentTarget = "autoscale"
