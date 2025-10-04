@@ -96,7 +96,7 @@ public class DtoMapper {
         
         dto.setHasSystemAccess(devotee.getHasSystemAccess());
         dto.setAppointedDate(devotee.getAppointedDate() != null ? devotee.getAppointedDate().toString() : null);
-        dto.setAppointedBy(devotee.getAppointedBy());
+        dto.setAppointedBy(devotee.getAppointedBy() != null ? devotee.getAppointedBy().longValue() : null);
         
         dto.setCreatedAt(devotee.getCreatedAt());
         dto.setUpdatedAt(devotee.getUpdatedAt());

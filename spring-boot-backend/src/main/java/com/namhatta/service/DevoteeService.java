@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -396,7 +397,7 @@ public class DevoteeService {
         if (request.getReportingToDevoteeId() != null) devotee.setReportingToDevoteeId(request.getReportingToDevoteeId());
         if (request.getHasSystemAccess() != null) devotee.setHasSystemAccess(request.getHasSystemAccess());
         if (request.getAppointedDate() != null) devotee.setAppointedDate(request.getAppointedDate().toString());
-        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy());
+        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy().intValue());
         if (request.getAdditionalComments() != null) devotee.setAdditionalComments(request.getAdditionalComments());
         if (request.getShraddhakutirId() != null) devotee.setShraddhakutirId(request.getShraddhakutirId());
     }
@@ -430,7 +431,7 @@ public class DevoteeService {
         if (request.getReportingToDevoteeId() != null) devotee.setReportingToDevoteeId(request.getReportingToDevoteeId());
         if (request.getHasSystemAccess() != null) devotee.setHasSystemAccess(request.getHasSystemAccess());
         if (request.getAppointedDate() != null) devotee.setAppointedDate(request.getAppointedDate().toString());
-        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy());
+        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy().intValue());
         if (request.getAdditionalComments() != null) devotee.setAdditionalComments(request.getAdditionalComments());
         if (request.getShraddhakutirId() != null) devotee.setShraddhakutirId(request.getShraddhakutirId());
     }
@@ -503,7 +504,7 @@ public class DevoteeService {
         dto.setReportingToDevoteeId(devotee.getReportingToDevoteeId());
         dto.setHasSystemAccess(devotee.getHasSystemAccess());
         dto.setAppointedDate(devotee.getAppointedDate());
-        dto.setAppointedBy(devotee.getAppointedBy());
+        dto.setAppointedBy(devotee.getAppointedBy() != null ? devotee.getAppointedBy().longValue() : null);
         dto.setCreatedAt(devotee.getCreatedAt());
         dto.setUpdatedAt(devotee.getUpdatedAt());
         

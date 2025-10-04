@@ -76,7 +76,7 @@ class RoleManagementServiceTest {
 
         when(devoteeRepository.findById(1L)).thenReturn(Optional.of(devotee));
         when(devoteeRepository.findById(3L)).thenReturn(Optional.of(newSupervisor));
-        when(roleHierarchyRules.canBeSuper supervisor(LeadershipRole.MAHA_CHAKRA_SENAPOTI, LeadershipRole.CHAKRA_SENAPOTI))
+        when(roleHierarchyRules.canBeSupervisor(LeadershipRole.MAHA_CHAKRA_SENAPOTI, LeadershipRole.CHAKRA_SENAPOTI))
                 .thenReturn(true);
         when(devoteeRepository.save(any(Devotee.class))).thenReturn(devotee);
         when(roleChangeHistoryRepository.save(any(RoleChangeHistory.class))).thenReturn(new RoleChangeHistory());
