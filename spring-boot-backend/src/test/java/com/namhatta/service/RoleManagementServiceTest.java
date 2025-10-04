@@ -1,5 +1,6 @@
 package com.namhatta.service;
 
+import com.namhatta.dto.DevoteeDTO;
 import com.namhatta.dto.PromoteDevoteeRequest;
 import com.namhatta.dto.DemoteDevoteeRequest;
 import com.namhatta.dto.TransferSubordinatesRequest;
