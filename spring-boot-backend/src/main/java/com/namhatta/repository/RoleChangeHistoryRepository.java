@@ -18,4 +18,6 @@ public interface RoleChangeHistoryRepository extends JpaRepository<RoleChangeHis
         @Param("devoteeId") Long devoteeId,
         Pageable pageable
     );
+    
+    Page<RoleChangeHistory> findByDevoteeIdOrderByCreatedAtDesc(Long devoteeId, Pageable pageable);
 }

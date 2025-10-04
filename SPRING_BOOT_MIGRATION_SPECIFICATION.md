@@ -591,46 +591,46 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 6: SERVICE LAYER - ROLE MANAGEMENT**
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Duration**: 3-4 days  
 **Prerequisites**: Phase 5 completed
 
 #### Task 6.1: Role Hierarchy Rules Utility
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 5.5
-- [ ] 6.1.1: Create RoleHierarchyRules utility class (can be @Component or static utility)
-- [ ] 6.1.2: Define ROLE_HIERARCHY constant Map with entries for each LeadershipRole:
+- [x] 6.1.1: Create RoleHierarchyRules utility class (can be @Component or static utility)
+- [x] 6.1.2: Define ROLE_HIERARCHY constant Map with entries for each LeadershipRole:
   - MALA_SENAPOTI: { level: 1, reportsTo: DISTRICT_SUPERVISOR, canPromoteTo: null, canDemoteTo: [MAHA_CHAKRA, CHAKRA, UPA_CHAKRA], manages: [MAHA_CHAKRA] }
   - MAHA_CHAKRA_SENAPOTI: { level: 2, reportsTo: MALA, canPromoteTo: [MALA], canDemoteTo: [CHAKRA, UPA_CHAKRA], manages: [CHAKRA] }
   - CHAKRA_SENAPOTI: { level: 3, reportsTo: MAHA_CHAKRA, canPromoteTo: [MAHA_CHAKRA], canDemoteTo: [UPA_CHAKRA], manages: [UPA_CHAKRA] }
   - UPA_CHAKRA_SENAPOTI: { level: 4, reportsTo: CHAKRA, canPromoteTo: [CHAKRA], canDemoteTo: null, manages: [] }
-- [ ] 6.1.3: Implement canPromote(LeadershipRole from, LeadershipRole to) → boolean method:
+- [x] 6.1.3: Implement canPromote(LeadershipRole from, LeadershipRole to) → boolean method:
   - Get hierarchy entry for 'from' role
   - Check if 'to' is in canPromoteTo list
   - Return true/false
-- [ ] 6.1.4: Implement canDemote(LeadershipRole from, LeadershipRole to) → boolean method:
+- [x] 6.1.4: Implement canDemote(LeadershipRole from, LeadershipRole to) → boolean method:
   - Get hierarchy entry for 'from' role
   - Check if 'to' is in canDemoteTo list
   - Return true/false
-- [ ] 6.1.5: Implement getReportingRole(LeadershipRole role) → LeadershipRole method:
+- [x] 6.1.5: Implement getReportingRole(LeadershipRole role) → LeadershipRole method:
   - Return reportsTo from hierarchy
-- [ ] 6.1.6: Implement getManagedRoles(LeadershipRole role) → List<LeadershipRole> method:
+- [x] 6.1.6: Implement getManagedRoles(LeadershipRole role) → List<LeadershipRole> method:
   - Return manages list from hierarchy
 
 #### Task 6.2: Role Management Service - Validation
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 6.1
-- [ ] 6.2.1: Create RoleManagementService class with @Service annotation
-- [ ] 6.2.2: Inject DevoteeRepository, RoleChangeHistoryRepository, RoleHierarchyRules
-- [ ] 6.2.3: Create ValidationResult inner class with fields: isValid (boolean), errors (List<String>), warnings (List<String>)
-- [ ] 6.2.4: Implement validateHierarchyChange(currentRole, targetRole, changeType) → ValidationResult:
+- [x] 6.2.1: Create RoleManagementService class with @Service annotation
+- [x] 6.2.2: Inject DevoteeRepository, RoleChangeHistoryRepository, RoleHierarchyRules
+- [x] 6.2.3: Create ValidationResult inner class with fields: isValid (boolean), errors (List<String>), warnings (List<String>)
+- [x] 6.2.4: Implement validateHierarchyChange(currentRole, targetRole, changeType) → ValidationResult:
   - changeType enum: PROMOTE, DEMOTE, REMOVE, REPLACE
   - If REMOVE: validate current role exists
   - If PROMOTE: call RoleHierarchyRules.canPromote(current, target), add error if false
   - If DEMOTE: call RoleHierarchyRules.canDemote(current, target), add error if false
   - Add warnings if applicable
   - Return ValidationResult
-- [ ] 6.2.5: Implement checkCircularReference(devoteeId, newReportingId) → boolean:
+- [x] 6.2.5: Implement checkCircularReference(devoteeId, newReportingId) → boolean:
   - If newReportingId is null, return false (no circular possible)
   - If devoteeId == newReportingId, return true (self-reference)
   - Create visited Set<Long>
@@ -643,12 +643,12 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Return false (no circular)
 
 #### Task 6.3: Role Management Service - Subordinate Transfer
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 6.2
-- [ ] 6.3.1: Implement getDirectSubordinates(Long devoteeId) → List<Devotee>:
+- [x] 6.3.1: Implement getDirectSubordinates(Long devoteeId) → List<Devotee>:
   - Query devoteeRepository.findByReportingToDevoteeId(devoteeId)
   - Return list
-- [ ] 6.3.2: Implement validateSubordinateTransfer(fromDevoteeId, toDevoteeId, subordinateIds) → ValidationResult:
+- [x] 6.3.2: Implement validateSubordinateTransfer(fromDevoteeId, toDevoteeId, subordinateIds) → ValidationResult:
   - Get all subordinates of fromDevoteeId
   - Check if all subordinateIds are actually reporting to fromDevoteeId
   - If toDevoteeId provided:
@@ -656,7 +656,7 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
     - For each subordinate, check circular reference with toDevoteeId
   - Add errors/warnings to ValidationResult
   - Return result
-- [ ] 6.3.3: Implement transferSubordinates(TransferRequest, userId) → TransferResult:
+- [x] 6.3.3: Implement transferSubordinates(TransferRequest, userId) → TransferResult:
   - Validate transfer using validateSubordinateTransfer()
   - If invalid, throw ValidationException
   - For each subordinateId:
@@ -666,9 +666,9 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Return TransferResult with count and updated subordinates
 
 #### Task 6.4: Role Management Service - Promotions/Demotions
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 6.3
-- [ ] 6.4.1: Implement promoteDevotee(PromoteRequest, userId) → RoleChangeResult:
+- [x] 6.4.1: Implement promoteDevotee(PromoteRequest, userId) → RoleChangeResult:
   - Get devotee by id
   - Validate hierarchy allows promotion using validateHierarchyChange(currentRole, targetRole, PROMOTE)
   - Check circular reference for newReportingTo
@@ -679,13 +679,13 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Save devotee
   - Create RoleChangeHistory with previousRole, newRole, previousReportingTo, newReportingTo, changedBy=userId, reason="Promotion: " + request.reason, subordinatesTransferred=count
   - Return RoleChangeResult with updated devotee, subordinatesTransferred count, roleChangeRecord
-- [ ] 6.4.2: Implement demoteDevotee(DemoteRequest, userId) → RoleChangeResult:
+- [x] 6.4.2: Implement demoteDevotee(DemoteRequest, userId) → RoleChangeResult:
   - Similar to promote but validate demotion is allowed
   - Handle subordinate transfers
   - Update role
   - Create history with reason="Demotion: " + request.reason
   - Return result
-- [ ] 6.4.3: Implement removeRole(devoteeId, reason, userId) → RoleChangeResult:
+- [x] 6.4.3: Implement removeRole(devoteeId, reason, userId) → RoleChangeResult:
   - Get devotee by id
   - Get all subordinates
   - If subordinates exist, require newSupervisorId in request
@@ -696,24 +696,24 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
   - Return result
 
 #### Task 6.5: Role Management Service - Queries
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 6.4
-- [ ] 6.5.1: Implement getAvailableSupervisors(districtCode, targetRole, excludeIds) → List<DevoteeDTO>:
+- [x] 6.5.1: Implement getAvailableSupervisors(districtCode, targetRole, excludeIds) → List<DevoteeDTO>:
   - Determine required supervisor role based on targetRole hierarchy
   - Query devotees in districtCode with required leadershipRole
   - Exclude IDs in excludeIds list
   - Convert to DTOs
   - Return list
-- [ ] 6.5.2: Implement getDirectSubordinates(Long devoteeId) → List<DevoteeDTO>:
+- [x] 6.5.2: Implement getDirectSubordinates(Long devoteeId) → List<DevoteeDTO>:
   - Already implemented in 6.3.1, add DTO conversion
   - Return list
-- [ ] 6.5.3: Implement getAllSubordinates(Long devoteeId) → List<DevoteeDTO>:
+- [x] 6.5.3: Implement getAllSubordinates(Long devoteeId) → List<DevoteeDTO>:
   - Get direct subordinates
   - For each subordinate, recursively get their subordinates
   - Collect all in Set to avoid duplicates
   - Convert to DTOs
   - Return list
-- [ ] 6.5.4: Implement getRoleHistory(devoteeId, Pageable) → Page<RoleChangeHistoryDTO>:
+- [x] 6.5.4: Implement getRoleHistory(devoteeId, Pageable) → Page<RoleChangeHistoryDTO>:
   - Query RoleChangeHistoryRepository by devoteeId with pagination
   - Convert to DTOs
   - Return Page
