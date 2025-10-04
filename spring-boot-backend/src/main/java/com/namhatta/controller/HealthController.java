@@ -1,15 +1,13 @@
 package com.namhatta.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("/api")
@@ -42,5 +40,14 @@ public class HealthController {
             response.put("status", "FAILED");
             return ResponseEntity.status(500).body(response);
         }
+    }
+
+    @GetMapping("/about")
+    public Map<String, String> about() {
+        Map<String, String> response = new HashMap<>();
+        response.put("name", "Namhatta Management System");
+        response.put("version", "1.0.0");
+        response.put("description", "Spring Boot backend for managing Namhatta organizations");
+        return response;
     }
 }
