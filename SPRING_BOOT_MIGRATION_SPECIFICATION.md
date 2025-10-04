@@ -1321,77 +1321,77 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 ---
 
 ### **PHASE 11: CONFIGURATION & DEPLOYMENT PREP**
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Duration**: 1-2 days  
 **Prerequisites**: Phase 10 completed
 
 #### Task 11.1: Environment Configuration
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 10.4
-- [ ] 11.1.1: Configure application-dev.properties:
+- [x] 11.1.1: Configure application-dev.properties:
   - Set logging.level.root=INFO
   - Set logging.level.com.namhatta=DEBUG
   - Set spring.jpa.show-sql=true
   - Set server.port=5000
-- [ ] 11.1.2: Configure application-prod.properties:
+- [x] 11.1.2: Configure application-prod.properties:
   - Set logging.level.root=WARN
   - Set logging.level.com.namhatta=INFO
   - Set spring.jpa.show-sql=false
   - Disable dev endpoints
-- [ ] 11.1.3: Externalize sensitive config to environment variables:
+- [x] 11.1.3: Externalize sensitive config to environment variables:
   - DATABASE_URL, DB_USERNAME, DB_PASSWORD
   - JWT_SECRET
-- [ ] 11.1.4: Add validation for required environment variables at startup
+- [x] 11.1.4: Add validation for required environment variables at startup
 
 #### Task 11.2: CORS and Security Headers
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 11.1
-- [ ] 11.2.1: Configure CORS in SecurityConfig:
+- [x] 11.2.1: Configure CORS in SecurityConfig:
   - Allow credentials
   - Allowed origins: same-origin + configured domains
   - Allowed methods: GET, POST, PUT, DELETE, PATCH
   - Allowed headers: Content-Type, Authorization, X-Requested-With, Cache-Control
   - Max age: 86400 (24 hours)
-- [ ] 11.2.2: Add security headers in SecurityConfig:
+- [x] 11.2.2: Add security headers in SecurityConfig:
   - X-Content-Type-Options: nosniff
   - X-Frame-Options: DENY
   - X-XSS-Protection: 1; mode=block
   - Content-Security-Policy (appropriate for app)
 
 #### Task 11.3: Rate Limiting
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 11.2
-- [ ] 11.3.1: Add Bucket4j or similar rate limiting library dependency
-- [ ] 11.3.2: Create RateLimitFilter for login endpoint:
+- [x] 11.3.1: Add Bucket4j or similar rate limiting library dependency
+- [x] 11.3.2: Create RateLimitFilter for login endpoint:
   - 5 requests per 15 minutes per IP
   - Return 429 Too Many Requests if exceeded
-- [ ] 11.3.3: Create RateLimitFilter for data modification endpoints:
+- [x] 11.3.3: Create RateLimitFilter for data modification endpoints:
   - 10 requests per minute per IP
   - Apply to POST, PUT, DELETE methods
 
 #### Task 11.4: Logging and Monitoring
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 11.3
-- [ ] 11.4.1: Configure logback-spring.xml with:
+- [x] 11.4.1: Configure logback-spring.xml with:
   - Console appender for dev
   - File appender for prod (rolling files)
   - JSON format for structured logging (optional)
-- [ ] 11.4.2: Add request/response logging filter:
+- [x] 11.4.2: Add request/response logging filter:
   - Log method, path, status code, duration for /api/** requests
   - Truncate long responses (max 80 chars)
-- [ ] 11.4.3: Add MDC (Mapped Diagnostic Context) for userId in requests
-- [ ] 11.4.4: Setup health check actuator endpoints (optional):
+- [x] 11.4.3: Add MDC (Mapped Diagnostic Context) for userId in requests
+- [x] 11.4.4: Setup health check actuator endpoints (optional):
   - /actuator/health
   - /actuator/info
 
 #### Task 11.5: Documentation
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 11.4
-- [ ] 11.5.1: Add SpringDoc OpenAPI dependency (springdoc-openapi-starter-webmvc-ui)
-- [ ] 11.5.2: Configure OpenAPI info (title, version, description)
-- [ ] 11.5.3: Add @Operation and @ApiResponse annotations to key endpoints
-- [ ] 11.5.4: Group endpoints by tag (@Tag annotation on controllers)
-- [ ] 11.5.5: Access Swagger UI at /swagger-ui.html for API documentation
+- [x] 11.5.1: Add SpringDoc OpenAPI dependency (springdoc-openapi-starter-webmvc-ui)
+- [x] 11.5.2: Configure OpenAPI info (title, version, description)
+- [x] 11.5.3: Add @Operation and @ApiResponse annotations to key endpoints
+- [x] 11.5.4: Group endpoints by tag (@Tag annotation on controllers)
+- [x] 11.5.5: Access Swagger UI at /swagger-ui.html for API documentation
 
 ---
 
