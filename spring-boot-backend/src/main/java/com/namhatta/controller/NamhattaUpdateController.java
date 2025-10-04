@@ -21,7 +21,7 @@ public class NamhattaUpdateController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'OFFICE', 'DISTRICT_SUPERVISOR')")
-    public ResponseEntity<NamhattaUpdate> createUpdate(@Valid @RequestBody Map<String, Object> request) {
+    public ResponseEntity<NamhattaUpdate> createUpdate(@Valid @RequestBody NamhattaUpdateService.NamhattaUpdateRequest request) {
         NamhattaUpdate update = namhattaUpdateService.createUpdate(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(update);
     }
