@@ -490,7 +490,22 @@ public class RoleManagementService {
                 .collect(Collectors.toList());
     }
 
-    public Page<RoleChangeHistory> getRoleHistory(Long devoteeId, Pageable pageable) {
-        return roleChangeHistoryRepository.findByDevoteeIdOrderByCreatedAtDesc(devoteeId, pageable);
+    public Page<Map<String, Object>> getRoleHistory(Long devoteeId, Pageable pageable) {
+        Page<RoleChangeHistory> historyPage = roleChangeHistoryRepository.findByDevoteeIdOrderByCreatedAtDesc(devoteeId, pageable);
+        
+        return historyPage.map(history -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", history.getId());
+            map.put("devoteeId", history.getDevoteeId());
+            map.put("previousRole", history.getPreviousRole());
+            map.put("newRole", history.getNewRole());
+            map.put("previousReportingTo", history.getPreviousReportingTo());
+            map.put("newReportingTo", history.getNewReportingTo());
+            map.put("changedBy", history.getChangedBy());
+            map.put("reason", history.getReason());
+            map.put("subordinatesTransferred", history.getSubordinatesTransferred());
+            map.put("createdAt", history.getCreatedAt());
+            return map;
+        });
     }
 }
