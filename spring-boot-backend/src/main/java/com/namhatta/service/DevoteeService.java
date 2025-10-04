@@ -2,9 +2,11 @@ package com.namhatta.service;
 
 import com.namhatta.dto.AddressData;
 import com.namhatta.dto.AddressDTO;
+import com.namhatta.dto.CreateDevoteeRequest;
 import com.namhatta.dto.CreateUserRequest;
 import com.namhatta.dto.DevoteeDTO;
 import com.namhatta.dto.LeadershipRequest;
+import com.namhatta.dto.UpdateDevoteeRequest;
 import com.namhatta.dto.UserDTO;
 import com.namhatta.model.entity.Address;
 import com.namhatta.model.entity.Devotee;
@@ -97,35 +99,31 @@ public class DevoteeService {
      * Task 5.4.5
      */
     @Transactional
-    public DevoteeDTO createDevotee(Map<String, Object> request) {
+    public DevoteeDTO createDevotee(CreateDevoteeRequest request) {
         // Validate input
-        if (request.get("legalName") == null || request.get("legalName").toString().trim().isEmpty()) {
+        if (request.getLegalName() == null || request.getLegalName().trim().isEmpty()) {
             throw new IllegalArgumentException("Legal name is required");
         }
         
         // Create Devotee entity
         Devotee devotee = new Devotee();
-        updateDevoteeFields(devotee, request);
+        updateDevoteeFieldsFromDTO(devotee, request);
         
         // Save devotee
         devotee = devoteeRepository.save(devotee);
         
         // Process addresses
-        if (request.containsKey("presentAddress") && request.get("presentAddress") != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> presentAddrMap = (Map<String, Object>) request.get("presentAddress");
-            AddressData presentAddress = mapToAddressData(presentAddrMap);
+        if (request.getPresentAddress() != null) {
+            AddressData presentAddress = request.getPresentAddress();
             Long addressId = addressService.findOrCreateAddress(presentAddress);
-            String landmark = presentAddrMap.get("landmark") != null ? presentAddrMap.get("landmark").toString() : null;
+            String landmark = presentAddress.getLandmark();
             addressService.linkDevoteeAddress(devotee.getId(), addressId, AddressType.PRESENT, landmark);
         }
         
-        if (request.containsKey("permanentAddress") && request.get("permanentAddress") != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> permanentAddrMap = (Map<String, Object>) request.get("permanentAddress");
-            AddressData permanentAddress = mapToAddressData(permanentAddrMap);
+        if (request.getPermanentAddress() != null) {
+            AddressData permanentAddress = request.getPermanentAddress();
             Long addressId = addressService.findOrCreateAddress(permanentAddress);
-            String landmark = permanentAddrMap.get("landmark") != null ? permanentAddrMap.get("landmark").toString() : null;
+            String landmark = permanentAddress.getLandmark();
             addressService.linkDevoteeAddress(devotee.getId(), addressId, AddressType.PERMANENT, landmark);
         }
         
@@ -137,7 +135,7 @@ public class DevoteeService {
      * Task 5.4.6
      */
     @Transactional
-    public DevoteeDTO updateDevotee(Long id, Map<String, Object> request, String userRole, List<String> userDistricts) {
+    public DevoteeDTO updateDevotee(Long id, UpdateDevoteeRequest request, String userRole, List<String> userDistricts) {
         Devotee devotee = devoteeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Devotee not found with id: " + id));
         
@@ -145,27 +143,23 @@ public class DevoteeService {
         // (simplified - in full implementation, check devotee's district against userDistricts)
         
         // Update provided fields
-        updateDevoteeFields(devotee, request);
+        updateDevoteeFieldsFromUpdateDTO(devotee, request);
         
         // Save
         devotee = devoteeRepository.save(devotee);
         
         // Update addresses if changed
-        if (request.containsKey("presentAddress") && request.get("presentAddress") != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> presentAddrMap = (Map<String, Object>) request.get("presentAddress");
-            AddressData presentAddress = mapToAddressData(presentAddrMap);
+        if (request.getPresentAddress() != null) {
+            AddressData presentAddress = request.getPresentAddress();
             Long addressId = addressService.findOrCreateAddress(presentAddress);
-            String landmark = presentAddrMap.get("landmark") != null ? presentAddrMap.get("landmark").toString() : null;
+            String landmark = presentAddress.getLandmark();
             addressService.linkDevoteeAddress(devotee.getId(), addressId, AddressType.PRESENT, landmark);
         }
         
-        if (request.containsKey("permanentAddress") && request.get("permanentAddress") != null) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> permanentAddrMap = (Map<String, Object>) request.get("permanentAddress");
-            AddressData permanentAddress = mapToAddressData(permanentAddrMap);
+        if (request.getPermanentAddress() != null) {
+            AddressData permanentAddress = request.getPermanentAddress();
             Long addressId = addressService.findOrCreateAddress(permanentAddress);
-            String landmark = permanentAddrMap.get("landmark") != null ? permanentAddrMap.get("landmark").toString() : null;
+            String landmark = permanentAddress.getLandmark();
             addressService.linkDevoteeAddress(devotee.getId(), addressId, AddressType.PERMANENT, landmark);
         }
         
@@ -375,6 +369,74 @@ public class DevoteeService {
         if (request.containsKey("shraddhakutirId")) {
             devotee.setShraddhakutirId(getLongValue(request.get("shraddhakutirId")));
         }
+    }
+    
+    /**
+     * Update devotee fields from CreateDevoteeRequest DTO
+     */
+    private void updateDevoteeFieldsFromDTO(Devotee devotee, CreateDevoteeRequest request) {
+        if (request.getLegalName() != null) devotee.setLegalName(request.getLegalName());
+        if (request.getName() != null) devotee.setName(request.getName());
+        if (request.getDateOfBirth() != null) devotee.setDob(request.getDateOfBirth());
+        if (request.getEmail() != null) devotee.setEmail(request.getEmail());
+        if (request.getPhone() != null) devotee.setPhone(request.getPhone());
+        if (request.getFatherName() != null) devotee.setFatherName(request.getFatherName());
+        if (request.getMotherName() != null) devotee.setMotherName(request.getMotherName());
+        if (request.getHusbandName() != null) devotee.setHusbandName(request.getHusbandName());
+        if (request.getGender() != null) devotee.setGender(request.getGender());
+        if (request.getBloodGroup() != null) devotee.setBloodGroup(request.getBloodGroup());
+        if (request.getMaritalStatus() != null) devotee.setMaritalStatus(request.getMaritalStatus());
+        if (request.getDevotionalStatusId() != null) devotee.setDevotionalStatusId(request.getDevotionalStatusId());
+        if (request.getNamhattaId() != null) devotee.setNamhattaId(request.getNamhattaId());
+        if (request.getHarinamInitiationGurudevId() != null) devotee.setHarinamInitiationGurudevId(request.getHarinamInitiationGurudevId());
+        if (request.getPancharatrikInitiationGurudevId() != null) devotee.setPancharatrikInitiationGurudevId(request.getPancharatrikInitiationGurudevId());
+        if (request.getInitiatedName() != null) devotee.setInitiatedName(request.getInitiatedName());
+        if (request.getHarinamDate() != null) devotee.setHarinamDate(request.getHarinamDate());
+        if (request.getPancharatrikDate() != null) devotee.setPancharatrikDate(request.getPancharatrikDate());
+        if (request.getEducation() != null) devotee.setEducation(request.getEducation());
+        if (request.getOccupation() != null) devotee.setOccupation(request.getOccupation());
+        if (request.getDevotionalCourses() != null) devotee.setDevotionalCourses(request.getDevotionalCourses());
+        if (request.getLeadershipRole() != null) devotee.setLeadershipRole(request.getLeadershipRole());
+        if (request.getReportingToDevoteeId() != null) devotee.setReportingToDevoteeId(request.getReportingToDevoteeId());
+        if (request.getHasSystemAccess() != null) devotee.setHasSystemAccess(request.getHasSystemAccess());
+        if (request.getAppointedDate() != null) devotee.setAppointedDate(request.getAppointedDate());
+        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy());
+        if (request.getAdditionalComments() != null) devotee.setAdditionalComments(request.getAdditionalComments());
+        if (request.getShraddhakutirId() != null) devotee.setShraddhakutirId(request.getShraddhakutirId());
+    }
+    
+    /**
+     * Update devotee fields from UpdateDevoteeRequest DTO
+     */
+    private void updateDevoteeFieldsFromUpdateDTO(Devotee devotee, UpdateDevoteeRequest request) {
+        if (request.getLegalName() != null) devotee.setLegalName(request.getLegalName());
+        if (request.getName() != null) devotee.setName(request.getName());
+        if (request.getDateOfBirth() != null) devotee.setDob(request.getDateOfBirth());
+        if (request.getEmail() != null) devotee.setEmail(request.getEmail());
+        if (request.getPhone() != null) devotee.setPhone(request.getPhone());
+        if (request.getFatherName() != null) devotee.setFatherName(request.getFatherName());
+        if (request.getMotherName() != null) devotee.setMotherName(request.getMotherName());
+        if (request.getHusbandName() != null) devotee.setHusbandName(request.getHusbandName());
+        if (request.getGender() != null) devotee.setGender(request.getGender());
+        if (request.getBloodGroup() != null) devotee.setBloodGroup(request.getBloodGroup());
+        if (request.getMaritalStatus() != null) devotee.setMaritalStatus(request.getMaritalStatus());
+        if (request.getDevotionalStatusId() != null) devotee.setDevotionalStatusId(request.getDevotionalStatusId());
+        if (request.getNamhattaId() != null) devotee.setNamhattaId(request.getNamhattaId());
+        if (request.getHarinamInitiationGurudevId() != null) devotee.setHarinamInitiationGurudevId(request.getHarinamInitiationGurudevId());
+        if (request.getPancharatrikInitiationGurudevId() != null) devotee.setPancharatrikInitiationGurudevId(request.getPancharatrikInitiationGurudevId());
+        if (request.getInitiatedName() != null) devotee.setInitiatedName(request.getInitiatedName());
+        if (request.getHarinamDate() != null) devotee.setHarinamDate(request.getHarinamDate());
+        if (request.getPancharatrikDate() != null) devotee.setPancharatrikDate(request.getPancharatrikDate());
+        if (request.getEducation() != null) devotee.setEducation(request.getEducation());
+        if (request.getOccupation() != null) devotee.setOccupation(request.getOccupation());
+        if (request.getDevotionalCourses() != null) devotee.setDevotionalCourses(request.getDevotionalCourses());
+        if (request.getLeadershipRole() != null) devotee.setLeadershipRole(request.getLeadershipRole());
+        if (request.getReportingToDevoteeId() != null) devotee.setReportingToDevoteeId(request.getReportingToDevoteeId());
+        if (request.getHasSystemAccess() != null) devotee.setHasSystemAccess(request.getHasSystemAccess());
+        if (request.getAppointedDate() != null) devotee.setAppointedDate(request.getAppointedDate());
+        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy());
+        if (request.getAdditionalComments() != null) devotee.setAdditionalComments(request.getAdditionalComments());
+        if (request.getShraddhakutirId() != null) devotee.setShraddhakutirId(request.getShraddhakutirId());
     }
     
     /**
