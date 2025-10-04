@@ -15,4 +15,6 @@ public interface UserDistrictRepository extends JpaRepository<UserDistrict, Long
     List<UserDistrict> findByDistrictCode(String districtCode);
     
     Optional<UserDistrict> findByUserIdAndDistrictCode(Long userId, String districtCode);
+    
+    void deleteByUserId(Long userId);
 }

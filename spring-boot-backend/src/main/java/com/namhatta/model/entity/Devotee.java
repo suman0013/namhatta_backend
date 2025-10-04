@@ -3,7 +3,7 @@ package com.namhatta.model.entity;
 import com.namhatta.model.enums.Gender;
 import com.namhatta.model.enums.LeadershipRole;
 import com.namhatta.model.enums.MaritalStatus;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

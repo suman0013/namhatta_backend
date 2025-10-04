@@ -1,6 +1,6 @@
 package com.namhatta.model.entity;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

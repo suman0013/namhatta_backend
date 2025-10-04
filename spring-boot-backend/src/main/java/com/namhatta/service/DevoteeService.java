@@ -178,8 +178,8 @@ public class DevoteeService {
         // Create StatusHistory record
         StatusHistory history = new StatusHistory();
         history.setDevoteeId(id);
-        history.setPreviousStatus(previousStatus);
-        history.setNewStatus(newStatusId);
+        history.setPreviousStatus(previousStatus != null ? previousStatus.toString() : null);
+        history.setNewStatus(newStatusId.toString());
         history.setComment(notes);
         statusHistoryRepository.save(history);
     }
