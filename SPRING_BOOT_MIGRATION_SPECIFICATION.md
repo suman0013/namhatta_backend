@@ -106,16 +106,16 @@ Each task has a status field. **YOU MUST UPDATE** the status as you work:
 - [x] 2.2.9: Create JwtBlacklist entity (table="jwt_blacklist") with tokenHash, expiredAt
 
 #### Task 2.3: Create Devotee Entity
-**Status**: NOT_STARTED  
+**Status**: COMPLETED  
 **Prerequisites**: Task 2.2
-- [ ] 2.3.1: Create Devotee entity (table="devotees") with personal fields (legalName, name, dob, email, phone, gender, bloodGroup, maritalStatus)
-- [ ] 2.3.2: Add family fields (fatherName, motherName, husbandName)
-- [ ] 2.3.3: Add spiritual fields (devotionalStatusId, harinamInitiationGurudevId, pancharatrikInitiationGurudevId, initiatedName, harinamDate, pancharatrikDate, education, occupation)
-- [ ] 2.3.4: Add devotionalCourses field as JSONB type (use @Type annotation for JSON handling)
-- [ ] 2.3.5: Add leadership fields (leadershipRole, reportingToDevoteeId, hasSystemAccess, appointedDate, appointedBy)
-- [ ] 2.3.6: Add additionalComments, shraddhakutirId, namhattaId fields
-- [ ] 2.3.7: Add self-referencing @ManyToOne relationship for hierarchy (reportingToDevotee)
-- [ ] 2.3.8: Add @ManyToOne relationships (namhattaId, devotionalStatusId, gurudevs, shraddhakutirId, appointedBy)
+- [x] 2.3.1: Create Devotee entity (table="devotees") with personal fields (legalName, name, dob, email, phone, gender, bloodGroup, maritalStatus)
+- [x] 2.3.2: Add family fields (fatherName, motherName, husbandName)
+- [x] 2.3.3: Add spiritual fields (devotionalStatusId, harinamInitiationGurudevId, pancharatrikInitiationGurudevId, initiatedName, harinamDate, pancharatrikDate, education, occupation)
+- [x] 2.3.4: Add devotionalCourses field as JSONB type (use @Type annotation for JSON handling)
+- [x] 2.3.5: Add leadership fields (leadershipRole, reportingToDevoteeId, hasSystemAccess, appointedDate, appointedBy)
+- [x] 2.3.6: Add additionalComments, shraddhakutirId, namhattaId fields
+- [x] 2.3.7: Add self-referencing @ManyToOne relationship for hierarchy (reportingToDevotee)
+- [x] 2.3.8: Add @ManyToOne relationships (namhattaId, devotionalStatusId, gurudevs, shraddhakutirId, appointedBy)
 
 #### Task 2.4: Create Address Entities
 **Status**: NOT_STARTED  
