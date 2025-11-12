@@ -1,4 +1,4 @@
-import { seedDatabase } from "./server/seed-data";
+import { seedDatabase } from "./backend-node/seed-data";
 
 console.log("Starting manual database seeding...");
 

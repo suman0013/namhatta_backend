@@ -10,7 +10,7 @@ export AUTHENTICATION_ENABLED=true
 export VITE_AUTHENTICATION_ENABLED=true
 
 echo "Starting Spring Boot backend on port 8080..."
-cd spring-boot-backend
+cd backend-spring
 echo "Cleaning previous build..."
 mvn clean
 echo "Starting application..."

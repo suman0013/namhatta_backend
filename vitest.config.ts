@@ -7,11 +7,11 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./client/src/test/setup.ts'],
+    setupFiles: ['./frontend/src/test/setup.ts'],
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './client/src'),
+      '@': path.resolve(__dirname, './frontend/src'),
       '@shared': path.resolve(__dirname, './shared'),
       '@assets': path.resolve(__dirname, './attached_assets'),
     },

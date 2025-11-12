@@ -1,4 +1,4 @@
-import { createUser, assignDistrictsToUser } from './server/storage-auth';
+import { createUser, assignDistrictsToUser } from './backend-node/storage-auth';
 
 async function seedUsers() {
   console.log('Creating test users...');

@@ -1,0 +1,465 @@
+/* Leaflet CSS - Required for map display */
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(239, 84%, 67%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.75rem;
+  
+  /* Custom Namhatta colors - Enhanced gradients */
+  --namhatta-primary: hsl(239, 84%, 67%);
+  --namhatta-secondary: hsl(292, 84%, 61%);
+  --namhatta-accent: hsl(168, 76%, 42%);
+  --namhatta-success: hsl(142, 76%, 36%);
+  --namhatta-warning: hsl(38, 92%, 50%);
+  --namhatta-error: hsl(0, 84%, 60%);
+  
+  /* Enhanced Glass effect variables */
+  --glass-bg: hsla(0, 0%, 100%, 0.95);
+  --glass-border: hsla(0, 0%, 100%, 0.3);
+  --glass-shadow: hsla(0, 0%, 0%, 0.08);
+  --glass-backdrop: blur(16px);
+  
+  /* Gradient variables */
+  --gradient-primary: linear-gradient(135deg, hsl(239, 84%, 67%) 0%, hsl(292, 84%, 61%) 100%);
+  --gradient-secondary: linear-gradient(135deg, hsl(168, 76%, 42%) 0%, hsl(142, 76%, 36%) 100%);
+  --gradient-tertiary: linear-gradient(135deg, hsl(38, 92%, 50%) 0%, hsl(0, 84%, 60%) 100%);
+  --gradient-surface: linear-gradient(135deg, hsla(0, 0%, 100%, 0.9) 0%, hsla(0, 0%, 100%, 0.7) 100%);
+}
+
+.dark {
+  --background: hsl(240, 8%, 12%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 70%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 8%, 10%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 6%, 40%);
+  --input: hsl(240, 6%, 18%);
+  --primary: hsl(239, 84%, 67%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 5%, 30%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(239, 84%, 67%);
+  
+  /* Dark mode glass variables */
+  --glass-bg: hsla(240, 10%, 3.9%, 0.8);
+  --glass-border: hsla(240, 3.7%, 15.9%, 0.5);
+  --glass-shadow: hsla(0, 0%, 0%, 0.3);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900;
+    font-family: 'Inter', system-ui, sans-serif;
+    transition: all 0.5s ease;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px var(--glass-shadow);
+    transition: all 0.3s ease;
+  }
+  
+  .dark .glass {
+    background: hsla(240, 10%, 15%, 0.9);
+    border: 1px solid hsla(240, 3.7%, 40%, 0.8);
+    color: hsl(0, 0%, 98%);
+  }
+  
+  .dark .glass::placeholder {
+    color: hsl(240, 5%, 65%);
+  }
+  
+  .dark .glass [data-placeholder] {
+    color: hsl(240, 5%, 65%);
+  }
+  
+  .glass:hover {
+    background: var(--glass-bg);
+  }
+  
+  .dark .glass:hover {
+    background: hsla(240, 10%, 20%, 0.95);
+    border-color: hsla(240, 3.7%, 50%, 0.9);
+  }
+  
+  /* Fix double border issue when using glass with border-0 */
+  .glass.border-0 {
+    border: none !important;
+  }
+
+  /* Ensure searchable select dropdowns are always visible */
+  .searchable-select-dropdown {
+    z-index: 9999 !important;
+    position: absolute !important;
+  }
+
+  /* Fix searchable select container positioning */
+  [data-searchable-select-open="true"] {
+    z-index: 100;
+    position: relative;
+  }
+  
+
+  
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/95 dark:bg-slate-800/95 shadow-xl rounded-2xl;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 100%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .dark .glass-card {
+    background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+  }
+  
+  .dark .glass-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent font-bold;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+  
+  .gradient-button {
+    @apply bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 hover:from-indigo-600 hover:via-purple-700 hover:to-pink-700 text-white transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:scale-105;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .hover-lift:hover {
+    @apply transform -translate-y-1 shadow-2xl;
+  }
+  
+  .status-badge-active {
+    @apply bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-badge-pending {
+    @apply bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .status-badge-inactive {
+    @apply bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300 px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .nav-item {
+    @apply flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300;
+  }
+  
+  .nav-item-active {
+    @apply bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-700/50 shadow-lg;
+    transform: translateY(-1px);
+  }
+  
+  .nav-item-inactive {
+    @apply text-gray-600 dark:text-gray-400 hover:bg-white/50 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-white;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .glass-card-enhanced {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.4);
+  }
+
+  .dark .glass-card-enhanced {
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .shimmer-button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .shimmer-button:hover::before {
+    left: 100%;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s infinite;
+  }
+
+  /* Enhanced hover effects */
+  .card-hover-effect {
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  .card-hover-effect:hover {
+    @apply transform scale-105 shadow-2xl;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+  }
+  
+  .dark .card-hover-effect:hover {
+    background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+  }
+
+  /* Floating animation for icons */
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Glow effect for important cards */
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+
+  .dark .glow-effect {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+  }
+
+  /* Stagger animation for lists */
+  .stagger-item {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+  .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+  .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+  .stagger-item:nth-child(4) { animation-delay: 0.4s; }
+  .stagger-item:nth-child(5) { animation-delay: 0.5s; }
+  .stagger-item:nth-child(6) { animation-delay: 0.6s; }
+
+  /* Section headers and form labels */
+  .form-section-header {
+    @apply text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2;
+  }
+  
+  .form-section-title {
+    @apply text-base font-medium mb-3 text-gray-800 dark:text-gray-200;
+  }
+  
+  .form-label {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+  
+  .form-description {
+    @apply text-xs text-gray-500 dark:text-gray-400 mt-1;
+  }
+
+  /* Enhanced button styles */
+  .modern-button {
+    @apply relative overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300;
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  .modern-button:hover {
+    @apply transform scale-105;
+  }
+
+  .modern-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .modern-button:hover::before {
+    left: 100%;
+  }
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* Custom Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  /* Dark mode scrollbar */
+  .dark ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Firefox scrollbar */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+  }
+
+  .dark html {
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.2);
+  }
+
+  /* Mobile responsive improvements */
+  @media (max-width: 768px) {
+    .glass-card {
+      @apply mx-2 rounded-2xl;
+    }
+    
+    .hover-lift:hover {
+      @apply translate-y-0 shadow-md;
+    }
+  }
+
+  /* Ensure proper viewport handling */
+  @media (max-width: 1024px) {
+    .nav-item {
+      @apply px-2 py-2 text-xs;
+    }
+    
+    .nav-item span {
+      @apply hidden sm:inline;
+    }
+  }
+
+  /* Ultra-wide screen improvements */
+  @media (min-width: 1920px) {
+    .glass-card {
+      @apply max-w-7xl mx-auto;
+    }
+  }
+
+  /* SearchableSelect dropdown z-index fixes */
+  .searchable-select-dropdown {
+    z-index: 10000 !important;
+  }
+  
+  /* Ensure all SearchableSelect containers have proper stacking context */
+  [data-searchable-select-open="true"] {
+    z-index: 9999 !important;
+    position: relative !important;
+  }
+  
+  /* Override any conflicting z-index rules for form elements */
+  .form-field {
+    z-index: auto;
+  }
+  
+  .form-field.active {
+    z-index: 9999;
+  }
+}

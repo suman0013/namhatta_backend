@@ -1,4 +1,4 @@
-import { db } from './server/db';
+import { db } from './backend-node/db';
 import { sql } from 'drizzle-orm';
 
 async function createAuthTables() {

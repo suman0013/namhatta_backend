@@ -9,6 +9,23 @@ Navigation layout: Horizontal top navigation bar instead of left sidebar for des
 
 ## Recent Changes
 
+### November 2025 - Codebase Reorganization Completed ✅
+- **Directory Structure**: Reorganized project into clear, maintainable structure
+  - Created `docs/` directory for all documentation (11 markdown files)
+  - Renamed `client/` to `frontend/` for clarity
+  - Renamed `server/` to `backend-node/` to distinguish from Spring Boot backend
+  - Renamed `spring-boot-backend/` to `backend-spring/` for consistency
+- **Asset Cleanup**: Cleaned `attached_assets/` from 108 files to 7 essential files
+  - Removed 10 old pasted text files (development notes)
+  - Removed 9 duplicate logo files
+  - Removed 82 unused development images
+  - Kept only actively used assets: 2 logos, 3 images, 2 CSV data files
+- **Configuration Updates**: Updated all config files to reflect new structure
+  - vite.config.ts, tsconfig.json, tailwind.config.ts, components.json
+  - package.json scripts, vitest.config.ts, start-springboot.sh
+- **Validation**: All workflows tested and confirmed working
+- **Status**: Codebase is now clean, organized, and ready for efficient development
+
 ### October 2025 - GitHub Import to Replit Completed ✅
 - **Environment Configuration**: Successfully imported project from GitHub and configured for Replit environment
 - **Dependencies**: All npm packages installed and verified (100+ dependencies)
@@ -50,7 +67,16 @@ Navigation layout: Horizontal top navigation bar instead of left sidebar for des
 
 ## System Architecture
 
-### Frontend Architecture
+### Project Structure
+- **frontend/**: React 18 + TypeScript frontend application
+- **backend-node/**: Node.js/Express backend (default, currently active)
+- **backend-spring/**: Spring Boot + Java backend (alternative implementation)
+- **docs/**: All project documentation files
+- **shared/**: TypeScript schemas shared between frontend and backend
+- **migrations/**: Drizzle database migration files
+- **attached_assets/**: Application images and data files (7 essential files)
+
+### Frontend Architecture (frontend/)
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter
 - **State Management**: React Query (TanStack Query) for server state
@@ -59,7 +85,7 @@ Navigation layout: Horizontal top navigation bar instead of left sidebar for des
 - **Build Tool**: Vite
 - **UI/UX Decisions**: Responsive app layout, consistent gradient styling, custom scrollbars, minimal and compact layouts for data-heavy pages, modern visual design for cards and sections (e.g., gradient backgrounds, floating animations), automatic scroll-to-top on navigation, dark mode support.
 
-### Backend Architecture
+### Backend Architecture (backend-node/)
 - **Runtime**: Node.js 20 with Express.js
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM

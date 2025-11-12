@@ -39,10 +39,12 @@ If you need to use a different database, update the `DATABASE_URL` in the `.env`
 
 ## Architecture
 
-- **Frontend**: React 18 + TypeScript + Tailwind CSS
-- **Backend**: Express.js + TypeScript
+- **Frontend**: React 18 + TypeScript + Tailwind CSS (`frontend/` directory)
+- **Backend (Node.js)**: Express.js + TypeScript (`backend-node/` directory)
+- **Backend (Spring Boot)**: Java + Spring Boot (`backend-spring/` directory)
 - **Database**: PostgreSQL with Drizzle ORM
 - **Build Tool**: Vite for frontend, ESBuild for backend
+- **Documentation**: All documentation files in `docs/` directory
 
 ## Key Features
 
@@ -53,4 +55,16 @@ If you need to use a different database, update the `DATABASE_URL` in the `.env`
 - Real-time updates and notifications
 - Responsive mobile-friendly interface
 
-For detailed documentation, see `replit.md`.
+## Project Structure
+
+```
+├── frontend/              # React frontend application
+├── backend-node/          # Node.js/Express backend (default)
+├── backend-spring/        # Spring Boot backend (alternative)
+├── docs/                  # All documentation files
+├── attached_assets/       # Images and data files used in the app
+├── shared/                # Shared TypeScript schemas
+└── migrations/            # Database migration files
+```
+
+For detailed documentation, see `replit.md` and files in the `docs/` directory.
