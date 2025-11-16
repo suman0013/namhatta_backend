@@ -17,14 +17,14 @@ public class NamhattaAddress {
     private Long id;
     
     @Column(name = "namhatta_id", nullable = false)
-    private Integer namhattaId;
+    private Long namhattaId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "namhatta_id", insertable = false, updatable = false)
     private Namhatta namhatta;
     
     @Column(name = "address_id", nullable = false)
-    private Integer addressId;
+    private Long addressId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", insertable = false, updatable = false)

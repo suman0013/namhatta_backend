@@ -18,14 +18,14 @@ public class DevoteeAddress {
     private Long id;
     
     @Column(name = "devotee_id", nullable = false)
-    private Integer devoteeId;
+    private Long devoteeId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "devotee_id", insertable = false, updatable = false)
     private Devotee devotee;
     
     @Column(name = "address_id", nullable = false)
-    private Integer addressId;
+    private Long addressId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", insertable = false, updatable = false)

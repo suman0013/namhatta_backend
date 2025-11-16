@@ -20,7 +20,7 @@ public class NamhattaUpdate {
     private Long id;
     
     @Column(name = "namhatta_id", nullable = false)
-    private Integer namhattaId;
+    private Long namhattaId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "namhatta_id", insertable = false, updatable = false)

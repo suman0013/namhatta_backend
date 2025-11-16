@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     private UserRole role;
     
     @Column(name = "devotee_id")
-    private Integer devoteeId;
+    private Long devoteeId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "devotee_id", insertable = false, updatable = false)

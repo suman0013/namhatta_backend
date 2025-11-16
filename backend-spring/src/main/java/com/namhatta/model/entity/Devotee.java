@@ -54,28 +54,28 @@ public class Devotee extends BaseEntity {
     private MaritalStatus maritalStatus;
     
     @Column(name = "devotional_status_id")
-    private Integer devotionalStatusId;
+    private Long devotionalStatusId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "devotional_status_id", insertable = false, updatable = false)
     private DevotionalStatus devotionalStatus;
     
     @Column(name = "namhatta_id")
-    private Integer namhattaId;
+    private Long namhattaId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "namhatta_id", insertable = false, updatable = false)
     private Namhatta namhatta;
     
     @Column(name = "harinam_initiation_gurudev_id")
-    private Integer harinamInitiationGurudevId;
+    private Long harinamInitiationGurudevId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "harinam_initiation_gurudev_id", insertable = false, updatable = false)
     private Gurudev harinamInitiationGurudev;
     
     @Column(name = "pancharatrik_initiation_gurudev_id")
-    private Integer pancharatrikInitiationGurudevId;
+    private Long pancharatrikInitiationGurudevId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pancharatrik_initiation_gurudev_id", insertable = false, updatable = false)
@@ -104,7 +104,7 @@ public class Devotee extends BaseEntity {
     private String additionalComments;
     
     @Column(name = "shraddhakutir_id")
-    private Integer shraddhakutirId;
+    private Long shraddhakutirId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shraddhakutir_id", insertable = false, updatable = false)
@@ -115,7 +115,7 @@ public class Devotee extends BaseEntity {
     private LeadershipRole leadershipRole;
     
     @Column(name = "reporting_to_devotee_id")
-    private Integer reportingToDevoteeId;
+    private Long reportingToDevoteeId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporting_to_devotee_id", insertable = false, updatable = false)
@@ -128,7 +128,7 @@ public class Devotee extends BaseEntity {
     private String appointedDate;
     
     @Column(name = "appointed_by")
-    private Integer appointedBy;
+    private Long appointedBy;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointed_by", insertable = false, updatable = false)

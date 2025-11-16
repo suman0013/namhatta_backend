@@ -397,7 +397,7 @@ public class DevoteeService {
         if (request.getReportingToDevoteeId() != null) devotee.setReportingToDevoteeId(request.getReportingToDevoteeId());
         if (request.getHasSystemAccess() != null) devotee.setHasSystemAccess(request.getHasSystemAccess());
         if (request.getAppointedDate() != null) devotee.setAppointedDate(request.getAppointedDate().toString());
-        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy().intValue());
+        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy());
         if (request.getAdditionalComments() != null) devotee.setAdditionalComments(request.getAdditionalComments());
         if (request.getShraddhakutirId() != null) devotee.setShraddhakutirId(request.getShraddhakutirId());
     }
@@ -431,7 +431,7 @@ public class DevoteeService {
         if (request.getReportingToDevoteeId() != null) devotee.setReportingToDevoteeId(request.getReportingToDevoteeId());
         if (request.getHasSystemAccess() != null) devotee.setHasSystemAccess(request.getHasSystemAccess());
         if (request.getAppointedDate() != null) devotee.setAppointedDate(request.getAppointedDate().toString());
-        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy().intValue());
+        if (request.getAppointedBy() != null) devotee.setAppointedBy(request.getAppointedBy());
         if (request.getAdditionalComments() != null) devotee.setAdditionalComments(request.getAdditionalComments());
         if (request.getShraddhakutirId() != null) devotee.setShraddhakutirId(request.getShraddhakutirId());
     }
@@ -504,7 +504,7 @@ public class DevoteeService {
         dto.setReportingToDevoteeId(devotee.getReportingToDevoteeId());
         dto.setHasSystemAccess(devotee.getHasSystemAccess());
         dto.setAppointedDate(devotee.getAppointedDate());
-        dto.setAppointedBy(devotee.getAppointedBy() != null ? devotee.getAppointedBy().longValue() : null);
+        dto.setAppointedBy(devotee.getAppointedBy());
         dto.setCreatedAt(devotee.getCreatedAt());
         dto.setUpdatedAt(devotee.getUpdatedAt());
         
@@ -528,7 +528,7 @@ public class DevoteeService {
     private Long getLongValue(Object value) {
         if (value == null) return null;
         if (value instanceof Long) return (Long) value;
-        if (value instanceof Integer) return ((Integer) value).longValue();
+        if (value instanceof Number) return ((Number) value).longValue();
         try {
             return Long.parseLong(value.toString());
         } catch (NumberFormatException e) {
