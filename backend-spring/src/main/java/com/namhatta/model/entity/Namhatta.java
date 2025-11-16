@@ -24,56 +24,56 @@ public class Namhatta extends BaseEntity {
     private String meetingTime;
     
     @Column(name = "mala_senapoti_id")
-    private Long malaSenapotiId;
+    private Integer malaSenapotiId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mala_senapoti_id", insertable = false, updatable = false)
     private Devotee malaSenapoti;
     
     @Column(name = "maha_chakra_senapoti_id")
-    private Long mahaChakraSenapotiId;
+    private Integer mahaChakraSenapotiId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "maha_chakra_senapoti_id", insertable = false, updatable = false)
     private Devotee mahaChakraSenapoti;
     
     @Column(name = "chakra_senapoti_id")
-    private Long chakraSenapotiId;
+    private Integer chakraSenapotiId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chakra_senapoti_id", insertable = false, updatable = false)
     private Devotee chakraSenapoti;
     
     @Column(name = "upa_chakra_senapoti_id")
-    private Long upaChakraSenapotiId;
+    private Integer upaChakraSenapotiId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "upa_chakra_senapoti_id", insertable = false, updatable = false)
     private Devotee upaChakraSenapoti;
     
     @Column(name = "secretary_id")
-    private Long secretaryId;
+    private Integer secretaryId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "secretary_id", insertable = false, updatable = false)
     private Devotee secretary;
     
     @Column(name = "president_id")
-    private Long presidentId;
+    private Integer presidentId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "president_id", insertable = false, updatable = false)
     private Devotee president;
     
     @Column(name = "accountant_id")
-    private Long accountantId;
+    private Integer accountantId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accountant_id", insertable = false, updatable = false)
     private Devotee accountant;
     
     @Column(name = "district_supervisor_id", nullable = false)
-    private Long districtSupervisorId;
+    private Integer districtSupervisorId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_supervisor_id", insertable = false, updatable = false)

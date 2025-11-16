@@ -17,7 +17,7 @@ public class RoleChangeHistory {
     private Long id;
     
     @Column(name = "devotee_id", nullable = false)
-    private Long devoteeId;
+    private Integer devoteeId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "devotee_id", insertable = false, updatable = false)
@@ -30,13 +30,13 @@ public class RoleChangeHistory {
     private String newRole;
     
     @Column(name = "previous_reporting_to")
-    private Long previousReportingTo;
+    private Integer previousReportingTo;
     
     @Column(name = "new_reporting_to")
-    private Long newReportingTo;
+    private Integer newReportingTo;
     
     @Column(name = "changed_by", nullable = false)
-    private Long changedBy;
+    private Integer changedBy;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "changed_by", insertable = false, updatable = false)

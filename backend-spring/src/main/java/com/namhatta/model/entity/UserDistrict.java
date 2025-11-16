@@ -18,7 +18,7 @@ public class UserDistrict {
     private Long id;
     
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Integer userId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)

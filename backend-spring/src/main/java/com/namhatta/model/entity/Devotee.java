@@ -54,28 +54,28 @@ public class Devotee extends BaseEntity {
     private MaritalStatus maritalStatus;
     
     @Column(name = "devotional_status_id")
-    private Long devotionalStatusId;
+    private Integer devotionalStatusId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "devotional_status_id", insertable = false, updatable = false)
     private DevotionalStatus devotionalStatus;
     
     @Column(name = "namhatta_id")
-    private Long namhattaId;
+    private Integer namhattaId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "namhatta_id", insertable = false, updatable = false)
     private Namhatta namhatta;
     
     @Column(name = "harinam_initiation_gurudev_id")
-    private Long harinamInitiationGurudevId;
+    private Integer harinamInitiationGurudevId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "harinam_initiation_gurudev_id", insertable = false, updatable = false)
     private Gurudev harinamInitiationGurudev;
     
     @Column(name = "pancharatrik_initiation_gurudev_id")
-    private Long pancharatrikInitiationGurudevId;
+    private Integer pancharatrikInitiationGurudevId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pancharatrik_initiation_gurudev_id", insertable = false, updatable = false)
@@ -104,7 +104,7 @@ public class Devotee extends BaseEntity {
     private String additionalComments;
     
     @Column(name = "shraddhakutir_id")
-    private Long shraddhakutirId;
+    private Integer shraddhakutirId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shraddhakutir_id", insertable = false, updatable = false)
@@ -115,7 +115,7 @@ public class Devotee extends BaseEntity {
     private LeadershipRole leadershipRole;
     
     @Column(name = "reporting_to_devotee_id")
-    private Long reportingToDevoteeId;
+    private Integer reportingToDevoteeId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporting_to_devotee_id", insertable = false, updatable = false)
